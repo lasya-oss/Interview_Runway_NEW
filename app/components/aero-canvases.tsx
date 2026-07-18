@@ -189,9 +189,18 @@ function SceneRig({ progressRef, pointerRef, tier }: { progressRef: MutableRefOb
     if (turbineRef.current) {
       const weight = windowWeight(p, 0.16, 0.3, 0.49);
       const local = smooth(clamp01((p - 0.16) / 0.33));
+      const pathLocal = clamp01((p - 0.18) / 0.2);
+      const firstCrossing = smooth((pathLocal - 0.46) / 0.14);
+      const secondCrossing = smooth((pathLocal - 0.72) / 0.14);
+      const firstToSecond = THREE.MathUtils.lerp(2.28, -2.28, firstCrossing);
+      const chapterPosition = THREE.MathUtils.lerp(firstToSecond, 2.18, secondCrossing);
+      const crossingDip = Math.max(
+        windowWeight(pathLocal, 0.44, 0.53, 0.62),
+        windowWeight(pathLocal, 0.7, 0.79, 0.88),
+      );
       turbineRef.current.visible = weight > 0.002;
-      turbineRef.current.scale.setScalar(Math.max(0.001, weight * 1.16));
-      turbineRef.current.position.set(-2.35 + local * 4.05, -0.12 + pointer.y * 0.08, -0.42 + weight * 0.72);
+      turbineRef.current.scale.setScalar(Math.max(0.001, weight * (1.16 - crossingDip * 0.14)));
+      turbineRef.current.position.set(chapterPosition, -0.12 + pointer.y * 0.08, -0.42 + weight * 0.72);
       turbineRef.current.rotation.set(-0.08 + local * 0.16, 0.32 - local * 0.54 + pointer.x * 0.04, -0.08 + local * 0.14);
     }
 
