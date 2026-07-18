@@ -2769,6 +2769,45 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .final-offer strong { font-size: 40px; }
 }
 
+/* Keep the complete desktop hero inside the opening viewport. The headline
+   responds to both width and height so shorter laptop screens retain the CTA. */
+@media (min-width: 801px) {
+  .hero-v2 {
+    height: 100dvh;
+    min-height: 640px;
+    padding: clamp(5.25rem, 10dvh, 7rem) 0 clamp(1rem, 3dvh, 2rem);
+  }
+
+  .hero-v2-grid {
+    grid-template-columns: minmax(0, 1.08fr) minmax(300px, .52fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+  }
+
+  .hero-v2 h1 {
+    font-size: clamp(4rem, min(6.8vw, 10.8dvh), 6.65rem);
+  }
+
+  .hero-v2-body {
+    max-width: 640px;
+    margin-top: clamp(1rem, 2.5dvh, 1.5rem);
+    font-size: clamp(.96rem, 1.2vw, 1.12rem);
+    line-height: 1.58;
+  }
+
+  .hero-v2-actions {
+    margin-top: clamp(1rem, 2.5dvh, 1.5rem);
+  }
+
+  .hero-v2 .microcopy {
+    margin-top: clamp(.55rem, 1.4dvh, .8rem);
+  }
+
+  .hero-flight-card {
+    align-self: center;
+    margin-bottom: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-progress { display: none; }
   .home-aero-stage canvas { display: none; }
