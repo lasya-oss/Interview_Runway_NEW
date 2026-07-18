@@ -12,7 +12,15 @@ export function PrepSystemExplorer() {
   const reduceMotion = useReducedMotion();
   const activeModule = MODULES[activeIndex];
   const angle = activeIndex * 60;
-  const explorerStyle = { "--active-angle": `${angle}deg` } as CSSProperties;
+  const orbitPitch = [0, 3, 1, -2, 2, -1][activeIndex];
+  const orbitYaw = [0, -3, 3, 0, -2, 2][activeIndex];
+  const orbitRoll = [-4, -1, 2, 4, 1, -3][activeIndex];
+  const explorerStyle = {
+    "--active-angle": `${angle}deg`,
+    "--orbit-pitch": `${orbitPitch}deg`,
+    "--orbit-yaw": `${orbitYaw}deg`,
+    "--orbit-roll": `${orbitRoll}deg`,
+  } as CSSProperties;
 
   return (
     <div className="prep-explorer" style={explorerStyle}>
@@ -32,11 +40,21 @@ export function PrepSystemExplorer() {
           id="prep-system-panel"
           aria-labelledby={`prep-tab-${activeIndex}`}
           aria-live="polite"
+          data-active-system={activeIndex + 1}
         >
           <div className="instrument-horizon" aria-hidden="true"><i /><i /><i /></div>
           <div className="instrument-orbit" aria-hidden="true">
             <div className="instrument-rings"><i /><i /><i /></div>
             <div className="instrument-rotor"><i /><i /><i /></div>
+            <AnimatePresence initial={false}>
+              <motion.div
+                className="instrument-selection-pulse"
+                key={`pulse-${activeIndex}`}
+                initial={reduceMotion ? false : { opacity: 0.72, scale: 0.32 }}
+                animate={{ opacity: 0, scale: 1.75 }}
+                transition={{ duration: reduceMotion ? 0 : 0.82, ease: [0.16, 1, 0.3, 1] }}
+              />
+            </AnimatePresence>
             {MODULES.map((module, index) => (
               <span
                 className={index === activeIndex ? "is-active" : ""}
@@ -50,8 +68,18 @@ export function PrepSystemExplorer() {
               </span>
             ))}
             <div className="instrument-core">
-              <b>0{activeIndex + 1}</b>
-              <span>{activeModule.kicker}</span>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={`core-${activeModule.kicker}`}
+                  initial={reduceMotion ? false : { opacity: 0, rotateY: 72, scale: 0.72 }}
+                  animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+                  exit={reduceMotion ? undefined : { opacity: 0, rotateY: -72, scale: 0.78 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.42, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <b>0{activeIndex + 1}</b>
+                  <span>{activeModule.kicker}</span>
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
 
