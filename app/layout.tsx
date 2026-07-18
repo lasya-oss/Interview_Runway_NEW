@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   description:
     "Interview prep for engineers in India targeting remote and AI-adjacent US tech roles. Start with the ₹799 Vault.",
   applicationName: "InterviewRunway",
+  icons: {
+    icon: [
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon-32.png",
+    apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
+  },
   keywords: [
     "remote interview preparation India",
     "AI company interview prep",

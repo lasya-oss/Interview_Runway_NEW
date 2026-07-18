@@ -58,6 +58,8 @@ test("server-renders the finished InterviewRunway homepage", async () => {
     html,
     /<title>Interview prep for remote (?:&amp;|&) AI-adjacent tech roles \| InterviewRunway<\/title>/i,
   );
+  assert.match(html, /href=["'][^"']*\/favicon-32\.png["']/i);
+  assert.match(html, /href=["'][^"']*\/apple-touch-icon\.png["']/i);
   assert.match(
     text,
     /Get interview-ready for remote & AI-adjacent tech roles\./i,
