@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 
 type VectorRef = MutableRefObject<{ x: number; y: number }>;
+type SystemRef = MutableRefObject<number>;
 
 function clamp01(value: number) {
   return Math.min(1, Math.max(0, value));
@@ -158,35 +159,99 @@ const VAULT_ROUTE_POINTS: readonly [number, number, number][] = [
   [2.28, 0.8, -0.04],
 ];
 
-function VaultFlightPlan({ lite }: { lite: boolean }) {
-  const routeGeometry = useMemo(() => {
-    const curve = new THREE.CatmullRomCurve3(VAULT_ROUTE_POINTS.map((point) => new THREE.Vector3(...point)));
-    return new THREE.TubeGeometry(curve, lite ? 32 : 72, lite ? 0.025 : 0.038, lite ? 6 : 10, false);
-  }, [lite]);
-  useEffect(() => () => routeGeometry.dispose(), [routeGeometry]);
+function VaultFlightPlan({ lite, activeSystemRef }: { lite: boolean; activeSystemRef: SystemRef }) {
+  const markerRef = useRef<THREE.Group>(null);
+  const markerProgressRef = useRef(0);
+  const tubularSegments = lite ? 32 : 72;
+  const radialSegments = lite ? 6 : 10;
+  const curve = useMemo(
+    () => new THREE.CatmullRomCurve3(VAULT_ROUTE_POINTS.map((point) => new THREE.Vector3(...point))),
+    [],
+  );
+  const routeGeometry = useMemo(
+    () => new THREE.TubeGeometry(curve, tubularSegments, lite ? 0.025 : 0.038, radialSegments, false),
+    [curve, lite, radialSegments, tubularSegments],
+  );
+  const completedRouteGeometry = useMemo(
+    () => new THREE.TubeGeometry(curve, tubularSegments, lite ? 0.031 : 0.047, radialSegments, false),
+    [curve, lite, radialSegments, tubularSegments],
+  );
+  const routeStops = useMemo(
+    () => VAULT_ROUTE_POINTS.map((_, index) => curve.getPointAt(index / (VAULT_ROUTE_POINTS.length - 1))),
+    [curve],
+  );
+
+  useEffect(() => () => {
+    routeGeometry.dispose();
+    completedRouteGeometry.dispose();
+  }, [completedRouteGeometry, routeGeometry]);
+
+  useFrame((state, delta) => {
+    const targetProgress = clamp01(activeSystemRef.current / (VAULT_ROUTE_POINTS.length - 1));
+    markerProgressRef.current = THREE.MathUtils.damp(markerProgressRef.current, targetProgress, 7.5, delta);
+    const markerProgress = markerProgressRef.current;
+    const marker = markerRef.current;
+    if (marker) {
+      const point = curve.getPointAt(markerProgress);
+      const tangent = curve.getTangentAt(markerProgress);
+      marker.position.copy(point);
+      marker.rotation.z = Math.atan2(tangent.y, tangent.x);
+      const pulse = 1 + Math.sin(state.clock.elapsedTime * 7) * 0.045;
+      marker.scale.setScalar(pulse);
+    }
+
+    const availableIndices = completedRouteGeometry.index?.count ?? 0;
+    const indexStep = radialSegments * 6;
+    const completedIndices = Math.min(
+      availableIndices,
+      Math.max(0, Math.round((markerProgress * availableIndices) / indexStep) * indexStep),
+    );
+    completedRouteGeometry.setDrawRange(0, completedIndices);
+  });
 
   return (
     <group>
       <mesh geometry={routeGeometry}>
         <meshBasicMaterial color="#8fb7c7" transparent opacity={0.32} />
       </mesh>
-      {VAULT_ROUTE_POINTS.map((point, index) => (
+      <mesh geometry={completedRouteGeometry}>
+        <meshBasicMaterial color="#ff6b2c" transparent opacity={0.82} />
+      </mesh>
+      {routeStops.map((point, index) => (
         <group key={index} position={point}>
           <mesh>
-            <torusGeometry args={[index === 5 ? 0.2 : 0.14, 0.018, 8, lite ? 24 : 40]} />
-            <meshBasicMaterial color={index === 5 ? "#ff6b2c" : "#a9c5d0"} transparent opacity={index === 5 ? 0.72 : 0.42} />
+            <torusGeometry args={[0.14, 0.018, 8, lite ? 24 : 40]} />
+            <meshBasicMaterial color="#a9c5d0" transparent opacity={0.42} />
           </mesh>
           <mesh position={[0, 0, -0.012]}>
-            <circleGeometry args={[index === 5 ? 0.09 : 0.055, lite ? 18 : 30]} />
-            <meshBasicMaterial color={index === 5 ? "#ff6b2c" : "#d6e3e8"} transparent opacity={index === 5 ? 0.45 : 0.25} />
+            <circleGeometry args={[0.055, lite ? 18 : 30]} />
+            <meshBasicMaterial color="#d6e3e8" transparent opacity={0.25} />
           </mesh>
         </group>
       ))}
+      <group ref={markerRef}>
+        <mesh>
+          <torusGeometry args={[0.21, 0.025, 10, lite ? 30 : 48]} />
+          <meshBasicMaterial color="#ff6b2c" transparent opacity={0.96} />
+        </mesh>
+        <mesh scale={1.34}>
+          <torusGeometry args={[0.21, 0.012, 8, lite ? 24 : 40]} />
+          <meshBasicMaterial color="#ff8b52" transparent opacity={0.36} />
+        </mesh>
+        <mesh position={[0, 0, 0.012]}>
+          <circleGeometry args={[0.082, lite ? 20 : 34]} />
+          <meshBasicMaterial color="#ff6b2c" transparent opacity={0.58} />
+        </mesh>
+        <mesh position={[0.29, 0, 0.016]} rotation={[0, 0, -Math.PI / 2]}>
+          <coneGeometry args={[0.055, 0.14, 3]} />
+          <meshBasicMaterial color="#ffd2bd" transparent opacity={0.92} />
+        </mesh>
+      </group>
     </group>
   );
 }
 
-function SceneRig({ progressRef, pointerRef, tier }: { progressRef: MutableRefObject<number>; pointerRef: VectorRef; tier: "lite" | "full" }) {
+function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progressRef: MutableRefObject<number>; pointerRef: VectorRef; activeSystemRef: SystemRef; tier: "lite" | "full" }) {
   const airfoilRef = useRef<THREE.Group>(null);
   const turbineRef = useRef<THREE.Group>(null);
   const routeRef = useRef<THREE.Group>(null);
@@ -261,7 +326,7 @@ function SceneRig({ progressRef, pointerRef, tier }: { progressRef: MutableRefOb
         {!lite ? <group position={[0.45, -0.34, -0.68]} scale={0.96}><Airfoil geometry={airfoilGeometry} wire /></group> : null}
       </group>
       <group ref={turbineRef}><Turbofan lite={lite} progressRef={progressRef} /></group>
-      <group ref={routeRef}><VaultFlightPlan lite={lite} /></group>
+      <group ref={routeRef}><VaultFlightPlan lite={lite} activeSystemRef={activeSystemRef} /></group>
       <group ref={gimbalRef}><Gimbal lite={lite} /></group>
       <group ref={trailRef}>
         {(lite ? [-0.5, 0, 0.5] : [-0.72, -0.36, 0, 0.36, 0.72]).map((y, index) => (
@@ -279,19 +344,27 @@ function DemandInvalidator() {
   const invalidate = useThree((state) => state.invalidate);
   useEffect(() => {
     let frame = 0;
+    let animationUntil = 0;
     const draw = () => {
-      frame = 0;
       invalidate();
+      if (performance.now() < animationUntil) frame = requestAnimationFrame(draw);
+      else frame = 0;
     };
     const onChange = () => {
       if (!frame) frame = requestAnimationFrame(draw);
     };
+    const onSystemChange = () => {
+      animationUntil = performance.now() + 950;
+      onChange();
+    };
     window.addEventListener("scroll", onChange, { passive: true });
     window.addEventListener("pointermove", onChange, { passive: true });
+    window.addEventListener("interviewrunway:prep-system-change", onSystemChange);
     onChange();
     return () => {
       window.removeEventListener("scroll", onChange);
       window.removeEventListener("pointermove", onChange);
+      window.removeEventListener("interviewrunway:prep-system-change", onSystemChange);
       if (frame) cancelAnimationFrame(frame);
     };
   }, [invalidate]);
@@ -323,10 +396,12 @@ function CanvasLifecycle() {
 export function HomeAeroCanvas({
   progressRef,
   pointerRef,
+  activeSystemRef,
   tier,
 }: {
   progressRef: MutableRefObject<number>;
   pointerRef: VectorRef;
+  activeSystemRef: SystemRef;
   tier: "lite" | "full";
 }) {
   return (
@@ -343,7 +418,7 @@ export function HomeAeroCanvas({
       <directionalLight position={[4, 5, 6]} intensity={3.4} color="#eaf0f4" />
       {tier === "full" ? <pointLight position={[-3, 1.5, 3]} intensity={14} distance={9} color="#4da8c7" /> : null}
       <pointLight position={[3, -1.5, 3]} intensity={18} distance={8} color="#ff6b2c" />
-      <SceneRig progressRef={progressRef} pointerRef={pointerRef} tier={tier} />
+      <SceneRig progressRef={progressRef} pointerRef={pointerRef} activeSystemRef={activeSystemRef} tier={tier} />
       <DemandInvalidator />
       <CanvasLifecycle />
     </Canvas>

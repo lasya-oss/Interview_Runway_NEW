@@ -70,8 +70,18 @@ function getSceneTier(): SceneTier {
 export function HomeAeroStage() {
   const progressRef = useRef(0);
   const pointerRef = useRef({ x: 0, y: 0 });
+  const activeSystemRef = useRef(0);
   const reducedMotion = useReducedMotion();
   const [readyTier, setReadyTier] = useState<Exclude<SceneTier, "static"> | null>(null);
+
+  useEffect(() => {
+    const onSystemChange = (event: Event) => {
+      const nextIndex = (event as CustomEvent<{ index?: number }>).detail?.index;
+      if (typeof nextIndex === "number") activeSystemRef.current = Math.min(5, Math.max(0, nextIndex));
+    };
+    window.addEventListener("interviewrunway:prep-system-change", onSystemChange);
+    return () => window.removeEventListener("interviewrunway:prep-system-change", onSystemChange);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -161,7 +171,7 @@ export function HomeAeroStage() {
   return (
     <div className="home-aero-stage" aria-hidden="true">
       <div className="aero-static-form"><i /><i /><i /></div>
-      {readyTier ? <AeroCanvasBoundary><HomeAeroCanvas progressRef={progressRef} pointerRef={pointerRef} tier={readyTier} /></AeroCanvasBoundary> : null}
+      {readyTier ? <AeroCanvasBoundary><HomeAeroCanvas progressRef={progressRef} pointerRef={pointerRef} activeSystemRef={activeSystemRef} tier={readyTier} /></AeroCanvasBoundary> : null}
     </div>
   );
 }

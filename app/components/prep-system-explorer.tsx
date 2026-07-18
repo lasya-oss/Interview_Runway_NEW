@@ -55,6 +55,13 @@ export function PrepSystemExplorer() {
     };
   }, []);
 
+  useEffect(() => {
+    document.documentElement.dataset.activePrepSystem = String(activeIndex + 1);
+    window.dispatchEvent(new CustomEvent("interviewrunway:prep-system-change", {
+      detail: { index: activeIndex },
+    }));
+  }, [activeIndex]);
+
   return (
     <div className="prep-explorer">
       <div className="payload-sticky">
