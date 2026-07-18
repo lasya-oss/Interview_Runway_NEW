@@ -3,8 +3,8 @@ import { PageShell } from "@/app/components/site-chrome";
 import { DemoLoginClient } from "./demo-login-client";
 
 export const metadata: Metadata = {
-  title: "Explore the learner workspace",
-  description: "Enter one of three sample InterviewRunway learner workspaces: Vault, AI Prep, or Premium coaching.",
+  title: "Choose an InterviewRunway demo",
+  description: "Choose Vault, AI Prep, or Premium and enter a populated InterviewRunway learner workspace.",
   robots: { index: false, follow: false },
 };
 
@@ -18,13 +18,13 @@ export default async function DemoLoginPage({ searchParams }: { searchParams: Pr
         <div className="demo-login-atmosphere" aria-hidden="true"><i /><i /><span /></div>
         <div className="container demo-login-layout">
           <div className="demo-login-intro">
-            <p className="eyebrow">Member product preview</p>
-            <h1 id="demo-login-title">Don’t imagine the product. <em>Enter it.</em></h1>
-            <p>Choose a learner at a different point in the preparation system. The library, plan, practice data, feedback, and coaching access change with the account.</p>
+            <p className="eyebrow">Interactive product demo</p>
+            <h1 id="demo-login-title">Choose a layer. <em>Enter the workspace.</em></h1>
+            <p>No signup and no empty dashboard. Choose the access level you want to inspect; we will load a fictional learner with realistic progress, unlocked tools, and review-edition material.</p>
             <div className="demo-login-principles">
-              <span><b>01</b> One shared learning product</span>
-              <span><b>02</b> Access changes by entitlement</span>
-              <span><b>03</b> Realistic sample progress</span>
+              <span><b>01</b> Pick Vault, AI Prep, or Premium</span>
+              <span><b>02</b> Enter the populated workspace instantly</span>
+              <span><b>03</b> Open real sample material inside</span>
             </div>
           </div>
           <DemoLoginClient returnTo={returnTo} />

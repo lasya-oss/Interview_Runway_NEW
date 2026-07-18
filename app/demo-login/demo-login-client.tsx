@@ -1,85 +1,116 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { DEMO_PROFILES, type DemoProfile } from "@/app/lib/demo-data";
+import Image from "next/image";
+import { useState } from "react";
+import {
+  DEMO_PROFILES,
+  DEMO_REVIEW_MATERIALS,
+  type DemoProfile,
+  type DemoTier,
+} from "@/app/lib/demo-data";
+
+const TIER_PROMISE: Record<DemoTier, { headline: string; summary: string; access: readonly string[] }> = {
+  foundation: {
+    headline: "Build the preparation base.",
+    summary: "Inspect the structured library, 12-week roadmap, weekly work surface, and progress model before timed practice begins.",
+    access: ["Vault library + roadmap", "Real review-edition PDFs", "Foundation progress state"],
+  },
+  practice: {
+    headline: "See the correction loop.",
+    summary: "Open the same product with adaptive mocks, transcript evidence, scoring dimensions, and the next action already changed by performance.",
+    access: ["Everything in Vault", "Adaptive practice + replays", "Feedback and readiness signals"],
+  },
+  premium: {
+    headline: "Inspect human calibration.",
+    summary: "Enter the complete workspace with coach-room access, evidence packets, session preparation, and a targeted calibration plan.",
+    access: ["Everything in AI Prep", "Coach room + private plan", "Calibration evidence"],
+  },
+};
 
 export function DemoLoginClient({ returnTo }: { returnTo: string }) {
-  const [selected, setSelected] = useState<DemoProfile>(DEMO_PROFILES[0]);
-  const [email, setEmail] = useState(DEMO_PROFILES[0].email);
-  const [password, setPassword] = useState(DEMO_PROFILES[0].password);
-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [opening, setOpening] = useState<DemoTier | null>(null);
   const [message, setMessage] = useState("");
 
-  const chooseProfile = (profile: DemoProfile) => {
-    setSelected(profile);
-    setEmail(profile.email);
-    setPassword(profile.password);
-    setStatus("idle");
-    setMessage("");
-  };
-
-  const submit = async (event?: FormEvent) => {
-    event?.preventDefault();
-    setStatus("loading");
+  const startDemo = async (profile: DemoProfile) => {
+    setOpening(profile.id);
     setMessage("");
 
     try {
       const response = await fetch("/api/demo-session", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ preview: profile.id }),
       });
       const result = await response.json() as { ok: boolean; message?: string };
       if (!response.ok || !result.ok) {
-        setStatus("error");
-        setMessage(result.message ?? "Unable to start the demo session.");
+        setOpening(null);
+        setMessage(result.message ?? "Unable to start the demo workspace.");
         return;
       }
       window.location.assign(returnTo);
     } catch {
-      setStatus("error");
-      setMessage("The demo session could not be started. Please try again.");
+      setOpening(null);
+      setMessage("The demo workspace could not be started. Please try again.");
     }
   };
 
   return (
-    <div className="demo-login-console">
-      <div className="demo-profile-picker" aria-label="Sample learner profiles">
-        {DEMO_PROFILES.map((profile) => (
-          <button
-            className={`demo-profile-card ${selected.id === profile.id ? "is-selected" : ""}`}
-            key={profile.id}
-            type="button"
-            onClick={() => chooseProfile(profile)}
-          >
-            <span className="demo-profile-index">0{DEMO_PROFILES.indexOf(profile) + 1}</span>
-            <span className="demo-profile-plan">{profile.planShort}</span>
-            <strong>{profile.name}</strong>
-            <small>{profile.role}</small>
-            <span className="demo-profile-state">{profile.progress}% through current plan</span>
-          </button>
-        ))}
-      </div>
+    <div className="demo-entry-stack" aria-label="Choose a product demo">
+      {DEMO_PROFILES.map((profile, index) => {
+        const promise = TIER_PROMISE[profile.id];
+        const materials = DEMO_REVIEW_MATERIALS.filter((material) => material.profiles.includes(profile.id));
+        const cover = materials[0];
+        const isOpening = opening === profile.id;
 
-      <form className="demo-login-form" onSubmit={submit}>
-        <div className="demo-login-form-top">
-          <div><span>Selected workspace</span><strong>{selected.plan}</strong></div>
-          <span className="demo-environment-badge">Sample data</span>
-        </div>
-        <label>
-          Demo email
-          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="username" />
-        </label>
-        <label>
-          Demo password
-          <input type="text" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
-        </label>
-        <button className="demo-login-submit" type="submit" disabled={status === "loading"}>
-          {status === "loading" ? "Opening workspace…" : `Enter as ${selected.firstName}`} <span aria-hidden="true">↗</span>
-        </button>
-        {status === "error" ? <p className="demo-login-error" role="alert">{message}</p> : null}
-        <p className="demo-login-note">This is a private product demo. The accounts contain fictional learner data and cannot make purchases or contact a coach.</p>
-      </form>
+        return (
+          <article className={`demo-entry-card demo-entry-card-${profile.id}`} key={profile.id}>
+            <div className="demo-entry-cover">
+              <Image
+                src={cover.preview}
+                alt={`${cover.title} review-edition cover`}
+                width={993}
+                height={1403}
+                sizes="(max-width: 900px) 32vw, 180px"
+              />
+              <span>REVIEW<br />EDITION</span>
+            </div>
+
+            <div className="demo-entry-copy">
+              <div className="demo-entry-label">
+                <span>0{index + 1} / {profile.planShort}</span>
+                <small>{profile.progress}% populated progress</small>
+              </div>
+              <h2>{promise.headline}</h2>
+              <p>{promise.summary}</p>
+              <ul>
+                {promise.access.map((item) => <li key={item}><i />{item}</li>)}
+              </ul>
+
+              <div className="demo-entry-learner">
+                <span>{profile.initials}</span>
+                <div><small>Demo learner</small><strong>{profile.name}</strong><p>{profile.role}</p></div>
+              </div>
+
+              <div className="demo-entry-materials">
+                <span>Material visible in this demo</span>
+                {materials.slice(0, 3).map((material) => (
+                  <a href={material.href} target="_blank" rel="noreferrer" key={material.href}>
+                    <b>{material.category}</b><span>{material.title}</span><small>{material.format} ↗</small>
+                  </a>
+                ))}
+              </div>
+
+              <button type="button" onClick={() => startDemo(profile)} disabled={opening !== null}>
+                <span>{isOpening ? "Loading populated workspace…" : `Enter ${profile.planShort} demo`}</span>
+                <b aria-hidden="true">↗</b>
+              </button>
+            </div>
+          </article>
+        );
+      })}
+
+      {message ? <p className="demo-login-error" role="alert">{message}</p> : null}
+      <p className="demo-login-note">Every workspace uses fictional learner progress. Review-edition materials are selected from the built catalogue and remain clearly marked pending final human editorial review.</p>
     </div>
   );
 }

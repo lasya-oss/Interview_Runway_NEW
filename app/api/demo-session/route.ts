@@ -18,8 +18,9 @@ export async function POST(request: Request) {
   } | null;
   const email = typeof body?.email === "string" ? body.email : "";
   const password = typeof body?.password === "string" ? body.password : "";
-  const profile = body?.preview === "practice"
-    ? findDemoById("practice")
+  const preview = typeof body?.preview === "string" ? body.preview : undefined;
+  const profile = preview === "foundation" || preview === "practice" || preview === "premium"
+    ? findDemoById(preview)
     : email.length <= 254 && password.length <= 128
       ? findDemoByCredentials(email, password)
       : null;

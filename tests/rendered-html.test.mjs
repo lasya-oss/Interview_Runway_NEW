@@ -71,6 +71,10 @@ test("server-renders the finished InterviewRunway homepage", async () => {
   assert.match(html, /<h1[^>]*\bid=["']hero-title["']/i);
   assert.match(html, /<footer\b/i);
 
+  const primaryNavigation = html.match(/<nav[^>]*aria-label=["']Primary navigation["'][^>]*>([\s\S]*?)<\/nav>/i)?.[1] ?? "";
+  assert.match(visibleText(primaryNavigation), /Curriculum\s+Pricing\s+Demo/i);
+  assert.doesNotMatch(visibleText(primaryNavigation), /Product|Coaching|About|Member demo/i);
+
   assert.doesNotMatch(
     html,
     /codex-preview|react-loading-skeleton|Codex is working|Your site is taking shape/i,
@@ -118,7 +122,7 @@ for (const { pathname, expected, init } of coreRoutes) {
 const productRoutes = [
   ["/pricing", [/Three purposeful layers/i, /₹2,499/i, /₹9,999/i]],
   ["/curriculum", [/Curriculum/i, /Five records below have been built as pilot outputs/i]],
-  ["/demo-login", [/Enter it/i, /Ananya Rao/i, /Rohan Mehta/i, /Meera Iyer/i]],
+  ["/demo-login", [/Choose a layer/i, /Enter the workspace/i, /Ananya Rao/i, /Rohan Mehta/i, /Meera Iyer/i, /Sliding Window Pattern Reference/i]],
 ];
 
 for (const [pathname, expected] of productRoutes) {
@@ -149,19 +153,21 @@ test("pricing personalizes one mid-tier sample workspace action", async () => {
   assert.doesNotMatch(text, /Enter the sample workspaces/i);
 });
 
-test("one-click practice preview issues the protected demo session", async () => {
-  const preview = await request("/api/demo-session", {
-    method: "POST",
-    headers: {
-      accept: "application/json",
-      "content-type": "application/json",
-      origin: "http://localhost",
-    },
-    body: JSON.stringify({ preview: "practice" }),
-  });
-  assert.equal(preview.status, 200);
-  assert.deepEqual(await preview.json(), { ok: true, profile: "practice" });
-  assert.match(preview.headers.get("set-cookie") ?? "", /ir_demo_session=.*HttpOnly/i);
+test("all three one-click demos issue protected tier sessions", async () => {
+  for (const tier of ["foundation", "practice", "premium"]) {
+    const preview = await request("/api/demo-session", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin: "http://localhost",
+      },
+      body: JSON.stringify({ preview: tier }),
+    });
+    assert.equal(preview.status, 200);
+    assert.deepEqual(await preview.json(), { ok: true, profile: tier });
+    assert.match(preview.headers.get("set-cookie") ?? "", /ir_demo_session=.*HttpOnly/i);
+  }
 });
 
 test("demo sign-in issues a protected session and opens the learner product", async () => {

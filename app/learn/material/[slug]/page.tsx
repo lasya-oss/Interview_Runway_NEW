@@ -174,6 +174,13 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
               <span>Practice prompt</span>
               <p>{detail.exercise}</p>
             </div>
+            {material.demoAsset ? (
+              <a className="material-review-link" href={material.demoAsset.href} target="_blank" rel="noreferrer">
+                <span>Built sample material</span>
+                <strong>{material.demoAsset.label}</strong>
+                <small>Human editorial review pending ↗</small>
+              </a>
+            ) : null}
           </aside>
         </div>
 

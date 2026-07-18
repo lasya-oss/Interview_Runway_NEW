@@ -2,10 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const NAV_ITEMS = [
-  { href: "/pricing", label: "Pricing" },
   { href: "/curriculum", label: "Curriculum" },
-  { href: "/premium", label: "Coaching" },
-  { href: "/about", label: "About" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/demo-login", label: "Demo" },
 ] as const;
 
 export function Brand() {
@@ -23,31 +22,9 @@ export function Header() {
       <div className="container header-inner">
         <Brand />
         <nav className="desktop-nav" aria-label="Primary navigation">
-          <details className="product-menu">
-            <summary>Product <span aria-hidden="true">⌄</span></summary>
-            <div className="product-menu-panel">
-              <Link href="/vault">
-                <small>01 · Learn</small><strong>The Vault</strong>
-                <span>Structured patterns, field sheets, and 4/12-week roadmaps.</span><b>₹799 once ↗</b>
-              </Link>
-              <Link href="/ai-prep">
-                <small>02 · Practise</small><strong>AI Prep</strong>
-                <span>Responsive mocks, transcripts, scoring, and corrective loops.</span><b>₹2,499 upgrade ↗</b>
-              </Link>
-              <Link href="/premium">
-                <small>03 · Calibrate</small><strong>1:1 Coaching</strong>
-                <span>Private diagnosis, live rehearsal, and a written action plan.</span><b>₹9,999 package ↗</b>
-              </Link>
-              <div className="product-menu-footer">
-                <span>See the product before you buy.</span>
-                <Link href="/demo-login">Enter all 3 demo workspaces ↗</Link>
-              </div>
-            </div>
-          </details>
           {NAV_ITEMS.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
         </nav>
         <div className="header-actions">
-          <Link className="signin-link" href="/demo-login">Member demo</Link>
           <Link className="compact-cta" href="/checkout/vault" data-analytics-event="checkout_started">
             Start with the Vault <span>₹799</span>
           </Link>
@@ -55,10 +32,8 @@ export function Header() {
         <details className="mobile-menu">
           <summary aria-label="Open navigation"><span /><span /></summary>
           <nav aria-label="Mobile navigation">
-            <Link href="/vault">The Vault</Link>
-            <Link href="/ai-prep">AI Prep</Link>
             {NAV_ITEMS.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
-            <Link href="/demo-login">Enter member demo</Link>
+            <Link href="/checkout/vault">Start with the Vault · ₹799</Link>
           </nav>
         </details>
       </div>
@@ -75,7 +50,7 @@ export function Footer() {
           <p>Interview prep for engineers in India targeting remote and AI-adjacent tech roles.</p>
         </div>
         <div className="footer-links">
-          <div><p>PRODUCT</p><Link href="/vault">The Vault</Link><Link href="/ai-prep">AI Prep</Link><Link href="/premium">1:1 Coaching</Link><Link href="/demo-login">Member demo</Link></div>
+          <div><p>PRODUCT</p><Link href="/vault">The Vault</Link><Link href="/ai-prep">AI Prep</Link><Link href="/premium">1:1 Coaching</Link><Link href="/demo-login">Demo</Link></div>
           <div><p>EXPLORE</p><Link href="/pricing">Pricing</Link><Link href="/curriculum">Curriculum</Link><Link href="/about">About</Link><Link href="/proof">Evidence standard</Link></div>
           <div><p>LEGAL</p><Link href="/legal/refund">Refunds</Link><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link></div>
         </div>

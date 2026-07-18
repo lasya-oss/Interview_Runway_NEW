@@ -90,6 +90,73 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
   },
 ] as const;
 
+export type DemoReviewMaterial = {
+  title: string;
+  category: string;
+  detail: string;
+  format: string;
+  href: string;
+  preview: string;
+  profiles: readonly DemoTier[];
+};
+
+export const DEMO_REVIEW_MATERIALS: readonly DemoReviewMaterial[] = [
+  {
+    title: "4-Week Accelerated Interview Roadmap",
+    category: "Plan",
+    detail: "7-page weekly plan and checkpoint system",
+    format: "PDF · 7 pages",
+    href: "/demo-materials/roadmap_4week.pdf",
+    preview: "/demo-materials/previews/roadmap_4week.png",
+    profiles: ["foundation"],
+  },
+  {
+    title: "Sliding Window Pattern Reference",
+    category: "DSA",
+    detail: "Recognition cues, invariants and practice ladder",
+    format: "PDF · 9 pages",
+    href: "/demo-materials/dsa_sliding-window.pdf",
+    preview: "/demo-materials/previews/dsa_sliding-window.png",
+    profiles: ["foundation"],
+  },
+  {
+    title: "Rate Limiting Decision Guide",
+    category: "System design",
+    detail: "Algorithms, counters, failure modes and interview flow",
+    format: "PDF · 3 pages",
+    href: "/demo-materials/sysdesign_rate-limiting.pdf",
+    preview: "/demo-materials/previews/sysdesign_rate-limiting.png",
+    profiles: ["foundation", "practice"],
+  },
+  {
+    title: "Design a Notification System",
+    category: "AI Prep brief",
+    detail: "Requirements-to-architecture walkthrough used by a mock",
+    format: "PDF · 3 pages",
+    href: "/demo-materials/sysdesign_notification-system-walkthrough.pdf",
+    preview: "/demo-materials/previews/sysdesign_notification-system-walkthrough.png",
+    profiles: ["practice"],
+  },
+  {
+    title: "System Design Mock Rubric",
+    category: "Evidence",
+    detail: "Baseline, decision, evidence, result and re-test loop",
+    format: "PDF · 2 pages",
+    href: "/demo-materials/operations_sysdesign-mock-rubric.pdf",
+    preview: "/demo-materials/previews/operations_sysdesign-mock-rubric.png",
+    profiles: ["practice", "premium"],
+  },
+  {
+    title: "Behavioral Answer Rubric",
+    category: "Coach review",
+    detail: "Evidence-first STAR structure and reviewer questions",
+    format: "PDF · 2 pages",
+    href: "/demo-materials/behavioral_scoring-rubric.pdf",
+    preview: "/demo-materials/previews/behavioral_scoring-rubric.png",
+    profiles: ["premium"],
+  },
+] as const;
+
 export type LearningMaterial = {
   slug: string;
   number: string;
@@ -105,6 +172,10 @@ export type LearningMaterial = {
   level: string;
   roadmap: string;
   progress: number;
+  demoAsset?: {
+    href: string;
+    label: string;
+  };
 };
 
 export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
@@ -123,6 +194,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Intermediate",
     roadmap: "Week 2",
     progress: 42,
+    demoAsset: { href: "/demo-materials/sysdesign_rate-limiting.pdf", label: "Open 3-page review edition" },
   },
   {
     slug: "sliding-window",
@@ -139,6 +211,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Foundation",
     roadmap: "Week 1",
     progress: 68,
+    demoAsset: { href: "/demo-materials/dsa_sliding-window.pdf", label: "Open 9-page review edition" },
   },
   {
     slug: "scope-stories",
@@ -187,6 +260,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Intermediate",
     roadmap: "Practice loop",
     progress: 0,
+    demoAsset: { href: "/demo-materials/sysdesign_notification-system-walkthrough.pdf", label: "Open 3-page mock brief" },
   },
   {
     slug: "staff-scope-calibration",
@@ -203,6 +277,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Senior → Staff",
     roadmap: "Coach assigned",
     progress: 25,
+    demoAsset: { href: "/demo-materials/behavioral_scoring-rubric.pdf", label: "Open 2-page review rubric" },
   },
   {
     slug: "cache-consistency",

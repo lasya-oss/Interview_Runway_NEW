@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { MemberShell } from "@/app/components/member-shell";
-import { LEARNING_MATERIALS, MOCK_HISTORY, SCORE_DIMENSIONS } from "@/app/lib/demo-data";
+import { DEMO_REVIEW_MATERIALS, LEARNING_MATERIALS, MOCK_HISTORY, SCORE_DIMENSIONS } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,18 @@ export const metadata: Metadata = {
 export default async function LearnerHomePage() {
   const profile = await requireDemoProfile("/learn");
   const scoreKey = profile.id;
-  const continuedMaterials = LEARNING_MATERIALS.slice(0, profile.id === "foundation" ? 3 : 4);
+  const continuedMaterials = profile.id === "foundation"
+    ? LEARNING_MATERIALS.filter((material) => material.tier === "foundation").slice(0, 3)
+    : profile.id === "practice"
+      ? [
+          ...LEARNING_MATERIALS.filter((material) => material.tier === "practice"),
+          ...LEARNING_MATERIALS.filter((material) => material.tier === "foundation"),
+        ].slice(0, 4)
+      : [
+          ...LEARNING_MATERIALS.filter((material) => material.tier === "premium"),
+          ...LEARNING_MATERIALS.filter((material) => material.tier === "practice"),
+        ].slice(0, 4);
+  const reviewMaterials = DEMO_REVIEW_MATERIALS.filter((material) => material.profiles.includes(profile.id)).slice(0, 3);
 
   return (
     <MemberShell profile={profile} active="today">
@@ -52,6 +64,23 @@ export default async function LearnerHomePage() {
               <div><dt>Next review</dt><dd>{profile.id === "premium" ? "Thu 18:30" : "Sunday"}</dd></div>
             </dl>
           </article>
+        </section>
+
+        <section className="member-section member-review-materials">
+          <div className="member-section-heading">
+            <div><p className="member-kicker">Inside this demo</p><h2>Open the material—not a placeholder.</h2></div>
+            <span>Review editions · human approval pending</span>
+          </div>
+          <div className="member-review-material-grid">
+            {reviewMaterials.map((material) => (
+              <a href={material.href} target="_blank" rel="noreferrer" key={material.href}>
+                <span className="member-review-cover">
+                  <Image src={material.preview} alt={`${material.title} cover`} width={993} height={1403} sizes="180px" />
+                </span>
+                <span className="member-review-copy"><small>{material.category} · {material.format}</small><strong>{material.title}</strong><p>{material.detail}</p><b>Open review edition ↗</b></span>
+              </a>
+            ))}
+          </div>
         </section>
 
         <section className="member-section">
