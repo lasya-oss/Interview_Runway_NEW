@@ -70,7 +70,7 @@ export function MemberShell({
           <div className="member-topbar-signals">
             <span><i /> Preview environment · fictional learner data</span>
             <span>{profile.streak}-day rhythm</span>
-            <Link href="/">Public site ↗</Link>
+            <Link href="/vault">Start real access ↗</Link>
           </div>
         </header>
         <main className="member-main">{children}</main>

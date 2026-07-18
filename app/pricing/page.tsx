@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CtaLink, PageHero, PageShell, SectionHeading } from "@/app/components/site-chrome";
+import { getChatGPTUser } from "@/app/chatgpt-auth";
+import { PricingWorkspacePreview } from "@/app/components/pricing-workspace-preview";
+import { CtaLink, PageShell, SectionHeading } from "@/app/components/site-chrome";
 import { OFFERS } from "@/app/lib/site-data";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Pricing — build your interview-prep system",
@@ -74,29 +78,17 @@ const PRICING_FAQS = [
   },
 ] as const;
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const user = await getChatGPTUser();
+  const learnerName = getLearnerName(user?.fullName, user?.email);
+
   return (
     <PageShell mobilePurchase>
-      <PageHero
-        motif="calibrator"
-        eyebrow="PRICING / THREE PURPOSEFUL LAYERS"
-        title={<>Start small. Add precision only when it <em>earns its place.</em></>}
-        body="InterviewRunway is assembled in stages: learn the foundation, introduce adaptive practice, then add human calibration only for a gap that repeated work has made visible."
-      >
-        <div className="pricing-hero-signals" aria-label="Pricing principles">
-          <span>INR PRICING</span><span>NO PRESELECTED UPGRADES</span><span>VAULT: ONE PAYMENT</span>
-        </div>
-        <div className="hero-actions">
-          <CtaLink href="/checkout/vault" event="checkout_started">Start with the Vault — {OFFERS.vault.priceLabel}</CtaLink>
-          <Link className="text-link" href="/demo-login">Enter the sample workspaces <span aria-hidden="true">→</span></Link>
-        </div>
-      </PageHero>
-
-      <section className="content-section pricing-assembly" aria-labelledby="pricing-layers-title">
+      <section className="content-section pricing-assembly pricing-assembly-first" aria-labelledby="pricing-layers-title">
         <div className="container">
           <SectionHeading
-            eyebrow="THE COMMERCIAL MODEL"
-            title="Not three bundles. Three moments."
+            eyebrow="PRICING / THREE PURPOSEFUL LAYERS"
+            title="Three layers. Buy only the moment you need."
             body="Each layer has a distinct job and entry condition. The product should recommend the smallest useful commitment, not push everyone toward the highest price."
             id="pricing-layers-title"
           />
@@ -113,6 +105,25 @@ export default function PricingPage() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="content-section pricing-workspace-section" aria-labelledby="pricing-workspace-title">
+        <div className="container">
+          <div className="pricing-workspace-heading">
+            <SectionHeading
+              eyebrow="START SMALL / INSPECT THE PRACTICE LAYER"
+              title="See the product at week three—not an empty dashboard."
+              body="This is the mid-tier AI Prep workspace after repeated use: a live roadmap, scored practice, specific evidence, and one defensible next action."
+              id="pricing-workspace-title"
+            />
+            <div className="pricing-workspace-identity">
+              <span>WORKSPACE IDENTITY</span>
+              <strong>{learnerName}</strong>
+              <small>{user ? "From your signed-in account" : "Preview placeholder"}</small>
+            </div>
+          </div>
+          <PricingWorkspacePreview learnerName={learnerName} />
         </div>
       </section>
 
@@ -176,4 +187,14 @@ export default function PricingPage() {
       </section>
     </PageShell>
   );
+}
+
+function getLearnerName(fullName: string | null | undefined, email: string | undefined): string {
+  const preferredName = fullName?.trim().split(/\s+/)[0];
+  if (preferredName) return preferredName;
+
+  const emailName = email?.split("@")[0]?.replace(/[._-]+/g, " ").trim();
+  if (emailName) return emailName.replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+  return "Your name here";
 }

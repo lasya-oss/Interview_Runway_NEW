@@ -130,6 +130,40 @@ for (const [pathname, expected] of productRoutes) {
   });
 }
 
+test("pricing personalizes one mid-tier sample workspace action", async () => {
+  const response = await render("/pricing", {
+    headers: {
+      accept: "text/html",
+      "oai-authenticated-user-email": "pratheep@example.com",
+      "oai-authenticated-user-full-name": "Pratheep%20BV",
+      "oai-authenticated-user-full-name-encoding": "percent-encoded-utf-8",
+    },
+  });
+  assert.equal(response.status, 200);
+
+  const html = await response.text();
+  const text = visibleText(html);
+  assert.match(text, /See the product at week three/i);
+  assert.match(text, /Good evening Pratheep\s*\./i);
+  assert.match(text, /Explore your sample workspace/i);
+  assert.doesNotMatch(text, /Enter the sample workspaces/i);
+});
+
+test("one-click practice preview issues the protected demo session", async () => {
+  const preview = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "practice" }),
+  });
+  assert.equal(preview.status, 200);
+  assert.deepEqual(await preview.json(), { ok: true, profile: "practice" });
+  assert.match(preview.headers.get("set-cookie") ?? "", /ir_demo_session=.*HttpOnly/i);
+});
+
 test("demo sign-in issues a protected session and opens the learner product", async () => {
   const login = await request("/api/demo-session", {
     method: "POST",

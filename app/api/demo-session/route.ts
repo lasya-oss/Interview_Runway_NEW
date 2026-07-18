@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findDemoByCredentials } from "@/app/lib/demo-data";
+import { findDemoByCredentials, findDemoById } from "@/app/lib/demo-data";
 import {
   createDemoSession,
   DEMO_SESSION_COOKIE,
@@ -14,11 +14,13 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     email?: unknown;
     password?: unknown;
+    preview?: unknown;
   } | null;
   const email = typeof body?.email === "string" ? body.email : "";
   const password = typeof body?.password === "string" ? body.password : "";
-  const profile =
-    email.length <= 254 && password.length <= 128
+  const profile = body?.preview === "practice"
+    ? findDemoById("practice")
+    : email.length <= 254 && password.length <= 128
       ? findDemoByCredentials(email, password)
       : null;
 
