@@ -86,14 +86,25 @@ export function TestimonialFlightDeck() {
     viewport.scrollLeft = latest * max;
   });
 
+  const currentIndex = Math.min(
+    SAMPLE_STORIES.length - 1,
+    Math.round(trackProgress * (SAMPLE_STORIES.length - 1)),
+  );
+
   const move = (direction: -1 | 1) => {
     const viewport = viewportRef.current;
     if (!viewport) return;
-    viewport.scrollBy({
-      left: direction * Math.min(viewport.clientWidth * 0.72, 820),
+    const targetIndex = Math.max(0, Math.min(SAMPLE_STORIES.length - 1, currentIndex + direction));
+    const target = viewport.querySelectorAll<HTMLElement>(".testimonial-card")[targetIndex];
+    if (!target) return;
+    viewport.scrollTo({
+      left: target.offsetLeft - (viewport.clientWidth - target.clientWidth) / 2,
       behavior: reduceMotion ? "auto" : "smooth",
     });
   };
+
+  const previousLabel = currentIndex === 0 ? "START" : SAMPLE_STORIES[currentIndex - 1].number;
+  const nextLabel = currentIndex === SAMPLE_STORIES.length - 1 ? "END" : SAMPLE_STORIES[currentIndex + 1].number;
 
   return (
     <section
@@ -151,10 +162,18 @@ export function TestimonialFlightDeck() {
           <div className="testimonial-flight-progress" aria-hidden="true">
             <span style={{ width: `${Math.max(8, trackProgress * 100)}%` }} />
           </div>
-          <p><b>{String(Math.min(SAMPLE_STORIES.length, Math.floor(trackProgress * SAMPLE_STORIES.length) + 1)).padStart(2, "0")}</b> / 04</p>
-          <div className="testimonial-flight-controls">
-            <button type="button" onClick={() => move(-1)} aria-label="Previous testimonial">←</button>
-            <button type="button" onClick={() => move(1)} aria-label="Next testimonial">→</button>
+          <div className="testimonial-flight-controls" aria-label="Testimonial navigation console">
+            <button type="button" onClick={() => move(-1)} aria-label="Previous testimonial" disabled={currentIndex === 0}>
+              <span className="testimonial-control-arrow" aria-hidden="true">←</span>
+              <span className="testimonial-control-copy"><small>PREVIOUS</small><b>{previousLabel}</b></span>
+            </button>
+            <div className="testimonial-flight-position" aria-live="polite">
+              <span>STORY</span><b>{SAMPLE_STORIES[currentIndex].number}</b><small>/ 04</small>
+            </div>
+            <button type="button" onClick={() => move(1)} aria-label="Next testimonial" disabled={currentIndex === SAMPLE_STORIES.length - 1}>
+              <span className="testimonial-control-copy"><small>NEXT</small><b>{nextLabel}</b></span>
+              <span className="testimonial-control-arrow" aria-hidden="true">→</span>
+            </button>
           </div>
           <Link href="/proof">Read the evidence standard <span aria-hidden="true">↗</span></Link>
         </footer>

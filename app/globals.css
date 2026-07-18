@@ -3005,30 +3005,76 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
   transition: width 180ms ease;
 }
 
-.testimonial-flight-footer > p {
-  margin: 0;
-  color: #71848d;
-  font-family: var(--font-mono);
-  font-size: 9px;
+.testimonial-flight-controls {
+  position: relative;
+  min-width: 354px;
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 1fr 78px 1fr;
+  overflow: hidden;
+  border: 1px solid rgba(29,62,75,.25);
+  border-radius: 16px 5px 16px 5px;
+  background: linear-gradient(145deg, #102632, #07131c);
+  box-shadow: 0 18px 45px rgba(32,64,77,.17), inset 0 1px rgba(255,255,255,.11);
 }
 
-.testimonial-flight-footer > p b { color: var(--afterburner); font-weight: 500; }
-
-.testimonial-flight-controls { display: flex; gap: 7px; }
+.testimonial-flight-controls::before {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 11%;
+  left: 11%;
+  height: 1px;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,107,44,.8), transparent);
+}
 
 .testimonial-flight-controls button {
-  width: 38px;
-  height: 38px;
-  border: 1px solid rgba(36,70,84,.16);
-  border-radius: 50%;
-  background: rgba(255,255,255,.55);
-  color: var(--ink);
+  position: relative;
+  min-width: 0;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 11px;
+  border: 0;
+  color: #dbe6ea;
+  background: linear-gradient(135deg, rgba(255,255,255,.035), transparent 65%);
   cursor: pointer;
-  transition: transform 180ms ease, border-color 180ms ease, color 180ms ease;
+  transition: color 180ms ease, background 220ms ease, box-shadow 220ms ease;
 }
 
-.testimonial-flight-controls button:hover { transform: translateY(-2px); border-color: var(--afterburner); color: var(--afterburner); }
-.testimonial-flight-controls button:focus-visible { outline: 2px solid var(--afterburner); outline-offset: 2px; }
+.testimonial-flight-controls button:first-child { border-right: 1px solid rgba(201,221,229,.1); }
+.testimonial-flight-controls button:last-child { border-left: 1px solid rgba(201,221,229,.1); }
+.testimonial-flight-controls button:hover:not(:disabled) { color: #fff; background: linear-gradient(135deg, rgba(255,107,44,.18), rgba(255,107,44,.035)); box-shadow: inset 0 0 28px rgba(255,107,44,.065); }
+.testimonial-flight-controls button:active:not(:disabled) { box-shadow: inset 0 3px 14px rgba(0,0,0,.28); }
+.testimonial-flight-controls button:focus-visible { z-index: 3; outline: 2px solid var(--afterburner); outline-offset: -3px; }
+.testimonial-flight-controls button:disabled { color: #526872; cursor: not-allowed; background: rgba(0,0,0,.12); }
+
+.testimonial-control-copy { min-width: 0; display: grid; gap: 2px; text-align: left; }
+.testimonial-flight-controls button:last-child .testimonial-control-copy { text-align: right; }
+.testimonial-control-copy small { color: #758b95; font-family: var(--font-mono); font-size: 6px; letter-spacing: .12em; }
+.testimonial-control-copy b { color: inherit; font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: .08em; }
+.testimonial-control-arrow { color: var(--afterburner); font-size: 21px; line-height: 1; transition: transform 240ms var(--ease-out-expo); }
+.testimonial-flight-controls button:first-child:hover:not(:disabled) .testimonial-control-arrow { transform: translateX(-5px); }
+.testimonial-flight-controls button:last-child:hover:not(:disabled) .testimonial-control-arrow { transform: translateX(5px); }
+.testimonial-flight-controls button:disabled .testimonial-control-arrow { color: #435963; }
+
+.testimonial-flight-position {
+  display: grid;
+  grid-template-columns: auto auto;
+  place-content: center;
+  align-items: baseline;
+  column-gap: 4px;
+  color: #80949e;
+  background: radial-gradient(circle, rgba(255,107,44,.09), transparent 72%), rgba(0,0,0,.18);
+  box-shadow: inset 1px 0 rgba(255,255,255,.025), inset -1px 0 rgba(255,255,255,.025);
+  font-family: var(--font-mono);
+}
+.testimonial-flight-position span { grid-column: 1 / -1; color: #627985; font-size: 6px; letter-spacing: .13em; text-align: center; }
+.testimonial-flight-position b { color: var(--afterburner); font-size: 18px; font-weight: 500; line-height: 1; text-shadow: 0 0 18px rgba(255,107,44,.32); }
+.testimonial-flight-position small { font-size: 7px; }
 
 .testimonial-flight-footer > a {
   margin-left: auto;
@@ -3429,6 +3475,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .testimonial-card blockquote { font-size: clamp(1.85rem, 5.8vw, 2.6rem); }
   .testimonial-flight-footer { padding-inline: 18px; flex-wrap: wrap; }
   .testimonial-flight-progress { width: auto; flex: 1; }
+  .testimonial-flight-controls { min-width: min(100%, 354px); }
   .testimonial-flight-footer > a { width: 100%; margin: 0; padding-top: 8px; }
   .final-cta-v2 { min-height: 90svh; }
   .final-cta-v2 h2 { font-size: clamp(3.6rem, 14vw, 5.8rem); }
@@ -3473,6 +3520,8 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .envelope-plane { padding: 26px; }
   .envelope-plane h3 { font-size: 2.35rem; }
   .testimonial-flight-viewport { height: 620px; }
+  .testimonial-flight-progress { flex-basis: 100%; }
+  .testimonial-flight-controls { width: 100%; min-width: 0; }
   .testimonial-card,
   .testimonial-card:nth-child(even) { width: calc(100vw - 32px); min-height: 570px; }
   .testimonial-card article { padding: 24px 21px; }
