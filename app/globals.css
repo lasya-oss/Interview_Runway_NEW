@@ -4743,6 +4743,21 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .member-review-material-grid > a { grid-template-columns: 92px minmax(0, 1fr); }
 }
 
+/* Give the public wordmark enough authority to anchor the flight deck. */
+
+.site-header .header-inner { min-height: 82px; }
+.site-header .brand { gap: 13px; font-size: 16px; font-weight: 700; letter-spacing: .1em; }
+.site-header .brand-mark { width: 32px; height: 32px; }
+.site-header .brand-mark i { width: 3px; height: 14px; }
+
+@media (max-width: 800px) {
+  .site-header .header-inner { min-height: 70px; }
+  .site-header .brand { gap: 11px; font-size: 14px; }
+  .site-header .brand-mark { width: 29px; height: 29px; }
+  .site-header .brand-mark i { height: 13px; }
+  .mobile-menu nav { top: 71px; }
+}
+
 /* Roadmap instrument */
 
 .roadmap-overview { display: grid; grid-template-columns: 1fr auto; gap: 50px; align-items: end; }
