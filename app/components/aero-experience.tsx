@@ -198,10 +198,20 @@ const CHAPTERS = [
 
 type Chapter = (typeof CHAPTERS)[number];
 
-function ChapterBody({ chapter }: { chapter: Chapter }) {
+function ChapterBody({ chapter, animated }: { chapter: Chapter; animated: boolean }) {
   return (
     <>
-      <div className="chapter-index"><span>{chapter.number}</span><i />{chapter.force}</div>
+      <motion.div
+        className="chapter-index"
+        initial={animated ? { opacity: 0, scale: 0.68, rotateX: 68, z: -120 } : false}
+        whileInView={animated ? { opacity: 1, scale: 1, rotateX: 0, z: 0 } : undefined}
+        viewport={{ once: true, amount: 0.65 }}
+        transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <strong>{chapter.number}</strong>
+        <span><small>LAYER</small>{chapter.force}</span>
+        <i />
+      </motion.div>
       <h3>{chapter.title}</h3>
       <p>{chapter.body}</p>
       <div className="chapter-footer">
@@ -225,8 +235,28 @@ function MotionChapter({ chapter, index }: { chapter: Chapter; index: number }) 
       className={`trajectory-chapter trajectory-chapter-${index + 1}`}
       style={{ x, scale, rotateY, transformPerspective: 900 }}
     >
-      <ChapterBody chapter={chapter} />
+      <ChapterBody chapter={chapter} animated />
     </motion.article>
+  );
+}
+
+function LayerMap({ animated }: { animated: boolean }) {
+  return (
+    <ol className="trajectory-layer-map" aria-label="The three preparation layers">
+      {CHAPTERS.map((chapter, index) => (
+        <motion.li
+          initial={animated ? { opacity: 0, y: 34, rotateX: 54 } : false}
+          whileInView={animated ? { opacity: 1, y: 0, rotateX: 0 } : undefined}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{ duration: 0.62, delay: index * 0.11, ease: [0.16, 1, 0.3, 1] }}
+          key={chapter.number}
+        >
+          <b>{chapter.number}</b>
+          <span>{chapter.force}</span>
+          <i aria-hidden="true" />
+        </motion.li>
+      ))}
+    </ol>
   );
 }
 
@@ -237,14 +267,15 @@ function SequenceFrame({ animated }: { animated: boolean }) {
       <div className="trajectory-intro container">
         <p className="eyebrow">A staged prep path</p>
         <h2 id="trajectory-title">Three layers. Added when needed.</h2>
-        <p>Start with the foundation. Add practice and human feedback only when your performance gives you a reason.</p>
+        <p className="trajectory-intro-copy">Start with the foundation. Add practice and human feedback only when your performance gives you a reason.</p>
+        <LayerMap animated={animated} />
       </div>
       <div className="trajectory-chapters container">
         {CHAPTERS.map((chapter, index) => animated ? (
           <MotionChapter chapter={chapter} index={index} key={chapter.number} />
         ) : (
           <article className={`trajectory-chapter trajectory-chapter-${index + 1}`} key={chapter.number}>
-            <ChapterBody chapter={chapter} />
+            <ChapterBody chapter={chapter} animated={false} />
           </article>
         ))}
       </div>

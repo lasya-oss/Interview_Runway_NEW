@@ -1876,7 +1876,7 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 }
 
 .trajectory-intro {
-  min-height: 68svh;
+  min-height: 88svh;
   padding-top: var(--section-y);
   display: flex;
   flex-direction: column;
@@ -1893,11 +1893,74 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
   letter-spacing: -.065em;
 }
 
-.trajectory-intro > p:last-child {
+.trajectory-intro-copy {
   max-width: 610px;
   margin: 28px 0 0;
   color: #aabac3;
   font-size: 18px;
+}
+
+.trajectory-layer-map {
+  width: min(100%, 900px);
+  margin: clamp(2.6rem, 6vh, 4.6rem) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  list-style: none;
+  perspective: 900px;
+}
+
+.trajectory-layer-map li {
+  position: relative;
+  min-height: 94px;
+  padding: 18px 24px 17px 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 13px;
+  border-top: 1px solid rgba(197, 219, 228, .22);
+  transform-style: preserve-3d;
+}
+
+.trajectory-layer-map li:not(:last-child) { margin-right: 28px; }
+
+.trajectory-layer-map li::before {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 36px;
+  height: 3px;
+  content: "";
+  background: var(--afterburner);
+  box-shadow: 0 0 18px rgba(255,107,44,.45);
+}
+
+.trajectory-layer-map b {
+  color: var(--afterburner);
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 3.3vw, 3.35rem);
+  font-weight: 610;
+  line-height: 1;
+  letter-spacing: -.06em;
+  text-shadow: 0 10px 28px rgba(0,0,0,.26), 0 0 20px rgba(255,107,44,.22);
+}
+
+.trajectory-layer-map span {
+  color: #e5edf1;
+  font-family: var(--font-display);
+  font-size: clamp(.82rem, 1.15vw, 1.05rem);
+  font-weight: 610;
+  line-height: 1.05;
+  letter-spacing: -.02em;
+}
+
+.trajectory-layer-map i {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,107,44,.38), rgba(177,207,219,.11), transparent);
 }
 
 .trajectory-chapters {
@@ -1917,22 +1980,56 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 }
 
 .chapter-index {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
   align-items: center;
-  gap: 13px;
+  gap: 17px;
   color: var(--afterburner);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: .14em;
+  perspective: 800px;
+  transform-style: preserve-3d;
 }
 
-.chapter-index span { color: inherit; }
-.chapter-index i { width: 46px; height: 1px; background: currentColor; opacity: .55; }
+.chapter-index strong {
+  display: block;
+  color: var(--afterburner);
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 7.4vw, 7.3rem);
+  font-weight: 620;
+  line-height: .72;
+  letter-spacing: -.08em;
+  transform: translateZ(36px);
+  text-shadow: 0 18px 36px rgba(0,0,0,.3), 0 0 26px rgba(255,107,44,.26);
+}
+
+.chapter-index span {
+  display: grid;
+  gap: 5px;
+  color: #f2f6f8;
+  font-family: var(--font-display);
+  font-size: clamp(1.08rem, 1.7vw, 1.5rem);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+
+.chapter-index small {
+  color: #78909b;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: .16em;
+}
+
+.chapter-index i {
+  height: 1px;
+  background: linear-gradient(90deg, currentColor, transparent);
+  opacity: .55;
+}
 
 .trajectory-chapter h3 {
-  margin: 22px 0 0;
+  margin: 30px 0 0;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 5vw, 5.35rem);
+  font-size: clamp(2.7rem, 4.4vw, 4.75rem);
   font-weight: 600;
   line-height: .98;
   letter-spacing: -.052em;
@@ -1966,6 +2063,8 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
   color: var(--ink);
 }
 
+.trajectory-chapter-3 .chapter-index span { color: var(--ink); }
+.trajectory-chapter-3 .chapter-index small { color: #667985; }
 .trajectory-chapter-3 > p { color: var(--ink-muted); }
 .trajectory-chapter-3 .chapter-footer { border-top-color: rgba(17,25,35,.16); }
 .trajectory-chapter-3 .chapter-footer > span { color: #657580; }
@@ -3001,9 +3100,12 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .hero-vector-strip { min-height: 60px; overflow: hidden; gap: 8px; font-size: 7px; }
   .hero-scroll-cue { display: none; }
   .trajectory-sequence { min-height: 272svh; }
-  .trajectory-intro { min-height: 68svh; }
+  .trajectory-intro { min-height: 82svh; }
   .trajectory-intro h2 { font-size: clamp(3.5rem, 14vw, 5.5rem); }
-  .trajectory-intro > p:last-child { font-size: 15px; }
+  .trajectory-intro-copy { font-size: 15px; }
+  .trajectory-layer-map li { padding-right: 10px; gap: 9px; }
+  .trajectory-layer-map li:not(:last-child) { margin-right: 14px; }
+  .trajectory-layer-map span { font-size: .78rem; }
   .trajectory-chapter { min-height: 68svh; width: min(88%, 520px); }
   .trajectory-chapter:nth-child(even) { margin-left: auto; }
   .trajectory-chapter h3 { font-size: clamp(2.8rem, 11vw, 4.5rem); }
@@ -3051,6 +3153,15 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .hero-flight-card > strong { font-size: 3rem; }
   .hero-vector-strip i { min-width: 8px; }
   .trajectory-chapter { width: 94%; }
+  .trajectory-intro { min-height: auto; padding-bottom: 4.5rem; }
+  .trajectory-layer-map { grid-template-columns: 1fr; margin-top: 2.2rem; }
+  .trajectory-layer-map li { min-height: 68px; padding: 11px 0; }
+  .trajectory-layer-map li:not(:last-child) { margin-right: 0; }
+  .trajectory-layer-map b { font-size: 2rem; }
+  .trajectory-layer-map span { font-size: .86rem; }
+  .chapter-index { gap: 12px; }
+  .chapter-index strong { font-size: 4.4rem; }
+  .chapter-index span { font-size: 1rem; }
   .chapter-footer { align-items: flex-start; flex-direction: column; }
   .manifest-row { gap: 12px; }
   .manifest-copy > strong { font-size: 1.65rem; }

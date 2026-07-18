@@ -59,19 +59,81 @@ function Airfoil({ geometry, color = "#b8c5cf", wire = false, lite = false }: { 
   );
 }
 
-function Turbine({ lite }: { lite: boolean }) {
-  const bladeCount = lite ? 5 : 9;
+function createFanBladeGeometry(lite: boolean) {
+  const shape = new THREE.Shape();
+  shape.moveTo(0.34, -0.08);
+  shape.bezierCurveTo(0.62, -0.16, 1.08, -0.2, 1.38, -0.04);
+  shape.bezierCurveTo(1.48, 0.02, 1.42, 0.18, 1.23, 0.27);
+  shape.bezierCurveTo(0.88, 0.39, 0.53, 0.25, 0.32, 0.1);
+  shape.closePath();
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.075,
+    bevelEnabled: true,
+    bevelSegments: lite ? 1 : 2,
+    bevelSize: 0.025,
+    bevelThickness: 0.02,
+    curveSegments: lite ? 8 : 14,
+  });
+  geometry.translate(0, 0, -0.0375);
+  return geometry;
+}
+
+function Turbofan({ lite, progressRef }: { lite: boolean; progressRef: MutableRefObject<number> }) {
+  const bladeCount = lite ? 10 : 16;
+  const fanRef = useRef<THREE.Group>(null);
+  const bladeGeometry = useMemo(() => createFanBladeGeometry(lite), [lite]);
+  useEffect(() => () => bladeGeometry.dispose(), [bladeGeometry]);
+
+  useFrame(() => {
+    if (fanRef.current) fanRef.current.rotation.z = progressRef.current * Math.PI * 12;
+  });
+
   return (
-    <group rotation={[Math.PI / 2, 0, 0]}>
-      <mesh><torusGeometry args={[1.45, 0.13, 10, lite ? 30 : 56]} /><meshStandardMaterial color="#9fb2bd" metalness={0.9} roughness={0.24} /></mesh>
-      <mesh><torusGeometry args={[0.92, 0.045, 8, lite ? 28 : 48]} /><meshBasicMaterial color="#ff6b2c" transparent opacity={0.8} /></mesh>
-      <mesh><cylinderGeometry args={[0.32, 0.56, 0.75, lite ? 18 : 32]} /><meshStandardMaterial color="#c7d2d8" metalness={0.92} roughness={0.2} /></mesh>
-      {Array.from({ length: bladeCount }).map((_, index) => (
-        <mesh key={index} rotation={[0, (Math.PI * 2 * index) / bladeCount, 0]} position={[0, 0.02, 0]}>
-          <boxGeometry args={[0.06, 0.08, 1.55]} />
-          <meshStandardMaterial color={index === 2 ? "#ff6b2c" : "#708795"} metalness={0.78} roughness={0.28} />
+    <group>
+      <mesh position={[0, 0, -0.23]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[1.48, 1.62, 0.74, lite ? 40 : 72, 1, true]} />
+        <meshPhysicalMaterial color="#61727c" metalness={0.96} roughness={0.2} clearcoat={0.8} clearcoatRoughness={0.22} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[0, 0, 0.11]}>
+        <torusGeometry args={[1.45, 0.17, lite ? 10 : 18, lite ? 42 : 84]} />
+        <meshPhysicalMaterial color="#b9c5ca" metalness={0.98} roughness={0.16} clearcoat={1} clearcoatRoughness={0.12} />
+      </mesh>
+      <mesh position={[0, 0, 0.055]}>
+        <torusGeometry args={[1.2, 0.055, 10, lite ? 40 : 72]} />
+        <meshStandardMaterial color="#293b45" metalness={0.92} roughness={0.2} />
+      </mesh>
+      <mesh position={[0, 0, -0.03]}>
+        <circleGeometry args={[1.21, lite ? 40 : 72]} />
+        <meshStandardMaterial color="#07131a" metalness={0.35} roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 0, -0.18]}>
+        <torusGeometry args={[1.08, 0.04, 8, lite ? 36 : 64]} />
+        <meshBasicMaterial color="#ff6b2c" transparent opacity={0.7} />
+      </mesh>
+      {!lite ? (
+        <>
+          <mesh position={[0, 0, -0.34]}><torusGeometry args={[0.9, 0.035, 8, 56]} /><meshBasicMaterial color="#ff8b52" transparent opacity={0.4} /></mesh>
+          <mesh position={[0, 0, -0.48]}><torusGeometry args={[0.72, 0.026, 8, 48]} /><meshStandardMaterial color="#617986" metalness={0.9} roughness={0.25} /></mesh>
+        </>
+      ) : null}
+      <group ref={fanRef} position={[0, 0, 0.02]}>
+        {Array.from({ length: bladeCount }).map((_, index) => (
+          <mesh geometry={bladeGeometry} key={index} rotation={[0, 0, (Math.PI * 2 * index) / bladeCount]}>
+            <meshPhysicalMaterial
+              color={index % 5 === 0 ? "#9eabb1" : "#71838c"}
+              metalness={0.96}
+              roughness={0.22}
+              clearcoat={0.65}
+              clearcoatRoughness={0.2}
+            />
+          </mesh>
+        ))}
+        <mesh position={[0, 0, 0.16]} rotation={[Math.PI / 2, 0, 0]}>
+          <coneGeometry args={[0.42, 0.72, lite ? 28 : 48]} />
+          <meshPhysicalMaterial color="#c7d1d5" metalness={0.97} roughness={0.15} clearcoat={1} clearcoatRoughness={0.12} />
         </mesh>
-      ))}
+        <mesh position={[0, 0, 0.28]}><circleGeometry args={[0.18, 32]} /><meshBasicMaterial color="#e7eef1" /></mesh>
+      </group>
     </group>
   );
 }
@@ -128,9 +190,9 @@ function SceneRig({ progressRef, pointerRef, tier }: { progressRef: MutableRefOb
       const weight = windowWeight(p, 0.16, 0.3, 0.49);
       const local = smooth(clamp01((p - 0.16) / 0.33));
       turbineRef.current.visible = weight > 0.002;
-      turbineRef.current.scale.setScalar(Math.max(0.001, weight * 1.22));
-      turbineRef.current.position.set(-2.45 + local * 4.25, -0.18 + pointer.y * 0.1, -0.5 + weight * 0.8);
-      turbineRef.current.rotation.set(local * 0.22, local * 0.7, local * Math.PI * 2.4);
+      turbineRef.current.scale.setScalar(Math.max(0.001, weight * 1.16));
+      turbineRef.current.position.set(-2.35 + local * 4.05, -0.12 + pointer.y * 0.08, -0.42 + weight * 0.72);
+      turbineRef.current.rotation.set(-0.08 + local * 0.16, 0.32 - local * 0.54 + pointer.x * 0.04, -0.08 + local * 0.14);
     }
 
     if (ribsRef.current) {
@@ -166,7 +228,7 @@ function SceneRig({ progressRef, pointerRef, tier }: { progressRef: MutableRefOb
         {!lite ? <group position={[0.2, -0.18, -0.34]} scale={0.98}><Airfoil geometry={airfoilGeometry} color="#324653" /></group> : null}
         {!lite ? <group position={[0.45, -0.34, -0.68]} scale={0.96}><Airfoil geometry={airfoilGeometry} wire /></group> : null}
       </group>
-      <group ref={turbineRef}><Turbine lite={lite} /></group>
+      <group ref={turbineRef}><Turbofan lite={lite} progressRef={progressRef} /></group>
       <group ref={ribsRef}><VaultRibs lite={lite} /></group>
       <group ref={gimbalRef}><Gimbal lite={lite} /></group>
       <group ref={trailRef}>
