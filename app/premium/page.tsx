@@ -12,6 +12,7 @@ export default function PremiumPage() {
   return (
     <PageShell>
       <PageHero
+        motif="calibrator"
         eyebrow="1:1 COACHING · CAPACITY-CAPPED"
         title={<>One coach. One gap. <em>Full focus.</em></>}
         body="Founder-led coaching for engineers who have done the groundwork, practised repeatedly, and can point to the part of the interview loop that still is not moving."

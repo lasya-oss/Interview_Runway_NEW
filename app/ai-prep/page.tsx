@@ -21,6 +21,7 @@ export default function AiPrepPage() {
   return (
     <PageShell>
       <PageHero
+        motif="turbine"
         eyebrow="AI PREP · VAULT OWNERS ONLY"
         title={<>Mock. Score. Adjust. <em>Repeat.</em></>}
         body="A text-first interview practice loop that responds to your answers, shows the evidence behind your score, and changes what you study next."

@@ -25,6 +25,7 @@ export default function ProofPage() {
   return (
     <PageShell>
       <PageHero
+        motif="signal"
         eyebrow="PROOF / EVIDENCE STANDARD"
         title={
           <>

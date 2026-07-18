@@ -79,47 +79,10 @@ export function SectionHeading({ eyebrow, title, body, id }: { eyebrow: string; 
   );
 }
 
-export function AirfoilVisual() {
+export function PageHero({ eyebrow, title, body, children, quiet = false, motif = "airfoil" }: { eyebrow: string; title: ReactNode; body: string; children?: ReactNode; quiet?: boolean; motif?: "airfoil" | "instruments" | "turbine" | "calibrator" | "signal" }) {
   return (
-    <div className="airfoil-stage" aria-hidden="true">
-      <div className="telemetry telemetry-top"><span>VECTOR</span><b>072°</b></div>
-      <div className="airfoil-orbit"><div className="airfoil"><i /></div></div>
-      <div className="airflow airflow-a" />
-      <div className="airflow airflow-b" />
-      <div className="airflow airflow-c" />
-      <div className="reticle"><span /><span /></div>
-      <div className="telemetry telemetry-bottom"><span>LIFT / DRAG</span><b>18.4</b></div>
-      <div className="visual-caption"><span>01</span><p>KNOWLEDGE<br />→ MOMENTUM</p></div>
-    </div>
-  );
-}
-
-export function StageRail() {
-  const stages = [
-    { n: "01", label: "START HERE", title: "The Vault", price: "₹799", body: "Build a complete foundation with structured content and two guided roadmaps.", href: "/vault", accent: true },
-    { n: "02", label: "VAULT BUYERS", title: "AI Prep", price: "₹2,499", body: "Run text-based mocks, receive structured scores, and adapt your weekly plan.", href: "/ai-prep" },
-    { n: "03", label: "CAPACITY-CAPPED", title: "1:1 Coaching", price: "From ₹9,999", body: "Work directly with the founder on gaps that practice has not resolved.", href: "/premium" },
-  ];
-  return (
-    <div className="stage-rail">
-      {stages.map((stage) => (
-        <article className={`stage-card ${stage.accent ? "stage-card-active" : ""}`} key={stage.n}>
-          <div className="stage-number">{stage.n}</div>
-          <p className="module-kicker">{stage.label}</p>
-          <h3>{stage.title}</h3>
-          <strong>{stage.price}</strong>
-          <p>{stage.body}</p>
-          <Link href={stage.href} aria-label={`Learn about ${stage.title}`}><span aria-hidden="true">→</span></Link>
-        </article>
-      ))}
-    </div>
-  );
-}
-
-export function PageHero({ eyebrow, title, body, children, quiet = false }: { eyebrow: string; title: ReactNode; body: string; children?: ReactNode; quiet?: boolean }) {
-  return (
-    <section className={`page-hero section-pad ${quiet ? "page-hero-quiet" : ""}`}>
-      {!quiet ? <><div className="runway-grid" aria-hidden="true" /><div className="hero-glow" aria-hidden="true" /></> : null}
+    <section className={`page-hero section-pad ${quiet ? "page-hero-quiet" : ""} page-hero-${motif}`}>
+      {!quiet ? <div className={`page-hero-motif motif-${motif}`} aria-hidden="true"><i /><i /><i /><span /></div> : null}
       <div className="container page-hero-inner">
         <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>

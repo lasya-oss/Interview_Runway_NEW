@@ -1,4 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import "@fontsource-variable/sora/wght.css";
+import "@fontsource-variable/manrope/wght.css";
+import "@fontsource/ibm-plex-mono/latin-400.css";
+import "@fontsource/ibm-plex-mono/latin-500.css";
+import "@fontsource/ibm-plex-mono/latin-600.css";
+import { AeroRuntime } from "@/app/components/aero-runtime";
 import "./globals.css";
 
 const siteUrl = "https://interviewrunway.com";
@@ -45,7 +51,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "dark",
-  themeColor: "#080b10",
+  themeColor: "#07111b",
   width: "device-width",
   initialScale: 1,
 };
@@ -53,7 +59,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-IN">
-      <body>{children}</body>
+      <body><AeroRuntime />{children}</body>
     </html>
   );
 }

@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  AirfoilVisual,
-  CtaLink,
-  Footer,
-  Header,
-  MobilePurchaseBar,
-  SectionHeading,
-  StageRail,
-} from "@/app/components/site-chrome";
+import { HomeAeroStage, TrajectorySequence } from "@/app/components/aero-experience";
+import { Reveal } from "@/app/components/aero-runtime";
+import { CtaLink, Footer, Header, MobilePurchaseBar, SectionHeading } from "@/app/components/site-chrome";
 import { HOME_FAQS, VAULT_MODULES } from "@/app/lib/site-data";
 
 export const metadata: Metadata = {
@@ -20,200 +14,174 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="site-shell has-mobile-purchase">
+    <div className="site-shell site-shell-v2 has-mobile-purchase">
+      <HomeAeroStage />
       <Header />
 
-      <main>
-        <section className="hero section-pad" aria-labelledby="hero-title">
-          <div className="runway-grid" aria-hidden="true" />
-          <div className="hero-glow" aria-hidden="true" />
-          <div className="container hero-layout">
-            <div className="hero-copy">
-              <p className="eyebrow">
-                <span className="eyebrow-dot" /> Built for engineers in India
-              </p>
+      <main className="home-v2">
+        <section className="hero-v2" aria-labelledby="hero-title" data-aero-phase="foundation">
+          <div className="hero-atmosphere" aria-hidden="true"><i /><i /><i /></div>
+          <div className="container hero-v2-grid">
+            <div className="hero-v2-copy">
+              <p className="eyebrow"><span className="eyebrow-dot" /> For engineers in India</p>
               <h1 id="hero-title">
-                Get interview-ready for remote &amp; <em>AI-adjacent</em> tech
-                roles.
+                Get interview-ready for remote &amp; <em>AI-adjacent</em> tech roles.
               </h1>
-              <p className="hero-body">
-                Practical DSA, system design, behavioural, and remote-career
-                prep for backend, platform, infrastructure, data, and software
-                roles at US and remote-first companies.
+              <p className="hero-v2-body">
+                A structured path through DSA, system design, behavioural
+                communication, and the realities of working remotely for US
+                and global teams.
               </p>
 
-              <div className="hero-offer" aria-label="The Vault price">
-                <div>
-                  <span className="data-label">START WITH THE VAULT</span>
-                  <strong>₹799</strong>
-                </div>
-                <span className="price-note">once<br />instant access</span>
-              </div>
-
-              <div className="hero-actions">
+              <div className="hero-v2-actions">
                 <CtaLink href="/checkout/vault" event="checkout_started">
-                  Get instant access — ₹799 <span aria-hidden="true">↗</span>
+                  Get the Vault — ₹799 <span aria-hidden="true">↗</span>
                 </CtaLink>
                 <Link className="text-link" href="#inside">
-                  See exactly what&apos;s inside <span aria-hidden="true">↓</span>
+                  See the prep system <span aria-hidden="true">↓</span>
                 </Link>
               </div>
-              <p className="microcopy">
-                UPI accepted <span>·</span> No subscription <span>·</span> No
-                surprise fees
-              </p>
+              <p className="microcopy">UPI accepted · One payment · No surprise add-ons</p>
             </div>
 
-            <AirfoilVisual />
+            <aside className="hero-flight-card" aria-label="Vault offer summary">
+              <div className="flight-card-top"><span>FOUNDATION / 01</span><i /></div>
+              <p>INTERVIEWRUNWAY VAULT</p>
+              <strong>₹799</strong>
+              <div className="flight-card-grid">
+                <div><span>ACCESS</span><b>One time</b></div>
+                <div><span>PATHS</span><b>4 / 12 weeks</b></div>
+                <div><span>SYSTEMS</span><b>08 modules</b></div>
+                <div><span>UPGRADE</span><b>Optional</b></div>
+              </div>
+            </aside>
           </div>
 
-          <div className="container trust-strip" aria-label="Purchase assurances">
-            <div><b>₹799</b><span>One-time price</span></div>
-            <div><b>UPI</b><span>Default at checkout</span></div>
-            <div><b>0</b><span>Placement guarantees</span></div>
-            <div><b>INR</b><span>Clear India pricing</span></div>
-          </div>
+          <div className="hero-scroll-cue" aria-hidden="true"><span>SCROLL TO EXPLORE</span><i /></div>
         </section>
 
-        <section className="section-pad stage-section" aria-labelledby="path-title">
-          <div className="container">
-            <SectionHeading
-              eyebrow="YOUR PREP RUNWAY"
-              title="Start with knowledge. Add practice only when you need it."
-              body="The path is deliberately staged so you do not overpay before you know what will actually move your interview performance."
-              id="path-title"
-            />
-            <StageRail />
-          </div>
-        </section>
+        <TrajectorySequence />
 
-        <section className="section-pad" id="inside" aria-labelledby="inside-title">
-          <div className="container">
-            <div className="split-heading">
+        <section className="payload-section" id="inside" aria-labelledby="inside-title" data-aero-phase="vault">
+          <div className="payload-ribs" aria-hidden="true"><i /><i /><i /><i /><i /></div>
+          <div className="container payload-layout">
+            <div className="payload-sticky">
               <SectionHeading
-                eyebrow="INSIDE THE ₹799 VAULT"
-                title="A focused prep system, not a pile of downloads."
-                body="Each module answers a specific question you will face while targeting remote and AI-adjacent roles."
+                eyebrow="Inside the ₹799 Vault"
+                title="Your prep system, assembled."
+                body="Each module is one working surface in the same system—built to help you recognise patterns, communicate trade-offs, and make your experience legible across borders."
                 id="inside-title"
               />
-              <Link className="text-link text-link-top" href="/vault">
-                Explore the full Vault <span aria-hidden="true">→</span>
-              </Link>
+              <div className="roadmap-instrument" aria-label="Four-week and twelve-week roadmaps">
+                <div className="roadmap-ring roadmap-ring-outer"><span>12</span></div>
+                <div className="roadmap-ring roadmap-ring-inner"><span>04</span></div>
+                <div className="roadmap-core"><b>2</b><span>structured<br />roadmaps</span></div>
+              </div>
+              <Link className="payload-link" href="/vault">Open the full manifest <span aria-hidden="true">↗</span></Link>
             </div>
 
-            <div className="module-grid">
+            <div className="payload-manifest">
               {VAULT_MODULES.slice(0, 6).map((module, index) => (
-                <article className="glass-card module-card" key={module.title}>
-                  <div className="module-index">0{index + 1}</div>
-                  <p className="module-kicker">{module.kicker}</p>
-                  <h3>{module.title}</h3>
-                  <p>{module.description}</p>
-                  <span className="module-meta">{module.meta}</span>
-                </article>
+                <Reveal direction={index % 2 === 0 ? "right" : "left"} delay={(index % 3) * 0.05} key={module.title}>
+                  <article className="manifest-row">
+                    <span className="manifest-index">0{index + 1}</span>
+                    <div><p>{module.kicker}</p><h3>{module.title}</h3><span>{module.description}</span></div>
+                    <b>{module.meta}</b>
+                  </article>
+                </Reveal>
               ))}
             </div>
-
-            <div className="roadmap-banner glass-card">
-              <div className="roadmap-dial" aria-hidden="true">
-                <span>04</span><i /> <span>12</span>
-              </div>
-              <div>
-                <p className="module-kicker">TWO CLEAR FLIGHT PLANS</p>
-                <h3>Choose the 4-week sprint or 12-week standard track.</h3>
-                <p>
-                  Both roadmaps tell you what to learn, what to practise, and
-                  when you are ready to test yourself.
-                </p>
-              </div>
-              <Link className="inline-arrow" href="/vault#roadmaps" aria-label="View Vault roadmaps">
-                <span aria-hidden="true">↗</span>
-              </Link>
-            </div>
           </div>
         </section>
 
-        <section className="section-pad method-section" aria-labelledby="method-title">
-          <div className="container method-layout">
-            <div className="method-copy">
+        <section className="control-section" aria-labelledby="method-title" data-aero-phase="guidance">
+          <div className="control-vapour" aria-hidden="true" />
+          <div className="container">
+            <Reveal>
               <SectionHeading
-                eyebrow="HOW IT WORKS"
-                title="Learn. Practise. Diagnose."
-                body="Static prep gets you moving. Feedback tells you where to steer. Human coaching is reserved for the moments where it can make the biggest difference."
+                eyebrow="A closed feedback loop"
+                title="Learn. Practise. Correct."
+                body="Readiness comes from closing the loop: build the model, test it under pressure, then correct the part that needs work."
                 id="method-title"
               />
-              <CtaLink href="/vault">Start with the Vault</CtaLink>
+            </Reveal>
+            <div className="control-loop">
+              <div className="control-path" aria-hidden="true"><i /><i /><i /></div>
+              <Reveal className="control-step control-step-1" direction="left">
+                <span>01 / BUILD</span><h3>Learn the pattern</h3><p>Use a structured roadmap to understand the patterns behind strong answers.</p><b>VAULT</b>
+              </Reveal>
+              <Reveal className="control-step control-step-2" direction="right">
+                <span>02 / TEST</span><h3>Practise under pressure</h3><p>Run responsive mocks that expose gaps in reasoning, communication, and trade-offs.</p><b>AI PREP</b>
+              </Reveal>
+              <Reveal className="control-step control-step-3" direction="left">
+                <span>03 / CORRECT</span><h3>Fix the persistent gap</h3><p>Use evidence from repeated attempts to decide whether targeted human coaching is worthwhile.</p><b>1:1 COACHING</b>
+              </Reveal>
             </div>
-            <ol className="method-list">
-              <li>
-                <span>01</span>
-                <div><h3>Build the fundamentals</h3><p>Follow a roadmap across DSA, system design, behavioural, and remote-career prep.</p></div>
-              </li>
-              <li>
-                <span>02</span>
-                <div><h3>Practise under pressure</h3><p>Vault buyers can add text-based AI mocks, scoring, and an adaptive study plan.</p></div>
-              </li>
-              <li>
-                <span>03</span>
-                <div><h3>Fix the stubborn gaps</h3><p>Use founder-led 1:1 coaching only when repeated feedback shows you need it.</p></div>
-              </li>
-            </ol>
           </div>
         </section>
 
-        <section className="section-pad" aria-labelledby="fit-title">
-          <div className="container">
-            <SectionHeading
-              eyebrow="FIT CHECK"
-              title="Precise about what this can—and cannot—do."
-              id="fit-title"
-            />
-            <div className="fit-grid">
-              <article className="fit-card fit-card-positive">
-                <p className="fit-label">BUILT FOR</p>
+        <section className="envelope-section" aria-labelledby="fit-title" data-aero-phase="fit">
+          <div className="container envelope-layout">
+            <Reveal>
+              <SectionHeading
+                eyebrow="Who it is for"
+                title="Clear about where this works."
+                body="The strongest trust signal is knowing what the product is not trying to claim."
+                id="fit-title"
+              />
+            </Reveal>
+            <div className="envelope-planes">
+              <Reveal className="envelope-plane envelope-plane-positive" direction="left">
+                <div className="plane-label"><span>GO</span><i /></div>
+                <h3>Built for</h3>
                 <ul>
                   <li>Engineers with roughly 1–8 years of experience</li>
+                  <li>Backend, platform, infrastructure, data, and AI-adjacent roles</li>
                   <li>Remote-first and US-company interview loops</li>
-                  <li>Backend, platform, infra, data, and AI-adjacent roles</li>
                   <li>People who want a structured plan, not hype</li>
                 </ul>
-              </article>
-              <article className="fit-card">
-                <p className="fit-label">NOT A PROMISE OF</p>
+              </Reveal>
+              <Reveal className="envelope-plane" direction="right">
+                <div className="plane-label"><span>LIMIT</span><i /></div>
+                <h3>Not a promise of</h3>
                 <ul>
-                  <li>A job, placement, visa, or sponsorship</li>
+                  <li>A job, placement, visa, sponsorship, or salary</li>
                   <li>Insider or leaked interview questions</li>
                   <li>Instant results without deliberate practice</li>
-                  <li>Anonymous testimonials or manufactured scarcity</li>
+                  <li>Anonymous proof or manufactured scarcity</li>
                 </ul>
-              </article>
+              </Reveal>
             </div>
           </div>
         </section>
 
-        <section className="section-pad proof-section" aria-labelledby="proof-title">
-          <div className="container proof-layout">
-            <div>
-              <p className="eyebrow">PROOF, WITH A SOURCE</p>
-              <h2 id="proof-title">No anonymous praise. No composite stories.</h2>
-            </div>
-            <div className="proof-panel glass-card">
-              <span className="status-pill"><i /> EVIDENCE POLICY</span>
-              <p>
-                Outcomes are published only when a real learner has consented
-                and the result can be linked to its source. Until those records
-                are supplied, we will not fill this space with invented quotes.
-              </p>
-              <Link className="text-link" href="/proof">
-                See the results standard <span aria-hidden="true">→</span>
-              </Link>
-            </div>
+        <section className="evidence-section" aria-labelledby="proof-title" data-aero-phase="proof">
+          <div className="container evidence-layout">
+            <Reveal direction="left">
+              <div>
+                <p className="eyebrow">Evidence standard</p>
+                <h2 id="proof-title">Proof should withstand review.</h2>
+                <p>No anonymous praise. No composite stories. No outcome published without a real learner, clear consent, and a reviewable source.</p>
+                <Link className="text-link" href="/proof">Read the evidence standard <span aria-hidden="true">→</span></Link>
+              </div>
+            </Reveal>
+            <Reveal className="evidence-trace" direction="right">
+              <div className="evidence-trace-line" aria-label="Claim, consent, and source review">
+                <span><b>01</b>Claim</span><i /><span><b>02</b>Consent</span><i /><span><b>03</b>Source</span>
+              </div>
+              <strong>Publish only after all three checks.</strong>
+              <p>Every outcome must be specific, consented, and connected to a reviewable source. Until then, it stays off the site.</p>
+            </Reveal>
           </div>
         </section>
 
-        <section className="section-pad faq-section" aria-labelledby="faq-title">
-          <div className="container faq-layout">
-            <SectionHeading eyebrow="PRE-FLIGHT CHECK" title="Questions before you start." id="faq-title" />
-            <div className="faq-list">
+        <section className="faq-section-v2" aria-labelledby="faq-title">
+          <div className="faq-horizon" aria-hidden="true" />
+          <div className="container faq-layout-v2">
+            <Reveal>
+              <SectionHeading eyebrow="Questions, answered" title="Know the terms before you start." id="faq-title" />
+            </Reveal>
+            <div className="faq-list faq-list-v2">
               {HOME_FAQS.map((faq) => (
                 <details key={faq.question}>
                   <summary>{faq.question}<span aria-hidden="true">+</span></summary>
@@ -224,15 +192,16 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="section-pad final-cta" aria-labelledby="final-title">
-          <div className="runway-grid runway-grid-final" aria-hidden="true" />
-          <div className="container final-cta-inner">
-            <p className="eyebrow">YOUR NEXT INTERVIEW STARTS HERE</p>
-            <h2 id="final-title">Build the signal before the stakes get high.</h2>
-            <p>One payment. A clear roadmap. Built for the interviews you are actually targeting.</p>
-            <CtaLink href="/checkout/vault" event="checkout_started">
-              Get the Vault — ₹799 <span aria-hidden="true">↗</span>
-            </CtaLink>
+        <section className="final-cta-v2" aria-labelledby="final-title" data-aero-phase="start">
+          <div className="convergence-field" aria-hidden="true"><i /><i /><i /><span /></div>
+          <div className="container final-cta-v2-inner">
+            <Reveal>
+              <p className="eyebrow">Start with the foundation</p>
+              <h2 id="final-title">Build the signal before the stakes get high.</h2>
+              <p>One payment. Two structured roadmaps. A foundation made for the interview loops you are actually targeting.</p>
+              <div className="final-offer"><strong>₹799</strong><span>once<br />instant access</span></div>
+              <CtaLink href="/checkout/vault" event="checkout_started">Get the Vault <span aria-hidden="true">↗</span></CtaLink>
+            </Reveal>
           </div>
         </section>
       </main>

@@ -25,6 +25,7 @@ export default function AboutPage() {
   return (
     <PageShell>
       <PageHero
+        motif="signal"
         eyebrow="ABOUT / ACCOUNTABILITY"
         title={
           <>

@@ -24,8 +24,9 @@ export default function VaultPage() {
   return (
     <PageShell mobilePurchase>
       <PageHero
+        motif="instruments"
         eyebrow="THE VAULT · START HERE"
-        title={<>A complete prep runway for <em>₹799 once.</em></>}
+        title={<>A complete interview-prep system for <em>₹799 once.</em></>}
         body="Build the fundamentals for remote and AI-adjacent software interviews: DSA, system design, behavioural communication, company context, and the reality of working from India."
       >
         <div className="offer-summary">
@@ -79,7 +80,7 @@ export default function VaultPage() {
         <div className="container">
           <SectionHeading
             eyebrow="CHOOSE YOUR PACE"
-            title="The same destination. Two flight plans."
+            title="One goal. Two study plans."
             body="Every week has a learning target, a practice target, and a checkpoint—so preparation becomes a schedule rather than a permanent background task."
             id="roadmap-title"
           />
@@ -121,7 +122,6 @@ export default function VaultPage() {
       </section>
 
       <section className="section-pad final-cta" aria-labelledby="vault-cta-title">
-        <div className="runway-grid runway-grid-final" aria-hidden="true" />
         <div className="container final-cta-inner">
           <p className="eyebrow">ONE PAYMENT · NO UPSELL PRESELECTED</p>
           <h2 id="vault-cta-title">Start with the foundation.</h2>
