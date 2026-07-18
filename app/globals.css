@@ -2790,48 +2790,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
    Public product proof, material-led pricing, and a real member workspace.
    -------------------------------------------------------------------------- */
 
-/* Two-level flight deck navigation */
-
-.header-utility {
-  min-height: 30px;
-  border-bottom: 1px solid rgba(211, 224, 231, .1);
-  color: #8499a5;
-  background: rgba(4, 11, 17, .64);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: .085em;
-  text-transform: uppercase;
-}
-
-.header-utility-inner {
-  min-height: 30px;
-  display: flex;
-  align-items: center;
-  gap: 25px;
-}
-
-.header-utility-inner > span:first-child {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  color: #b6c5cc;
-}
-
-.header-utility-inner > span:first-child i {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--afterburner);
-  box-shadow: 0 0 12px rgba(255,107,44,.75);
-}
-
-.header-utility-inner a {
-  transition: color 160ms ease;
-}
-
-.header-utility-inner a:nth-last-child(2) { margin-left: auto; }
-.header-utility-inner a:hover { color: #f4f7f9; }
-.header-utility-inner a b { color: var(--afterburner); }
+/* Flight deck navigation */
 
 .header-inner {
   position: relative;
@@ -3159,7 +3118,6 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .curriculum-quality-gates p { margin: 11px 0 0; color: #93a7b0; font-size: 12px; }
 
 @media (max-width: 1050px) {
-  .header-utility-inner > span:nth-child(2) { display: none; }
   .product-menu-panel { left: 120px; width: calc(100vw - 160px); }
   .workspace-preview-frame { grid-template-columns: 200px 1fr; }
   .workspace-preview-command { grid-template-columns: 1fr; }
@@ -3171,12 +3129,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 }
 
 @media (max-width: 800px) {
-  .header-utility { min-height: 27px; }
-  .header-utility-inner { min-height: 27px; justify-content: space-between; gap: 12px; }
-  .header-utility-inner > span:nth-child(2), .header-utility-inner > a:nth-last-child(2) { display: none; }
-  .header-utility-inner a:nth-last-child(2) { margin-left: 0; }
-  .header-utility-inner > a:last-child { color: #aabac2; }
-  .mobile-menu nav { top: 98px; }
+  .mobile-menu nav { top: 70px; }
   .workspace-preview-frame { grid-template-columns: 1fr; }
   .workspace-preview-nav { display: none; }
   .workspace-preview-welcome { padding: 38px 26px 30px; }
@@ -3193,8 +3146,6 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 }
 
 @media (max-width: 520px) {
-  .header-utility-inner > span:first-child { font-size: 7px; }
-  .header-utility-inner > a:last-child { font-size: 7px; }
   .workspace-preview-welcome { grid-template-columns: 1fr; }
   .workspace-preview-readiness { width: 92px; height: 92px; }
   .workspace-preview-command article { min-height: 230px; }

@@ -20,14 +20,6 @@ export function Brand() {
 export function Header() {
   return (
     <header className="site-header">
-      <div className="header-utility" aria-label="Product highlights">
-        <div className="container header-utility-inner">
-          <span><i /> Built for engineers in India</span>
-          <span>Remote + AI-adjacent roles</span>
-          <Link href="/curriculum">Explore a real lesson <b>↗</b></Link>
-          <Link href="/pricing">Vault access · ₹799 once</Link>
-        </div>
-      </div>
       <div className="container header-inner">
         <Brand />
         <nav className="desktop-nav" aria-label="Primary navigation">
