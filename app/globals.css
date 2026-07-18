@@ -1205,7 +1205,7 @@ input {
 .checkout-account span { color: var(--dim); font-family: var(--font-mono); font-size: 9px; letter-spacing: .09em; }
 .checkout-account strong { overflow-wrap: anywhere; font-size: 14px; }
 .checkout-account small { color: var(--muted); font-size: 12px; }
-.checkout-manifest { display: grid; border-block: 1px solid var(--line); }
+.checkout-manifest { margin-top: 24px; display: grid; border-block: 1px solid var(--line); }
 .checkout-manifest > div { min-height: 76px; padding: 16px 0; display: grid; grid-template-columns: 34px 1fr; align-items: start; gap: 12px; border-bottom: 1px solid var(--line); }
 .checkout-manifest > div:last-child { border-bottom: 0; }
 .checkout-manifest > div > span { padding-top: 2px; color: var(--accent); font-family: var(--font-mono); font-size: 10px; }

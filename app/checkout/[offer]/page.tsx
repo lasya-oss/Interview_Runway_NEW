@@ -53,6 +53,12 @@ export default async function CheckoutPage({
               <small>Vault access is attached to this signed-in account.</small>
             </div>
 
+            <CheckoutClient
+              clientToken={clientToken}
+              email={user.email}
+              environment={paddleEnvironment()}
+            />
+
             <div className="checkout-manifest" aria-label="Vault access manifest">
               <div>
                 <span>01</span>
@@ -67,12 +73,6 @@ export default async function CheckoutPage({
                 <p><b>Launch edition updates included</b><small>No subscription and no upgrade selected silently.</small></p>
               </div>
             </div>
-
-            <CheckoutClient
-              clientToken={clientToken}
-              email={user.email}
-              environment={paddleEnvironment()}
-            />
 
             <p className="checkout-policy-line">
               By continuing, you can review the final tax-adjusted total before
