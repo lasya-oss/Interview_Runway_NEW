@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { HomeAeroStage, TrajectorySequence } from "@/app/components/aero-experience";
 import { Reveal } from "@/app/components/aero-runtime";
+import { PrepSystemExplorer } from "@/app/components/prep-system-explorer";
 import { CtaLink, Footer, Header, MobilePurchaseBar, SectionHeading } from "@/app/components/site-chrome";
-import { HOME_FAQS, OFFERS, VAULT_MODULES } from "@/app/lib/site-data";
+import { HOME_FAQS, OFFERS } from "@/app/lib/site-data";
 
 const HOME_PRICING_LAYERS = [
   {
@@ -88,34 +89,7 @@ export default function Home() {
 
         <section className="payload-section" id="inside" aria-labelledby="inside-title" data-aero-phase="vault">
           <div className="payload-ribs" aria-hidden="true"><i /><i /><i /><i /><i /></div>
-          <div className="container payload-layout">
-            <div className="payload-sticky">
-              <SectionHeading
-                eyebrow="Inside the ₹799 Vault"
-                title="Your prep system, assembled."
-                body="Each module is one working surface in the same system—built to help you recognise patterns, communicate trade-offs, and make your experience legible across borders."
-                id="inside-title"
-              />
-              <div className="roadmap-instrument" aria-label="Four-week and twelve-week roadmaps">
-                <div className="roadmap-ring roadmap-ring-outer"><span>12</span></div>
-                <div className="roadmap-ring roadmap-ring-inner"><span>04</span></div>
-                <div className="roadmap-core"><b>2</b><span>structured<br />roadmaps</span></div>
-              </div>
-              <Link className="payload-link" href="/vault">Open the full manifest <span aria-hidden="true">↗</span></Link>
-            </div>
-
-            <div className="payload-manifest">
-              {VAULT_MODULES.slice(0, 6).map((module, index) => (
-                <Reveal direction={index % 2 === 0 ? "right" : "left"} delay={(index % 3) * 0.05} key={module.title}>
-                  <article className="manifest-row">
-                    <span className="manifest-index">0{index + 1}</span>
-                    <div><p>{module.kicker}</p><h3>{module.title}</h3><span>{module.description}</span></div>
-                    <b>{module.meta}</b>
-                  </article>
-                </Reveal>
-              ))}
-            </div>
-          </div>
+          <div className="container"><PrepSystemExplorer /></div>
         </section>
 
         <section className="control-section" aria-labelledby="method-title" data-aero-phase="guidance">
