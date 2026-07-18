@@ -4442,15 +4442,26 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 }
 
 .demo-login-layout {
-  grid-template-columns: minmax(300px, .56fr) minmax(0, 1.44fr);
-  gap: clamp(50px, 6vw, 110px);
+  grid-template-columns: minmax(390px, .76fr) minmax(0, 1.24fr);
+  gap: clamp(48px, 5vw, 78px);
 }
+
+.demo-login-intro,
+.demo-entry-stack { min-width: 0; }
+
+.demo-login-intro { max-width: 520px; padding-right: 10px; }
 
 .demo-login-intro h1 {
-  font-size: clamp(3.5rem, 5.35vw, 5.9rem);
+  max-width: 100%;
+  font-size: clamp(3.35rem, 4.3vw, 5.15rem);
+  text-wrap: balance;
 }
 
+.demo-login-intro h1 em { display: block; }
+
 .demo-entry-stack {
+  position: relative;
+  z-index: 3;
   display: grid;
   gap: 18px;
 }
@@ -4458,6 +4469,8 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .demo-entry-card {
   position: relative;
   isolation: isolate;
+  width: 100%;
+  min-width: 0;
   min-height: 500px;
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr);
@@ -4787,7 +4800,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 @media (max-width: 1180px) {
   .demo-login-layout { grid-template-columns: 1fr; }
-  .demo-login-intro { position: static; max-width: 760px; }
+  .demo-login-intro { position: static; max-width: 760px; padding-right: 0; }
   .member-review-material-grid { grid-template-columns: 1fr; }
   .member-review-material-grid > a { min-height: 230px; }
 }
