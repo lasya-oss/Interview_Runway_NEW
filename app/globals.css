@@ -3567,15 +3567,19 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 .workspace-preview-section {
   position: relative;
-  z-index: 3;
   padding: var(--section-y) 0;
   overflow: hidden;
   color: var(--ink);
   background:
-    linear-gradient(90deg, rgba(35, 71, 87, .055) 1px, transparent 1px),
-    linear-gradient(rgba(35, 71, 87, .055) 1px, transparent 1px),
-    linear-gradient(145deg, #f7f8f8, #dde7eb);
+    linear-gradient(90deg, rgba(35, 71, 87, .05) 1px, transparent 1px),
+    linear-gradient(rgba(35, 71, 87, .05) 1px, transparent 1px),
+    linear-gradient(145deg, rgba(247,248,248,.9), rgba(221,231,235,.82));
   background-size: 56px 56px, 56px 56px, auto;
+}
+
+.workspace-preview-section > .container {
+  position: relative;
+  z-index: 3;
 }
 
 .workspace-preview-section::before {
@@ -3597,6 +3601,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 .workspace-preview-frame {
   position: relative;
+  z-index: 3;
   margin-top: 72px;
   display: grid;
   grid-template-columns: 230px 1fr;
@@ -3604,8 +3609,11 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   border: 1px solid rgba(218,232,238,.2);
   border-radius: 26px;
   color: #eef3f5;
-  background: #09131c;
+  background:
+    linear-gradient(145deg, rgba(8,20,29,.72), rgba(4,13,20,.62));
   box-shadow: 0 48px 110px rgba(21,50,63,.22), inset 0 1px rgba(255,255,255,.08);
+  backdrop-filter: blur(5px) saturate(115%);
+  -webkit-backdrop-filter: blur(5px) saturate(115%);
 }
 
 .workspace-preview-frame::before {
@@ -3615,7 +3623,11 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: radial-gradient(46rem circle at 82% -14%, rgba(111,178,202,.15), transparent 45%);
+  background:
+    linear-gradient(90deg, rgba(187,214,224,.025) 1px, transparent 1px),
+    linear-gradient(rgba(187,214,224,.025) 1px, transparent 1px),
+    radial-gradient(46rem circle at 82% -14%, rgba(111,178,202,.13), transparent 45%);
+  background-size: 54px 54px, 54px 54px, auto;
 }
 
 .workspace-preview-nav {
@@ -3626,7 +3638,9 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   display: flex;
   flex-direction: column;
   border-right: 1px solid rgba(208,224,231,.12);
-  background: linear-gradient(180deg, rgba(18,34,44,.95), rgba(8,18,27,.96));
+  background: linear-gradient(180deg, rgba(14,32,43,.76), rgba(6,17,25,.7));
+  backdrop-filter: blur(9px) saturate(112%);
+  -webkit-backdrop-filter: blur(9px) saturate(112%);
 }
 
 .workspace-preview-brand { display: flex; align-items: center; gap: 10px; font-size: 10px; letter-spacing: .06em; }
@@ -3637,26 +3651,26 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .workspace-preview-nav li small { font-family: var(--font-mono); font-size: 7px; text-transform: uppercase; }
 .workspace-preview-nav li.is-active { color: #f3f6f7; background: rgba(218,232,238,.08); box-shadow: inset 2px 0 var(--afterburner); }
 .workspace-preview-nav li.is-locked { opacity: .62; }
-.workspace-preview-plan { margin-top: auto; padding: 17px; border: 1px solid rgba(213,228,234,.13); border-radius: 14px; background: rgba(3,10,15,.36); }
+.workspace-preview-plan { margin-top: auto; padding: 17px; border: 1px solid rgba(213,228,234,.15); border-radius: 14px; background: rgba(3,10,15,.48); box-shadow: inset 0 1px rgba(255,255,255,.025); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .workspace-preview-plan > span { display: block; color: #6e838f; font-family: var(--font-mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; }
 .workspace-preview-plan strong { display: block; margin-top: 8px; font-size: 11px; }
 .workspace-preview-plan > i { height: 3px; margin-top: 17px; display: block; overflow: hidden; border-radius: 99px; background: rgba(214,229,235,.1); }
 .workspace-preview-plan > i b { display: block; width: 18%; height: 100%; background: var(--afterburner); }
 .workspace-preview-plan small { display: block; margin-top: 7px; color: #748892; font-size: 8px; }
 
-.workspace-preview-main { position: relative; z-index: 5; min-width: 0; }
-.workspace-preview-topbar { min-height: 61px; padding: 0 27px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(208,224,231,.11); color: #728792; font-family: var(--font-mono); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
+.workspace-preview-main { position: relative; z-index: 5; min-width: 0; background: linear-gradient(135deg, rgba(5,16,24,.31), rgba(9,23,33,.16)); }
+.workspace-preview-topbar { min-height: 61px; padding: 0 27px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(208,224,231,.13); color: #8499a3; background: rgba(4,13,20,.24); font-family: var(--font-mono); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
 .workspace-preview-topbar b { color: #c9d6db; font-weight: 500; }
 .workspace-preview-welcome { padding: 50px 48px 38px; display: grid; grid-template-columns: 1fr auto; gap: 35px; align-items: center; }
 .workspace-preview-welcome p { margin: 0 0 13px; color: var(--afterburner); font-family: var(--font-mono); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
-.workspace-preview-welcome h3 { max-width: 640px; margin: 0; font-family: var(--font-display); font-size: clamp(2rem, 3.6vw, 3.65rem); font-weight: 560; line-height: 1.03; letter-spacing: -.055em; }
+.workspace-preview-welcome h3 { max-width: 640px; margin: 0; font-family: var(--font-display); font-size: clamp(2rem, 3.6vw, 3.65rem); font-weight: 560; line-height: 1.03; letter-spacing: -.055em; text-shadow: 0 2px 24px rgba(0,0,0,.42); }
 .workspace-preview-welcome h3 em { color: #9db4be; font-style: normal; }
 .workspace-preview-welcome > div:first-child > span { display: block; max-width: 550px; margin-top: 14px; color: #82959f; font-size: 11px; }
-.workspace-preview-readiness { width: 112px; height: 112px; display: grid; place-content: center; border: 1px solid rgba(208,224,231,.16); border-radius: 50%; text-align: center; background: radial-gradient(circle, rgba(255,107,44,.08), transparent 65%); box-shadow: inset 0 0 0 7px rgba(215,229,235,.025); }
+.workspace-preview-readiness { width: 112px; height: 112px; display: grid; place-content: center; border: 1px solid rgba(208,224,231,.2); border-radius: 50%; text-align: center; background: radial-gradient(circle, rgba(5,15,23,.56), rgba(5,15,23,.22) 65%, transparent 66%); box-shadow: inset 0 0 0 7px rgba(215,229,235,.03); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
 .workspace-preview-readiness strong { font-family: var(--font-mono); font-size: 30px; font-weight: 500; line-height: 1; }
 .workspace-preview-readiness span { margin-top: 7px; color: #778c97; font-family: var(--font-mono); font-size: 7px; line-height: 1.35; letter-spacing: .08em; text-transform: uppercase; }
 .workspace-preview-command { padding: 0 48px 48px; display: grid; grid-template-columns: 1.35fr .65fr; gap: 12px; }
-.workspace-preview-command article { min-height: 245px; padding: 23px; border: 1px solid rgba(208,224,231,.12); border-radius: 17px; background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.015)); }
+.workspace-preview-command article { min-height: 245px; padding: 23px; border: 1px solid rgba(208,224,231,.17); border-radius: 17px; background: linear-gradient(145deg, rgba(13,31,41,.58), rgba(4,14,21,.4)); box-shadow: inset 0 1px rgba(255,255,255,.035), 0 18px 50px rgba(0,0,0,.08); backdrop-filter: blur(10px) saturate(110%); -webkit-backdrop-filter: blur(10px) saturate(110%); }
 .workspace-preview-command article > p { margin: 0; display: flex; justify-content: space-between; color: #70858f; font-family: var(--font-mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; }
 .workspace-preview-command article > p b { color: #a7b8c0; font-weight: 500; }
 .workspace-preview-command h4 { max-width: 520px; margin: 18px 0 8px; font-family: var(--font-display); font-size: 22px; line-height: 1.15; letter-spacing: -.035em; }
