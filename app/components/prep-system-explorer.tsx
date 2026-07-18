@@ -67,27 +67,28 @@ export function PrepSystemExplorer() {
           </p>
         </div>
 
-        <div
-          className="system-instrument"
-          role="tabpanel"
-          id="prep-system-panel"
-          aria-labelledby={`prep-tab-${activeIndex}`}
-          aria-live="polite"
-          data-active-system={activeIndex + 1}
-        >
+        <div className="payload-instrument-stick">
+          <div
+            className="system-instrument"
+            role="tabpanel"
+            id="prep-system-panel"
+            aria-labelledby={`prep-tab-${activeIndex}`}
+            aria-live="polite"
+            data-active-system={activeIndex + 1}
+          >
           <div className="instrument-status" aria-hidden="true">
             <span>SYSTEM 0{activeIndex + 1} / 06</span><i /><b>{activeModule.meta}</b>
           </div>
 
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              className="instrument-flight-plan"
-              key={activeModule.kicker}
-              initial={reduceMotion ? false : { opacity: 0, y: 18, rotateX: 6, filter: "blur(6px)" }}
-              animate={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)" }}
-              exit={reduceMotion ? undefined : { opacity: 0, y: -12, rotateX: -4, filter: "blur(4px)" }}
-              transition={{ duration: reduceMotion ? 0 : 0.42, ease: [0.16, 1, 0.3, 1] }}
-            >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                className="instrument-flight-plan"
+                key={activeModule.kicker}
+                initial={reduceMotion ? false : { opacity: 0, y: 18, rotateX: 6, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)" }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -12, rotateX: -4, filter: "blur(4px)" }}
+                transition={{ duration: reduceMotion ? 0 : 0.42, ease: [0.16, 1, 0.3, 1] }}
+              >
               <div className="flight-plan-heading">
                 <span>{activeModule.kicker}</span>
                 <strong>{activeModule.title}</strong>
@@ -117,13 +118,14 @@ export function PrepSystemExplorer() {
                   ))}
                 </ol>
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-        <Link className="payload-link" href="/vault">
-          Open the full manifest <span aria-hidden="true">↗</span>
-        </Link>
+          <Link className="payload-link" href="/vault">
+            Open the full manifest <span aria-hidden="true">↗</span>
+          </Link>
+        </div>
       </div>
 
       <div className="payload-manifest" role="tablist" aria-label="Interview preparation systems">

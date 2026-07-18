@@ -4999,6 +4999,19 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .instrument-capabilities li { grid-template-columns: 1fr; gap: 3px; padding: 8px; }
 }
 
+/* Keep the sixth system fully visible: only the instrument pins, not its intro. */
+
+.prep-explorer { align-items: stretch; }
+.payload-sticky { position: relative; top: auto; min-height: 100%; }
+.payload-instrument-stick { position: sticky; top: 104px; margin-top: 38px; }
+.payload-instrument-stick .system-instrument { margin-top: 0; }
+.payload-manifest { padding-bottom: 34svh; }
+
+@media (max-width: 800px) {
+  .payload-instrument-stick { position: static; margin-top: 38px; }
+  .payload-manifest { padding-bottom: 0; }
+}
+
 /* Roadmap instrument */
 
 .roadmap-overview { display: grid; grid-template-columns: 1fr auto; gap: 50px; align-items: end; }
