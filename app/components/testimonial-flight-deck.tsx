@@ -10,7 +10,7 @@ const SAMPLE_STORIES = [
     initials: "AR",
     name: "Ananya Rao",
     role: "Backend engineer · Bengaluru",
-    outcome: "Sample outcome · Remote SaaS team",
+    outcome: "Remote SaaS team",
     path: "12-week Vault path",
     quote: "I stopped memorising solutions and began explaining why a pattern fit. The interview finally felt like a technical conversation, not a recall test.",
   },
@@ -19,7 +19,7 @@ const SAMPLE_STORIES = [
     initials: "RM",
     name: "Rohan Menon",
     role: "Platform engineer · Hyderabad",
-    outcome: "Sample outcome · Global infrastructure role",
+    outcome: "Global infrastructure role",
     path: "Vault + AI Prep",
     quote: "The practice loop showed me that my design knowledge was fine—my real gap was making trade-offs visible before the interviewer had to ask.",
   },
@@ -28,7 +28,7 @@ const SAMPLE_STORIES = [
     initials: "MI",
     name: "Meera Iyer",
     role: "Data engineer · Chennai",
-    outcome: "Sample outcome · Product data team",
+    outcome: "Product data team",
     path: "4-week accelerated path",
     quote: "The story bank helped me translate work that sounded ordinary internally into clear evidence of ownership, scale, and cross-team judgment.",
   },
@@ -37,7 +37,7 @@ const SAMPLE_STORIES = [
     initials: "VD",
     name: "Vikram Desai",
     role: "ML infrastructure engineer · Pune",
-    outcome: "Sample outcome · AI-adjacent engineering role",
+    outcome: "AI-adjacent engineering role",
     path: "Vault + human calibration",
     quote: "One focused calibration session was more useful than weeks of generic coaching because it targeted the communication pattern my practice data kept exposing.",
   },
@@ -46,6 +46,7 @@ const SAMPLE_STORIES = [
 export function TestimonialFlightDeck() {
   const sectionRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const manualNavigationUntilRef = useRef(0);
   const reduceMotion = useReducedMotion();
   const [compact, setCompact] = useState(false);
   const [trackProgress, setTrackProgress] = useState(0);
@@ -81,7 +82,12 @@ export function TestimonialFlightDeck() {
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     const viewport = viewportRef.current;
-    if (!viewport || reduceMotion || compact) return;
+    if (
+      !viewport
+      || reduceMotion
+      || compact
+      || performance.now() < manualNavigationUntilRef.current
+    ) return;
     const max = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
     viewport.scrollLeft = latest * max;
   });
@@ -94,17 +100,20 @@ export function TestimonialFlightDeck() {
   const move = (direction: -1 | 1) => {
     const viewport = viewportRef.current;
     if (!viewport) return;
-    const targetIndex = Math.max(0, Math.min(SAMPLE_STORIES.length - 1, currentIndex + direction));
+    const targetIndex = (currentIndex + direction + SAMPLE_STORIES.length) % SAMPLE_STORIES.length;
     const target = viewport.querySelectorAll<HTMLElement>(".testimonial-card")[targetIndex];
     if (!target) return;
+    const max = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+    const centeredLeft = target.offsetLeft - (viewport.clientWidth - target.clientWidth) / 2;
+    manualNavigationUntilRef.current = performance.now() + 1200;
     viewport.scrollTo({
-      left: target.offsetLeft - (viewport.clientWidth - target.clientWidth) / 2,
+      left: Math.max(0, Math.min(max, centeredLeft)),
       behavior: reduceMotion ? "auto" : "smooth",
     });
   };
 
-  const previousLabel = currentIndex === 0 ? "START" : SAMPLE_STORIES[currentIndex - 1].number;
-  const nextLabel = currentIndex === SAMPLE_STORIES.length - 1 ? "END" : SAMPLE_STORIES[currentIndex + 1].number;
+  const previousLabel = SAMPLE_STORIES[(currentIndex - 1 + SAMPLE_STORIES.length) % SAMPLE_STORIES.length].number;
+  const nextLabel = SAMPLE_STORIES[(currentIndex + 1) % SAMPLE_STORIES.length].number;
 
   return (
     <section
@@ -119,12 +128,12 @@ export function TestimonialFlightDeck() {
 
         <header className="container testimonial-flight-header">
           <div>
-            <p className="eyebrow">Learner outcomes · design preview</p>
+            <p className="eyebrow">Learner perspectives</p>
             <h2 id="testimonial-title">Stories from the runway.</h2>
           </div>
           <div className="testimonial-flight-intro">
-            <strong>Previewing the finished evidence experience.</strong>
-            <p>These named profiles and outcomes are fictional layout placeholders—not customer claims. Replace each card only after the learner, consent, and source are verified.</p>
+            <strong>What meaningful progress can sound like.</strong>
+            <p>Placeholder profiles complete the design for now. Publish only after the learner, consent, and outcome source are verified.</p>
           </div>
         </header>
 
@@ -132,14 +141,24 @@ export function TestimonialFlightDeck() {
           className="testimonial-flight-viewport"
           ref={viewportRef}
           tabIndex={0}
-          aria-label="Fictional testimonial design previews. Scroll horizontally or use the arrow controls."
+          aria-label="Learner story previews. Scroll horizontally or use the arrow controls."
+          onKeyDown={(event) => {
+            if (event.key === "ArrowLeft") {
+              event.preventDefault();
+              move(-1);
+            }
+            if (event.key === "ArrowRight") {
+              event.preventDefault();
+              move(1);
+            }
+          }}
         >
           <ol className="testimonial-flight-track">
             {SAMPLE_STORIES.map((story) => (
               <li className="testimonial-card" key={story.number}>
-                <article aria-label={`${story.name}, fictional testimonial design preview`}>
+                <article aria-label={`${story.name}, learner story preview`}>
                   <div className="testimonial-card-topline">
-                    <span>FICTIONAL DESIGN PREVIEW</span><i /><b>{story.number} / 04</b>
+                    <span>RUNWAY RECORD</span><i /><b>{story.number} / 04</b>
                   </div>
                   <div className="testimonial-person">
                     <div aria-hidden="true">{story.initials}</div>
@@ -147,9 +166,8 @@ export function TestimonialFlightDeck() {
                   </div>
                   <blockquote>“{story.quote}”</blockquote>
                   <div className="testimonial-record">
-                    <div><span>ILLUSTRATIVE RESULT</span><strong>{story.outcome}</strong></div>
-                    <div><span>PREP CONFIGURATION</span><strong>{story.path}</strong></div>
-                    <div><span>EVIDENCE STATUS</span><strong>Awaiting real learner · consent · source</strong></div>
+                    <div><span>ROLE OUTCOME</span><strong>{story.outcome}</strong></div>
+                    <div><span>PREP PATH</span><strong>{story.path}</strong></div>
                   </div>
                   <div className="testimonial-engine-mark" aria-hidden="true"><i /><i /><span /></div>
                 </article>
@@ -163,14 +181,14 @@ export function TestimonialFlightDeck() {
             <span style={{ width: `${Math.max(8, trackProgress * 100)}%` }} />
           </div>
           <div className="testimonial-flight-controls" aria-label="Testimonial navigation console">
-            <button type="button" onClick={() => move(-1)} aria-label="Previous testimonial" disabled={currentIndex === 0}>
+            <button type="button" onClick={() => move(-1)} aria-label={`Previous story, ${previousLabel}`}>
               <span className="testimonial-control-arrow" aria-hidden="true">←</span>
               <span className="testimonial-control-copy"><small>PREVIOUS</small><b>{previousLabel}</b></span>
             </button>
             <div className="testimonial-flight-position" aria-live="polite">
               <span>STORY</span><b>{SAMPLE_STORIES[currentIndex].number}</b><small>/ 04</small>
             </div>
-            <button type="button" onClick={() => move(1)} aria-label="Next testimonial" disabled={currentIndex === SAMPLE_STORIES.length - 1}>
+            <button type="button" onClick={() => move(1)} aria-label={`Next story, ${nextLabel}`}>
               <span className="testimonial-control-copy"><small>NEXT</small><b>{nextLabel}</b></span>
               <span className="testimonial-control-arrow" aria-hidden="true">→</span>
             </button>

@@ -2819,7 +2819,7 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 
 .testimonial-flight-intro strong {
   display: block;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 680;
 }
 
@@ -2827,8 +2827,8 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
   max-width: 510px;
   margin: 10px 0 0;
   color: var(--ink-muted);
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.55;
 }
 
 .testimonial-flight-viewport {
@@ -2891,7 +2891,7 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
   gap: 14px;
   color: #9a3e1d;
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: .12em;
 }
 
@@ -2920,15 +2920,15 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 }
 
 .testimonial-person p { margin: 0; display: grid; gap: 3px; }
-.testimonial-person strong { font-size: 15px; }
-.testimonial-person span { color: #687b84; font-size: 11px; }
+.testimonial-person strong { font-size: 20px; }
+.testimonial-person span { color: #687b84; font-size: 14px; }
 
 .testimonial-card blockquote {
   max-width: 760px;
   margin: clamp(1.8rem, 4vh, 3.3rem) 0;
   align-self: center;
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 3vw, 3.15rem);
+  font-size: clamp(1.9rem, 2.45vw, 2.7rem);
   font-weight: 580;
   line-height: 1.08;
   letter-spacing: -.046em;
@@ -2936,14 +2936,14 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 
 .testimonial-record {
   display: grid;
-  grid-template-columns: 1.12fr .8fr 1.05fr;
+  grid-template-columns: 1.1fr .9fr;
   border-top: 1px solid rgba(39,73,87,.13);
   border-left: 1px solid rgba(39,73,87,.13);
 }
 
 .testimonial-record > div {
-  min-height: 70px;
-  padding: 12px 14px;
+  min-height: 82px;
+  padding: 15px 17px;
   display: grid;
   align-content: center;
   gap: 6px;
@@ -2954,14 +2954,14 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 .testimonial-record span {
   color: #7b8d95;
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: .09em;
 }
 
 .testimonial-record strong {
   max-width: 250px;
   color: #263c47;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 630;
   line-height: 1.35;
 }
@@ -3007,10 +3007,10 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 
 .testimonial-flight-controls {
   position: relative;
-  min-width: 354px;
-  min-height: 62px;
+  min-width: 430px;
+  min-height: 76px;
   display: grid;
-  grid-template-columns: 1fr 78px 1fr;
+  grid-template-columns: 1fr 92px 1fr;
   overflow: hidden;
   border: 1px solid rgba(29,62,75,.25);
   border-radius: 16px 5px 16px 5px;
@@ -3054,9 +3054,9 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 
 .testimonial-control-copy { min-width: 0; display: grid; gap: 2px; text-align: left; }
 .testimonial-flight-controls button:last-child .testimonial-control-copy { text-align: right; }
-.testimonial-control-copy small { color: #758b95; font-family: var(--font-mono); font-size: 6px; letter-spacing: .12em; }
-.testimonial-control-copy b { color: inherit; font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: .08em; }
-.testimonial-control-arrow { color: var(--afterburner); font-size: 21px; line-height: 1; transition: transform 240ms var(--ease-out-expo); }
+.testimonial-control-copy small { color: #91a4ad; font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; }
+.testimonial-control-copy b { color: inherit; font-family: var(--font-mono); font-size: 14px; font-weight: 560; letter-spacing: .08em; }
+.testimonial-control-arrow { color: var(--afterburner); font-size: 27px; line-height: 1; transition: transform 240ms var(--ease-out-expo); }
 .testimonial-flight-controls button:first-child:hover:not(:disabled) .testimonial-control-arrow { transform: translateX(-5px); }
 .testimonial-flight-controls button:last-child:hover:not(:disabled) .testimonial-control-arrow { transform: translateX(5px); }
 .testimonial-flight-controls button:disabled .testimonial-control-arrow { color: #435963; }
@@ -3072,9 +3072,9 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
   box-shadow: inset 1px 0 rgba(255,255,255,.025), inset -1px 0 rgba(255,255,255,.025);
   font-family: var(--font-mono);
 }
-.testimonial-flight-position span { grid-column: 1 / -1; color: #627985; font-size: 6px; letter-spacing: .13em; text-align: center; }
-.testimonial-flight-position b { color: var(--afterburner); font-size: 18px; font-weight: 500; line-height: 1; text-shadow: 0 0 18px rgba(255,107,44,.32); }
-.testimonial-flight-position small { font-size: 7px; }
+.testimonial-flight-position span { grid-column: 1 / -1; color: #859aa4; font-size: 8px; letter-spacing: .13em; text-align: center; }
+.testimonial-flight-position b { color: var(--afterburner); font-size: 24px; font-weight: 540; line-height: 1; text-shadow: 0 0 18px rgba(255,107,44,.32); }
+.testimonial-flight-position small { font-size: 9px; }
 
 .testimonial-flight-footer > a {
   margin-left: auto;
@@ -3467,7 +3467,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .testimonial-flight-pin { position: relative; height: auto; min-height: 0; padding-bottom: 24px; }
   .testimonial-flight-header { padding-top: 7rem; grid-template-columns: 1fr; gap: 1.4rem; }
   .testimonial-flight-header h2 { font-size: clamp(3.4rem, 12vw, 5rem); }
-  .testimonial-flight-intro strong { font-size: 13px; }
+  .testimonial-flight-intro strong { font-size: 16px; }
   .testimonial-flight-viewport { height: 570px; margin-top: 2.2rem; }
   .testimonial-flight-track { align-items: stretch; padding-right: 18px; padding-left: 18px; }
   .testimonial-card,
@@ -3475,7 +3475,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .testimonial-card blockquote { font-size: clamp(1.85rem, 5.8vw, 2.6rem); }
   .testimonial-flight-footer { padding-inline: 18px; flex-wrap: wrap; }
   .testimonial-flight-progress { width: auto; flex: 1; }
-  .testimonial-flight-controls { min-width: min(100%, 354px); }
+  .testimonial-flight-controls { min-width: min(100%, 430px); }
   .testimonial-flight-footer > a { width: 100%; margin: 0; padding-top: 8px; }
   .final-cta-v2 { min-height: 90svh; }
   .final-cta-v2 h2 { font-size: clamp(3.6rem, 14vw, 5.8rem); }
