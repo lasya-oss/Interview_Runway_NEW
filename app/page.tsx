@@ -3,7 +3,31 @@ import Link from "next/link";
 import { HomeAeroStage, TrajectorySequence } from "@/app/components/aero-experience";
 import { Reveal } from "@/app/components/aero-runtime";
 import { CtaLink, Footer, Header, MobilePurchaseBar, SectionHeading } from "@/app/components/site-chrome";
-import { HOME_FAQS, VAULT_MODULES } from "@/app/lib/site-data";
+import { HOME_FAQS, OFFERS, VAULT_MODULES } from "@/app/lib/site-data";
+
+const HOME_PRICING_LAYERS = [
+  {
+    phase: "01 / FOUNDATION",
+    offer: OFFERS.vault,
+    note: "Start here",
+    href: "/checkout/vault",
+    cta: "Get the Vault",
+  },
+  {
+    phase: "02 / PRACTICE",
+    offer: OFFERS["ai-prep"],
+    note: "Vault-owner upgrade",
+    href: "/ai-prep",
+    cta: "Preview AI Prep",
+  },
+  {
+    phase: "03 / CALIBRATION",
+    offer: OFFERS.premium,
+    note: "Capacity-capped package",
+    href: "/premium",
+    cta: "Review coaching",
+  },
+] as const;
 
 export const metadata: Metadata = {
   title: "Interview prep for remote & AI-adjacent tech roles",
@@ -116,6 +140,92 @@ export default function Home() {
               <Reveal className="control-step control-step-3" direction="left">
                 <span>03 / CORRECT</span><h3>Fix the persistent gap</h3><p>Use evidence from repeated attempts to decide whether targeted human coaching is worthwhile.</p><b>1:1 COACHING</b>
               </Reveal>
+            </div>
+          </div>
+        </section>
+
+        <section className="workspace-preview-section" aria-labelledby="workspace-preview-title" data-aero-phase="product">
+          <div className="container">
+            <Reveal>
+              <SectionHeading
+                eyebrow="The member product"
+                title="The work continues after checkout."
+                body="Open a realistic learner workspace before you buy. Three sample accounts show how the same product changes from self-paced foundations to adaptive practice and private coaching."
+                id="workspace-preview-title"
+              />
+            </Reveal>
+
+            <Reveal className="workspace-preview-frame" direction="right">
+              <aside className="workspace-preview-nav" aria-label="Sample learner navigation">
+                <div className="workspace-preview-brand"><span aria-hidden="true">IR</span><b>Learning workspace</b></div>
+                <ol>
+                  <li className="is-active"><span>01</span><b>Today</b></li>
+                  <li><span>02</span><b>Roadmap</b></li>
+                  <li><span>03</span><b>Library</b></li>
+                  <li className="is-locked"><span>04</span><b>Practice</b><small>Upgrade</small></li>
+                  <li className="is-locked"><span>05</span><b>Feedback</b><small>Upgrade</small></li>
+                </ol>
+                <div className="workspace-preview-plan"><span>Current access</span><strong>The Vault · Foundation</strong><i><b /></i><small>18% plan progress · Week 2</small></div>
+              </aside>
+
+              <div className="workspace-preview-main">
+                <div className="workspace-preview-topbar"><span>Sample learner · Fictional data</span><b>Remote backend roles</b></div>
+                <div className="workspace-preview-welcome">
+                  <div><p>Friday · Week 2 of 12</p><h3>Good evening, Ananya. <em>Keep the loop tight.</em></h3><span>Build repeatable technical patterns before adding timed mocks.</span></div>
+                  <div className="workspace-preview-readiness"><strong>18</strong><span>Plan<br />complete</span></div>
+                </div>
+                <div className="workspace-preview-command">
+                  <article>
+                    <p><span>Next action</span><b>System design · 18 min</b></p>
+                    <div className="workspace-preview-visual" aria-hidden="true"><i /><i /><i /><span /></div>
+                    <h4>Rate limiting: choose the right algorithm</h4>
+                    <small>Continue the lesson, then explain your choice aloud before viewing the worked decision tree.</small>
+                  </article>
+                  <article className="workspace-preview-week">
+                    <p><span>This week</span><b>Plan active</b></p>
+                    <div aria-label="Five of nine sample weekly tasks complete"><i /><i /><i /><i /><i /><i /><i /><i /><i /></div>
+                    <dl><div><dt>Completed</dt><dd>5 / 9</dd></div><div><dt>Focused time</dt><dd>2h 14m</dd></div><div><dt>Next review</dt><dd>Sunday</dd></div></dl>
+                  </article>
+                </div>
+              </div>
+            </Reveal>
+
+            <div className="workspace-preview-footer">
+              <div className="workspace-access-states" aria-label="Sample account access levels">
+                <span><b>Vault</b> Library + roadmaps</span>
+                <span><b>AI Prep</b> Mocks + feedback</span>
+                <span><b>Premium</b> Coach room + calibration</span>
+              </div>
+              <Link className="primary-cta" href="/demo-login">Enter all three sample accounts <span aria-hidden="true">↗</span></Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="home-pricing-section" aria-labelledby="home-pricing-title" data-aero-phase="pricing">
+          <div className="container">
+            <Reveal>
+              <SectionHeading
+                eyebrow="Build only what you need"
+                title="One foundation. Two optional layers."
+                body="The Vault is the starting product. Adaptive practice and human coaching are separate additions—never preselected, never disguised as a subscription."
+                id="home-pricing-title"
+              />
+            </Reveal>
+            <div className="home-pricing-layers">
+              {HOME_PRICING_LAYERS.map((layer, index) => (
+                <Reveal className={`home-price-layer home-price-layer-${index + 1}`} direction={index % 2 === 0 ? "left" : "right"} key={layer.offer.slug}>
+                  <p><span>{layer.phase}</span><b>{layer.note}</b></p>
+                  <h3>{layer.offer.name.replace("InterviewRunway ", "")}</h3>
+                  <strong>{layer.offer.priceLabel}</strong>
+                  <span>{layer.offer.description}</span>
+                  <small>{layer.offer.entitlement}</small>
+                  <Link href={layer.href}>{layer.cta} <span aria-hidden="true">↗</span></Link>
+                </Reveal>
+              ))}
+            </div>
+            <div className="home-pricing-footer">
+              <span>Prices shown in INR · Exact taxes and final entitlement shown before payment</span>
+              <Link className="text-link" href="/pricing">Compare every layer <span aria-hidden="true">→</span></Link>
             </div>
           </div>
         </section>

@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const NAV_ITEMS = [
-  { href: "/vault", label: "Vault" },
-  { href: "/proof", label: "Results" },
-  { href: "/premium", label: "1:1 Coaching" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/curriculum", label: "Curriculum" },
+  { href: "/premium", label: "Coaching" },
   { href: "/about", label: "About" },
 ] as const;
 
@@ -20,22 +20,53 @@ export function Brand() {
 export function Header() {
   return (
     <header className="site-header">
+      <div className="header-utility" aria-label="Product highlights">
+        <div className="container header-utility-inner">
+          <span><i /> Built for engineers in India</span>
+          <span>Remote + AI-adjacent roles</span>
+          <Link href="/curriculum">Explore a real lesson <b>↗</b></Link>
+          <Link href="/pricing">Vault access · ₹799 once</Link>
+        </div>
+      </div>
       <div className="container header-inner">
         <Brand />
         <nav className="desktop-nav" aria-label="Primary navigation">
+          <details className="product-menu">
+            <summary>Product <span aria-hidden="true">⌄</span></summary>
+            <div className="product-menu-panel">
+              <Link href="/vault">
+                <small>01 · Learn</small><strong>The Vault</strong>
+                <span>Structured patterns, field sheets, and 4/12-week roadmaps.</span><b>₹799 once ↗</b>
+              </Link>
+              <Link href="/ai-prep">
+                <small>02 · Practise</small><strong>AI Prep</strong>
+                <span>Responsive mocks, transcripts, scoring, and corrective loops.</span><b>₹2,499 upgrade ↗</b>
+              </Link>
+              <Link href="/premium">
+                <small>03 · Calibrate</small><strong>1:1 Coaching</strong>
+                <span>Private diagnosis, live rehearsal, and a written action plan.</span><b>₹9,999 package ↗</b>
+              </Link>
+              <div className="product-menu-footer">
+                <span>See the product before you buy.</span>
+                <Link href="/demo-login">Enter all 3 demo workspaces ↗</Link>
+              </div>
+            </div>
+          </details>
           {NAV_ITEMS.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
         </nav>
         <div className="header-actions">
-          <Link className="signin-link" href="/ai-prep">Vault sign in</Link>
+          <Link className="signin-link" href="/demo-login">Member demo</Link>
           <Link className="compact-cta" href="/checkout/vault" data-analytics-event="checkout_started">
-            Get the Vault <span>₹799</span>
+            Start with the Vault <span>₹799</span>
           </Link>
         </div>
         <details className="mobile-menu">
           <summary aria-label="Open navigation"><span /><span /></summary>
           <nav aria-label="Mobile navigation">
+            <Link href="/vault">The Vault</Link>
+            <Link href="/ai-prep">AI Prep</Link>
             {NAV_ITEMS.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
-            <Link href="/ai-prep">Vault sign in</Link>
+            <Link href="/demo-login">Enter member demo</Link>
           </nav>
         </details>
       </div>
@@ -52,8 +83,8 @@ export function Footer() {
           <p>Interview prep for engineers in India targeting remote and AI-adjacent tech roles.</p>
         </div>
         <div className="footer-links">
-          <div><p>PRODUCT</p><Link href="/vault">The Vault</Link><Link href="/ai-prep">AI Prep</Link><Link href="/premium">1:1 Coaching</Link></div>
-          <div><p>TRUST</p><Link href="/about">About</Link><Link href="/proof">Results policy</Link><Link href="/compare/interview-kickstart-alternative-india">Compare</Link></div>
+          <div><p>PRODUCT</p><Link href="/vault">The Vault</Link><Link href="/ai-prep">AI Prep</Link><Link href="/premium">1:1 Coaching</Link><Link href="/demo-login">Member demo</Link></div>
+          <div><p>EXPLORE</p><Link href="/pricing">Pricing</Link><Link href="/curriculum">Curriculum</Link><Link href="/about">About</Link><Link href="/proof">Evidence standard</Link></div>
           <div><p>LEGAL</p><Link href="/legal/refund">Refunds</Link><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link></div>
         </div>
       </div>

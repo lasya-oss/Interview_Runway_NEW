@@ -34,9 +34,9 @@ export const metadata: Metadata = {
     description: "Founder-designed prep. India pricing. Start with the ₹799 Vault.",
     images: [
       {
-        url: `${siteUrl}/og.png`,
-        width: 1733,
-        height: 908,
+        url: `${siteUrl}/og-v3.png`,
+        width: 1731,
+        height: 909,
         alt: "InterviewRunway — Remote and AI-adjacent tech interview prep for engineers in India",
       },
     ],
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Remote + AI-adjacent tech interview prep, built for India",
     description: "Founder-designed prep. India pricing. Start with the ₹799 Vault.",
-    images: [`${siteUrl}/og.png`],
+    images: [`${siteUrl}/og-v3.png`],
   },
 };
 

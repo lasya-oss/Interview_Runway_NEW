@@ -87,6 +87,18 @@ export default function AiPrepPage() {
           </article>
         </div>
       </section>
+
+      <section className="section-pad final-cta" aria-labelledby="ai-preview-cta-title">
+        <div className="container final-cta-inner">
+          <p className="eyebrow">INSPECT THE PRACTICE PRODUCT</p>
+          <h2 id="ai-preview-cta-title">Enter the loop before it asks for money.</h2>
+          <p>Use the AI Prep sample learner to run the fixed mock interaction and inspect evidence-backed feedback. The checkout route is a ₹0 simulation until access duration, usage limits, and merchant details are final.</p>
+          <div className="section-actions">
+            <CtaLink href="/demo-login">Enter the AI Prep demo <span aria-hidden="true">↗</span></CtaLink>
+            <Link className="text-link" href="/checkout/ai-prep">Preview the ₹2,499 checkout <span aria-hidden="true">→</span></Link>
+          </div>
+        </div>
+      </section>
     </PageShell>
   );
 }
