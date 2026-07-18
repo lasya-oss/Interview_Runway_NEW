@@ -4457,6 +4457,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 .demo-entry-card {
   position: relative;
+  isolation: isolate;
   min-height: 500px;
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr);
@@ -4467,6 +4468,25 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   box-shadow: 0 28px 80px rgba(27,60,74,.1), inset 0 1px rgba(255,255,255,.9);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+
+.demo-entry-card::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(235, 240, 242, .34);
+  backdrop-filter: grayscale(.94) saturate(.22) contrast(.9);
+  -webkit-backdrop-filter: grayscale(.94) saturate(.22) contrast(.9);
+  transition: background 260ms ease, backdrop-filter 260ms ease;
+}
+
+.demo-entry-card:hover::before,
+.demo-entry-card:focus-within::before {
+  background: rgba(235, 240, 242, .25);
+  backdrop-filter: grayscale(.82) saturate(.34) contrast(.94);
+  -webkit-backdrop-filter: grayscale(.82) saturate(.34) contrast(.94);
 }
 
 .demo-entry-card::after {
@@ -4643,16 +4663,20 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .demo-entry-materials small { color: #788a92; font-size: 7px; }
 
 .demo-entry-copy > button {
+  position: relative;
+  z-index: 4;
+  isolation: isolate;
+  overflow: hidden;
   min-height: 58px;
   margin-top: 22px;
   padding: 0 19px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 0;
+  border: 1px solid rgba(255, 130, 74, .68);
   border-radius: 11px;
   color: #fff;
-  background: #102a36;
+  background: transparent;
   font-size: 11px;
   font-weight: 760;
   cursor: pointer;
@@ -4660,11 +4684,56 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   transition: transform 180ms var(--ease-out-expo), background 180ms ease;
 }
 
-.demo-entry-copy > button:hover { transform: translateY(-2px); background: #183c4a; }
-.demo-entry-copy > button b { color: var(--afterburner); font-size: 16px; }
+.demo-entry-copy > button::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: -320% -35%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 76%,
+    rgba(255, 107, 44, .06) 81%,
+    #ff6b2c 88%,
+    #ffd3bf 91%,
+    rgba(255, 107, 44, .12) 95%,
+    transparent 100%
+  );
+  animation: demo-entry-light-stream 3.2s linear infinite;
+}
+
+.demo-entry-copy > button::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 2px;
+  border-radius: 9px;
+  background: linear-gradient(110deg, #102a36, #0a202b 70%);
+  box-shadow: inset 0 1px rgba(255,255,255,.07);
+  transition: background 180ms ease;
+}
+
+.demo-entry-card-practice .demo-entry-copy > button::before { animation-delay: -1.05s; }
+.demo-entry-card-premium .demo-entry-copy > button::before { animation-delay: -2.1s; }
+.demo-entry-copy > button:hover { transform: translateY(-2px); }
+.demo-entry-copy > button:hover::after { background: linear-gradient(110deg, #183c4a, #0b2632 70%); }
+.demo-entry-copy > button > span { display: grid; gap: 3px; text-align: left; }
+.demo-entry-copy > button small { color: #ff9b6d; font-family: var(--font-mono); font-size: 7px; font-weight: 500; letter-spacing: .11em; }
+.demo-entry-copy > button strong { color: #fff; font-size: 12px; line-height: 1.2; }
+.demo-entry-copy > button b { color: var(--afterburner); font-size: 19px; }
 .demo-entry-copy > button:disabled { cursor: wait; opacity: .68; }
 .demo-entry-stack > .demo-login-note { margin: 4px 8px 0; color: #647780; font-size: 8px; line-height: 1.65; }
 .demo-entry-stack > .demo-login-error { margin: 0 8px; }
+
+@keyframes demo-entry-light-stream {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-entry-copy > button::before {
+    animation: none;
+    background: linear-gradient(90deg, transparent, #ff6b2c 48%, #ffd3bf 52%, transparent);
+  }
+}
 
 /* Real review-edition material inside every selected workspace. */
 

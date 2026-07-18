@@ -101,7 +101,10 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
               </div>
 
               <button type="button" onClick={() => startDemo(profile)} disabled={opening !== null}>
-                <span>{isOpening ? "Loading populated workspace…" : `Enter ${profile.planShort} demo`}</span>
+                <span>
+                  <small>INTERACTIVE WORKSPACE</small>
+                  <strong>{isOpening ? "Loading populated workspace…" : `Enter ${profile.planShort} demo`}</strong>
+                </span>
                 <b aria-hidden="true">↗</b>
               </button>
             </div>
