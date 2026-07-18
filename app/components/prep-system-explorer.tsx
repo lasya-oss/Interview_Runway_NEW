@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { VAULT_MODULES } from "@/app/lib/site-data";
 
 const MODULES = VAULT_MODULES.slice(0, 6);
 
 export function PrepSystemExplorer() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const rowRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const reduceMotion = useReducedMotion();
   const activeModule = MODULES[activeIndex];
   const angle = activeIndex * 60;
@@ -21,6 +22,48 @@ export function PrepSystemExplorer() {
     "--orbit-yaw": `${orbitYaw}deg`,
     "--orbit-roll": `${orbitRoll}deg`,
   } as CSSProperties;
+
+  useEffect(() => {
+    let animationFrame = 0;
+
+    const syncSystemToScroll = () => {
+      animationFrame = 0;
+      const rows = rowRefs.current.filter((row): row is HTMLButtonElement => Boolean(row));
+      if (!rows.length) return;
+
+      const firstRect = rows[0].getBoundingClientRect();
+      const lastRect = rows[rows.length - 1].getBoundingClientRect();
+      if (firstRect.top > window.innerHeight || lastRect.bottom < 0) return;
+
+      const aeroFocusLine = window.innerHeight * 0.38;
+      let closestIndex = 0;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      rows.forEach((row, index) => {
+        const rect = row.getBoundingClientRect();
+        const distance = Math.abs(rect.top + rect.height / 2 - aeroFocusLine);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
+      });
+
+      setActiveIndex((current) => current === closestIndex ? current : closestIndex);
+    };
+
+    const requestSync = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(syncSystemToScroll);
+    };
+
+    syncSystemToScroll();
+    window.addEventListener("scroll", requestSync, { passive: true });
+    window.addEventListener("resize", requestSync, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", requestSync);
+      window.removeEventListener("resize", requestSync);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+  }, []);
 
   return (
     <div className="prep-explorer" style={explorerStyle}>
@@ -117,6 +160,7 @@ export function PrepSystemExplorer() {
           const isActive = index === activeIndex;
           return (
             <motion.button
+              ref={(node) => { rowRefs.current[index] = node; }}
               type="button"
               role="tab"
               id={`prep-tab-${index}`}
