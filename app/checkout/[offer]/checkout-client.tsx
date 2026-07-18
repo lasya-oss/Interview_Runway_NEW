@@ -1,103 +1,108 @@
 "use client";
 
-import { useState } from "react";
-import type { OfferKey } from "@/app/lib/site-data";
+import { initializePaddle, type Paddle } from "@paddle/paddle-js";
+import { useRef, useState } from "react";
 
-type PreviewOutcome = "success" | "pending" | "failed";
+type CheckoutState = "idle" | "preparing" | "error";
 
 export function CheckoutClient({
-  offer,
-  premium = false,
+  clientToken,
+  email,
+  environment,
 }: {
-  offer: OfferKey;
-  premium?: boolean;
+  clientToken: string | null;
+  email: string;
+  environment: "production" | "sandbox";
 }) {
-  const [method, setMethod] = useState("upi");
-  const [outcome, setOutcome] = useState<PreviewOutcome>("success");
-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
-  const methods = [
-    { id: "upi", name: "UPI", detail: "Preview an app-based approval", recommended: true },
-    { id: "card", name: "Card", detail: "Preview hosted card authorisation", recommended: false },
-    { id: "netbanking", name: "Netbanking", detail: "Preview a bank redirect", recommended: false },
-    ...(premium
-      ? [{ id: "emi", name: "EMI", detail: "Preview an eligibility handoff", recommended: false }]
-      : []),
-  ];
-  const outcomes: Array<{ id: PreviewOutcome; name: string; detail: string }> = [
-    { id: "success", name: "Approved", detail: "Show the successful handoff state" },
-    { id: "pending", name: "Pending", detail: "Show asynchronous verification" },
-    { id: "failed", name: "Declined", detail: "Show a recoverable failure" },
-  ];
+  const [state, setState] = useState<CheckoutState>("idle");
+  const [message, setMessage] = useState("");
+  const paddleRef = useRef<Promise<Paddle | undefined> | null>(null);
+  const configured = Boolean(clientToken);
 
-  const runPreview = async () => {
-    setStatus("loading");
+  const beginCheckout = async () => {
+    if (!clientToken || state === "preparing") return;
+
+    setState("preparing");
+    setMessage("");
+
     try {
-      const response = await fetch("/api/checkout-preview", {
+      paddleRef.current ??= initializePaddle({
+        environment,
+        token: clientToken,
+      });
+      const paddle = await paddleRef.current;
+      if (!paddle) throw new Error("Paddle could not be initialized");
+
+      const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ offer, method, outcome }),
+        body: JSON.stringify({ offer: "vault" }),
       });
-      const result = (await response.json()) as {
-        ok?: boolean;
-        redirect?: string;
-      };
-      if (!response.ok || !result.ok || !result.redirect) {
-        setStatus("error");
-        return;
+      const result = (await response.json().catch(() => null)) as {
+        checkoutSessionId?: string;
+        error?: string;
+        transactionId?: string;
+      } | null;
+
+      if (
+        !response.ok ||
+        !result?.checkoutSessionId ||
+        !result.transactionId
+      ) {
+        throw new Error(result?.error || "Checkout could not be prepared");
       }
-      window.location.assign(result.redirect);
-    } catch {
-      setStatus("error");
+
+      const successUrl = new URL("/checkout/success", window.location.origin);
+      successUrl.searchParams.set("session", result.checkoutSessionId);
+
+      paddle.Checkout.open({
+        customer: { email },
+        settings: {
+          displayMode: "overlay",
+          locale: "en",
+          showAddDiscounts: false,
+          showAddTaxId: true,
+          successUrl: successUrl.toString(),
+          theme: "light",
+          variant: "one-page",
+        },
+        transactionId: result.transactionId,
+      });
+
+      setState("idle");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Secure checkout could not be opened. Please try again.",
+      );
+      setState("error");
     }
   };
 
   return (
-    <div>
-      <div className="payment-options" role="radiogroup" aria-label="Preview payment method">
-        {methods.map((item) => (
-          <label className="payment-option" key={item.id}>
-            <input
-              type="radio"
-              name="payment-method"
-              value={item.id}
-              checked={method === item.id}
-              onChange={() => setMethod(item.id)}
-            />
-            <span><b>{item.name}</b><small>{item.detail}</small></span>
-            {item.recommended ? <span className="recommended-tag">RECOMMENDED</span> : null}
-          </label>
-        ))}
-      </div>
-
-      <p className="module-kicker" style={{ marginTop: 28 }}>PREVIEW OUTCOME</p>
-      <div className="payment-options" role="radiogroup" aria-label="Preview outcome">
-        {outcomes.map((item) => (
-          <label className="payment-option" key={item.id}>
-            <input
-              type="radio"
-              name="preview-outcome"
-              value={item.id}
-              checked={outcome === item.id}
-              onChange={() => setOutcome(item.id)}
-            />
-            <span><b>{item.name}</b><small>{item.detail}</small></span>
-          </label>
-        ))}
-      </div>
-
+    <div className="paddle-checkout-action">
       <button
         className="checkout-button"
         type="button"
-        onClick={runPreview}
-        disabled={status === "loading"}
-        aria-describedby="checkout-preview-note"
+        onClick={beginCheckout}
+        disabled={!configured || state === "preparing"}
+        aria-describedby="paddle-checkout-note"
       >
-        {status === "loading" ? "Preparing preview…" : "Run no-charge checkout preview"}
+        {state === "preparing"
+          ? "Preparing secure checkout…"
+          : configured
+            ? "Continue securely with Paddle"
+            : "Checkout configuration unavailable"}
       </button>
-      <p className="preview-notice" id="checkout-preview-note" role={status === "error" ? "alert" : undefined}>
-        {status === "error"
-          ? "The preview could not be started. Please try again."
-          : "Interactive demo only — no payment details, order, charge, or entitlement will be created."}
+      <p
+        className="preview-notice"
+        id="paddle-checkout-note"
+        role={state === "error" ? "alert" : undefined}
+      >
+        {state === "error"
+          ? message
+          : "You will review the final amount and payment method inside Paddle before authorizing anything."}
       </p>
     </div>
   );

@@ -31,8 +31,8 @@ async function request(pathname = "/", init = {}) {
   );
 }
 
-async function render(pathname = "/") {
-  return request(pathname);
+async function render(pathname = "/", init = {}) {
+  return request(pathname, init);
 }
 
 function visibleText(html) {
@@ -92,13 +92,19 @@ const coreRoutes = [
   },
   {
     pathname: "/checkout/vault",
-    expected: [/(?:checkout|review your order|complete your order)/i, /₹799/],
+    expected: [/secure checkout/i, /₹799/, /Paddle/i],
+    init: {
+      headers: {
+        accept: "text/html",
+        "oai-authenticated-user-email": "buyer@example.com",
+      },
+    },
   },
 ];
 
-for (const { pathname, expected } of coreRoutes) {
+for (const { pathname, expected, init } of coreRoutes) {
   test(`server-renders ${pathname}`, async () => {
-    const response = await render(pathname);
+    const response = await render(pathname, init);
     assert.equal(response.status, 200);
     assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
@@ -156,24 +162,42 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(dashboardText, /Every attempt leaves evidence/i);
 });
 
-test("checkout preview validates the offer server-side and exposes all result states", async () => {
-  const preview = await request("/api/checkout-preview", {
+test("Paddle checkout requires an authenticated account", async () => {
+  const checkout = await request("/api/checkout", {
     method: "POST",
     headers: {
       accept: "application/json",
       "content-type": "application/json",
       origin: "http://localhost",
     },
-    body: JSON.stringify({ offer: "vault", method: "upi", outcome: "pending" }),
+    body: JSON.stringify({ offer: "vault" }),
   });
-  assert.equal(preview.status, 200);
-  const result = await preview.json();
-  assert.equal(result.ok, true);
-  assert.match(result.redirect, /^\/checkout\/pending\?offer=vault&method=upi&reference=IRP-/);
+  assert.equal(checkout.status, 401);
+  assert.deepEqual(await checkout.json(), { error: "Authentication required" });
+});
 
-  const pending = await render(result.redirect);
-  assert.equal(pending.status, 200);
-  const pendingText = visibleText(await pending.text());
-  assert.match(pendingText, /Verification is still in progress/i);
-  assert.match(pendingText, /Amount charged ₹0/i);
+test("Paddle webhook rejects unsigned requests before fulfillment", async () => {
+  const webhook = await request("/api/webhooks/paddle", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ event_type: "transaction.completed" }),
+  });
+  assert.equal(webhook.status, 400);
+  assert.deepEqual(await webhook.json(), { error: "Missing Paddle signature" });
+});
+
+test("buyer-facing checkout contains no prototype or no-charge simulation", async () => {
+  const response = await render("/checkout/vault", {
+    headers: {
+      accept: "text/html",
+      "oai-authenticated-user-email": "buyer@example.com",
+    },
+  });
+  assert.equal(response.status, 200);
+  const text = visibleText(await response.text());
+  assert.match(text, /Continue securely with Paddle|Checkout configuration unavailable/i);
+  assert.doesNotMatch(text, /prototype|simulation|₹0|no-charge/i);
 });

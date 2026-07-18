@@ -17,6 +17,8 @@
     "@fontsource-variable/manrope": "5.2.8",
     "@fontsource-variable/sora": "5.2.8",
     "@fontsource/ibm-plex-mono": "5.2.7",
+    "@paddle/paddle-js": "^1.6.4",
+    "@paddle/paddle-node-sdk": "^3.8.0",
     "@react-three/fiber": "9.6.1",
     "drizzle-orm": "0.45.2",
     "motion": "12.42.2",
