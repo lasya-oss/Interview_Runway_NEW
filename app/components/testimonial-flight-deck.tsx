@@ -50,6 +50,7 @@ export function TestimonialFlightDeck() {
   const reduceMotion = useReducedMotion();
   const [compact, setCompact] = useState(false);
   const [trackProgress, setTrackProgress] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
@@ -60,6 +61,14 @@ export function TestimonialFlightDeck() {
     if (!viewport) return;
     const max = Math.max(1, viewport.scrollWidth - viewport.clientWidth);
     setTrackProgress(Math.min(1, viewport.scrollLeft / max));
+    const viewportCenter = viewport.getBoundingClientRect().left + viewport.clientWidth / 2;
+    const cards = Array.from(viewport.querySelectorAll<HTMLElement>(".testimonial-card"));
+    const closestIndex = cards.reduce((closest, card, index) => {
+      const rect = card.getBoundingClientRect();
+      const distance = Math.abs(rect.left + rect.width / 2 - viewportCenter);
+      return distance < closest.distance ? { index, distance } : closest;
+    }, { index: 0, distance: Number.POSITIVE_INFINITY }).index;
+    setActiveIndex((current) => current === closestIndex ? current : closestIndex);
   }, []);
 
   useEffect(() => {
@@ -92,28 +101,28 @@ export function TestimonialFlightDeck() {
     viewport.scrollLeft = latest * max;
   });
 
-  const currentIndex = Math.min(
-    SAMPLE_STORIES.length - 1,
-    Math.round(trackProgress * (SAMPLE_STORIES.length - 1)),
-  );
-
   const move = (direction: -1 | 1) => {
     const viewport = viewportRef.current;
     if (!viewport) return;
-    const targetIndex = (currentIndex + direction + SAMPLE_STORIES.length) % SAMPLE_STORIES.length;
+    const targetIndex = (activeIndex + direction + SAMPLE_STORIES.length) % SAMPLE_STORIES.length;
     const target = viewport.querySelectorAll<HTMLElement>(".testimonial-card")[targetIndex];
     if (!target) return;
     const max = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-    const centeredLeft = target.offsetLeft - (viewport.clientWidth - target.clientWidth) / 2;
-    manualNavigationUntilRef.current = performance.now() + 1200;
+    const viewportRect = viewport.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const targetContentLeft = targetRect.left - viewportRect.left + viewport.scrollLeft;
+    const centeredLeft = targetContentLeft - (viewport.clientWidth - targetRect.width) / 2;
+    manualNavigationUntilRef.current = performance.now() + 2400;
+    setActiveIndex(targetIndex);
+    setTrackProgress(targetIndex / (SAMPLE_STORIES.length - 1));
     viewport.scrollTo({
       left: Math.max(0, Math.min(max, centeredLeft)),
       behavior: reduceMotion ? "auto" : "smooth",
     });
   };
 
-  const previousLabel = SAMPLE_STORIES[(currentIndex - 1 + SAMPLE_STORIES.length) % SAMPLE_STORIES.length].number;
-  const nextLabel = SAMPLE_STORIES[(currentIndex + 1) % SAMPLE_STORIES.length].number;
+  const previousLabel = SAMPLE_STORIES[(activeIndex - 1 + SAMPLE_STORIES.length) % SAMPLE_STORIES.length].number;
+  const nextLabel = SAMPLE_STORIES[(activeIndex + 1) % SAMPLE_STORIES.length].number;
 
   return (
     <section
@@ -154,17 +163,21 @@ export function TestimonialFlightDeck() {
           }}
         >
           <ol className="testimonial-flight-track">
-            {SAMPLE_STORIES.map((story) => (
-              <li className="testimonial-card" key={story.number}>
+            {SAMPLE_STORIES.map((story, index) => (
+              <li
+                className={`testimonial-card${index === activeIndex ? " is-active" : ""}`}
+                aria-current={index === activeIndex ? "true" : undefined}
+                key={story.number}
+              >
                 <article aria-label={`${story.name}, learner story preview`}>
                   <div className="testimonial-card-topline">
                     <span>RUNWAY RECORD</span><i /><b>{story.number} / 04</b>
                   </div>
+                  <blockquote>“{story.quote}”</blockquote>
                   <div className="testimonial-person">
                     <div aria-hidden="true">{story.initials}</div>
                     <p><strong>{story.name}</strong><span>{story.role}</span></p>
                   </div>
-                  <blockquote>“{story.quote}”</blockquote>
                   <div className="testimonial-record">
                     <div><span>ROLE OUTCOME</span><strong>{story.outcome}</strong></div>
                     <div><span>PREP PATH</span><strong>{story.path}</strong></div>
@@ -180,13 +193,26 @@ export function TestimonialFlightDeck() {
           <div className="testimonial-flight-progress" aria-hidden="true">
             <span style={{ width: `${Math.max(8, trackProgress * 100)}%` }} />
           </div>
-          <div className="testimonial-flight-controls" aria-label="Testimonial navigation console">
+          <div
+            className="testimonial-flight-controls"
+            aria-label="Testimonial navigation console"
+            onKeyDown={(event) => {
+              if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                move(-1);
+              }
+              if (event.key === "ArrowRight") {
+                event.preventDefault();
+                move(1);
+              }
+            }}
+          >
             <button type="button" onClick={() => move(-1)} aria-label={`Previous story, ${previousLabel}`}>
               <span className="testimonial-control-arrow" aria-hidden="true">←</span>
               <span className="testimonial-control-copy"><small>PREVIOUS</small><b>{previousLabel}</b></span>
             </button>
             <div className="testimonial-flight-position" aria-live="polite">
-              <span>STORY</span><b>{SAMPLE_STORIES[currentIndex].number}</b><small>/ 04</small>
+              <span>STORY</span><b>{SAMPLE_STORIES[activeIndex].number}</b><small>/ 04</small>
             </div>
             <button type="button" onClick={() => move(1)} aria-label={`Next story, ${nextLabel}`}>
               <span className="testimonial-control-copy"><small>NEXT</small><b>{nextLabel}</b></span>

@@ -2857,15 +2857,18 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 }
 
 .testimonial-card {
-  width: min(70vw, 920px);
+  width: min(66vw, 860px);
   min-height: clamp(390px, 48vh, 520px);
   flex: 0 0 auto;
+  opacity: .46;
   scroll-snap-align: center;
   transform: rotateY(-2.5deg) translateY(-5px);
   transform-style: preserve-3d;
+  transition: opacity 260ms ease, transform 420ms var(--ease-out-expo);
 }
 
 .testimonial-card:nth-child(even) { transform: rotateY(2.5deg) translateY(16px); }
+.testimonial-card.is-active { opacity: 1; transform: rotateY(0) translateY(0) scale(1.015); }
 
 .testimonial-card article {
   position: relative;
@@ -2873,7 +2876,7 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
   min-height: inherit;
   padding: clamp(1.6rem, 3.2vw, 3rem);
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto 1fr auto auto;
   overflow: hidden;
   border: 1px solid rgba(40, 75, 89, .16);
   border-radius: 30px 10px 30px 10px;
@@ -2899,7 +2902,7 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 .testimonial-card-topline b { color: #6c8089; font-weight: 500; }
 
 .testimonial-person {
-  margin-top: clamp(1.5rem, 3vh, 2.5rem);
+  margin: 0 0 clamp(1.1rem, 2vh, 1.7rem);
   display: flex;
   align-items: center;
   gap: 14px;
@@ -2920,18 +2923,18 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 }
 
 .testimonial-person p { margin: 0; display: grid; gap: 3px; }
-.testimonial-person strong { font-size: 20px; }
-.testimonial-person span { color: #687b84; font-size: 14px; }
+.testimonial-person strong { font-size: 18px; }
+.testimonial-person span { color: #687b84; font-size: 13px; }
 
 .testimonial-card blockquote {
-  max-width: 760px;
-  margin: clamp(1.8rem, 4vh, 3.3rem) 0;
+  max-width: 700px;
+  margin: clamp(1.35rem, 2.8vh, 2.2rem) 0 clamp(1.15rem, 2.4vh, 1.9rem);
   align-self: center;
-  font-family: var(--font-display);
-  font-size: clamp(1.9rem, 2.45vw, 2.7rem);
-  font-weight: 580;
-  line-height: 1.08;
-  letter-spacing: -.046em;
+  font-family: var(--font-body);
+  font-size: clamp(1.35rem, 1.65vw, 1.85rem);
+  font-weight: 520;
+  line-height: 1.42;
+  letter-spacing: -.022em;
 }
 
 .testimonial-record {
@@ -2983,6 +2986,8 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 .testimonial-engine-mark span { inset: 67px; background: rgba(255,107,44,.16); border: 0; box-shadow: 0 0 22px rgba(255,107,44,.16); }
 
 .testimonial-flight-footer {
+  position: relative;
+  z-index: 20;
   min-height: 72px;
   padding-bottom: 18px;
   display: flex;
@@ -3007,6 +3012,7 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 
 .testimonial-flight-controls {
   position: relative;
+  z-index: 2;
   min-width: 430px;
   min-height: 76px;
   display: grid;
@@ -3032,6 +3038,7 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 
 .testimonial-flight-controls button {
   position: relative;
+  z-index: 3;
   min-width: 0;
   padding: 0 14px;
   display: flex;
@@ -3042,6 +3049,8 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
   color: #dbe6ea;
   background: linear-gradient(135deg, rgba(255,255,255,.035), transparent 65%);
   cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
   transition: color 180ms ease, background 220ms ease, box-shadow 220ms ease;
 }
 
@@ -3472,7 +3481,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .testimonial-flight-track { align-items: stretch; padding-right: 18px; padding-left: 18px; }
   .testimonial-card,
   .testimonial-card:nth-child(even) { width: min(86vw, 680px); min-height: 510px; transform: none; }
-  .testimonial-card blockquote { font-size: clamp(1.85rem, 5.8vw, 2.6rem); }
+  .testimonial-card blockquote { font-size: clamp(1.3rem, 4.2vw, 1.75rem); }
   .testimonial-flight-footer { padding-inline: 18px; flex-wrap: wrap; }
   .testimonial-flight-progress { width: auto; flex: 1; }
   .testimonial-flight-controls { min-width: min(100%, 430px); }
@@ -3525,7 +3534,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .testimonial-card,
   .testimonial-card:nth-child(even) { width: calc(100vw - 32px); min-height: 570px; }
   .testimonial-card article { padding: 24px 21px; }
-  .testimonial-card blockquote { margin: 1.7rem 0; font-size: 1.72rem; }
+  .testimonial-card blockquote { margin: 1.35rem 0 1.15rem; font-size: 1.42rem; }
   .testimonial-record { grid-template-columns: 1fr; }
   .testimonial-record > div { min-height: 54px; }
   .testimonial-engine-mark { top: 16%; right: -55px; opacity: .38; }
