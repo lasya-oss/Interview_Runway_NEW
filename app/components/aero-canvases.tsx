@@ -149,15 +149,38 @@ function Gimbal({ lite }: { lite: boolean }) {
   );
 }
 
-function VaultRibs({ lite }: { lite: boolean }) {
-  const ribCount = lite ? 4 : 7;
+const VAULT_ROUTE_POINTS: readonly [number, number, number][] = [
+  [-2.35, -0.72, 0],
+  [-1.52, 0.18, 0.08],
+  [-0.58, -0.08, 0.13],
+  [0.18, 0.62, 0.08],
+  [1.12, 0.28, 0.02],
+  [2.28, 0.8, -0.04],
+];
+
+function VaultFlightPlan({ lite }: { lite: boolean }) {
+  const routeGeometry = useMemo(() => {
+    const curve = new THREE.CatmullRomCurve3(VAULT_ROUTE_POINTS.map((point) => new THREE.Vector3(...point)));
+    return new THREE.TubeGeometry(curve, lite ? 32 : 72, lite ? 0.025 : 0.038, lite ? 6 : 10, false);
+  }, [lite]);
+  useEffect(() => () => routeGeometry.dispose(), [routeGeometry]);
+
   return (
     <group>
-      {Array.from({ length: ribCount }).map((_, index) => (
-        <mesh key={index} position={[0, 0, -index * 0.5]} scale={1 + index * 0.12}>
-          <torusGeometry args={[1.15, 0.035, 8, 6]} />
-          <meshStandardMaterial color={index === 2 || index === 5 ? "#ff6b2c" : "#7f949e"} metalness={0.8} roughness={0.32} transparent opacity={0.78 - index * 0.06} />
-        </mesh>
+      <mesh geometry={routeGeometry}>
+        <meshBasicMaterial color="#8fb7c7" transparent opacity={0.32} />
+      </mesh>
+      {VAULT_ROUTE_POINTS.map((point, index) => (
+        <group key={index} position={point}>
+          <mesh>
+            <torusGeometry args={[index === 5 ? 0.2 : 0.14, 0.018, 8, lite ? 24 : 40]} />
+            <meshBasicMaterial color={index === 5 ? "#ff6b2c" : "#a9c5d0"} transparent opacity={index === 5 ? 0.72 : 0.42} />
+          </mesh>
+          <mesh position={[0, 0, -0.012]}>
+            <circleGeometry args={[index === 5 ? 0.09 : 0.055, lite ? 18 : 30]} />
+            <meshBasicMaterial color={index === 5 ? "#ff6b2c" : "#d6e3e8"} transparent opacity={index === 5 ? 0.45 : 0.25} />
+          </mesh>
+        </group>
       ))}
     </group>
   );
@@ -166,7 +189,7 @@ function VaultRibs({ lite }: { lite: boolean }) {
 function SceneRig({ progressRef, pointerRef, tier }: { progressRef: MutableRefObject<number>; pointerRef: VectorRef; tier: "lite" | "full" }) {
   const airfoilRef = useRef<THREE.Group>(null);
   const turbineRef = useRef<THREE.Group>(null);
-  const ribsRef = useRef<THREE.Group>(null);
+  const routeRef = useRef<THREE.Group>(null);
   const gimbalRef = useRef<THREE.Group>(null);
   const trailRef = useRef<THREE.Group>(null);
   const lite = tier === "lite";
@@ -204,13 +227,13 @@ function SceneRig({ progressRef, pointerRef, tier }: { progressRef: MutableRefOb
       turbineRef.current.rotation.set(-0.08 + local * 0.16, 0.32 - local * 0.54 + pointer.x * 0.04, -0.08 + local * 0.14);
     }
 
-    if (ribsRef.current) {
+    if (routeRef.current) {
       const weight = windowWeight(p, 0.35, 0.5, 0.69);
       const local = smooth(clamp01((p - 0.35) / 0.34));
-      ribsRef.current.visible = weight > 0.002;
-      ribsRef.current.scale.setScalar(Math.max(0.001, weight * (1.15 + local * 0.3)));
-      ribsRef.current.position.set(1.55 - local * 3.15, 0.15, -1.2 + local * 1.2);
-      ribsRef.current.rotation.set(0.15, -0.45 + local * 0.8, 0.25 + local * 0.35);
+      routeRef.current.visible = weight > 0.002;
+      routeRef.current.scale.setScalar(Math.max(0.001, weight * (0.92 + local * 0.12)));
+      routeRef.current.position.set(0.75 - local * 1.45, 0.05, -1.55 + local * 0.18);
+      routeRef.current.rotation.set(0.06 + local * 0.04, -0.2 + local * 0.34, -0.08 + local * 0.12);
     }
 
     if (gimbalRef.current) {
@@ -238,7 +261,7 @@ function SceneRig({ progressRef, pointerRef, tier }: { progressRef: MutableRefOb
         {!lite ? <group position={[0.45, -0.34, -0.68]} scale={0.96}><Airfoil geometry={airfoilGeometry} wire /></group> : null}
       </group>
       <group ref={turbineRef}><Turbofan lite={lite} progressRef={progressRef} /></group>
-      <group ref={ribsRef}><VaultRibs lite={lite} /></group>
+      <group ref={routeRef}><VaultFlightPlan lite={lite} /></group>
       <group ref={gimbalRef}><Gimbal lite={lite} /></group>
       <group ref={trailRef}>
         {(lite ? [-0.5, 0, 0.5] : [-0.72, -0.36, 0, 0.36, 0.72]).map((y, index) => (

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { VAULT_MODULES } from "@/app/lib/site-data";
 
 const MODULES = VAULT_MODULES.slice(0, 6);
@@ -12,16 +12,6 @@ export function PrepSystemExplorer() {
   const rowRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const reduceMotion = useReducedMotion();
   const activeModule = MODULES[activeIndex];
-  const angle = activeIndex * 60;
-  const orbitPitch = [0, 3, 1, -2, 2, -1][activeIndex];
-  const orbitYaw = [0, -3, 3, 0, -2, 2][activeIndex];
-  const orbitRoll = [-4, -1, 2, 4, 1, -3][activeIndex];
-  const explorerStyle = {
-    "--active-angle": `${angle}deg`,
-    "--orbit-pitch": `${orbitPitch}deg`,
-    "--orbit-yaw": `${orbitYaw}deg`,
-    "--orbit-roll": `${orbitRoll}deg`,
-  } as CSSProperties;
 
   useEffect(() => {
     let animationFrame = 0;
@@ -66,7 +56,7 @@ export function PrepSystemExplorer() {
   }, []);
 
   return (
-    <div className="prep-explorer" style={explorerStyle}>
+    <div className="prep-explorer">
       <div className="payload-sticky">
         <div className="section-heading">
           <p className="eyebrow">Inside the ₹799 Vault</p>
@@ -85,69 +75,50 @@ export function PrepSystemExplorer() {
           aria-live="polite"
           data-active-system={activeIndex + 1}
         >
-          <div className="instrument-horizon" aria-hidden="true"><i /><i /><i /></div>
-          <div className="instrument-orbit" aria-hidden="true">
-            <div className="instrument-rings"><i /><i /><i /></div>
-            <div className="instrument-rotor"><i /><i /><i /></div>
-            <AnimatePresence initial={false}>
-              <motion.div
-                className="instrument-selection-pulse"
-                key={`pulse-${activeIndex}`}
-                initial={reduceMotion ? false : { opacity: 0.72, scale: 0.32 }}
-                animate={{ opacity: 0, scale: 1.75 }}
-                transition={{ duration: reduceMotion ? 0 : 0.82, ease: [0.16, 1, 0.3, 1] }}
-              />
-            </AnimatePresence>
-            {MODULES.map((module, index) => (
-              <span
-                className={index === activeIndex ? "is-active" : ""}
-                style={{
-                  "--node-angle": `${index * 60}deg`,
-                  "--node-counter-angle": `${index * -60}deg`,
-                } as CSSProperties}
-                key={module.kicker}
-              >
-                0{index + 1}
-              </span>
-            ))}
-            <div className="instrument-core">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={`core-${activeModule.kicker}`}
-                  initial={reduceMotion ? false : { opacity: 0, rotateY: 72, scale: 0.72 }}
-                  animate={{ opacity: 1, rotateY: 0, scale: 1 }}
-                  exit={reduceMotion ? undefined : { opacity: 0, rotateY: -72, scale: 0.78 }}
-                  transition={{ duration: reduceMotion ? 0 : 0.42, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <b>0{activeIndex + 1}</b>
-                  <span>{activeModule.kicker}</span>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+          <div className="instrument-status" aria-hidden="true">
+            <span>SYSTEM 0{activeIndex + 1} / 06</span><i /><b>{activeModule.meta}</b>
           </div>
 
-          <div className="instrument-readout">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={activeModule.kicker}
-                initial={reduceMotion ? false : { opacity: 0, y: 10, filter: "blur(5px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={reduceMotion ? undefined : { opacity: 0, y: -7, filter: "blur(4px)" }}
-                transition={{ duration: reduceMotion ? 0 : 0.28, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <p>{activeModule.title}</p>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              className="instrument-flight-plan"
+              key={activeModule.kicker}
+              initial={reduceMotion ? false : { opacity: 0, y: 18, rotateX: 6, filter: "blur(6px)" }}
+              animate={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)" }}
+              exit={reduceMotion ? undefined : { opacity: 0, y: -12, rotateX: -4, filter: "blur(4px)" }}
+              transition={{ duration: reduceMotion ? 0 : 0.42, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="flight-plan-heading">
+                <span>{activeModule.kicker}</span>
+                <strong>{activeModule.title}</strong>
+              </div>
+
+              <div className="flight-plan-stages">
+                {activeModule.flow.map((stage, index) => (
+                  <div key={stage}>
+                    <span>0{index + 1}</span>
+                    <small>{["INPUT", "SYSTEM", "INTERVIEW SIGNAL"][index]}</small>
+                    <strong>{stage}</strong>
+                  </div>
+                ))}
+                <i className="flight-plan-line" aria-hidden="true"><b /><b /><b /></i>
+              </div>
+
+              <div className="flight-plan-value">
+                <span>WHAT THIS UNLOCKS</span>
+                <p>{activeModule.outcome}</p>
+              </div>
+
+              <div className="instrument-capabilities">
+                <span>THE LEARNER CAN NOW</span>
                 <ol>
                   {activeModule.facets.map((facet, index) => (
-                    <li key={facet}><span>0{index + 1}</span>{facet}</li>
+                    <li key={facet}><b>0{index + 1}</b><span>{facet}</span></li>
                   ))}
                 </ol>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          <div className="instrument-status" aria-hidden="true">
-            <span>ACTIVE SYSTEM</span><i /><b>{activeModule.meta}</b>
-          </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         <Link className="payload-link" href="/vault">

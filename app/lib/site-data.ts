@@ -37,6 +37,8 @@ export const VAULT_MODULES = [
     description: "Learn the signal behind two pointers, sliding windows, graphs, DP, heaps, intervals, and other recurring patterns.",
     meta: "15+ core patterns",
     facets: ["Recognise the shape", "Choose the pattern", "Explain complexity"],
+    flow: ["Problem wording", "Pattern + invariant", "Clear solution rationale"],
+    outcome: "Move from reading a problem to naming the right pattern, invariant, and complexity before coding.",
   },
   {
     kicker: "SYSTEM THINKING",
@@ -44,6 +46,8 @@ export const VAULT_MODULES = [
     description: "Build fluency in caching, queues, sharding, rate limits, consistency, and common end-to-end systems.",
     meta: "Fundamentals + walkthroughs",
     facets: ["Frame constraints", "Expose trade-offs", "Defend the design"],
+    flow: ["Ambiguous prompt", "Constraints + trade-offs", "Defensible architecture"],
+    outcome: "Structure a design answer around explicit decisions instead of drawing a memorised system diagram.",
   },
   {
     kicker: "STORY BANK",
@@ -51,20 +55,26 @@ export const VAULT_MODULES = [
     description: "Use STAR without flattening your experience, and translate Indian company context for a US interviewer.",
     meta: "40+ prompts and frameworks",
     facets: ["Find the evidence", "Shape the arc", "Translate context"],
+    flow: ["Raw experience", "Decision + evidence", "Answer that travels"],
+    outcome: "Turn real projects into concise stories where your decision, ownership, and measurable consequence remain visible.",
   },
   {
     kicker: "ROLE INTELLIGENCE",
-    title: "Publicly sourced company patterns",
-    description: "Original, paraphrased prep banks for companies with enough credible public interview information.",
-    meta: "No leaked question sets",
-    facets: ["Map the loop", "Read public signals", "Prepare role-first"],
+    title: "Know the interview loop before you prepare",
+    description: "Role-specific preparation maps built only from credible public interview information—never leaked question banks.",
+    meta: "Public sources · no leaked sets",
+    facets: ["Map the loop", "Verify public signals", "Prioritise by role"],
+    flow: ["Credible public signals", "Role-specific loop map", "Focused preparation plan"],
+    outcome: "See which rounds, capabilities, and evidence deserve attention for the role—without pretending to predict exact questions.",
   },
   {
     kicker: "CAREER SIGNAL",
-    title: "Resume, LinkedIn, and outreach templates",
-    description: "ATS-safe, editable templates that make your scope legible to remote-hiring recruiters.",
+    title: "Turn experience into recruiter-visible proof",
+    description: "ATS-safe resume, LinkedIn, and outreach systems that make your engineering scope legible to remote-hiring teams.",
     meta: "Editable, not locked PDFs",
-    facets: ["Clarify your scope", "Strengthen proof", "Start conversations"],
+    facets: ["Translate your scope", "Surface credible proof", "Create conversations"],
+    flow: ["Real engineering work", "Evidence-led translation", "Recruiter-readable signal"],
+    outcome: "Express scope, technical decisions, and impact in language that survives ATS screening and makes sense across borders.",
   },
   {
     kicker: "REMOTE REALITY",
@@ -72,6 +82,8 @@ export const VAULT_MODULES = [
     description: "Understand the practical layer of working remotely from India without visa mythology or vague advice.",
     meta: "Human review required",
     facets: ["Read the contract", "Model total pay", "Negotiate with context"],
+    flow: ["Offer + contract terms", "Pay, risk + context", "Informed decision"],
+    outcome: "Compare the actual economics and obligations of remote work before accepting or negotiating an offer.",
   },
   {
     kicker: "REFERENCE SYSTEM",
@@ -79,6 +91,8 @@ export const VAULT_MODULES = [
     description: "Technical and career-prep references organised around real interview decisions, with source review before release.",
     meta: "Quality-gated library",
     facets: ["Find it quickly", "Review the decision", "Verify the source"],
+    flow: ["Interview decision", "Concise reference", "Rapid recall"],
+    outcome: "Retrieve the exact concept or decision you need without reopening an entire course.",
   },
   {
     kicker: "EXPLAINER SERIES",
@@ -86,6 +100,8 @@ export const VAULT_MODULES = [
     description: "Focused visual explainers for DSA, design, behavioural structure, and remote-work logistics.",
     meta: "No-face learning format",
     facets: ["See the model", "Follow the motion", "Recall the decision"],
+    flow: ["Abstract concept", "Diagram-led explanation", "Durable mental model"],
+    outcome: "Use visual motion to understand and remember the model behind the interview answer.",
   },
 ] as const;
 
