@@ -4,6 +4,7 @@ import { HomeAeroStage, TrajectorySequence } from "@/app/components/aero-experie
 import { Reveal } from "@/app/components/aero-runtime";
 import { PrepSystemExplorer } from "@/app/components/prep-system-explorer";
 import { CtaLink, Footer, Header, MobilePurchaseBar, SectionHeading } from "@/app/components/site-chrome";
+import { TestimonialFlightDeck } from "@/app/components/testimonial-flight-deck";
 import { HOME_FAQS, OFFERS } from "@/app/lib/site-data";
 
 const HOME_PRICING_LAYERS = [
@@ -239,25 +240,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="evidence-section" aria-labelledby="proof-title" data-aero-phase="proof">
-          <div className="container evidence-layout">
-            <Reveal direction="left">
-              <div>
-                <p className="eyebrow">Evidence standard</p>
-                <h2 id="proof-title">Proof should withstand review.</h2>
-                <p>No anonymous praise. No composite stories. No outcome published without a real learner, clear consent, and a reviewable source.</p>
-                <Link className="text-link" href="/proof">Read the evidence standard <span aria-hidden="true">→</span></Link>
-              </div>
-            </Reveal>
-            <Reveal className="evidence-trace" direction="right">
-              <div className="evidence-trace-line" aria-label="Claim, consent, and source review">
-                <span><b>01</b>Claim</span><i /><span><b>02</b>Consent</span><i /><span><b>03</b>Source</span>
-              </div>
-              <strong>Publish only after all three checks.</strong>
-              <p>Every outcome must be specific, consented, and connected to a reviewable source. Until then, it stays off the site.</p>
-            </Reveal>
-          </div>
-        </section>
+        <TestimonialFlightDeck />
 
         <section className="faq-section-v2" aria-labelledby="faq-title">
           <div className="faq-horizon" aria-hidden="true" />
