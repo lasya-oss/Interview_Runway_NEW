@@ -337,3 +337,20 @@ test("three-layer evidence readouts use body-copy sizing", async () => {
   assert.match(styles, /\.trajectory-sequence \.chapter-footer[\s\S]*font-size:\s*13\.5px/);
   assert.match(styles, /\.trajectory-sequence \.chapter-footer a\s*\{\s*font-size:\s*14px/);
 });
+
+test("prep system restores its animated orbit with readable benefit copy", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const component = await readFile(
+    new URL("../app/components/prep-system-explorer.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(component, /className="system-instrument system-instrument-orbital"/);
+  assert.match(component, /className="instrument-orbit"/);
+  assert.match(component, /className="instrument-rings"/);
+  assert.match(component, /className="instrument-rotor"/);
+  assert.match(component, /WHAT THIS SYSTEM UNLOCKS/);
+  assert.match(styles, /\.system-instrument-orbital \.instrument-readout p[\s\S]*font-size:\s*20px/);
+  assert.match(styles, /\.system-instrument-orbital \.instrument-readout li[\s\S]*font-size:\s*14px/);
+  assert.match(styles, /\.system-instrument-orbital \.instrument-status[\s\S]*font-size:\s*11px/);
+});
