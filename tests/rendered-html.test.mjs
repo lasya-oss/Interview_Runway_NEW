@@ -363,3 +363,13 @@ test("diagnostic choices use presentation-scale typography", async () => {
   assert.match(styles, /\.signal-answer-stack button > span\s*\{[\s\S]*font-size:\s*12px/);
   assert.match(styles, /\.signal-report-readout p,[\s\S]*font-size:\s*15px/);
 });
+
+test("homepage pricing tiers use readable explanatory copy", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(styles, /\.home-pricing-section \.home-price-layer > p\s*\{[\s\S]*font-size:\s*12px/);
+  assert.match(styles, /\.home-pricing-section \.home-price-layer dt\s*\{[\s\S]*font-size:\s*11px/);
+  assert.match(styles, /\.home-pricing-section \.home-price-layer dd\s*\{[\s\S]*font-size:\s*16px/);
+  assert.match(styles, /\.home-pricing-section \.home-price-layer > small\s*\{[\s\S]*font-size:\s*12px/);
+  assert.match(styles, /\.home-pricing-section \.home-price-layer > a\s*\{[\s\S]*font-size:\s*16px/);
+});

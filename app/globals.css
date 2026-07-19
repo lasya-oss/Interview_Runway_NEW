@@ -6279,3 +6279,105 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .signal-answer-stack button strong { font-size: 16px; line-height: 1.45; }
   .signal-answer-stack button i { font-size: 18px; }
 }
+
+/* The pricing cards sell the difference between tiers. Keep their supporting
+   copy at reading size instead of treating it like decorative telemetry. */
+
+.home-pricing-section .home-price-layer {
+  padding: 38px 40px;
+}
+
+.home-pricing-section .home-price-layer > p {
+  gap: 14px;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.home-pricing-section .home-price-layer > p b {
+  color: #8da0aa;
+  font-weight: 600;
+}
+
+.home-pricing-section .home-price-layer h3 {
+  margin-top: 54px;
+}
+
+.home-pricing-section .home-price-layer dl {
+  margin-top: 32px;
+}
+
+.home-pricing-section .home-price-layer dl > div {
+  min-height: 82px;
+  padding: 18px 0;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.home-pricing-section .home-price-layer dt {
+  padding-top: 2px;
+  color: #8da0aa;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+}
+
+.home-pricing-section .home-price-layer dd {
+  color: #c4d0d5;
+  font-size: 16px;
+  font-weight: 520;
+  line-height: 1.5;
+}
+
+.home-pricing-section .home-price-layer > small {
+  margin-top: 20px;
+  color: #8da0aa;
+  font-size: 12px;
+  font-weight: 560;
+  line-height: 1.55;
+  letter-spacing: 0.045em;
+}
+
+.home-pricing-section .home-price-layer > a {
+  padding-top: 34px;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.home-pricing-section .home-pricing-footer {
+  font-size: 11px;
+}
+
+.home-pricing-section .home-pricing-footer .text-link {
+  font-size: 15px;
+}
+
+@media (max-width: 1050px) {
+  .home-pricing-section .home-price-layer,
+  .home-pricing-section .home-price-layer-2 {
+    min-height: 520px;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-pricing-section .home-price-layer {
+    min-height: 0;
+    padding: 29px 27px;
+  }
+
+  .home-pricing-section .home-price-layer h3 { margin-top: 42px; }
+
+  .home-pricing-section .home-price-layer dl > div {
+    min-height: 0;
+    padding: 16px 0;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .home-pricing-section .home-price-layer dt { padding-top: 0; font-size: 10.5px; }
+  .home-pricing-section .home-price-layer dd { font-size: 15px; }
+  .home-pricing-section .home-price-layer > small { font-size: 11px; }
+  .home-pricing-section .home-price-layer > a { font-size: 15px; }
+}
