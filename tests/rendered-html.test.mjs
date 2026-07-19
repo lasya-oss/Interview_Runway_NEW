@@ -290,3 +290,14 @@ test("testimonial controls cannot be blocked by the decorative 3D canvas", async
   assert.match(component, /data-active-record=\{story\.number\}/);
   assert.doesNotMatch(component, /scrollTo\s*\(/);
 });
+
+test("member demo typography has an explicit legibility floor", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(styles, /--member-micro:\s*9px/);
+  assert.match(styles, /--member-body:\s*12\.5px/);
+  assert.match(styles, /\.member-nav a > b\s*\{\s*font-size:\s*13px/);
+  assert.match(styles, /\.member-status-band strong\s*\{\s*font-size:\s*11px/);
+  assert.match(styles, /\.mock-history-table strong\s*\{\s*font-size:\s*13\.5px/);
+  assert.match(styles, /\.member-material-card p\s*\{\s*font-size:\s*var\(--member-body\)/);
+});

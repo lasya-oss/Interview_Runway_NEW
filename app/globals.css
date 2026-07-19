@@ -4477,7 +4477,8 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 /* Member application shell: machined spine, work surface, operations rail */
 
-.member-shell {
+.member-shell,
+.demo-login-page {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 232px minmax(0, 1fr) 218px;
@@ -5780,4 +5781,216 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .testimonial-flight-deck .testimonial-flight-viewport { height: 640px; }
   .testimonial-flight-deck .testimonial-card { min-height: 580px; }
   .testimonial-flight-deck .testimonial-record { grid-template-columns: 1fr; }
+}
+
+/* Member workspace legibility scale.
+   Instrument labels stay compact, but no longer fall below a usable reading size. */
+
+.member-shell {
+  --member-micro: 9px;
+  --member-label: 10px;
+  --member-action: 11px;
+  --member-body: 12.5px;
+  --member-copy: 13.5px;
+}
+
+.member-sidebar-brand .brand { font-size: 12px; }
+.member-sidebar-brand > span { font-size: var(--member-micro); }
+.member-nav a { min-height: 52px; }
+.member-nav a > span { font-size: var(--member-micro); }
+.member-nav a > b { font-size: 13px; }
+.member-nav a > small { font-size: 8px; }
+.member-plan-card > span { font-size: var(--member-micro); }
+.member-plan-card strong { font-size: 13px; }
+.member-plan-card small { font-size: 9.5px; line-height: 1.45; }
+.member-plan-card > a { font-size: var(--member-action); }
+.member-avatar { font-size: var(--member-micro); }
+.member-profile-card strong { font-size: 11.5px; }
+.member-profile-card small { font-size: var(--member-micro); }
+.member-switch-button { font-size: var(--member-label); }
+
+.member-topbar { min-height: 102px; }
+.member-status-band { min-height: 64px; }
+.member-status-band span { font-size: 8px; }
+.member-status-band strong { font-size: 11px; }
+.member-topbar-signals { min-height: 38px; font-size: 8px; }
+
+.ops-rail-head { font-size: 8.5px; }
+.member-ops-rail section > span { font-size: 8px; }
+.member-ops-rail section > strong { font-size: 19px; }
+.member-ops-rail section > small { font-size: var(--member-label); }
+.member-ops-rail section > a { font-size: 10.5px; }
+.member-ops-rail li { font-size: 10.5px; }
+.member-ops-rail > p { font-size: 8px; }
+
+.member-kicker,
+.member-panel-label span { font-size: 9.5px; }
+.member-panel-label b { font-size: 8.5px; }
+.member-primary-button { font-size: 12px; }
+.member-section-heading > a,
+.member-section-heading > span { font-size: 11.5px; }
+.member-hero-copy > p:last-child { font-size: 14px; line-height: 1.65; }
+.readiness-dial span { font-size: 8.5px; }
+.next-action-panel > p { font-size: var(--member-copy); line-height: 1.6; }
+.week-strip b { font-size: 8.5px; }
+.weekly-stats div { font-size: var(--member-label); }
+.signal-bars > div > span,
+.signal-bars > div > b { font-size: 12px; }
+.tier-insight > span,
+.foundation-baseline-panel > span { font-size: var(--member-micro); }
+.tier-insight p,
+.foundation-baseline-panel p { font-size: var(--member-copy); line-height: 1.55; }
+.foundation-baseline-panel > a { font-size: var(--member-action); }
+
+.mock-history-table > div { min-height: 82px; }
+.mock-history-table span,
+.mock-history-table time { font-size: var(--member-micro); }
+.mock-history-table strong { font-size: 13.5px; }
+.mock-history-table small { font-size: var(--member-action); }
+.member-material-card > span { font-size: var(--member-micro); }
+.member-material-card small { font-size: var(--member-micro); letter-spacing: .05em; }
+.member-material-card p { font-size: var(--member-body); line-height: 1.55; }
+.member-material-card b { font-size: var(--member-action); }
+
+.roadmap-overview > div:first-child > p:last-child,
+.library-heading > div:first-child > p:last-child,
+.practice-heading > div:first-child > p:last-child,
+.feedback-heading > div:first-child > p:last-child,
+.coaching-heading > div:first-child > p:last-child,
+.material-header > div > p:last-child { font-size: 14px; }
+.roadmap-completion > span,
+.roadmap-toolbar > span,
+.roadmap-week-heading p,
+.library-index span,
+.library-search,
+.library-results-heading,
+.material-breadcrumb,
+.material-header dl > div,
+.material-stage-top,
+.material-stage > p,
+.material-stage-controls { font-size: var(--member-micro); }
+.roadmap-toolbar button { font-size: var(--member-action); }
+.roadmap-week-heading div > span { font-size: var(--member-body); line-height: 1.55; }
+.roadmap-week-heading > b { font-size: var(--member-label); }
+.roadmap-task-list strong { font-size: var(--member-body); }
+.roadmap-task-list small { font-size: var(--member-micro); }
+
+.library-search input { font-size: 13px; }
+.library-scope button,
+.library-category-rail button { font-size: var(--member-action); }
+.library-results-heading small { font-size: 8.5px; }
+.library-record-number { font-size: var(--member-label); }
+.library-record-copy > small,
+.library-record-copy > div span,
+.library-record-meta > span,
+.library-record-meta > small,
+.library-record-meta > b { font-size: var(--member-micro); }
+.library-record-copy > p { font-size: var(--member-body); line-height: 1.55; }
+.library-record-meta > a { font-size: var(--member-action); }
+
+.material-notes > div span { font-size: var(--member-micro); }
+.material-notes > div p { font-size: var(--member-copy); line-height: 1.55; }
+.material-chapters article > span,
+.material-chapters article > b { font-size: var(--member-micro); }
+.material-chapters article p { font-size: var(--member-body); line-height: 1.55; }
+.material-next-step p:last-child { font-size: 12px; line-height: 1.55; }
+
+.practice-briefing-main > span,
+.practice-briefing dl div,
+.practice-session-header span,
+.practice-session-header strong,
+.practice-session-header b,
+.practice-transcript-disclaimer,
+.interviewer-turn > span,
+.learner-turn > span,
+.practice-response-panel > div { font-size: var(--member-micro); }
+.practice-history-note { font-size: var(--member-action); }
+.practice-session-header button,
+.practice-sample-answer,
+.practice-complete-actions > button { font-size: var(--member-action); }
+.interviewer-turn p,
+.learner-turn p,
+.practice-response-panel textarea { font-size: 13px; }
+.interviewer-turn small { font-size: var(--member-action); }
+.practice-response-panel > p { font-size: var(--member-label); }
+.practice-complete > section > p:last-of-type { font-size: 14px; line-height: 1.6; }
+.practice-transcript-summary > article > span { font-size: var(--member-micro); }
+.practice-transcript-summary strong { font-size: var(--member-body); }
+.practice-transcript-summary p { font-size: 12px; }
+
+.feedback-score span,
+.feedback-score small,
+.feedback-primary-insight > span,
+.feedback-primary-insight > div small,
+.feedback-evidence-marker,
+.feedback-evidence-marker b,
+.feedback-evidence-list small,
+.feedback-evidence-list dt,
+.feedback-action-list small { font-size: var(--member-micro); }
+.feedback-tabs button { font-size: var(--member-action); }
+.feedback-dimensions article > div,
+.feedback-dimensions article > div b { font-size: var(--member-action); }
+.feedback-dimensions article > p,
+.feedback-evidence-list dd,
+.feedback-action-list p { font-size: 12px; line-height: 1.55; }
+.feedback-primary-insight > p,
+.feedback-evidence-intro > p:last-child,
+.feedback-actions-heading > p:last-child { font-size: var(--member-copy); line-height: 1.6; }
+.feedback-primary-insight > div b { font-size: var(--member-label); }
+.feedback-action-list a { font-size: var(--member-action); }
+
+.coaching-status span,
+.coaching-status small,
+.coaching-next-session time span,
+.coaching-next-session time small,
+.coaching-next-session > div:nth-of-type(2) > p,
+.coaching-note > div,
+.coaching-path-step small,
+.coaching-files article > span,
+.coaching-files small,
+.coaching-files article > b,
+.coaching-prework dl div { font-size: var(--member-micro); }
+.coaching-next-session li,
+.coaching-identity > p:not(.member-kicker),
+.coaching-path-step p,
+.coaching-prework > p:not(.member-kicker) { font-size: var(--member-body); line-height: 1.55; }
+.coaching-next-session > button,
+.coaching-files button,
+.coaching-prework button { font-size: var(--member-action); }
+.coaching-identity a { font-size: var(--member-action); }
+.coaching-note > p { font-size: var(--member-label); }
+.coaching-files h3 { font-size: var(--member-body); }
+.coaching-demo-boundary { font-size: var(--member-action); line-height: 1.55; }
+
+.demo-profile-index,
+.demo-profile-plan,
+.demo-login-form-top > div span,
+.demo-environment-badge,
+.demo-login-form label,
+.demo-entry-label,
+.demo-entry-learner small,
+.demo-entry-materials b,
+.demo-entry-copy > button small { font-size: var(--member-micro); }
+.demo-profile-card small,
+.demo-profile-state,
+.demo-login-note,
+.demo-entry-copy > p,
+.demo-entry-learner p,
+.demo-entry-materials small,
+.demo-entry-stack > .demo-login-note { font-size: var(--member-action); }
+.demo-login-form input { font-size: 13px; }
+.demo-login-submit { font-size: 14px; }
+.demo-entry-copy > ul li,
+.demo-entry-learner strong,
+.demo-entry-materials a > span { font-size: var(--member-body); }
+.member-review-copy small,
+.material-review-link span,
+.material-review-link small { font-size: var(--member-micro); }
+.member-review-copy p { font-size: 12px; }
+.member-review-copy b { font-size: 10.5px; }
+.material-review-link strong { font-size: 12px; }
+
+@media (max-width: 900px) {
+  .member-topbar { min-height: 0; }
+  .member-nav a { min-height: 46px; }
 }
