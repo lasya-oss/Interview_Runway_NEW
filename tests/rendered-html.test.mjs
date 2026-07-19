@@ -350,7 +350,7 @@ test("prep system restores its animated orbit with readable benefit copy", async
   assert.match(component, /className="instrument-rings"/);
   assert.match(component, /className="instrument-rotor"/);
   assert.match(component, /WHAT THIS SYSTEM UNLOCKS/);
-  assert.match(styles, /\.system-instrument-orbital \.instrument-readout p[\s\S]*font-size:\s*20px/);
-  assert.match(styles, /\.system-instrument-orbital \.instrument-readout li[\s\S]*font-size:\s*14px/);
-  assert.match(styles, /\.system-instrument-orbital \.instrument-status[\s\S]*font-size:\s*11px/);
+  assert.match(styles, /\.system-instrument-orbital \.instrument-readout p[\s\S]*font-size:\s*22px/);
+  assert.match(styles, /\.system-instrument-orbital \.instrument-readout li[\s\S]*font-size:\s*15\.5px/);
+  assert.match(styles, /\.system-instrument-orbital \.instrument-status[\s\S]*font-size:\s*12px/);
 });

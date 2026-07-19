@@ -6049,7 +6049,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   right: 24px;
   left: 24px;
   color: #a9bcc4;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 550;
   letter-spacing: .11em;
 }
@@ -6092,7 +6092,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   width: 44px;
   height: 34px;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   transform: rotate(var(--node-angle)) translateX(178px) rotate(var(--node-counter-angle));
 }
@@ -6111,7 +6111,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   width: 106px;
   margin-top: 10px;
   color: #b4c5cc;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 550;
   line-height: 1.4;
 }
@@ -6132,14 +6132,14 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   display: block;
   color: #a2b7c0;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 600;
   letter-spacing: .11em;
 }
 
 .system-instrument-orbital .instrument-readout p {
   margin-top: 10px;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1.25;
 }
 
@@ -6150,14 +6150,14 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 .system-instrument-orbital .instrument-readout li {
   color: #c1d0d6;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 540;
   line-height: 1.45;
 }
 
 .system-instrument-orbital .instrument-readout li span {
   margin-bottom: 7px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -6176,12 +6176,12 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 @media (max-width: 520px) {
   .payload-section .system-instrument-orbital { height: 690px; }
-  .system-instrument-orbital .instrument-status { right: 17px; left: 17px; font-size: 9px; }
+  .system-instrument-orbital .instrument-status { right: 17px; left: 17px; font-size: 10.5px; }
   .system-instrument-orbital .instrument-orbit { top: 68px; width: 292px; height: 292px; }
   .system-instrument-orbital .instrument-orbit > span {
     width: 38px;
     height: 30px;
-    font-size: 10px;
+    font-size: 11px;
     transform: rotate(var(--node-angle)) translateX(137px) rotate(var(--node-counter-angle));
   }
   .system-instrument-orbital .instrument-orbit > span.is-active {
@@ -6189,11 +6189,11 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   }
   .system-instrument-orbital .instrument-core { width: 124px; height: 124px; }
   .system-instrument-orbital .instrument-core b { font-size: 36px; }
-  .system-instrument-orbital .instrument-core span { width: 92px; font-size: 8.5px; }
+  .system-instrument-orbital .instrument-core span { width: 92px; font-size: 10px; }
   .system-instrument-orbital .instrument-readout { right: 14px; bottom: 14px; left: 14px; min-height: 280px; padding: 18px; }
-  .system-instrument-orbital .instrument-readout p { font-size: 18px; }
+  .system-instrument-orbital .instrument-readout p { font-size: 20px; }
   .system-instrument-orbital .instrument-readout ol { grid-template-columns: 1fr; gap: 9px; }
-  .system-instrument-orbital .instrument-readout li { font-size: 13.5px; }
+  .system-instrument-orbital .instrument-readout li { font-size: 15px; }
   .system-instrument-orbital .instrument-readout li span { display: inline; margin: 0 8px 0 0; }
 }
 
