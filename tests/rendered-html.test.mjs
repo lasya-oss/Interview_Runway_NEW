@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 let renderSequence = 0;
@@ -266,4 +267,12 @@ test("buyer-facing checkout contains no prototype or no-charge simulation", asyn
   const text = visibleText(await response.text());
   assert.match(text, /Continue securely with Paddle|Checkout configuration unavailable/i);
   assert.doesNotMatch(text, /prototype|simulation|₹0|no-charge/i);
+});
+
+test("3D renderer uses Retina-class density and hardware antialiasing", async () => {
+  const source = await readFile(new URL("../app/components/aero-canvases.tsx", import.meta.url), "utf8");
+  assert.match(source, /dpr=\{tier === "full" \? \[1\.75, 2\.5\] : \[1\.25, 2\]\}/);
+  assert.match(source, /antialias:\s*true/);
+  assert.match(source, /precision:\s*"highp"/);
+  assert.doesNotMatch(source, /antialias:\s*false/);
 });

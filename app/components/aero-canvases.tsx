@@ -30,10 +30,10 @@ function createAirfoilGeometry(lite: boolean) {
   const geometry = new THREE.ExtrudeGeometry(shape, {
     depth: 0.42,
     bevelEnabled: true,
-    bevelSegments: lite ? 1 : 3,
+    bevelSegments: lite ? 2 : 5,
     bevelSize: 0.08,
     bevelThickness: 0.08,
-    curveSegments: lite ? 14 : 24,
+    curveSegments: lite ? 20 : 40,
   });
   geometry.center();
   return geometry;
@@ -70,10 +70,10 @@ function createFanBladeGeometry(lite: boolean) {
   const geometry = new THREE.ExtrudeGeometry(shape, {
     depth: 0.075,
     bevelEnabled: true,
-    bevelSegments: lite ? 1 : 2,
+    bevelSegments: lite ? 2 : 4,
     bevelSize: 0.025,
     bevelThickness: 0.02,
-    curveSegments: lite ? 8 : 14,
+    curveSegments: lite ? 12 : 24,
   });
   geometry.translate(0, 0, -0.0375);
   return geometry;
@@ -92,23 +92,23 @@ function Turbofan({ lite, progressRef }: { lite: boolean; progressRef: MutableRe
   return (
     <group>
       <mesh position={[0, 0, -0.23]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[1.48, 1.62, 0.74, lite ? 40 : 72, 1, true]} />
+        <cylinderGeometry args={[1.48, 1.62, 0.74, lite ? 56 : 112, 1, true]} />
         <meshPhysicalMaterial color="#61727c" metalness={0.96} roughness={0.2} clearcoat={0.8} clearcoatRoughness={0.22} side={THREE.DoubleSide} />
       </mesh>
       <mesh position={[0, 0, 0.11]}>
-        <torusGeometry args={[1.45, 0.17, lite ? 10 : 18, lite ? 42 : 84]} />
+        <torusGeometry args={[1.45, 0.17, lite ? 14 : 28, lite ? 64 : 144]} />
         <meshPhysicalMaterial color="#b9c5ca" metalness={0.98} roughness={0.16} clearcoat={1} clearcoatRoughness={0.12} />
       </mesh>
       <mesh position={[0, 0, 0.055]}>
-        <torusGeometry args={[1.2, 0.055, 10, lite ? 40 : 72]} />
+        <torusGeometry args={[1.2, 0.055, lite ? 12 : 20, lite ? 56 : 112]} />
         <meshStandardMaterial color="#293b45" metalness={0.92} roughness={0.2} />
       </mesh>
       <mesh position={[0, 0, -0.03]}>
-        <circleGeometry args={[1.21, lite ? 40 : 72]} />
+        <circleGeometry args={[1.21, lite ? 56 : 112]} />
         <meshStandardMaterial color="#07131a" metalness={0.35} roughness={0.5} />
       </mesh>
       <mesh position={[0, 0, -0.18]}>
-        <torusGeometry args={[1.08, 0.04, 8, lite ? 36 : 64]} />
+        <torusGeometry args={[1.08, 0.04, lite ? 10 : 16, lite ? 52 : 104]} />
         <meshBasicMaterial color="#ff6b2c" transparent opacity={0.7} />
       </mesh>
       {!lite ? (
@@ -130,7 +130,7 @@ function Turbofan({ lite, progressRef }: { lite: boolean; progressRef: MutableRe
           </mesh>
         ))}
         <mesh position={[0, 0, 0.16]} rotation={[Math.PI / 2, 0, 0]}>
-          <coneGeometry args={[0.42, 0.72, lite ? 28 : 48]} />
+          <coneGeometry args={[0.42, 0.72, lite ? 40 : 80]} />
           <meshPhysicalMaterial color="#c7d1d5" metalness={0.97} roughness={0.15} clearcoat={1} clearcoatRoughness={0.12} />
         </mesh>
         <mesh position={[0, 0, 0.28]}><circleGeometry args={[0.18, 32]} /><meshBasicMaterial color="#e7eef1" /></mesh>
@@ -142,10 +142,10 @@ function Turbofan({ lite, progressRef }: { lite: boolean; progressRef: MutableRe
 function Gimbal({ lite }: { lite: boolean }) {
   return (
     <group>
-      <mesh rotation={[0.3, 0.8, 0.2]}><torusGeometry args={[1.55, 0.045, 8, lite ? 36 : 72]} /><meshStandardMaterial color="#6d8491" metalness={0.88} roughness={0.2} /></mesh>
-      <mesh rotation={[1.2, 0.15, 0.4]}><torusGeometry args={[1.18, 0.055, 8, lite ? 32 : 64]} /><meshStandardMaterial color="#b8c5cf" metalness={0.9} roughness={0.18} /></mesh>
-      {!lite ? <mesh rotation={[0.25, 0.15, 1.15]}><torusGeometry args={[0.82, 0.035, 10, 56]} /><meshBasicMaterial color="#ff6b2c" transparent opacity={0.8} /></mesh> : null}
-      <mesh><icosahedronGeometry args={[0.34, lite ? 1 : 2]} /><meshStandardMaterial color="#eaf0f4" emissive="#ff6b2c" emissiveIntensity={0.14} metalness={0.65} roughness={0.14} /></mesh>
+      <mesh rotation={[0.3, 0.8, 0.2]}><torusGeometry args={[1.55, 0.045, lite ? 12 : 24, lite ? 64 : 144]} /><meshStandardMaterial color="#6d8491" metalness={0.88} roughness={0.2} /></mesh>
+      <mesh rotation={[1.2, 0.15, 0.4]}><torusGeometry args={[1.18, 0.055, lite ? 12 : 24, lite ? 56 : 128]} /><meshStandardMaterial color="#b8c5cf" metalness={0.9} roughness={0.18} /></mesh>
+      {!lite ? <mesh rotation={[0.25, 0.15, 1.15]}><torusGeometry args={[0.82, 0.035, 20, 112]} /><meshBasicMaterial color="#ff6b2c" transparent opacity={0.8} /></mesh> : null}
+      <mesh><icosahedronGeometry args={[0.34, lite ? 3 : 5]} /><meshStandardMaterial color="#eaf0f4" emissive="#ff6b2c" emissiveIntensity={0.14} metalness={0.65} roughness={0.14} flatShading={false} /></mesh>
     </group>
   );
 }
@@ -162,8 +162,8 @@ const VAULT_ROUTE_POINTS: readonly [number, number, number][] = [
 function VaultFlightPlan({ lite, activeSystemRef }: { lite: boolean; activeSystemRef: SystemRef }) {
   const markerRef = useRef<THREE.Group>(null);
   const markerProgressRef = useRef(0);
-  const tubularSegments = lite ? 32 : 72;
-  const radialSegments = lite ? 6 : 10;
+  const tubularSegments = lite ? 56 : 128;
+  const radialSegments = lite ? 10 : 18;
   const curve = useMemo(
     () => new THREE.CatmullRomCurve3(VAULT_ROUTE_POINTS.map((point) => new THREE.Vector3(...point))),
     [],
@@ -407,10 +407,10 @@ export function HomeAeroCanvas({
   return (
     <Canvas
       frameloop="demand"
-      dpr={tier === "full" ? [1, 1.45] : 1}
+      dpr={tier === "full" ? [1.75, 2.5] : [1.25, 2]}
       resize={{ scroll: false, debounce: { scroll: 0, resize: 100 } }}
       camera={{ position: [0, 0, 7.4], fov: 42 }}
-      gl={{ alpha: true, antialias: false, powerPreference: "high-performance", depth: true, stencil: false, preserveDrawingBuffer: false, failIfMajorPerformanceCaveat: true }}
+      gl={{ alpha: true, antialias: true, precision: "highp", powerPreference: "high-performance", depth: true, stencil: false, preserveDrawingBuffer: false, failIfMajorPerformanceCaveat: true }}
       shadows={false}
       fallback={null}
     >
