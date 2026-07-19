@@ -291,6 +291,17 @@ test("3D renderer uses Retina-class density and hardware antialiasing", async ()
   assert.doesNotMatch(source, /antialias:\s*false/);
 });
 
+test("homepage 3D curve and wheel are mapped to their intended sections", async () => {
+  const source = await readFile(
+    new URL("../app/components/aero-canvases.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /SYSTEM_CURVE_WINDOW = \{ start: 0\.2, peak: 0\.31, end: 0\.5 \}/);
+  assert.match(source, /LAYER_WHEEL_WINDOW = \{ start: 0\.5, peak: 0\.58, end: 0\.7 \}/);
+  assert.match(source, /turbineRef[\s\S]*LAYER_WHEEL_WINDOW\.start[\s\S]*routeRef[\s\S]*SYSTEM_CURVE_WINDOW\.start/);
+});
+
 test("testimonial controls cannot be blocked by the decorative 3D canvas", async () => {
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const component = await readFile(new URL("../app/components/testimonial-flight-deck.tsx", import.meta.url), "utf8");

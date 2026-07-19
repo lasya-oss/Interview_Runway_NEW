@@ -251,6 +251,11 @@ function VaultFlightPlan({ lite, activeSystemRef }: { lite: boolean; activeSyste
   );
 }
 
+// Keep the system curve inside the six-system explorer and the turbine inside
+// the following three-layer sequence. Their windows meet, but never overlap.
+const SYSTEM_CURVE_WINDOW = { start: 0.2, peak: 0.31, end: 0.5 } as const;
+const LAYER_WHEEL_WINDOW = { start: 0.5, peak: 0.58, end: 0.7 } as const;
+
 function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progressRef: MutableRefObject<number>; pointerRef: VectorRef; activeSystemRef: SystemRef; tier: "lite" | "full" }) {
   const airfoilRef = useRef<THREE.Group>(null);
   const turbineRef = useRef<THREE.Group>(null);
@@ -275,9 +280,9 @@ function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progress
     }
 
     if (turbineRef.current) {
-      const weight = windowWeight(p, 0.16, 0.3, 0.49);
-      const local = smooth(clamp01((p - 0.16) / 0.33));
-      const pathLocal = clamp01((p - 0.18) / 0.2);
+      const weight = windowWeight(p, LAYER_WHEEL_WINDOW.start, LAYER_WHEEL_WINDOW.peak, LAYER_WHEEL_WINDOW.end);
+      const local = smooth(clamp01((p - LAYER_WHEEL_WINDOW.start) / (LAYER_WHEEL_WINDOW.end - LAYER_WHEEL_WINDOW.start)));
+      const pathLocal = clamp01((p - 0.515) / 0.17);
       const firstCrossing = smooth((pathLocal - 0.46) / 0.14);
       const secondCrossing = smooth((pathLocal - 0.72) / 0.14);
       const firstToSecond = THREE.MathUtils.lerp(2.28, -2.28, firstCrossing);
@@ -293,12 +298,12 @@ function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progress
     }
 
     if (routeRef.current) {
-      const weight = windowWeight(p, 0.35, 0.5, 0.69);
-      const local = smooth(clamp01((p - 0.35) / 0.34));
+      const weight = windowWeight(p, SYSTEM_CURVE_WINDOW.start, SYSTEM_CURVE_WINDOW.peak, SYSTEM_CURVE_WINDOW.end);
+      const local = smooth(clamp01((p - SYSTEM_CURVE_WINDOW.start) / (SYSTEM_CURVE_WINDOW.end - SYSTEM_CURVE_WINDOW.start)));
       routeRef.current.visible = weight > 0.002;
-      routeRef.current.scale.setScalar(Math.max(0.001, weight * (0.92 + local * 0.12)));
-      routeRef.current.position.set(0.75 - local * 1.45, 0.05, -1.55 + local * 0.18);
-      routeRef.current.rotation.set(0.06 + local * 0.04, -0.2 + local * 0.34, -0.08 + local * 0.12);
+      routeRef.current.scale.setScalar(Math.max(0.001, weight * (0.98 + local * 0.08)));
+      routeRef.current.position.set(-1.05 - local * 0.35, -0.18, -1.68 + local * 0.08);
+      routeRef.current.rotation.set(0.04 + local * 0.03, -0.12 + local * 0.16, -0.06 + local * 0.08);
     }
 
     if (gimbalRef.current) {
