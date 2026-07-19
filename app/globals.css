@@ -4469,8 +4469,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 /* Member application shell: machined spine, work surface, operations rail */
 
-.member-shell,
-.demo-login-page {
+.member-shell {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 232px minmax(0, 1fr) 218px;

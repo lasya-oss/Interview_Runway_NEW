@@ -373,3 +373,11 @@ test("homepage pricing tiers use readable explanatory copy", async () => {
   assert.match(styles, /\.home-pricing-section \.home-price-layer > small\s*\{[\s\S]*font-size:\s*12px/);
   assert.match(styles, /\.home-pricing-section \.home-price-layer > a\s*\{[\s\S]*font-size:\s*16px/);
 });
+
+test("demo chooser is not constrained by the member application shell", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.doesNotMatch(styles, /\.member-shell\s*,\s*\.demo-login-page\s*\{/);
+  assert.match(styles, /\.member-shell\s*\{[\s\S]*grid-template-columns:\s*232px minmax\(0, 1fr\) 218px/);
+  assert.match(styles, /\.demo-login-layout\s*\{[\s\S]*grid-template-columns:\s*minmax\(390px, \.76fr\) minmax\(0, 1\.24fr\)/);
+});
