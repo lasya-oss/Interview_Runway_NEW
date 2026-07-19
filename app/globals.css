@@ -1846,7 +1846,10 @@ body {
 .home-aero-stage canvas {
   width: 100% !important;
   height: 100% !important;
+  pointer-events: none !important;
 }
+
+.home-aero-stage * { pointer-events: none !important; }
 
 .aero-static-form {
   position: absolute;
@@ -3110,43 +3113,35 @@ html[data-aero-canvas="ready"] .aero-static-form { opacity: 0.06; }
 }
 
 .testimonial-flight-viewport {
+  position: relative;
   min-width: 0;
+  min-height: clamp(440px, 54vh, 570px);
   margin-top: clamp(1.2rem, 3vh, 2rem);
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
+  display: grid;
+  align-items: center;
+  overflow: hidden;
   perspective: 1400px;
-  scroll-snap-type: x proximity;
 }
 
-.testimonial-flight-viewport::-webkit-scrollbar { display: none; }
 .testimonial-flight-viewport:focus-visible { outline: 2px solid var(--afterburner); outline-offset: -3px; }
 
 .testimonial-flight-track {
-  width: max-content;
+  width: 100%;
   min-height: 100%;
   margin: 0;
   padding: 18px max(24px, calc((100vw - var(--wrap)) / 2)) 34px;
-  display: flex;
-  align-items: center;
-  gap: clamp(1.5rem, 3vw, 3.4rem);
+  display: grid;
+  place-items: center;
   list-style: none;
 }
 
 .testimonial-card {
-  width: min(66vw, 860px);
+  width: min(74vw, 980px);
   min-height: clamp(390px, 48vh, 520px);
-  flex: 0 0 auto;
-  opacity: .46;
-  scroll-snap-align: center;
-  transform: rotateY(-2.5deg) translateY(-5px);
   transform-style: preserve-3d;
-  transition: opacity 260ms ease, transform 420ms var(--ease-out-expo);
 }
 
-.testimonial-card:nth-child(even) { transform: rotateY(2.5deg) translateY(16px); }
-.testimonial-card.is-active { opacity: 1; transform: rotateY(0) translateY(0) scale(1.015); }
+.testimonial-card.is-active { opacity: 1; }
 
 .testimonial-card article {
   position: relative;
@@ -3755,10 +3750,9 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .testimonial-flight-header { padding-top: 7rem; grid-template-columns: 1fr; gap: 1.4rem; }
   .testimonial-flight-header h2 { font-size: clamp(3.4rem, 12vw, 5rem); }
   .testimonial-flight-intro strong { font-size: 16px; }
-  .testimonial-flight-viewport { height: 570px; margin-top: 2.2rem; }
+  .testimonial-flight-viewport { min-height: 570px; height: auto; margin-top: 2.2rem; }
   .testimonial-flight-track { align-items: stretch; padding-right: 18px; padding-left: 18px; }
-  .testimonial-card,
-  .testimonial-card:nth-child(even) { width: min(86vw, 680px); min-height: 510px; transform: none; }
+  .testimonial-card { width: min(86vw, 680px); min-height: 510px; }
   .testimonial-card blockquote { font-size: clamp(1.3rem, 4.2vw, 1.75rem); }
   .testimonial-flight-footer { padding-inline: 18px; flex-wrap: wrap; }
   .testimonial-flight-progress { width: auto; flex: 1; }
@@ -3806,11 +3800,10 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .control-step h3 { font-size: 2.45rem; }
   .envelope-plane { padding: 26px; }
   .envelope-plane h3 { font-size: 2.35rem; }
-  .testimonial-flight-viewport { height: 620px; }
+  .testimonial-flight-viewport { min-height: 620px; }
   .testimonial-flight-progress { flex-basis: 100%; }
   .testimonial-flight-controls { width: 100%; min-width: 0; }
-  .testimonial-card,
-  .testimonial-card:nth-child(even) { width: calc(100vw - 32px); min-height: 570px; }
+  .testimonial-card { width: calc(100vw - 32px); min-height: 570px; }
   .testimonial-card article { padding: 24px 21px; }
   .testimonial-card blockquote { margin: 1.35rem 0 1.15rem; font-size: 1.42rem; }
   .testimonial-record { grid-template-columns: 1fr; }
@@ -3822,9 +3815,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 @media (prefers-reduced-motion: reduce) {
   .testimonial-flight-deck { min-height: auto; }
   .testimonial-flight-pin { position: relative; height: auto; min-height: 0; padding-bottom: 24px; }
-  .testimonial-flight-viewport { height: min(570px, 68svh); margin-top: 2rem; }
-  .testimonial-card,
-  .testimonial-card:nth-child(even) { transform: none; }
+  .testimonial-flight-viewport { min-height: min(570px, 68svh); height: auto; margin-top: 2rem; }
 }
 
 /* Keep the complete desktop hero inside the opening viewport. The headline

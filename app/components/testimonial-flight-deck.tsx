@@ -1,8 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+} from "motion/react";
+import { useCallback, useRef, useState } from "react";
 
 const EVIDENCE_RECORDS = [
   {
@@ -45,82 +51,41 @@ const EVIDENCE_RECORDS = [
 
 export function TestimonialFlightDeck() {
   const sectionRef = useRef<HTMLElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
+  const activeIndexRef = useRef(0);
   const manualNavigationUntilRef = useRef(0);
   const reduceMotion = useReducedMotion();
-  const [compact, setCompact] = useState(false);
-  const [trackProgress, setTrackProgress] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState<1 | -1>(1);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
 
-  const updateTrackProgress = useCallback(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    const max = Math.max(1, viewport.scrollWidth - viewport.clientWidth);
-    setTrackProgress(Math.min(1, viewport.scrollLeft / max));
-    const viewportCenter = viewport.getBoundingClientRect().left + viewport.clientWidth / 2;
-    const cards = Array.from(viewport.querySelectorAll<HTMLElement>(".testimonial-card"));
-    const closestIndex = cards.reduce((closest, card, index) => {
-      const rect = card.getBoundingClientRect();
-      const distance = Math.abs(rect.left + rect.width / 2 - viewportCenter);
-      return distance < closest.distance ? { index, distance } : closest;
-    }, { index: 0, distance: Number.POSITIVE_INFINITY }).index;
-    setActiveIndex((current) => current === closestIndex ? current : closestIndex);
+  const showRecord = useCallback((index: number, travelDirection: 1 | -1) => {
+    activeIndexRef.current = index;
+    setDirection(travelDirection);
+    setActiveIndex(index);
   }, []);
 
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 800px)");
-    const update = () => setCompact(media.matches);
-    update();
-    media.addEventListener("change", update);
-    const viewport = viewportRef.current;
-    const observer = new ResizeObserver(updateTrackProgress);
-    if (viewport) {
-      viewport.addEventListener("scroll", updateTrackProgress, { passive: true });
-      observer.observe(viewport);
-    }
-    return () => {
-      media.removeEventListener("change", update);
-      viewport?.removeEventListener("scroll", updateTrackProgress);
-      observer.disconnect();
-    };
-  }, [updateTrackProgress]);
-
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const viewport = viewportRef.current;
-    if (
-      !viewport
-      || reduceMotion
-      || compact
-      || performance.now() < manualNavigationUntilRef.current
-    ) return;
-    const max = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-    viewport.scrollLeft = latest * max;
+    if (reduceMotion || performance.now() < manualNavigationUntilRef.current) return;
+    const scrollIndex = Math.min(
+      EVIDENCE_RECORDS.length - 1,
+      Math.floor(latest * EVIDENCE_RECORDS.length),
+    );
+    if (scrollIndex === activeIndexRef.current) return;
+    showRecord(scrollIndex, scrollIndex > activeIndexRef.current ? 1 : -1);
   });
 
   const move = (direction: -1 | 1) => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    const targetIndex = (activeIndex + direction + EVIDENCE_RECORDS.length) % EVIDENCE_RECORDS.length;
-    const target = viewport.querySelectorAll<HTMLElement>(".testimonial-card")[targetIndex];
-    if (!target) return;
-    const max = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-    const viewportRect = viewport.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    const targetContentLeft = targetRect.left - viewportRect.left + viewport.scrollLeft;
-    const centeredLeft = targetContentLeft - (viewport.clientWidth - targetRect.width) / 2;
-    manualNavigationUntilRef.current = performance.now() + 2400;
-    setActiveIndex(targetIndex);
-    setTrackProgress(targetIndex / (EVIDENCE_RECORDS.length - 1));
-    viewport.scrollTo({
-      left: Math.max(0, Math.min(max, centeredLeft)),
-      behavior: reduceMotion ? "auto" : "smooth",
-    });
+    const targetIndex = (
+      activeIndexRef.current + direction + EVIDENCE_RECORDS.length
+    ) % EVIDENCE_RECORDS.length;
+    manualNavigationUntilRef.current = performance.now() + 2800;
+    showRecord(targetIndex, direction);
   };
 
+  const story = EVIDENCE_RECORDS[activeIndex];
   const previousLabel = EVIDENCE_RECORDS[(activeIndex - 1 + EVIDENCE_RECORDS.length) % EVIDENCE_RECORDS.length].number;
   const nextLabel = EVIDENCE_RECORDS[(activeIndex + 1) % EVIDENCE_RECORDS.length].number;
 
@@ -148,9 +113,9 @@ export function TestimonialFlightDeck() {
 
         <div
           className="testimonial-flight-viewport"
-          ref={viewportRef}
           tabIndex={0}
-          aria-label="Evidence record formats. Scroll horizontally or use the arrow controls."
+          data-active-record={story.number}
+          aria-label="Evidence record formats. Use the left and right arrow controls to change records."
           onKeyDown={(event) => {
             if (event.key === "ArrowLeft") {
               event.preventDefault();
@@ -162,12 +127,27 @@ export function TestimonialFlightDeck() {
             }
           }}
         >
-          <ol className="testimonial-flight-track">
-            {EVIDENCE_RECORDS.map((story, index) => (
-              <li
-                className={`testimonial-card${index === activeIndex ? " is-active" : ""}`}
-                aria-current={index === activeIndex ? "true" : undefined}
+          <ol className="testimonial-flight-track" aria-live="polite">
+            <AnimatePresence initial={false} mode="wait" custom={direction}>
+              <motion.li
+                className="testimonial-card is-active"
+                aria-current="true"
                 key={story.number}
+                custom={direction}
+                initial={reduceMotion ? { opacity: 0 } : {
+                  opacity: 0,
+                  x: direction * 150,
+                  rotateY: direction * 5,
+                  filter: "blur(4px)",
+                }}
+                animate={{ opacity: 1, x: 0, rotateY: 0, filter: "blur(0px)" }}
+                exit={reduceMotion ? { opacity: 0 } : {
+                  opacity: 0,
+                  x: direction * -120,
+                  rotateY: direction * -4,
+                  filter: "blur(3px)",
+                }}
+                transition={{ duration: reduceMotion ? 0.01 : 0.42, ease: [0.16, 1, 0.3, 1] }}
               >
                 <article aria-label={`${story.system} evidence record`}>
                   <div className="testimonial-card-topline">
@@ -183,14 +163,14 @@ export function TestimonialFlightDeck() {
                   <p className="testimonial-timeframe">TIMEFRAME · {story.timeframe}</p>
                   <div className="testimonial-engine-mark" aria-hidden="true"><i /><i /><span /></div>
                 </article>
-              </li>
-            ))}
+              </motion.li>
+            </AnimatePresence>
           </ol>
         </div>
 
         <footer className="container testimonial-flight-footer">
           <div className="testimonial-flight-progress" aria-hidden="true">
-            <span style={{ width: `${Math.max(8, trackProgress * 100)}%` }} />
+            <span style={{ width: `${((activeIndex + 1) / EVIDENCE_RECORDS.length) * 100}%` }} />
           </div>
           <div
             className="testimonial-flight-controls"
@@ -206,14 +186,14 @@ export function TestimonialFlightDeck() {
               }
             }}
           >
-            <button type="button" onClick={() => move(-1)} aria-label={`Previous story, ${previousLabel}`}>
+            <button type="button" data-testid="previous-evidence-record" onClick={() => move(-1)} aria-label={`Previous story, ${previousLabel}`}>
               <span className="testimonial-control-arrow" aria-hidden="true">←</span>
               <span className="testimonial-control-copy"><small>PREVIOUS</small><b>{previousLabel}</b></span>
             </button>
             <div className="testimonial-flight-position" aria-live="polite">
               <span>RECORD</span><b>{EVIDENCE_RECORDS[activeIndex].number}</b><small>/ 04</small>
             </div>
-            <button type="button" onClick={() => move(1)} aria-label={`Next story, ${nextLabel}`}>
+            <button type="button" data-testid="next-evidence-record" onClick={() => move(1)} aria-label={`Next story, ${nextLabel}`}>
               <span className="testimonial-control-copy"><small>NEXT</small><b>{nextLabel}</b></span>
               <span className="testimonial-control-arrow" aria-hidden="true">→</span>
             </button>

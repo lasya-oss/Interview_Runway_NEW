@@ -69,6 +69,9 @@ test("server-renders the finished InterviewRunway homepage", async () => {
   assert.match(text, /Check your interview signal/i);
   assert.match(html, /href=["'][^"']*\/diagnostic["'][^>]*data-analytics-event=["']hero_signal_cta_clicked["']/i);
   assert.match(text, /Baseline → intervention → signal change → outcome/i);
+  assert.match(html, /data-testid=["']previous-evidence-record["']/i);
+  assert.match(html, /data-testid=["']next-evidence-record["']/i);
+  assert.match(html, /data-active-record=["']01["']/i);
   assert.doesNotMatch(text, /I stopped memorising solutions|One focused calibration session was more useful/i);
 
   assert.match(html, /<html[^>]*\blang=["']en-IN["']/i);
@@ -275,4 +278,15 @@ test("3D renderer uses Retina-class density and hardware antialiasing", async ()
   assert.match(source, /antialias:\s*true/);
   assert.match(source, /precision:\s*"highp"/);
   assert.doesNotMatch(source, /antialias:\s*false/);
+});
+
+test("testimonial controls cannot be blocked by the decorative 3D canvas", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const component = await readFile(new URL("../app/components/testimonial-flight-deck.tsx", import.meta.url), "utf8");
+
+  assert.match(styles, /\.home-aero-stage \*\s*\{\s*pointer-events:\s*none\s*!important;/);
+  assert.match(component, /data-testid="previous-evidence-record"/);
+  assert.match(component, /data-testid="next-evidence-record"/);
+  assert.match(component, /data-active-record=\{story\.number\}/);
+  assert.doesNotMatch(component, /scrollTo\s*\(/);
 });
