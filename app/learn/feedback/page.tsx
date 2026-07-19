@@ -51,7 +51,7 @@ export default async function FeedbackPage() {
           <LockedMemberPanel
             tier="The Second Seat"
             title="Feedback begins with interview-shaped evidence."
-            body="Foundation provides the preparation system and self-checks. The Second Seat adds stored transcripts, category-level practice signals, and corrections tied to specific moments. This controlled demo uses prewritten sample evidence."
+            body="The Vault provides the preparation system and self-checks. The Second Seat adds stored transcripts, category-level practice signals, and corrections tied to specific moments. This demo uses prewritten sample evidence."
           />
         </div>
       </MemberShell>

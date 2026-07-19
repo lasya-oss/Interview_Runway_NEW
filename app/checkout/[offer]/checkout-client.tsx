@@ -21,7 +21,7 @@ export function CheckoutClient({
   const beginCheckout = async () => {
     if (!clientToken || state === "preparing") return;
 
-    trackEvent("foundation_checkout_started", { offer: "foundation", surface: "secure_checkout" });
+    trackEvent("checkout_started", { offer: "vault", surface: "paddle_button" });
 
     setState("preparing");
     setMessage("");
@@ -102,7 +102,7 @@ export function CheckoutClient({
       >
         {state === "error"
           ? message
-          : "Review the final total and available payment methods before completing the Foundation purchase."}
+          : "Enter the email you want on the receipt, review the final total, and choose your payment method before completing purchase."}
       </p>
     </div>
   );

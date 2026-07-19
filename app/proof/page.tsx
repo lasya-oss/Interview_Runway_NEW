@@ -221,7 +221,7 @@ export default function ProofPage() {
               here before the first testimonial goes live.
             </p>
             <CtaLink href="/vault">
-              See what Foundation includes <span aria-hidden="true">→</span>
+              See what the Vault includes <span aria-hidden="true">→</span>
             </CtaLink>
           </div>
         </div>

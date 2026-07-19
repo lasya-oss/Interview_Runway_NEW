@@ -19,7 +19,7 @@ const CRITERIA = [
   {
     title: "Starting commitment",
     interviewRunway:
-      "The path starts with ₹799 Foundation. The Second Seat is previewable but unlocks only after measurable Foundation clearance; Human Calibration is an evidence-led final step.",
+      "The published launch path starts with a ₹799, one-time Vault. The Second Seat and 1:1 coaching are separate, optional steps.",
     verify:
       "Check the other program's current total price, financing terms, included services, and cancellation terms on its official pages or contract.",
   },
@@ -33,14 +33,14 @@ const CRITERIA = [
   {
     title: "Learning format",
     interviewRunway:
-      "The system is staged: self-paced Foundation first, responsive Second Seat practice after clearance, and capacity-capped Human Calibration only when repeated evidence identifies a persistent gap.",
+      "The model is staged: self-paced foundations first, optional text-based AI practice next, and capacity-capped human coaching only when needed.",
     verify:
       "Confirm whether the alternative is cohort-based, self-paced, group-led, or 1:1, and how much live support is included in writing.",
   },
   {
     title: "India payment experience",
     interviewRunway:
-      "Foundation is priced in INR, with the final tax-adjusted total and available payment methods shown before confirmation. No optional upgrade is added silently.",
+      "The planned checkout is INR-first and UPI-first, with the exact price and applicable taxes shown before payment. Payments are not active yet.",
     verify:
       "Check the final currency, taxes, payment methods, financing cost, and foreign-transaction implications for your location.",
   },
@@ -54,7 +54,7 @@ const CRITERIA = [
   {
     title: "Refund and exit terms",
     interviewRunway:
-      "The checkout links the current written terms and refund standard before payment. Product-specific access and eligibility conditions are disclosed before confirmation.",
+      "The final refund window is still pending and must be shown at checkout before payments are enabled.",
     verify:
       "Read the provider's current written refund, deferral, attendance, financing, and cancellation conditions before signing or paying.",
   },
@@ -104,7 +104,7 @@ export default function InterviewKickstartAlternativeIndiaPage() {
                 <li>A low-commitment, self-paced starting point</li>
                 <li>Prep framed for India-to-remote interview contexts</li>
                 <li>DSA, system design, behavioural, and remote-career foundations</li>
-                <li>A clear Foundation-to-Second-Seat path instead of one bundled package</li>
+                <li>Optional practice and coaching instead of one bundled package</li>
                 <li>Clear limits without a placement or salary promise</li>
               </ul>
             </article>
@@ -112,9 +112,9 @@ export default function InterviewKickstartAlternativeIndiaPage() {
               <h3>Look elsewhere if you need</h3>
               <ul>
                 <li>A live cohort from the first day</li>
-                <li>High-touch human support bundled into the initial purchase</li>
+                <li>High-touch coaching bundled into the initial purchase</li>
                 <li>A placement, visa, sponsorship, or salary guarantee</li>
-                <li>Direct access to the Second Seat without completing its Foundation clearance</li>
+                <li>A purchase today—the InterviewRunway checkout is not active yet</li>
                 <li>A format or role focus not covered by the published curriculum</li>
               </ul>
             </article>
@@ -138,7 +138,7 @@ export default function InterviewKickstartAlternativeIndiaPage() {
           </ul>
           <div className="section-actions">
             <Link className="text-link" href="/vault">
-              Review ₹799 Foundation <span aria-hidden="true">→</span>
+              Review the ₹799 Vault <span aria-hidden="true">→</span>
             </Link>
             <Link className="text-link" href="/proof">
               Read the proof standard <span aria-hidden="true">→</span>

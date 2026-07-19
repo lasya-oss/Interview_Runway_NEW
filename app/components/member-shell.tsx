@@ -8,9 +8,9 @@ const MEMBER_NAV = [
   { key: "today", href: "/learn", label: "Today", mark: "01", access: "library" },
   { key: "roadmap", href: "/learn/roadmap", label: "Roadmap", mark: "02", access: "library" },
   { key: "library", href: "/learn/library", label: "Library", mark: "03", access: "library" },
-  { key: "practice", href: "/learn/practice", label: "Second Seat", mark: "04", access: "practice" },
+  { key: "practice", href: "/learn/practice", label: "Practice", mark: "04", access: "practice" },
   { key: "feedback", href: "/learn/feedback", label: "Feedback", mark: "05", access: "feedback" },
-  { key: "coaching", href: "/learn/coaching", label: "Human Calibration", mark: "06", access: "coaching" },
+  { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "06", access: "coaching" },
 ] as const;
 
 export function MemberShell({
@@ -27,17 +27,11 @@ export function MemberShell({
     : profile.id === "practice"
       ? { window: "19 days", signal: "78 · practice", event: "Adaptive mock 08", eventTime: "Tue · 20:00" }
       : { window: "13 days", signal: "84 · coach calibrated", event: "Calibration session", eventTime: "Thu · 18:30" };
-  const accessName = profile.id === "foundation"
-    ? "Foundation · Sample"
-    : profile.id === "practice"
-      ? "The Second Seat · Sample"
-      : "Human Calibration · Sample";
-  const clearanceComplete = profile.clearanceCompleted === profile.clearanceTotal;
   const conversion = profile.id === "foundation"
-    ? { href: "/learn/roadmap", label: "Continue Foundation clearance", event: undefined }
+    ? { href: "/checkout/vault", label: "Start Vault · ₹799", event: "checkout_started" }
     : profile.id === "practice"
-      ? { href: "/learn/practice", label: "Open The Second Seat", event: "second_seat_unlock_started" }
-      : { href: "/learn/coaching", label: "Open Human Calibration", event: undefined };
+      ? { href: "/second-seat", label: "Review Second Seat access", event: undefined }
+      : { href: "/premium", label: "Review calibration", event: undefined };
 
   return (
     <div className="member-shell" data-member-tier={profile.id}>
@@ -49,7 +43,7 @@ export function MemberShell({
             const unlocked = profile.access[item.access];
             return (
               <Link className={`${active === item.key ? "is-active" : ""} ${unlocked ? "" : "is-locked"}`} href={item.href} key={item.key}>
-                <span>{item.mark}</span><b>{item.label}</b>{unlocked ? null : <small>{item.key === "practice" ? "Clearance" : "Evidence"}</small>}
+                <span>{item.mark}</span><b>{item.label}</b>{unlocked ? null : <small>Upgrade</small>}
               </Link>
             );
           })}
@@ -57,9 +51,9 @@ export function MemberShell({
 
         <div className="member-plan-card">
           <span>Current access</span>
-          <strong>{accessName}</strong>
+          <strong>{profile.plan}</strong>
           <div><i style={{ width: `${profile.progress}%` }} /></div>
-          <small>{profile.progress}% plan progress · Week {profile.week}<br />{clearanceComplete ? "Sample clearance complete" : `Sample clearance ${profile.clearanceCompleted} of ${profile.clearanceTotal}`}</small>
+          <small>{profile.progress}% plan progress · Week {profile.week}</small>
           <Link href="/pricing">Compare access</Link>
         </div>
 
@@ -104,9 +98,9 @@ export function MemberShell({
         <section>
           <span>Access stack</span>
           <ul>
-            <li className="is-on"><i /> Foundation</li>
-            <li className={profile.access.practice ? "is-on" : ""}><i /> The Second Seat</li>
-            <li className={profile.access.coaching ? "is-on" : ""}><i /> Human Calibration</li>
+            <li className="is-on"><i /> Vault library</li>
+            <li className={profile.access.practice ? "is-on" : ""}><i /> AI practice</li>
+            <li className={profile.access.coaching ? "is-on" : ""}><i /> Coach room</li>
           </ul>
         </section>
         <p>DEMO WORKSPACE<br />NO PURCHASE REQUIRED</p>

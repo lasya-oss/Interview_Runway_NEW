@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AnalyticsView } from "@/app/components/analytics-view";
 import { CtaLink, PageHero, PageShell, SectionHeading } from "@/app/components/site-chrome";
 
 export const metadata: Metadata = {
-  title: "Human Calibration — focused interview guidance",
-  description: "Evidence-led, capacity-capped Human Calibration for InterviewRunway learners with one specific, persistent interview gap.",
+  title: "1:1 interview coaching",
+  description: "Capacity-capped 1:1 interview coaching for InterviewRunway learners with specific, persistent interview gaps.",
   alternates: { canonical: "/premium" },
 };
 
@@ -14,18 +13,17 @@ export default function PremiumPage() {
     <PageShell>
       <PageHero
         motif="calibrator"
-        eyebrow="HUMAN CALIBRATION · EVIDENCE-LED"
-        title={<>When the remaining gap becomes personal, <em>a person steps in.</em></>}
-        body="Your practice evidence becomes a focused mentor packet, so the conversation begins with your actual gap—not a generic coaching script."
+        eyebrow="1:1 COACHING · CAPACITY-CAPPED"
+        title={<>One coach. One gap. <em>Full focus.</em></>}
+        body="Founder-led coaching for engineers who have done the groundwork, practised repeatedly, and can point to the part of the interview loop that still is not moving."
       >
-        <AnalyticsView event="human_calibration_viewed" payload={{ surface: "human_calibration_page" }} />
         <div className="availability-panel">
           <span className="availability-light" aria-hidden="true" />
-          <div><strong>Evidence-led · capacity capped</strong><p>Package scope, real availability, and final terms are confirmed before booking. Price: ₹9,999.</p></div>
+          <div><strong>Live availability is not connected yet</strong><p>No slot count will be shown until it comes from the real calendar. Working package price: ₹9,999.</p></div>
         </div>
         <div className="hero-actions">
-          <CtaLink href="#scope">Review Human Calibration</CtaLink>
-          <Link className="text-link" href="/diagnostic">Check your interview signal <span aria-hidden="true">→</span></Link>
+          <CtaLink href="#scope">Review the coaching scope</CtaLink>
+          <Link className="text-link" href="/about">Verify the founder standard <span aria-hidden="true">→</span></Link>
         </div>
       </PageHero>
 
@@ -33,8 +31,8 @@ export default function PremiumPage() {
         <div className="container">
           <SectionHeading
             eyebrow="WHO THIS IS FOR"
-            title="Human judgment after evidence—not before it."
-            body="Human Calibration solves a named problem. If the next step is more Foundation work or another Second Seat practice loop, that is what the system should tell you."
+            title="Coaching after diagnosis—not before it."
+            body="The premium tier should solve a named problem. If the best next step is more fundamentals or another AI mock, that is what the product should tell you."
             id="scope-title"
           />
           <div className="content-grid">
@@ -45,7 +43,7 @@ export default function PremiumPage() {
             </article>
             <article className="content-card">
               <p className="module-kicker">NOT YET</p>
-              <h3>The flight plan still needs reps</h3>
+              <h3>The foundation still needs reps</h3>
               <ul><li>You have not completed core prep</li><li>You want a placement or referral guarantee</li><li>You cannot yet name the interview stage causing trouble</li><li>You need unlimited on-demand support</li></ul>
             </article>
           </div>
@@ -55,9 +53,9 @@ export default function PremiumPage() {
       <section className="content-section method-section" aria-labelledby="package-title">
         <div className="container method-layout">
           <SectionHeading
-            eyebrow="FOCUSED CALIBRATION PACKAGE"
+            eyebrow="WORKING LAUNCH PACKAGE"
             title="The scope gets explicit before the calendar opens."
-            body="₹9,999 is the package price. Session count, duration, preparation, rescheduling, payment options, and deliverables are confirmed together before a booking is accepted."
+            body="₹9,999 is the current working price. Final session count, duration, preparation, rescheduling, EMI eligibility, and deliverables must be published together before bookings are accepted."
             id="package-title"
           />
           <article className="content-card">
@@ -75,10 +73,10 @@ export default function PremiumPage() {
 
       <section className="section-pad final-cta" aria-labelledby="premium-cta-title">
         <div className="container final-cta-inner">
-          <p className="eyebrow">THE FINAL APPROACH</p>
-          <h2 id="premium-cta-title">Bring a person in when the evidence is ready.</h2>
-          <p>Start with the signal check. Human Calibration becomes useful only when a repeated gap is specific enough to focus the engagement.</p>
-          <CtaLink href="/diagnostic">Check your interview signal</CtaLink>
+          <p className="eyebrow">TRUST BEFORE SCARCITY</p>
+          <h2 id="premium-cta-title">No fake slot counter.</h2>
+          <p>The booking path will open only after the founder profile, package scope, and live calendar are connected and verified.</p>
+          <CtaLink href="/checkout/premium">Preview the ₹9,999 order summary</CtaLink>
         </div>
       </section>
     </PageShell>

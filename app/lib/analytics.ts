@@ -8,20 +8,11 @@ export const ANALYTICS_EVENTS = [
   "pricing_tier_viewed",
   "checkout_started",
   "checkout_completed",
+  "foundation_checkout_started",
+  "second_seat_preview_started",
   "practice_first_session_completed",
   "mock_score_recorded",
   "learner_story_consent_captured",
-  "second_seat_teaser_viewed",
-  "second_seat_preview_started",
-  "second_seat_preview_completed",
-  "second_seat_perspective_changed",
-  "foundation_clearance_viewed",
-  "foundation_checkout_started",
-  "second_seat_eligibility_completed",
-  "second_seat_unlock_started",
-  "practice_time_viewed",
-  "practice_time_topup_started",
-  "human_calibration_viewed",
 ] as const;
 
 export type AnalyticsEvent = (typeof ANALYTICS_EVENTS)[number];

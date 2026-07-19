@@ -13,10 +13,6 @@ export type DemoProfile = {
   planShort: string;
   /** Plan completion is not an assessed readiness score. */
   progress: number;
-  clearanceCompleted: number;
-  clearanceTotal: number;
-  practiceMinutesIncluded: number;
-  practiceMinutesUsed: number;
   streak: number;
   week: number;
   roadmapWeeks: number;
@@ -41,13 +37,9 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     password: "Vault799!",
     role: "Backend Engineer · 2.5 years",
     target: "Remote backend roles",
-    plan: "Foundation · Flight Plan",
-    planShort: "Foundation",
+    plan: "The Vault · Foundation",
+    planShort: "Vault",
     progress: 18,
-    clearanceCompleted: 4,
-    clearanceTotal: 6,
-    practiceMinutesIncluded: 0,
-    practiceMinutesUsed: 0,
     streak: 4,
     week: 2,
     roadmapWeeks: 12,
@@ -62,16 +54,12 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     firstName: "Rohan",
     initials: "RM",
     email: "practice@demo.interviewrunway.com",
-    password: "Seat2499!",
+    password: "AI2499!",
     role: "Platform Engineer · 4 years",
     target: "US infrastructure teams",
-    plan: "The Second Seat · Active",
+    plan: "The Second Seat · Practice",
     planShort: "The Second Seat",
     progress: 54,
-    clearanceCompleted: 6,
-    clearanceTotal: 6,
-    practiceMinutesIncluded: 120,
-    practiceMinutesUsed: 34,
     streak: 9,
     week: 3,
     roadmapWeeks: 4,
@@ -89,13 +77,9 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     password: "Premium9999!",
     role: "Senior Software Engineer · 7 years",
     target: "Staff-track AI infrastructure",
-    plan: "Human Calibration · Active",
-    planShort: "Human Calibration",
+    plan: "1:1 Calibration · Premium",
+    planShort: "Premium",
     progress: 76,
-    clearanceCompleted: 6,
-    clearanceTotal: 6,
-    practiceMinutesIncluded: 120,
-    practiceMinutesUsed: 71,
     streak: 12,
     week: 4,
     roadmapWeeks: 4,
@@ -117,6 +101,15 @@ export type DemoReviewMaterial = {
 };
 
 export const DEMO_REVIEW_MATERIALS: readonly DemoReviewMaterial[] = [
+  {
+    title: "4-Week Accelerated Interview Roadmap",
+    category: "Plan",
+    detail: "7-page weekly plan and checkpoint system",
+    format: "PDF · 7 pages",
+    href: "/demo-materials/roadmap_4week.pdf",
+    preview: "/demo-materials/previews/roadmap_4week.png",
+    profiles: ["foundation"],
+  },
   {
     title: "Sliding Window Pattern Reference",
     category: "DSA",
@@ -255,7 +248,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
   {
     slug: "notification-mock",
     number: "05",
-    category: "Second Seat practice",
+    category: "AI practice",
     title: "Design a notification service",
     description: "A timed adaptive mock with probes for fan-out, prioritisation, retry policy, and user preferences.",
     format: "Responsive mock",

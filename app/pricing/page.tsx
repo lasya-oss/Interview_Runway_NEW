@@ -19,6 +19,8 @@ const PRICING_LAYERS = [
     number: "01",
     label: "FOUNDATION",
     offer: OFFERS.vault,
+    displayName: "Foundation",
+    entitlement: "Lifetime access to the launch edition, checkpoints, and included updates",
     status: "START HERE",
     priceNote: "One payment",
     body: "Build the foundation. Complete the checkpoints. Unlock eligibility.",
@@ -30,6 +32,8 @@ const PRICING_LAYERS = [
     number: "02",
     label: "THE SYSTEM COMES ALIVE",
     offer: OFFERS["ai-prep"],
+    displayName: "The Second Seat",
+    entitlement: "Foundation-cleared access · included practice-time allowance shown before unlock",
     status: "FOUNDATION CLEARANCE REQUIRED",
     priceNote: "Available after clearance",
     body: "Live intelligence for practice, guidance, and permitted interview support. You remain in command.",
@@ -41,6 +45,8 @@ const PRICING_LAYERS = [
     number: "03",
     label: "HUMAN CALIBRATION",
     offer: OFFERS.premium,
+    displayName: "Human Calibration",
+    entitlement: "Evidence-led · capacity capped · final scope confirmed before booking",
     status: "EVIDENCE-LED · CAPACITY CAPPED",
     priceNote: "Focused package",
     body: "Add a real person when repeated evidence identifies a persistent gap.",
@@ -98,11 +104,11 @@ export default async function PricingPage() {
               <article className={`pricing-layer pricing-layer-${index + 1}`} key={layer.offer.slug}>
                 <AnalyticsView event="pricing_tier_viewed" payload={{ tier: layer.offer.slug, surface: "pricing" }} />
                 <div className="pricing-layer-top"><span>{layer.number} / {layer.label}</span><b>{layer.status}</b></div>
-                <h2>{layer.offer.name.replace("InterviewRunway ", "")}</h2>
+                <h2>{layer.displayName}</h2>
                 <div className="pricing-layer-price"><strong>{layer.offer.priceLabel}</strong><span>{layer.priceNote}</span></div>
                 <p>{layer.body}</p>
                 <ul>{layer.includes.map((item) => <li key={item}>{item}</li>)}</ul>
-                <div className="pricing-layer-entitlement"><span>Access model</span><b>{layer.offer.entitlement}</b></div>
+                <div className="pricing-layer-entitlement"><span>Access model</span><b>{layer.entitlement}</b></div>
                 <Link
                   className={index === 0 ? "primary-cta" : "text-link"}
                   data-analytics-event={index === 0 ? "foundation_checkout_started" : index === 1 ? "second_seat_preview_started" : undefined}

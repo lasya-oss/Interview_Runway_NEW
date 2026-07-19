@@ -6,7 +6,7 @@ import { getCheckoutSessionForUser } from "@/app/lib/checkout-store";
 import { CheckoutVerification } from "./verification-client";
 
 export const metadata: Metadata = {
-  title: "Verifying your Foundation access",
+  title: "Verifying your Vault access",
   robots: { index: false, follow: false },
 };
 

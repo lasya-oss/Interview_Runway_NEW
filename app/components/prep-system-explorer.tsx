@@ -76,11 +76,11 @@ export function PrepSystemExplorer() {
     <div className="prep-explorer" style={explorerStyle}>
       <div className="payload-sticky">
         <div className="section-heading">
-          <p className="eyebrow">Foundation clearance</p>
-          <h2 id="inside-title">Build the flight plan before the cockpit comes alive.</h2>
+          <p className="eyebrow">The diagnostic model</p>
+          <h2 id="inside-title">Six systems.<br />One signal.</h2>
           <p>
-            Patterns, systems, behavioural evidence, role context, and mock demonstrations
-            create the baseline the Second Seat needs to test under pressure.
+            Scroll through the systems. The instrument follows the active row and
+            shows the capability, gap, practice, change, and representative test.
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export function PrepSystemExplorer() {
             <div className="instrument-horizon" aria-hidden="true"><i /><i /><i /></div>
 
             <div className="instrument-status" aria-hidden="true">
-              <span>SYSTEM 0{activeIndex + 1} / 06 READY</span><i /><b>SECOND SEAT ELIGIBILITY</b>
+              <span>SYSTEM 0{activeIndex + 1} / 06</span><i /><b>{activeModule.meta}</b>
             </div>
 
             <div className="instrument-orbit" aria-hidden="true">

@@ -17,8 +17,8 @@ const COPY: Record<
 > = {
   active: {
     eyebrow: "CLEARANCE CONFIRMED",
-    title: "Your Foundation access is active.",
-    body: "Payment is confirmed and your Foundation flight plan is ready.",
+    title: "Your Vault access is active.",
+    body: "Payment is confirmed and your Vault access is ready.",
   },
   pending: {
     eyebrow: "VERIFYING CLEARANCE",
@@ -28,7 +28,7 @@ const COPY: Record<
   failed: {
     eyebrow: "CHECKOUT INTERRUPTED",
     title: "Access was not activated.",
-    body: "The payment handoff did not complete. No Foundation entitlement was created for this checkout session.",
+    body: "The payment handoff did not complete. No Vault entitlement was created for this checkout session.",
   },
   expired: {
     eyebrow: "SESSION EXPIRED",
@@ -38,7 +38,7 @@ const COPY: Record<
   revoked: {
     eyebrow: "ACCESS REVOKED",
     title: "This purchase is no longer active.",
-    body: "An approved refund or payment reversal was received, so the related Foundation access was removed.",
+    body: "An approved refund or payment reversal was received, so the related Vault access was removed.",
   },
 };
 
@@ -96,13 +96,13 @@ export function CheckoutVerification({
       <p className="checkout-intro">{copy.body}</p>
 
       <dl className="verification-record">
-        <div><dt>Product</dt><dd>InterviewRunway Foundation</dd></div>
+        <div><dt>Product</dt><dd>InterviewRunway Vault</dd></div>
         <div><dt>Status</dt><dd>{status === "active" ? "Payment verified" : "Verification pending"}</dd></div>
       </dl>
 
       <div className="hero-actions">
         {status === "active" ? (
-          <Link className="primary-cta" href="/vault">Open Foundation overview <span aria-hidden="true">↗</span></Link>
+          <Link className="primary-cta" href="/vault">Open Vault overview <span aria-hidden="true">↗</span></Link>
         ) : (
           <Link className="primary-cta" href="/checkout/vault">Return to checkout <span aria-hidden="true">↗</span></Link>
         )}

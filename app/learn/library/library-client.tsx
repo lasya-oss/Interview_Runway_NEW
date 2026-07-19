@@ -7,9 +7,9 @@ import type { DemoTier, LearningMaterial } from "@/app/lib/demo-data";
 const TIER_ORDER: Record<DemoTier, number> = { foundation: 0, practice: 1, premium: 2 };
 
 function accessLabel(tier: DemoTier) {
-  if (tier === "foundation") return "Foundation";
+  if (tier === "foundation") return "Vault";
   if (tier === "practice") return "The Second Seat";
-  return "Human Calibration";
+  return "Premium";
 }
 
 export function LibraryClient({ profileId, materials }: { profileId: DemoTier; materials: readonly LearningMaterial[] }) {

@@ -30,7 +30,7 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
       { time: "15:30", title: "Defend the trade-off", detail: "Close with monitoring, bypass policy, and the failure mode you intentionally accepted." },
     ],
     principle: "The strongest answer is not the most sophisticated limiter. It is the limiter whose failure behaviour matches the product risk.",
-    exercise: "Explain why a token bucket is or is not appropriate for a high-volume public service with bursty enterprise traffic.",
+    exercise: "Explain why a token bucket is or is not appropriate for a public inference API with bursty enterprise traffic.",
     related: "Map cache failure modes next",
   },
   "sliding-window": {
@@ -89,7 +89,7 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
       { time: "03", title: "Influence map", detail: "Distinguish authority, alignment, escalation, and durable mechanisms." },
       { time: "04", title: "Live calibration", detail: "Use the private session to compress the story without losing evidence." },
     ],
-    principle: "Human Calibration should correct a named, repeated gap—not add more generic preparation.",
+    principle: "Premium coaching should correct a named, repeated gap—not add more generic preparation.",
     exercise: "Bring two examples showing how your decision changed another team’s plan, risk, or operating model.",
     related: "Open the private coaching room",
   },
@@ -97,8 +97,8 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
 
 function tierLabel(tier: DemoTier) {
   if (tier === "practice") return "The Second Seat";
-  if (tier === "premium") return "Human Calibration";
-  return "Foundation";
+  if (tier === "premium") return "Premium coaching";
+  return "The Vault";
 }
 
 export default async function MaterialPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -116,7 +116,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
           <LockedMemberPanel
             tier={tierLabel(material.tier)}
             title={`${material.title} belongs to the next layer.`}
-            body={`This representative ${material.format.toLowerCase()} is visible in the demo catalogue so you can understand the product progression, but it is not included with ${tierLabel(profile.id)}.`}
+            body={`This representative ${material.format.toLowerCase()} is visible in the demo catalogue so you can understand the product progression, but it is not included with ${profile.planShort}.`}
           />
         </div>
       </MemberShell>
@@ -201,7 +201,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
         </section>
 
         <footer className="material-next-step">
-          <div><p className="member-kicker">Continue the loop</p><h2>{detail.related}</h2><p>This action opens another representative demo surface; it does not record completion or contact a live service.</p></div>
+          <div><p className="member-kicker">Continue the loop</p><h2>{detail.related}</h2><p>This action opens another representative demo surface; it does not record completion or invoke an AI service.</p></div>
           <Link className="member-primary-button" href={destination}>Continue <span aria-hidden="true">↗</span></Link>
         </footer>
       </article>

@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AnalyticsView } from "@/app/components/analytics-view";
-import { HomeAeroStage } from "@/app/components/aero-experience";
+import { HomeAeroStage, TrajectorySequence } from "@/app/components/aero-experience";
 import { Reveal } from "@/app/components/aero-runtime";
 import { PrepSystemExplorer } from "@/app/components/prep-system-explorer";
-import { SecondSeatHeroInstrument, SecondSeatJourney, SecondSeatPreview } from "@/app/components/second-seat-experience";
 import { CtaLink, Footer, Header, SectionHeading } from "@/app/components/site-chrome";
 import { TestimonialFlightDeck } from "@/app/components/testimonial-flight-deck";
 import { HOME_FAQS, OFFERS } from "@/app/lib/site-data";
@@ -22,38 +21,29 @@ const HOME_PRICING_LAYERS = [
   {
     phase: "01 / FOUNDATION",
     offer: OFFERS.vault,
-    status: "CLEARANCE KEY",
-    for: "Build the foundation. Complete the checkpoints. Unlock eligibility.",
-    visible: "Flight plan, systems, evidence, diagnostic, and mock demonstration",
-    unlock: "Measurable Second Seat eligibility",
-    includes: ["Six clearance checkpoints", "4-week and 12-week flight plans", "Lifetime launch-edition access"],
+    for: "You need a complete preparation system",
+    visible: "Roadmaps, pattern library, and evidence workflows",
+    unlock: "A baseline ready for pressure-testing",
     href: "/checkout/vault",
-    cta: "Start Foundation",
-    event: "foundation_checkout_started",
+    cta: "Start with the Vault",
   },
   {
-    phase: "02 / THE SECOND SEAT",
+    phase: "02 / PRACTICE",
     offer: OFFERS["ai-prep"],
-    status: "FOUNDATION CLEARANCE REQUIRED",
-    for: "Foundation-cleared learners ready to test under pressure",
-    visible: "Dynamic practice, multiple perspectives, guidance, and responsive mocks",
-    unlock: "A live correction loop that keeps pace with the conversation",
-    includes: ["Responsive mock interviews", "Multiple reasoning perspectives", "WhatsApp guidance", "Specialist training systems", "Included practice-time allowance", "Permitted live interview support"],
-    href: "#second-seat-preview",
-    cta: "Preview the Second Seat",
-    event: "second_seat_preview_started",
+    for: "You know the material but performance varies",
+    visible: "Responsive mocks, transcript evidence, changed plan",
+    unlock: "A measurable correction loop",
+    href: "/second-seat",
+    cta: "Inspect the Second Seat",
   },
   {
-    phase: "03 / HUMAN CALIBRATION",
+    phase: "03 / CALIBRATION",
     offer: OFFERS.premium,
-    status: "EVIDENCE-LED · CAPACITY CAPPED",
-    for: "Repeated evidence identifies one persistent personal gap",
-    visible: "Flight-recorder packet, mentor review, and focused correction plan",
-    unlock: "A clean final approach guided by a real person",
-    includes: ["Evidence packet review", "Focused mentor relationship", "Explicit final-approach plan"],
+    for: "Repeated work exposes one persistent gap",
+    visible: "Coach packet, targeted review, explicit correction",
+    unlock: "Human calibration where it is worth the cost",
     href: "/premium",
-    cta: "Review Human Calibration",
-    event: undefined,
+    cta: "Review calibration",
   },
 ] as const;
 
@@ -70,7 +60,7 @@ export default function Home() {
       <Header />
 
       <main className="home-v2 narrative-home">
-        <section className="hero-v2 narrative-hero" aria-labelledby="hero-title" data-aero-phase="hero">
+        <section className="hero-v2 narrative-hero" aria-labelledby="hero-title" data-aero-phase="foundation">
           <div className="hero-atmosphere" aria-hidden="true"><i /><i /><i /></div>
           <div className="container hero-v2-grid">
             <div className="hero-v2-copy">
@@ -84,12 +74,17 @@ export default function Home() {
               <p className="microcopy">Free · 7–10 minutes · No payment or account</p>
             </div>
 
-            <SecondSeatHeroInstrument />
+            <aside className="hero-signal-console" aria-label="Interview signal scan preview">
+              <div className="hero-console-head"><span>INTERVIEW SIGNAL / SCAN</span><b>06 SYSTEMS</b></div>
+              <div className="hero-console-orbit" aria-hidden="true"><i /><i /><i /><b>IR</b></div>
+              <ol>{SIGNAL_DIMENSIONS.slice(0, 3).map((item) => <li key={item[0]}><span>{item[0]}</span><strong>{item[1]}</strong><i /></li>)}</ol>
+              <p><span>OUTPUT</span><strong>One gap. One exercise. One next layer.</strong></p>
+            </aside>
           </div>
           <div className="hero-scroll-cue" aria-hidden="true"><span>SCROLL TO FOLLOW THE SIGNAL</span><i /></div>
         </section>
 
-        <section className="signal-intro-section" aria-labelledby="signal-intro-title" data-aero-phase="diagnostic">
+        <section className="signal-intro-section" aria-labelledby="signal-intro-title" data-aero-phase="guidance">
           <div className="signal-intro-lines" aria-hidden="true"><i /><i /><i /></div>
           <div className="container signal-intro-layout">
             <Reveal>
@@ -108,19 +103,17 @@ export default function Home() {
           </div>
         </section>
 
-        <SecondSeatPreview />
-
         <section className="payload-section" id="inside" aria-labelledby="inside-title" data-aero-phase="vault">
           <div className="payload-ribs" aria-hidden="true"><i /><i /><i /><i /><i /></div>
           <div className="container"><PrepSystemExplorer /></div>
         </section>
 
-        <SecondSeatJourney />
+        <TrajectorySequence />
 
         <section className="workspace-preview-section" aria-labelledby="workspace-preview-title" data-aero-phase="product">
           <div className="container">
             <Reveal>
-              <SectionHeading eyebrow="Enter the product before buying" title="One cockpit. Three levels of evidence." body="Choose Foundation, The Second Seat, or Human Calibration. Each demo opens populated, includes real review-edition material, and gives you a meaningful action within the first minute." id="workspace-preview-title" />
+              <SectionHeading eyebrow="Enter the product before buying" title="One cockpit. Three levels of evidence." body="Choose Vault, the Second Seat, or Premium Calibration. Each demo opens populated, includes real review-edition material, and gives you a meaningful action within the first minute." id="workspace-preview-title" />
             </Reveal>
 
             <Reveal className="workspace-preview-frame" direction="right">
@@ -129,7 +122,7 @@ export default function Home() {
                 <ol>
                   <li className="is-active"><span>01</span><b>Today</b></li><li><span>02</span><b>Roadmap</b></li><li><span>03</span><b>Library</b></li><li className="is-locked"><span>04</span><b>Practice</b><small>Upgrade</small></li><li className="is-locked"><span>05</span><b>Feedback</b><small>Upgrade</small></li>
                 </ol>
-                <div className="workspace-preview-plan"><span>Current access</span><strong>Foundation · Flight Plan</strong><i><b /></i><small>18% plan progress · Week 2</small></div>
+                <div className="workspace-preview-plan"><span>Current access</span><strong>The Vault · Foundation</strong><i><b /></i><small>18% plan progress · Week 2</small></div>
               </aside>
               <div className="workspace-preview-main">
                 <div className="workspace-preview-topbar"><span>Demo workspace · sample learner data</span><b>Remote backend roles</b></div>
@@ -140,26 +133,25 @@ export default function Home() {
                 </div>
               </div>
             </Reveal>
-            <div className="workspace-preview-footer"><div className="workspace-access-states" aria-label="Demo access levels"><span><b>Foundation</b> Build the flight plan</span><span><b>The Second Seat</b> Expose the gap</span><span><b>Human Calibration</b> Complete the landing</span></div><Link className="primary-cta" href="/demo-login">Choose a demo cockpit <span aria-hidden="true">↗</span></Link></div>
+            <div className="workspace-preview-footer"><div className="workspace-access-states" aria-label="Demo access levels"><span><b>Vault</b> Learn the model</span><span><b>The Second Seat</b> Expose the gap</span><span><b>Premium</b> Calibrate the signal</span></div><Link className="primary-cta" href="/demo-login">Choose a demo cockpit <span aria-hidden="true">↗</span></Link></div>
           </div>
         </section>
 
         <section className="home-pricing-section" aria-labelledby="home-pricing-title" data-aero-phase="pricing">
           <div className="container">
-            <Reveal><SectionHeading eyebrow="Clear progression" title="Foundation earns access to the system at the center." body="Build the flight plan first. Unlock the Second Seat when the clearance requirements are complete. Add Human Calibration only when repeated evidence identifies a gap technology alone has not fixed." id="home-pricing-title" /></Reveal>
+            <Reveal><SectionHeading eyebrow="Transparent progression" title="Pay only when the next layer has a job." body="The Vault builds the base. The Second Seat measures performance. Human review is reserved for a specific persistent gap. Nothing is bundled, preselected, or sold as a job guarantee." id="home-pricing-title" /></Reveal>
             <div className="home-pricing-layers">
               {HOME_PRICING_LAYERS.map((layer, index) => (
                 <Reveal className={`home-price-layer home-price-layer-${index + 1}`} direction={index % 2 === 0 ? "left" : "right"} key={layer.offer.slug}>
                   <AnalyticsView event="pricing_tier_viewed" payload={{ tier: layer.offer.slug, surface: "homepage" }} />
-                  <p><span>{layer.phase}</span><b>{layer.status}</b></p>
+                  <p><span>{layer.phase}</span><b>{index === 0 ? "Start here" : "Evidence-led addition"}</b></p>
                   <h3>{layer.offer.name.replace("InterviewRunway ", "")}</h3><strong>{layer.offer.priceLabel}</strong>
                   <dl><div><dt>FOR</dt><dd>{layer.for}</dd></div><div><dt>VISIBLE IMMEDIATELY</dt><dd>{layer.visible}</dd></div><div><dt>NEXT UNLOCK</dt><dd>{layer.unlock}</dd></div></dl>
-                  <ul>{layer.includes.map((item) => <li key={item}>{item}</li>)}</ul>
-                  <small>{layer.offer.entitlement}</small><Link href={layer.href} data-analytics-event={layer.event}>{layer.cta} <span aria-hidden="true">↗</span></Link>
+                  <small>{layer.offer.entitlement}</small><Link href={layer.href}>{layer.cta} <span aria-hidden="true">↗</span></Link>
                 </Reveal>
               ))}
             </div>
-            <div className="home-pricing-footer"><span>INR pricing · Taxes and exact entitlement shown before payment · Foundation refund terms linked at checkout</span><Link className="text-link" href="/pricing">Compare every layer <span aria-hidden="true">→</span></Link></div>
+            <div className="home-pricing-footer"><span>INR pricing · Taxes and exact entitlement shown before payment · Vault refund terms linked at checkout</span><Link className="text-link" href="/pricing">Compare every layer <span aria-hidden="true">→</span></Link></div>
           </div>
         </section>
 

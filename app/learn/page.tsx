@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { MemberShell } from "@/app/components/member-shell";
-import { SecondSeatClearancePanel } from "@/app/components/second-seat-clearance-panel";
 import { DEMO_REVIEW_MATERIALS, LEARNING_MATERIALS, MOCK_HISTORY, SCORE_DIMENSIONS } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 
@@ -44,8 +43,6 @@ export default async function LearnerHomePage() {
             <i /><i /><i />
           </div>
         </section>
-
-        <SecondSeatClearancePanel profile={profile} />
 
         <section className="member-command-grid">
           <article className="next-action-panel">
@@ -95,7 +92,7 @@ export default async function LearnerHomePage() {
                 <div className="baseline-radar" aria-hidden="true"><i /><i /><i /><b>?</b></div>
                 <h3>No synthetic readiness score.</h3>
                 <p>Your lesson completion is tracked, but readiness only appears after a scored practice session. Until then, the product keeps those concepts separate.</p>
-                <Link href="/second-seat">See how the Second Seat establishes it ↗</Link>
+                <Link href="/pricing">See how AI practice establishes it ↗</Link>
               </article>
             ) : (
               <article className="signal-bars">

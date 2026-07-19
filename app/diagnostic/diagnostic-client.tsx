@@ -132,12 +132,12 @@ export function DiagnosticClient() {
     const riskIndex = scores.indexOf(Math.min(...scores));
     const average = scores.reduce((total, score) => total + score, 0) / scores.length;
     const layer = average < 2.35
-      ? { name: "Foundation", href: "/vault", reason: "Build a reliable baseline before adding interview pressure." }
+      ? { name: "Foundation · Vault", href: "/vault", reason: "Build the models before adding pressure." }
       : average < 3.35
-        ? { name: "The Second Seat", href: "/second-seat", reason: "Use responsive practice to make the gap measurable from several perspectives." }
+        ? { name: "Practice · The Second Seat", href: "/second-seat", reason: "Use repeated attempts to make the gap measurable." }
         : scores[riskIndex] < 3
-          ? { name: "Human Calibration", href: "/premium", reason: "The baseline is strong; one narrow gap may benefit from human judgment." }
-          : { name: "The Second Seat", href: "/second-seat", reason: "Stress-test the signal before spending on human review." };
+          ? { name: "Calibration · Human Review", href: "/premium", reason: "The base is strong; one narrow gap needs expert calibration." }
+          : { name: "Practice · The Second Seat", href: "/second-seat", reason: "Stress-test the signal before spending on human review." };
 
     return {
       strongest: DIMENSIONS[strongestIndex],
@@ -178,10 +178,9 @@ export function DiagnosticClient() {
       url: url.toString(),
     };
     try {
-      const canShare = typeof navigator.share === "function";
-      if (canShare) await navigator.share(data);
+      if (navigator.share) await navigator.share(data);
       else await navigator.clipboard.writeText(`${data.text} ${data.url}`);
-      setShareState(canShare ? "Shared" : "Link copied");
+      setShareState(navigator.share ? "Shared" : "Link copied");
       trackEvent("signal_report_shared", { strongest: report?.strongest.key, risk: report?.risk.key });
     } catch {
       setShareState("Share cancelled");

@@ -21,11 +21,9 @@ export default async function PracticePage() {
         ) : (
           <LockedMemberPanel
             tier="The Second Seat"
-            title="Complete Foundation clearance to bring the cockpit alive."
-            body="Foundation builds the baseline that responsive practice needs. Finish the remaining checkpoints to unlock several expert perspectives, responsive follow-ups, and an included practice-time allowance."
-          >
-            <div className="practice-history-note"><i /><p><strong>SECOND SEAT CLEARANCE · {profile.clearanceCompleted} OF {profile.clearanceTotal} COMPLETE</strong><br />Return to the roadmap to complete the sample Foundation checkpoints.</p></div>
-          </LockedMemberPanel>
+            title="Timed practice begins after the foundation."
+            body="The Vault account can inspect the learning system, roadmap, and representative materials. The Second Seat adds responsive mock sessions, transcripts, and evidence-linked corrections. This demo does not run an AI model."
+          />
         )}
       </div>
     </MemberShell>
