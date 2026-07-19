@@ -4417,9 +4417,37 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .demo-login-intro h1 { margin: 0; font-family: var(--font-display); font-size: clamp(3.7rem, 6vw, 6.4rem); font-weight: 610; line-height: .94; letter-spacing: -.064em; }
 .demo-login-intro h1 em { color: #ac4520; font-style: normal; }
 .demo-login-intro > p:not(.eyebrow) { max-width: 530px; margin: 30px 0 0; color: var(--ink-muted); font-size: 16px; line-height: 1.75; }
-.demo-login-principles { margin-top: 48px; border-top: 1px solid rgba(30,64,77,.16); }
-.demo-login-principles span { min-height: 57px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(30,64,77,.16); color: #536670; font-size: 11px; }
-.demo-login-principles b { color: #a6421d; font-family: var(--font-mono); font-size: 8px; }
+.demo-login-principles { margin-top: 52px; border-top: 1px solid rgba(30,64,77,.18); }
+.demo-login-principles span {
+  min-height: 82px;
+  padding: 10px 0;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  border-bottom: 1px solid rgba(30,64,77,.18);
+  color: #435b66;
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.28vw, 1.28rem);
+  font-weight: 560;
+  line-height: 1.25;
+  letter-spacing: -.025em;
+}
+.demo-login-principles b {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(166,66,29,.26);
+  border-radius: 50%;
+  color: #a6421d;
+  background: rgba(255,107,44,.055);
+  box-shadow: 0 8px 22px rgba(128,61,34,.07);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 560;
+  letter-spacing: 0;
+}
 .demo-login-console { position: relative; overflow: hidden; border: 1px solid rgba(30,64,77,.17); border-radius: 26px; background: rgba(250,251,251,.76); box-shadow: 0 45px 110px rgba(30,62,75,.14), inset 0 1px #fff; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
 .demo-profile-picker { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid rgba(30,64,77,.14); }
 .demo-profile-card { min-height: 245px; padding: 24px; display: flex; align-items: flex-start; flex-direction: column; border: 0; border-right: 1px solid rgba(30,64,77,.14); color: var(--ink); background: rgba(255,255,255,.25); text-align: left; cursor: pointer; transition: background 180ms ease, box-shadow 180ms ease; }
