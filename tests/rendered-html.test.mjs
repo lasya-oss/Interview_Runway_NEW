@@ -299,6 +299,9 @@ test("homepage 3D curve and wheel are mapped to their intended sections", async 
 
   assert.match(source, /SYSTEM_CURVE_WINDOW = \{ start: 0\.2, peak: 0\.31, end: 0\.5 \}/);
   assert.match(source, /LAYER_WHEEL_WINDOW = \{ start: 0\.5, peak: 0\.58, end: 0\.7 \}/);
+  assert.match(source, /WORKSPACE_GIMBAL_WINDOW = \{ start: 0\.67, peak: 0\.74, end: 0\.9 \}/);
+  assert.match(source, /firstCrossing = smooth\(\(pathLocal - 0\.38\) \/ 0\.12\)/);
+  assert.match(source, /secondCrossing = smooth\(\(pathLocal - 0\.62\) \/ 0\.12\)/);
   assert.match(source, /turbineRef[\s\S]*LAYER_WHEEL_WINDOW\.start[\s\S]*routeRef[\s\S]*SYSTEM_CURVE_WINDOW\.start/);
 });
 

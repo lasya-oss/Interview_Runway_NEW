@@ -255,6 +255,7 @@ function VaultFlightPlan({ lite, activeSystemRef }: { lite: boolean; activeSyste
 // the following three-layer sequence. Their windows meet, but never overlap.
 const SYSTEM_CURVE_WINDOW = { start: 0.2, peak: 0.31, end: 0.5 } as const;
 const LAYER_WHEEL_WINDOW = { start: 0.5, peak: 0.58, end: 0.7 } as const;
+const WORKSPACE_GIMBAL_WINDOW = { start: 0.67, peak: 0.74, end: 0.9 } as const;
 
 function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progressRef: MutableRefObject<number>; pointerRef: VectorRef; activeSystemRef: SystemRef; tier: "lite" | "full" }) {
   const airfoilRef = useRef<THREE.Group>(null);
@@ -283,10 +284,10 @@ function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progress
       const weight = windowWeight(p, LAYER_WHEEL_WINDOW.start, LAYER_WHEEL_WINDOW.peak, LAYER_WHEEL_WINDOW.end);
       const local = smooth(clamp01((p - LAYER_WHEEL_WINDOW.start) / (LAYER_WHEEL_WINDOW.end - LAYER_WHEEL_WINDOW.start)));
       const pathLocal = clamp01((p - 0.515) / 0.17);
-      const firstCrossing = smooth((pathLocal - 0.46) / 0.14);
-      const secondCrossing = smooth((pathLocal - 0.72) / 0.14);
-      const firstToSecond = THREE.MathUtils.lerp(2.28, -2.28, firstCrossing);
-      const chapterPosition = THREE.MathUtils.lerp(firstToSecond, 2.18, secondCrossing);
+      const firstCrossing = smooth((pathLocal - 0.38) / 0.12);
+      const secondCrossing = smooth((pathLocal - 0.62) / 0.12);
+      const firstToSecond = THREE.MathUtils.lerp(2.4, -2.4, firstCrossing);
+      const chapterPosition = THREE.MathUtils.lerp(firstToSecond, 2.4, secondCrossing);
       const crossingDip = Math.max(
         windowWeight(pathLocal, 0.44, 0.53, 0.62),
         windowWeight(pathLocal, 0.7, 0.79, 0.88),
@@ -307,8 +308,8 @@ function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progress
     }
 
     if (gimbalRef.current) {
-      const weight = windowWeight(p, 0.58, 0.72, 0.94);
-      const local = smooth(clamp01((p - 0.58) / 0.34));
+      const weight = windowWeight(p, WORKSPACE_GIMBAL_WINDOW.start, WORKSPACE_GIMBAL_WINDOW.peak, WORKSPACE_GIMBAL_WINDOW.end);
+      const local = smooth(clamp01((p - WORKSPACE_GIMBAL_WINDOW.start) / (WORKSPACE_GIMBAL_WINDOW.end - WORKSPACE_GIMBAL_WINDOW.start)));
       gimbalRef.current.visible = weight > 0.002;
       gimbalRef.current.scale.setScalar(Math.max(0.001, weight * 1.06));
       gimbalRef.current.position.set(-1.9 + local * 3.2 + pointer.x * 0.12, 0.15 + pointer.y * 0.1, 0.1);
