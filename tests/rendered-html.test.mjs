@@ -354,3 +354,12 @@ test("prep system restores its animated orbit with readable benefit copy", async
   assert.match(styles, /\.system-instrument-orbital \.instrument-readout li[\s\S]*font-size:\s*15\.5px/);
   assert.match(styles, /\.system-instrument-orbital \.instrument-status[\s\S]*font-size:\s*12px/);
 });
+
+test("diagnostic choices use presentation-scale typography", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(styles, /\.signal-answer-stack button\s*\{[\s\S]*min-height:\s*136px/);
+  assert.match(styles, /\.signal-answer-stack button strong\s*\{[\s\S]*font-size:\s*clamp\(17px,\s*1\.22vw,\s*20px\)/);
+  assert.match(styles, /\.signal-answer-stack button > span\s*\{[\s\S]*font-size:\s*12px/);
+  assert.match(styles, /\.signal-report-readout p,[\s\S]*font-size:\s*15px/);
+});

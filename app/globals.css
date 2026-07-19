@@ -6202,3 +6202,80 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .system-instrument-orbital .instrument-rings,
   .system-instrument-orbital .instrument-core { animation: none; }
 }
+
+/* The diagnostic is a decision surface. Its prompts and choices must read at
+   presentation scale instead of inheriting compact dashboard typography. */
+
+.signal-check-page {
+  --signal-label-size: 12px;
+  --signal-body-size: 16px;
+}
+
+.signal-briefing-layout > div:first-child > small { font-size: 12px; }
+.signal-scan-manifest > div { font-size: 10.5px; }
+.signal-scan-manifest > p span { font-size: 10.5px; }
+.signal-scan-manifest > p strong { font-size: 14px; }
+
+.signal-question-rail > p { font-size: 10px; }
+.signal-question-rail > span { font-size: 13px; }
+.signal-question-rail > small { font-size: 10.5px; }
+.signal-question-card { max-width: 1180px; }
+.signal-question-card > p { font-size: var(--signal-label-size); }
+.signal-answer-stack { margin-top: 42px; gap: 16px; }
+.signal-answer-stack button {
+  min-height: 136px;
+  padding: 25px 28px;
+  grid-template-columns: 38px minmax(0, 1fr) 28px;
+  gap: 18px;
+  border-radius: 17px;
+}
+.signal-answer-stack button > span {
+  width: 36px;
+  height: 36px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.signal-answer-stack button strong {
+  font-size: clamp(17px, 1.22vw, 20px);
+  font-weight: 600;
+  line-height: 1.48;
+}
+.signal-answer-stack button i { font-size: 21px; }
+.signal-back,
+.signal-retake { font-size: 14px; }
+
+.signal-score span { font-size: 10px; }
+.signal-report-radar article span { font-size: 11px; }
+.signal-report-radar article strong { font-size: 14px; }
+.signal-report-radar article > small { font-size: 11px; }
+.signal-report-readout span,
+.signal-recommendation span { font-size: 11px; }
+.signal-report-readout p,
+.signal-recommendation p { font-size: 15px; }
+.signal-recommendation button { font-size: 14px; }
+
+@media (max-width: 1050px) {
+  .signal-answer-stack button { min-height: 126px; padding: 22px 23px; }
+  .signal-answer-stack button strong { font-size: 17px; }
+}
+
+@media (max-width: 800px) {
+  .signal-question-stage { overflow: visible; }
+  .signal-question-layout { min-height: auto; padding-block: 4rem; }
+  .signal-answer-stack { gap: 12px; }
+  .signal-answer-stack button { min-height: 112px; }
+}
+
+@media (max-width: 520px) {
+  .signal-question-card > p { font-size: 11px; }
+  .signal-answer-stack { margin-top: 30px; }
+  .signal-answer-stack button {
+    min-height: 104px;
+    padding: 18px;
+    grid-template-columns: 34px minmax(0, 1fr) 22px;
+    gap: 13px;
+  }
+  .signal-answer-stack button > span { width: 32px; height: 32px; font-size: 11px; }
+  .signal-answer-stack button strong { font-size: 16px; line-height: 1.45; }
+  .signal-answer-stack button i { font-size: 18px; }
+}
