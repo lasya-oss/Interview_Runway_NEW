@@ -31,12 +31,11 @@ export default async function CheckoutSuccessPage({
       <div className="container">
         <div className="checkout-header">
           <Brand />
-          <span className="secure-label">SIGNED PAYMENT VERIFICATION</span>
+          <span className="secure-label">PAYMENT CONFIRMATION</span>
         </div>
         <CheckoutVerification
           checkoutSessionId={checkoutSessionId}
           initialStatus={publicStatus(session.status, session.expiresAt)}
-          userEmail={user.email}
         />
       </div>
     </main>

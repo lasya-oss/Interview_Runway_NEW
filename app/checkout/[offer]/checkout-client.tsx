@@ -8,11 +8,9 @@ type CheckoutState = "idle" | "preparing" | "error";
 
 export function CheckoutClient({
   clientToken,
-  email,
   environment,
 }: {
   clientToken: string | null;
-  email: string;
   environment: "production" | "sandbox";
 }) {
   const [state, setState] = useState<CheckoutState>("idle");
@@ -34,7 +32,7 @@ export function CheckoutClient({
         token: clientToken,
       });
       const paddle = await paddleRef.current;
-      if (!paddle) throw new Error("Paddle could not be initialized");
+      if (!paddle) throw new Error("Secure checkout could not be initialized");
 
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -59,7 +57,6 @@ export function CheckoutClient({
       successUrl.searchParams.set("session", result.checkoutSessionId);
 
       paddle.Checkout.open({
-        customer: { email },
         settings: {
           displayMode: "overlay",
           locale: "en",
@@ -95,7 +92,7 @@ export function CheckoutClient({
         {state === "preparing"
           ? "Preparing secure checkout…"
           : configured
-            ? "Continue securely with Paddle"
+            ? "Continue to secure checkout"
             : "Checkout configuration unavailable"}
       </button>
       <p
@@ -105,7 +102,7 @@ export function CheckoutClient({
       >
         {state === "error"
           ? message
-          : "You will review the final amount and payment method inside Paddle before authorizing anything."}
+          : "Enter the email you want on the receipt, review the final total, and choose your payment method before completing purchase."}
       </p>
     </div>
   );

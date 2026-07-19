@@ -18,12 +18,12 @@ const COPY: Record<
   active: {
     eyebrow: "CLEARANCE CONFIRMED",
     title: "Your Vault access is active.",
-    body: "Paddle confirmed the transaction through a signed server webhook. The entitlement is attached to your signed-in InterviewRunway account.",
+    body: "Payment is confirmed and your Vault access is ready.",
   },
   pending: {
     eyebrow: "VERIFYING CLEARANCE",
     title: "Payment returned. Access is being verified.",
-    body: "This page is waiting for Paddle's signed server confirmation. It will update automatically; a browser redirect alone cannot unlock the Vault.",
+    body: "Your payment is being securely confirmed. This page will update automatically.",
   },
   failed: {
     eyebrow: "CHECKOUT INTERRUPTED",
@@ -33,23 +33,21 @@ const COPY: Record<
   expired: {
     eyebrow: "SESSION EXPIRED",
     title: "This checkout window has closed.",
-    body: "Start a new secure checkout to receive a fresh Paddle transaction. An expired browser session cannot activate access.",
+    body: "Start a new secure checkout to continue. An expired browser session cannot activate access.",
   },
   revoked: {
     eyebrow: "ACCESS REVOKED",
     title: "This purchase is no longer active.",
-    body: "Paddle reported an approved refund or chargeback for the matched transaction, so its Vault entitlement was revoked.",
+    body: "An approved refund or payment reversal was received, so the related Vault access was removed.",
   },
 };
 
 export function CheckoutVerification({
   checkoutSessionId,
   initialStatus,
-  userEmail,
 }: {
   checkoutSessionId: string;
   initialStatus: VerificationStatus;
-  userEmail: string;
 }) {
   const [status, setStatus] = useState(initialStatus);
 
@@ -98,9 +96,8 @@ export function CheckoutVerification({
       <p className="checkout-intro">{copy.body}</p>
 
       <dl className="verification-record">
-        <div><dt>Account</dt><dd>{userEmail}</dd></div>
         <div><dt>Product</dt><dd>InterviewRunway Vault</dd></div>
-        <div><dt>Authority</dt><dd>{status === "active" ? "Paddle webhook verified" : "Awaiting verified event"}</dd></div>
+        <div><dt>Status</dt><dd>{status === "active" ? "Payment verified" : "Verification pending"}</dd></div>
       </dl>
 
       <div className="hero-actions">

@@ -106,7 +106,7 @@ const coreRoutes = [
   },
   {
     pathname: "/checkout/vault",
-    expected: [/secure checkout/i, /₹799/, /Paddle/i],
+    expected: [/secure checkout/i, /₹799/, /one-time purchase/i],
     init: {
       headers: {
         accept: "text/html",
@@ -229,7 +229,7 @@ test("analytics contract is present on acquisition and payment surfaces", async 
     },
   });
   assert.equal(checkout.status, 200);
-  assert.match(await checkout.text(), /Continue securely with Paddle|Checkout configuration unavailable/i);
+  assert.match(await checkout.text(), /Continue to secure checkout|Checkout configuration unavailable/i);
 });
 
 test("Paddle checkout requires an authenticated account", async () => {
@@ -268,8 +268,19 @@ test("buyer-facing checkout contains no prototype or no-charge simulation", asyn
   });
   assert.equal(response.status, 200);
   const text = visibleText(await response.text());
-  assert.match(text, /Continue securely with Paddle|Checkout configuration unavailable/i);
+  assert.match(text, /Continue to secure checkout|Checkout configuration unavailable/i);
   assert.doesNotMatch(text, /prototype|simulation|₹0|no-charge/i);
+  assert.doesNotMatch(text, /Paddle|buyer@example\.com|purchasing account/i);
+});
+
+test("checkout collects the receipt email instead of prefilling the signed-in account", async () => {
+  const source = await readFile(
+    new URL("../app/checkout/[offer]/checkout-client.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.doesNotMatch(source, /customer:\s*\{\s*email/);
+  assert.match(source, /email you want on the receipt/i);
 });
 
 test("3D renderer uses Retina-class density and hardware antialiasing", async () => {

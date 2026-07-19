@@ -13,7 +13,7 @@ import { CheckoutClient } from "./checkout-client";
 export const metadata: Metadata = {
   title: "Secure Vault checkout",
   description:
-    "Review the InterviewRunway Vault order and complete payment securely with Paddle.",
+    "Review the InterviewRunway Vault order and complete payment securely.",
   robots: { index: false, follow: false },
 };
 
@@ -25,7 +25,7 @@ export default async function CheckoutPage({
   const { offer } = await params;
   if (offer !== "vault") notFound();
 
-  const user = await requireChatGPTUser("/checkout/vault");
+  await requireChatGPTUser("/checkout/vault");
   const vault = OFFERS.vault;
   const clientToken = getPaddleClientToken();
 
@@ -34,7 +34,7 @@ export default async function CheckoutPage({
       <div className="container">
         <div className="checkout-header">
           <Brand />
-          <span className="secure-label">SECURE CHECKOUT · POWERED BY PADDLE</span>
+          <span className="secure-label">SECURE CHECKOUT · ONE-TIME PURCHASE</span>
         </div>
 
         <div className="checkout-layout">
@@ -42,20 +42,13 @@ export default async function CheckoutPage({
             <p className="module-kicker">VAULT ACCESS · ONE TIME</p>
             <h1 id="payment-title">Clearance for your next interview.</h1>
             <p className="checkout-intro">
-              Review the access below, then continue into Paddle&apos;s secure
-              checkout. InterviewRunway never receives your card, UPI, or bank
-              credentials.
+              Review your order, then continue to the encrypted payment screen.
+              Your payment details are handled securely and are never stored by
+              InterviewRunway.
             </p>
-
-            <div className="checkout-account">
-              <span>PURCHASING ACCOUNT</span>
-              <strong>{user.email}</strong>
-              <small>Vault access is attached to this signed-in account.</small>
-            </div>
 
             <CheckoutClient
               clientToken={clientToken}
-              email={user.email}
               environment={paddleEnvironment()}
             />
 
@@ -89,20 +82,19 @@ export default async function CheckoutPage({
 
             <div className="price-line"><span>Vault access</span><span>{vault.priceLabel}</span></div>
             <div className="price-line"><span>Billing</span><span>One time</span></div>
-            <div className="price-line"><span>Tax</span><span>Calculated by Paddle</span></div>
+            <div className="price-line"><span>Tax</span><span>Calculated at checkout</span></div>
             <div className="price-line price-total"><span>Base price</span><span>{vault.priceLabel}</span></div>
 
             <div className="refund-inline">
-              Paddle shows any applicable tax and the final amount before you
-              authorize payment. Public sales remain gated until the final legal
-              terms and website approval are complete.
+              Any applicable tax and the final amount are shown before payment.
+              You will not be charged until you confirm the order.
             </div>
 
             <div className="trust-note">
-              <span>✓ PADDLE HOSTS PAYMENT ENTRY</span>
-              <span>✓ SERVER-CREATED ₹799 ORDER</span>
-              <span>✓ SIGNED WEBHOOK VERIFICATION</span>
-              <span>✓ REFUNDS REVOKE THE MATCHED ENTITLEMENT</span>
+              <span>✓ SECURE PAYMENT ENTRY</span>
+              <span>✓ ONE-TIME ₹799 PURCHASE</span>
+              <span>✓ NO SUBSCRIPTION</span>
+              <span>✓ ACCESS ACTIVATED AFTER PAYMENT CONFIRMATION</span>
             </div>
           </aside>
         </div>

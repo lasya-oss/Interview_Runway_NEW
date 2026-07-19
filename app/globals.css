@@ -1479,10 +1479,6 @@ input {
 .checkout-card { padding: 36px; border: 1px solid var(--line); border-radius: 22px; background: #101620; box-shadow: inset 0 1px rgba(255,255,255,0.05), 0 35px 90px rgba(0,0,0,0.22); }
 .checkout-card h1 { margin: 0; font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, 4.4rem); line-height: 0.98; text-transform: uppercase; }
 .checkout-intro { margin: 16px 0 34px; color: var(--muted); }
-.checkout-account { margin-bottom: 14px; padding: 18px 20px; display: grid; gap: 4px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,0.025); }
-.checkout-account span { color: var(--dim); font-family: var(--font-mono); font-size: 9px; letter-spacing: .09em; }
-.checkout-account strong { overflow-wrap: anywhere; font-size: 14px; }
-.checkout-account small { color: var(--muted); font-size: 12px; }
 .checkout-manifest { margin-top: 24px; display: grid; border-block: 1px solid var(--line); }
 .checkout-manifest > div { min-height: 76px; padding: 16px 0; display: grid; grid-template-columns: 34px 1fr; align-items: start; gap: 12px; border-bottom: 1px solid var(--line); }
 .checkout-manifest > div:last-child { border-bottom: 0; }
@@ -3649,11 +3645,7 @@ main > .content-section.method-section .content-card {
 .refund-inline,
 .preview-notice,
 .secure-label { color: var(--ink-muted); }
-.checkout-account { border-color: rgba(35,67,80,.15); background: rgba(255,255,255,.48); }
-.checkout-account span { color: #70838d; }
-.checkout-account strong,
 .checkout-policy-line a { color: var(--ink); }
-.checkout-account small,
 .checkout-manifest small,
 .checkout-policy-line { color: var(--ink-muted); }
 .checkout-manifest,
