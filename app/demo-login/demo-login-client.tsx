@@ -13,18 +13,18 @@ import {
 const TIER_PROMISE: Record<DemoTier, { headline: string; summary: string; access: readonly string[] }> = {
   foundation: {
     headline: "Build the preparation base.",
-    summary: "Inspect the structured library, 12-week roadmap, weekly work surface, and progress model before timed practice begins.",
-    access: ["Vault library + roadmap", "Real review-edition PDFs", "Foundation progress state"],
+    summary: "Inspect the structured library, 12-week roadmap, weekly work surface, and progress view before timed practice begins.",
+    access: ["Foundation library + roadmap", "Real review-edition PDFs", "Foundation progress state"],
   },
   practice: {
-    headline: "See the correction loop.",
-    summary: "Open the same product with adaptive mocks, transcript evidence, scoring dimensions, and the next action already changed by performance.",
-    access: ["Everything in Vault", "Adaptive practice + replays", "Feedback and readiness signals"],
+    headline: "Take the Second Seat.",
+    summary: "Run one complete practice loop with several expert perspectives, a responsive follow-up, and included practice time visible throughout.",
+    access: ["Everything in Foundation", "Responsive practice + perspectives", "Controlled sample · 120 practice minutes"],
   },
   premium: {
     headline: "Inspect human calibration.",
     summary: "Enter the complete workspace with coach-room access, evidence packets, session preparation, and a targeted calibration plan.",
-    access: ["Everything in AI Prep", "Coach room + private plan", "Calibration evidence"],
+    access: ["Everything in the Second Seat", "Instructor room + focused plan", "Calibration evidence"],
   },
 };
 
@@ -36,6 +36,9 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
     setOpening(profile.id);
     setMessage("");
     trackEvent("demo_tier_selected", { tier: profile.id });
+    if (profile.id === "practice") {
+      trackEvent("second_seat_preview_started", { origin: "demo_selector", question: "rate_limiter" });
+    }
 
     try {
       const response = await fetch("/api/demo-session", {
@@ -50,7 +53,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
         return;
       }
       trackEvent("demo_action_completed", { tier: profile.id, action: "workspace_opened" });
-      window.location.assign(returnTo);
+      window.location.assign(profile.id === "practice" ? "/learn/practice" : returnTo);
     } catch {
       setOpening(null);
       setMessage("The demo workspace could not be started. Please try again.");
@@ -74,6 +77,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
                 width={993}
                 height={1403}
                 sizes="(max-width: 900px) 32vw, 180px"
+                unoptimized
               />
               <span>REVIEW<br />EDITION</span>
             </div>
@@ -116,7 +120,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
       })}
 
       {message ? <p className="demo-login-error" role="alert">{message}</p> : null}
-      <p className="demo-login-note">Sample workspace data · Review-edition materials remain marked pending final human editorial review.</p>
+      <p className="demo-login-note">Controlled sample workspace · Foundation clearance is required before the complete Second Seat can be unlocked.</p>
     </div>
   );
 }

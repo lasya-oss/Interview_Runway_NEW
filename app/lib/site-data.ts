@@ -1,30 +1,30 @@
 export const OFFERS = {
   vault: {
     slug: "vault",
-    eyebrow: "THE VAULT",
-    name: "InterviewRunway Vault",
+    eyebrow: "FOUNDATION / FLIGHT PLAN",
+    name: "InterviewRunway Foundation",
     price: 799,
     priceLabel: "₹799",
-    description: "Founder-designed interview prep library with 4-week and 12-week roadmaps.",
-    entitlement: "Lifetime access to the launch edition and included updates",
+    description: "A structured flight plan across patterns, systems, evidence, role context, and mock demonstrations.",
+    entitlement: "Lifetime access to the launch edition, checkpoints, and included updates",
   },
   "ai-prep": {
     slug: "ai-prep",
-    eyebrow: "AI PREP",
-    name: "InterviewRunway AI Prep",
+    eyebrow: "THE SECOND SEAT",
+    name: "InterviewRunway The Second Seat",
     price: 2499,
     priceLabel: "₹2,499",
-    description: "Text-based mock interviews, scoring, and an adaptive study plan for Vault owners.",
-    entitlement: "Vault-owner upgrade; launch usage limits shown before payment",
+    description: "Live intelligence for practice, guidance, and permitted interview support.",
+    entitlement: "Foundation-cleared access · included practice-time allowance shown before unlock",
   },
   premium: {
     slug: "premium",
-    eyebrow: "1:1 COACHING",
-    name: "InterviewRunway 1:1 Coaching",
+    eyebrow: "HUMAN CALIBRATION",
+    name: "InterviewRunway Human Calibration",
     price: 9999,
     priceLabel: "₹9,999",
-    description: "Focused founder-led coaching for gaps that repeated practice has not fixed.",
-    entitlement: "Final package scope confirmed before booking",
+    description: "A real person reviews the evidence and calibrates the remaining persistent gap.",
+    entitlement: "Evidence-led · capacity capped · final scope confirmed before booking",
   },
 } as const;
 
@@ -138,19 +138,19 @@ export const VAULT_MODULES = [
 export const HOME_FAQS = [
   {
     question: "Is this only for senior engineers?",
-    answer: "No. The Vault is designed for roughly 1–8 years of experience. The roadmap helps you choose depth based on role and level instead of assuming everyone needs the same prep.",
+    answer: "No. Foundation is designed for roughly 1–8 years of experience. The roadmap helps you choose depth based on role and level instead of assuming everyone needs the same prep.",
   },
   {
     question: "Does ₹799 become a subscription?",
-    answer: "No. The Vault is a one-time purchase. AI Prep and 1:1 coaching are separate, optional products and are never pre-selected at checkout.",
+    answer: "No. Foundation is a one-time purchase. The Second Seat and Human Calibration are separate, evidence-led additions and are never pre-selected at checkout.",
   },
   {
     question: "Will this get me a US visa or job?",
     answer: "No course can honestly promise that. The product helps you prepare for remote and US-company interview loops; it does not provide placement, sponsorship, or a job guarantee.",
   },
   {
-    question: "Why is AI Prep not available to everyone?",
-    answer: "It is designed as a practice layer for people already using the Vault. Keeping it gated makes the feedback loop more useful and avoids selling an AI tool cold without foundational context.",
+    question: "Why is the Second Seat not sold separately?",
+    answer: "Its live practice loop needs a usable baseline: completed Foundation systems, a diagnostic, a mock checkpoint, and an initial signal profile. The gate is readiness—not arbitrary scarcity.",
   },
   {
     question: "Are the testimonials real?",

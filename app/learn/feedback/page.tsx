@@ -49,9 +49,9 @@ export default async function FeedbackPage() {
       <MemberShell profile={profile} active="feedback">
         <div className="member-page">
           <LockedMemberPanel
-            tier="AI Prep"
+            tier="The Second Seat"
             title="Feedback begins with interview-shaped evidence."
-            body="The Vault provides the preparation system and self-checks. AI Prep adds stored transcripts, category-level practice signals, and corrections tied to specific moments. This demo uses prewritten sample evidence."
+            body="Foundation provides the preparation system and self-checks. The Second Seat adds stored transcripts, category-level practice signals, and corrections tied to specific moments. This controlled demo uses prewritten sample evidence."
           />
         </div>
       </MemberShell>

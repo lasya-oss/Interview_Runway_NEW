@@ -18,7 +18,7 @@ export function PricingWorkspacePreview({ learnerName }: { learnerName: string }
       });
 
       if (!response.ok) throw new Error("Sample workspace unavailable");
-      window.location.assign("/learn");
+      window.location.assign("/learn/practice");
     } catch {
       setError("The sample workspace could not open. Please try again.");
       setIsOpening(false);
@@ -27,10 +27,10 @@ export function PricingWorkspacePreview({ learnerName }: { learnerName: string }
 
   return (
     <div className="pricing-workspace-stage">
-      <div className="pricing-workspace-frame" aria-label="AI Prep sample workspace at week three">
+      <div className="pricing-workspace-frame" aria-label="The Second Seat controlled sample workspace at week three">
         <div className="pricing-workspace-topline">
-          <span><i /> SAMPLE WORKSPACE · FICTIONAL PROGRESS</span>
-          <span>AI PREP / PRACTICE LAYER</span>
+          <span><i /> CONTROLLED DEMO · SAMPLE DATA</span>
+          <span>THE SECOND SEAT / ACTIVE</span>
           <span>WEEK 03 / 04</span>
         </div>
 
@@ -67,8 +67,8 @@ export function PricingWorkspacePreview({ learnerName }: { learnerName: string }
             <div className="pricing-workspace-command">
               <article>
                 <div><span>NEXT ACTION / MOCK 08</span><b>35 MIN</b></div>
-                <h4>Design a notification service.</h4>
-                <p>State the delivery contract, bound retries, and defend one consistency trade-off.</p>
+                <h4>How would you design a rate limiter?</h4>
+                <p>State the traffic constraint, choose the policy, and defend the trade-off before implementation.</p>
                 <span className="pricing-command-link">OPEN PREPARATION <i aria-hidden="true">↗</i></span>
               </article>
               <aside>
@@ -80,9 +80,9 @@ export function PricingWorkspacePreview({ learnerName }: { learnerName: string }
             </div>
 
             <div className="pricing-workspace-signal">
-              <span>WEEKLY PRACTICE SIGNAL</span>
+              <span>SAMPLE PRACTICE TIME</span>
               <div aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /></div>
-              <p><strong>+10</strong> across the last three scored mocks</p>
+              <p><strong>86 min</strong> remaining of a sample 120-minute allowance</p>
             </div>
           </div>
         </div>
@@ -90,11 +90,11 @@ export function PricingWorkspacePreview({ learnerName }: { learnerName: string }
 
       <div className="pricing-workspace-entry">
         <div>
-          <span>NO PAYMENT · NO RECORD CREATED</span>
-          <p>Explore fictional mid-tier progress, feedback, practice history, and the adaptive roadmap. The workspace itself will show how to start real access.</p>
+          <span>CONTROLLED DEMO · NO PAYMENT · NO RECORD CREATED</span>
+          <p>Explore sample Second Seat progress, perspectives, practice history, and the responsive roadmap. The workspace clearly marks how Foundation clearance unlocks real access.</p>
         </div>
         <button className="primary-cta" type="button" onClick={openSampleWorkspace} disabled={isOpening}>
-          {isOpening ? "Opening your sample…" : "Explore your sample workspace"} <span aria-hidden="true">↗</span>
+          {isOpening ? "Opening the demo…" : "Enter the Second Seat demo"} <span aria-hidden="true">↗</span>
         </button>
       </div>
       <p className="pricing-workspace-error" role="status" aria-live="polite">{error}</p>

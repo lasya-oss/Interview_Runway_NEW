@@ -132,12 +132,12 @@ export function DiagnosticClient() {
     const riskIndex = scores.indexOf(Math.min(...scores));
     const average = scores.reduce((total, score) => total + score, 0) / scores.length;
     const layer = average < 2.35
-      ? { name: "Foundation · Vault", href: "/vault", reason: "Build the models before adding pressure." }
+      ? { name: "Foundation", href: "/vault", reason: "Build a reliable baseline before adding interview pressure." }
       : average < 3.35
-        ? { name: "Practice · AI Prep", href: "/ai-prep", reason: "Use repeated attempts to make the gap measurable." }
+        ? { name: "The Second Seat", href: "/second-seat", reason: "Use responsive practice to make the gap measurable from several perspectives." }
         : scores[riskIndex] < 3
-          ? { name: "Calibration · Human Review", href: "/premium", reason: "The base is strong; one narrow gap needs expert calibration." }
-          : { name: "Practice · AI Prep", href: "/ai-prep", reason: "Stress-test the signal before spending on human review." };
+          ? { name: "Human Calibration", href: "/premium", reason: "The baseline is strong; one narrow gap may benefit from human judgment." }
+          : { name: "The Second Seat", href: "/second-seat", reason: "Stress-test the signal before spending on human review." };
 
     return {
       strongest: DIMENSIONS[strongestIndex],
@@ -178,9 +178,10 @@ export function DiagnosticClient() {
       url: url.toString(),
     };
     try {
-      if (navigator.share) await navigator.share(data);
+      const canShare = typeof navigator.share === "function";
+      if (canShare) await navigator.share(data);
       else await navigator.clipboard.writeText(`${data.text} ${data.url}`);
-      setShareState(navigator.share ? "Shared" : "Link copied");
+      setShareState(canShare ? "Shared" : "Link copied");
       trackEvent("signal_report_shared", { strongest: report?.strongest.key, risk: report?.risk.key });
     } catch {
       setShareState("Share cancelled");

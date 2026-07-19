@@ -290,19 +290,10 @@ function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progress
     if (turbineRef.current) {
       const weight = windowWeight(p, LAYER_WHEEL_WINDOW.start, LAYER_WHEEL_WINDOW.peak, LAYER_WHEEL_WINDOW.end);
       const local = smooth(clamp01((p - LAYER_WHEEL_WINDOW.start) / (LAYER_WHEEL_WINDOW.end - LAYER_WHEEL_WINDOW.start)));
-      const pathLocal = clamp01((p - 0.515) / 0.17);
-      const firstCrossing = smooth((pathLocal - 0.38) / 0.12);
-      const secondCrossing = smooth((pathLocal - 0.62) / 0.12);
-      const firstToSecond = THREE.MathUtils.lerp(2.4, -2.4, firstCrossing);
-      const chapterPosition = THREE.MathUtils.lerp(firstToSecond, 2.4, secondCrossing);
-      const crossingDip = Math.max(
-        windowWeight(pathLocal, 0.44, 0.53, 0.62),
-        windowWeight(pathLocal, 0.7, 0.79, 0.88),
-      );
       turbineRef.current.visible = weight > 0.002;
-      turbineRef.current.scale.setScalar(Math.max(0.001, weight * (1.16 - crossingDip * 0.14)));
-      turbineRef.current.position.set(chapterPosition, -0.12 + pointer.y * 0.08, -0.42 + weight * 0.72);
-      turbineRef.current.rotation.set(-0.08 + local * 0.16, 0.32 - local * 0.54 + pointer.x * 0.04, -0.08 + local * 0.14);
+      turbineRef.current.scale.setScalar(Math.max(0.001, weight * 1.08));
+      turbineRef.current.position.set(1.82 + pointer.x * 0.08, -0.1 + Math.sin(local * Math.PI) * 0.08 + pointer.y * 0.05, -0.18 + weight * 0.42);
+      turbineRef.current.rotation.set(-0.08 + local * 0.12, 0.28 - local * 0.42 + pointer.x * 0.03, -0.06 + local * 0.1);
     }
 
     if (routeRef.current) {
@@ -319,7 +310,7 @@ function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progress
       const local = smooth(clamp01((p - WORKSPACE_GIMBAL_WINDOW.start) / (WORKSPACE_GIMBAL_WINDOW.end - WORKSPACE_GIMBAL_WINDOW.start)));
       gimbalRef.current.visible = weight > 0.002;
       gimbalRef.current.scale.setScalar(Math.max(0.001, weight * 1.06));
-      gimbalRef.current.position.set(-1.9 + local * 3.2 + pointer.x * 0.12, 0.15 + pointer.y * 0.1, 0.1);
+      gimbalRef.current.position.set(1.76 + pointer.x * 0.08, 0.12 + Math.sin(local * Math.PI) * 0.12 + pointer.y * 0.06, 0.08);
       gimbalRef.current.rotation.set(local * 0.55, local * 0.8, -local * 0.35);
     }
 

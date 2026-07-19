@@ -12,7 +12,7 @@ const siteUrl = "https://interviewrunway.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "InterviewRunway — Turn experience into interview signal",
+    default: "InterviewRunway — Build the flight plan. Unlock the Second Seat.",
     template: "%s | InterviewRunway",
   },
   description:
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   keywords: [
     "remote interview preparation India",
-    "AI company interview prep",
+    "AI-adjacent company interview prep",
     "software engineer interview prep India",
     "system design interview",
     "DSA interview preparation",
@@ -39,22 +39,22 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: siteUrl,
     siteName: "InterviewRunway",
-    title: "Turn your experience into interview signal",
-    description: "Run the free Interview Signal Check, inspect a populated demo, and add preparation layers only when the evidence justifies them.",
+    title: "Build the flight plan. Unlock the Second Seat.",
+    description: "Turn experience into interview signal, earn Foundation clearance, and unlock live practice from several expert perspectives.",
     images: [
       {
-        url: `${siteUrl}/og-v3.png`,
-        width: 1731,
-        height: 909,
-        alt: "InterviewRunway — Turn engineering experience into interview signal",
+        url: `${siteUrl}/og-second-seat-v1.png`,
+        width: 1734,
+        height: 907,
+        alt: "InterviewRunway Second Seat turbine-inspired intelligence core",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Turn your experience into interview signal",
-    description: "Free signal check, populated product demos, and evidence-led interview preparation for engineers in India.",
-    images: [`${siteUrl}/og-v3.png`],
+    title: "Build the flight plan. Unlock the Second Seat.",
+    description: "Free signal check, Foundation clearance, and a controlled Second Seat practice demo for engineers in India.",
+    images: [`${siteUrl}/og-second-seat-v1.png`],
   },
 };
 

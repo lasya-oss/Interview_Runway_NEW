@@ -11,9 +11,9 @@ import {
 import { CheckoutClient } from "./checkout-client";
 
 export const metadata: Metadata = {
-  title: "Secure Vault checkout",
+  title: "Secure Foundation checkout",
   description:
-    "Review the InterviewRunway Vault order and complete payment securely.",
+    "Review the InterviewRunway Foundation order and complete payment securely.",
   robots: { index: false, follow: false },
 };
 
@@ -26,7 +26,7 @@ export default async function CheckoutPage({
   if (offer !== "vault") notFound();
 
   await requireChatGPTUser("/checkout/vault");
-  const vault = OFFERS.vault;
+  const foundation = OFFERS.vault;
   const clientToken = getPaddleClientToken();
 
   return (
@@ -39,8 +39,8 @@ export default async function CheckoutPage({
 
         <div className="checkout-layout">
           <section className="checkout-card" aria-labelledby="payment-title">
-            <p className="module-kicker">VAULT ACCESS · ONE TIME</p>
-            <h1 id="payment-title">Clearance for your next interview.</h1>
+            <p className="module-kicker">FOUNDATION ACCESS · ONE TIME</p>
+            <h1 id="payment-title">Build the flight plan.</h1>
             <p className="checkout-intro">
               Review your order, then continue to the encrypted payment screen.
               Your payment details are handled securely and are never stored by
@@ -52,14 +52,14 @@ export default async function CheckoutPage({
               environment={paddleEnvironment()}
             />
 
-            <div className="checkout-manifest" aria-label="Vault access manifest">
+            <div className="checkout-manifest" aria-label="Foundation access manifest">
               <div>
                 <span>01</span>
                 <p><b>4-week and 12-week flight plans</b><small>Choose the runway that matches your timeline.</small></p>
               </div>
               <div>
                 <span>02</span>
-                <p><b>Eight interview systems</b><small>DSA, design, behavioural, role, career, and remote-work preparation.</small></p>
+                <p><b>Interview systems and checkpoints</b><small>DSA, design, behavioural, role, career, and remote-work preparation.</small></p>
               </div>
               <div>
                 <span>03</span>
@@ -77,13 +77,13 @@ export default async function CheckoutPage({
 
           <aside className="checkout-card order-card" aria-labelledby="order-title">
             <p className="module-kicker">ORDER SUMMARY</p>
-            <h2 id="order-title">{vault.name}</h2>
-            <p>{vault.description}</p>
+            <h2 id="order-title">{foundation.name}</h2>
+            <p>{foundation.description}</p>
 
-            <div className="price-line"><span>Vault access</span><span>{vault.priceLabel}</span></div>
+            <div className="price-line"><span>Foundation access</span><span>{foundation.priceLabel}</span></div>
             <div className="price-line"><span>Billing</span><span>One time</span></div>
             <div className="price-line"><span>Tax</span><span>Calculated at checkout</span></div>
-            <div className="price-line price-total"><span>Base price</span><span>{vault.priceLabel}</span></div>
+            <div className="price-line price-total"><span>Base price</span><span>{foundation.priceLabel}</span></div>
 
             <div className="refund-inline">
               Any applicable tax and the final amount are shown before payment.
@@ -92,7 +92,7 @@ export default async function CheckoutPage({
 
             <div className="trust-note">
               <span>✓ SECURE PAYMENT ENTRY</span>
-              <span>✓ ONE-TIME ₹799 PURCHASE</span>
+              <span>✓ ONE-TIME ₹799 FOUNDATION PURCHASE</span>
               <span>✓ NO SUBSCRIPTION</span>
               <span>✓ ACCESS ACTIVATED AFTER PAYMENT CONFIRMATION</span>
             </div>

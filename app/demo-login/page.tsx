@@ -3,8 +3,8 @@ import { PageShell } from "@/app/components/site-chrome";
 import { DemoLoginClient } from "./demo-login-client";
 
 export const metadata: Metadata = {
-  title: "Choose an InterviewRunway demo",
-  description: "Choose Vault, AI Prep, or Premium and enter a populated InterviewRunway learner workspace.",
+  title: "The Second Seat demo — one question, three perspectives",
+  description: "Choose Foundation, The Second Seat, or Human Calibration and enter a populated InterviewRunway learner workspace, including one complete responsive practice loop.",
   robots: { index: false, follow: false },
 };
 
@@ -22,7 +22,7 @@ export default async function DemoLoginPage({ searchParams }: { searchParams: Pr
             <h1 id="demo-login-title">Choose a layer. <em>Enter the workspace.</em></h1>
             <p>No signup and no empty dashboard. Choose the access level you want to inspect; the demo opens with realistic progress, unlocked tools, and review-edition material already in context.</p>
             <div className="demo-login-principles">
-              <span><b>01</b> Pick Vault, AI Prep, or Premium</span>
+              <span><b>01</b> Pick Foundation, The Second Seat, or Human Calibration</span>
               <span><b>02</b> Enter the populated workspace instantly</span>
               <span><b>03</b> Open real sample material inside</span>
             </div>

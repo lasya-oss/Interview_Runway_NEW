@@ -106,7 +106,7 @@ export default function CurriculumPage() {
               body="Each family earns its place by helping a learner recognise a pattern, explain a decision, or make their experience legible to the market they are targeting."
               id="curriculum-atlas-title"
             />
-            <Link className="text-link" href="/vault">Review the complete Vault offer <span aria-hidden="true">→</span></Link>
+            <Link className="text-link" href="/vault">Review the complete Foundation offer <span aria-hidden="true">→</span></Link>
           </div>
           <div className="curriculum-index-list">
             {VAULT_MODULES.map((module, index) => (
@@ -164,7 +164,7 @@ export default function CurriculumPage() {
           <h2 id="curriculum-cta-title">See the product from both sides.</h2>
           <p>Review the commercial offer, then enter the sample learner workspace to understand what access is meant to feel like.</p>
           <div className="section-actions">
-            <CtaLink href="/checkout/vault" event="checkout_started">Get the Vault — ₹799 <span aria-hidden="true">↗</span></CtaLink>
+            <CtaLink href="/checkout/vault" event="foundation_checkout_started">Start Foundation — ₹799 <span aria-hidden="true">↗</span></CtaLink>
             <Link className="text-link" href="/demo-login">Open the sample workspaces <span aria-hidden="true">→</span></Link>
           </div>
         </div>

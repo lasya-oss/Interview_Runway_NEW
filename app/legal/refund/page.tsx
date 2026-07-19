@@ -7,9 +7,9 @@ import {
 } from "@/app/components/site-chrome";
 
 export const metadata: Metadata = {
-  title: "Refund policy — draft before launch",
+  title: "Refund policy",
   description:
-    "InterviewRunway's plain-language draft refund policy. Final eligibility and the refund window will be published before payments are enabled.",
+    "InterviewRunway's plain-language refund standard for digital Foundation access, the Second Seat, and Human Calibration.",
   alternates: { canonical: "/legal/refund" },
 };
 
@@ -18,20 +18,20 @@ export default function RefundPolicyPage() {
     <PageShell>
       <PageHero
         quiet
-        eyebrow="LEGAL · LAUNCH DRAFT"
+        eyebrow="LEGAL · REFUND STANDARD"
         title="Refunds, without fine-print games."
-        body="This is a pre-launch draft, not an active refund offer. The final window, eligibility rules, seller identity, and grievance contact will be published here and shown at checkout before any payment is enabled."
+        body="Review the exact access, refund eligibility, window, and any product-specific limits shown with your order before you confirm payment. Nothing is added silently."
       />
 
       <section className="content-section" aria-labelledby="refund-status-title">
         <div className="container">
           <article className="content-card glass-card">
-            <p className="module-kicker">PAYMENTS ARE NOT YET ACTIVE</p>
-            <h2 id="refund-status-title">Launch details still pending</h2>
+            <p className="module-kicker">READ BEFORE PURCHASE</p>
+            <h2 id="refund-status-title">Your order terms are shown before payment</h2>
             <p>
-              The final refund window, legal seller name and address, refund
-              request channel, and grievance officer details have not been
-              supplied. They must be completed before checkout is activated.
+              The order screen states the product, entitlement, final amount,
+              applicable taxes, and the refund conditions attached to that
+              purchase. Do not assume a refund window that is not shown there.
             </p>
           </article>
         </div>
@@ -54,25 +54,26 @@ export default function RefundPolicyPage() {
 
           <h2>If you request a refund</h2>
           <p>
-            The live policy will provide one clear request channel and list the
-            information needed to locate the purchase. It will also explain the
-            review and payment-return process in plain language.
+            Use the support route shown on your order confirmation and provide
+            the purchase reference and reason for the request. The response will
+            explain the eligibility decision and, when approved, the expected
+            return process in plain language.
           </p>
 
           <h2>Different products may need different rules</h2>
           <p>
-            Digital Vault access, usage-based AI Prep, and scheduled 1:1
-            coaching are different services. Any different eligibility or
+            Digital Foundation access, included or added Second Seat practice
+            time, and scheduled Human Calibration are different services. Any different eligibility or
             cancellation rules will be disclosed beside the relevant offer
             before payment—not introduced after purchase.
           </p>
 
           <h2>Failed or duplicate payments</h2>
           <p>
-            The final support process will cover duplicate charges and payments
-            that are debited but do not create access. Razorpay may also handle
-            bank-side reversals. A support contact and escalation path will be
-            published before launch.
+            Support covers duplicate charges and payments that are debited but
+            do not create access. The payment provider or bank may also handle a
+            reversal. Use the support route on the order confirmation so the
+            transaction can be traced without exposing payment details.
           </p>
 
           <h2>Your legal rights</h2>

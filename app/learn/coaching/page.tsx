@@ -31,7 +31,7 @@ export default async function CoachingPage() {
       <MemberShell profile={profile} active="coaching">
         <div className="member-page">
           <LockedMemberPanel
-            tier="Premium coaching"
+            tier="Human Calibration"
             title="Human calibration is reserved for a named gap."
             body={`${profile.planShort} can see how the private coaching room is structured, but agenda notes, session scheduling, and coach deliverables belong to the premium example engagement. No coach is contacted from this demo.`}
           >

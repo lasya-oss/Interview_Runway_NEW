@@ -9,8 +9,8 @@ import { OFFERS } from "@/app/lib/site-data";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Pricing — build your interview-prep system",
-  description: "Compare the ₹799 Vault foundation, the AI Prep upgrade for Vault owners, and capacity-capped 1:1 coaching.",
+  title: "Pricing — Foundation, The Second Seat & Human Calibration",
+  description: "Start with ₹799 Foundation, earn access to the ₹2,499 Second Seat, and add capacity-capped Human Calibration only when the evidence calls for it.",
   alternates: { canonical: "/pricing" },
 };
 
@@ -19,63 +19,63 @@ const PRICING_LAYERS = [
     number: "01",
     label: "FOUNDATION",
     offer: OFFERS.vault,
-    status: "Open to everyone",
+    status: "START HERE",
     priceNote: "One payment",
-    body: "Build reliable patterns across DSA, system design, behavioural communication, and remote-career decisions.",
-    includes: ["4-week and 12-week roadmaps", "Vault curriculum and reference library", "Editable career templates", "Launch-edition updates included"],
+    body: "Build the foundation. Complete the checkpoints. Unlock eligibility.",
+    includes: ["4-week and 12-week flight plans", "Patterns, systems, and behavioural evidence", "Role intelligence and remote-career material", "Diagnostics, mock demonstrations, and checkpoints"],
     href: "/checkout/vault",
-    cta: "Get the Vault",
+    cta: "Start Foundation",
   },
   {
     number: "02",
-    label: "PRACTICE",
+    label: "THE SYSTEM COMES ALIVE",
     offer: OFFERS["ai-prep"],
-    status: "Vault owners only",
-    priceNote: "Working upgrade price",
-    body: "Add interview pressure, transcript-linked scoring, and a study plan that responds to repeated evidence.",
-    includes: ["Text-based DSA, design, and behavioural mocks", "Category-level feedback tied to each transcript", "Adaptive study-plan changes", "Progress signals across repeated sessions"],
-    href: "/ai-prep",
-    cta: "Preview AI Prep",
+    status: "FOUNDATION CLEARANCE REQUIRED",
+    priceNote: "Available after clearance",
+    body: "Live intelligence for practice, guidance, and permitted interview support. You remain in command.",
+    includes: ["Dynamic, responsive mock interviews", "Interviewer, technical, and communication perspectives", "WhatsApp guidance", "Specialist training systems", "Included practice-time allowance", "Permitted live interview support"],
+    href: "/second-seat",
+    cta: "Preview the Second Seat",
   },
   {
     number: "03",
-    label: "CALIBRATION",
+    label: "HUMAN CALIBRATION",
     offer: OFFERS.premium,
-    status: "Capacity capped",
-    priceNote: "Working package price",
-    body: "Bring a persistent, evidenced gap to a focused human engagement instead of buying generic coaching upfront.",
-    includes: ["Pre-session diagnostic", "Founder-led gap calibration", "Written next-action plan", "Final scope and terms before booking"],
+    status: "EVIDENCE-LED · CAPACITY CAPPED",
+    priceNote: "Focused package",
+    body: "Add a real person when repeated evidence identifies a persistent gap.",
+    includes: ["Flight-recorder evidence packet", "Focused review of one persistent gap", "Human judgment and mentoring", "Explicit correction and next-action plan"],
     href: "/premium",
-    cta: "Review coaching scope",
+    cta: "Review Human Calibration",
   },
 ] as const;
 
 const COMPARISON_ROWS = [
-  ["Best next step", "Build the foundation", "Practise under pressure", "Correct a persistent gap"],
-  ["Who can access", "Anyone in the target audience", "Verified Vault owners", "Learners with a defined coaching need"],
-  ["Core library", "Included", "Uses your Vault foundation", "Used as preparation context"],
-  ["Structured roadmap", "4-week and 12-week", "Adapts to mock evidence", "Refined around the named gap"],
-  ["Interactive mocks", "Not included", "Core product", "Evidence may inform coaching"],
-  ["Human time", "None", "None", "Founder-led and capacity capped"],
-  ["Purchase path", "Direct checkout", "Sign in and verify Vault access", "Review scope, fit, and availability"],
+  ["Core job", "Build a usable baseline", "Practise, observe, and guide", "Calibrate one persistent gap"],
+  ["Entry condition", "Open to every target learner", "Foundation clearance complete", "Repeated evidence identifies a human need"],
+  ["Structured flight plan", "4-week and 12-week", "Responds to practice evidence", "Becomes the mentor context"],
+  ["Responsive mock interviews", "Mock demonstrations and checkpoints", "Core experience", "Transcripts shape the review"],
+  ["Multiple perspectives", "Introduced in the curriculum", "Live interviewer, technical, and communication views", "A person resolves the remaining ambiguity"],
+  ["Practice time", "Not metered", "Included allowance; additions disclosed before unlock", "Defined by the confirmed package"],
+  ["Purchase path", "Direct Foundation checkout", "Preview publicly; unlock after clearance", "Review evidence, scope, fit, and availability"],
 ] as const;
 
 const PRICING_FAQS = [
   {
     question: "Do I need to buy all three layers?",
-    answer: "No. Start with the Vault. AI Prep and coaching are optional additions meant for specific needs that appear after you begin preparing.",
+    answer: "No. Start with Foundation. The Second Seat becomes available only after measurable clearance, and Human Calibration is reserved for a persistent gap that repeated evidence has made visible.",
   },
   {
-    question: "Is the ₹799 Vault a subscription?",
+    question: "Is the ₹799 Foundation a subscription?",
     answer: "No. It is a one-time purchase with the entitlement shown at checkout. No upgrade is preselected.",
   },
   {
-    question: "Can I buy AI Prep without the Vault?",
-    answer: "No. AI Prep is designed around the Vault roadmap and is offered only after Vault ownership is verified. Final usage limits and access duration must be shown before its checkout is enabled.",
+    question: "Can I buy the Second Seat directly?",
+    answer: "No. You can preview it, but the unlock appears only after the required Foundation systems, diagnostic, mock checkpoint, and initial signal profile are complete. The gate measures readiness; it is not artificial scarcity.",
   },
   {
-    question: "What exactly is included in the ₹9,999 coaching package?",
-    answer: "₹9,999 is the working launch price. Session count, duration, preparation, written deliverables, availability, EMI, rescheduling, and refund terms must be confirmed together before booking.",
+    question: "When does Human Calibration make sense?",
+    answer: "When repeated Second Seat practice exposes the same narrow gap and human judgment is more useful than more repetition. Package scope, availability, and final terms are confirmed before booking.",
   },
 ] as const;
 
@@ -88,9 +88,9 @@ export default async function PricingPage() {
       <section className="content-section pricing-assembly pricing-assembly-first" aria-labelledby="pricing-layers-title">
         <div className="container">
           <SectionHeading
-            eyebrow="PRICING / THREE PURPOSEFUL LAYERS"
-            title="Three layers. Buy only the moment you need."
-            body="Each layer has a distinct job and entry condition. The product should recommend the smallest useful commitment, not push everyone toward the highest price."
+            eyebrow="ONE CONTINUOUS FLIGHT PATH"
+            title="Foundation earns access. The Second Seat brings it alive."
+            body="Human Calibration joins only when technology has made a remaining gap specific enough to deserve a person's time."
             id="pricing-layers-title"
           />
           <div className="pricing-layer-grid">
@@ -103,7 +103,13 @@ export default async function PricingPage() {
                 <p>{layer.body}</p>
                 <ul>{layer.includes.map((item) => <li key={item}>{item}</li>)}</ul>
                 <div className="pricing-layer-entitlement"><span>Access model</span><b>{layer.offer.entitlement}</b></div>
-                <Link className={index === 0 ? "primary-cta" : "text-link"} href={layer.href}>{layer.cta} <span aria-hidden="true">↗</span></Link>
+                <Link
+                  className={index === 0 ? "primary-cta" : "text-link"}
+                  data-analytics-event={index === 0 ? "foundation_checkout_started" : index === 1 ? "second_seat_preview_started" : undefined}
+                  href={layer.href}
+                >
+                  {layer.cta} <span aria-hidden="true">↗</span>
+                </Link>
               </article>
             ))}
           </div>
@@ -114,15 +120,15 @@ export default async function PricingPage() {
         <div className="container">
           <div className="pricing-workspace-heading">
             <SectionHeading
-              eyebrow="START SMALL / INSPECT THE PRACTICE LAYER"
-              title="See the product at week three—not an empty dashboard."
-              body="This is the mid-tier AI Prep workspace after repeated use: a live roadmap, scored practice, specific evidence, and one defensible next action."
+              eyebrow="CONTROLLED SECOND SEAT DEMO"
+              title="Enter a populated cockpit—not an empty dashboard."
+              body="Inspect a sample learner at week three: responsive practice, several perspectives, specific evidence, and one defensible next action."
               id="pricing-workspace-title"
             />
             <div className="pricing-workspace-identity">
-              <span>WORKSPACE IDENTITY</span>
+              <span>DEMO LEARNER</span>
               <strong>{learnerName}</strong>
-              <small>{user ? "From your signed-in account" : "Preview placeholder"}</small>
+              <small>{user ? "Name shown in this preview only" : "Sample profile"}</small>
             </div>
           </div>
           <PricingWorkspacePreview learnerName={learnerName} />
@@ -139,7 +145,7 @@ export default async function PricingPage() {
           />
           <div className="pricing-table-wrap">
             <table className="pricing-table">
-              <thead><tr><th scope="col">Decision</th><th scope="col">Vault</th><th scope="col">AI Prep</th><th scope="col">1:1 Coaching</th></tr></thead>
+              <thead><tr><th scope="col">Decision</th><th scope="col">Foundation</th><th scope="col">The Second Seat</th><th scope="col">Human Calibration</th></tr></thead>
               <tbody>
                 {COMPARISON_ROWS.map(([label, vault, ai, premium]) => (
                   <tr key={label}><th scope="row">{label}</th><td>{vault}</td><td>{ai}</td><td>{premium}</td></tr>
@@ -147,7 +153,7 @@ export default async function PricingPage() {
               </tbody>
             </table>
           </div>
-          <p className="pricing-disclosure">AI Prep usage limits and duration, and the final coaching package scope, remain launch decisions. They must appear beside the exact total before either payment route is enabled.</p>
+          <p className="pricing-disclosure">The public path never skips Foundation clearance. Included practice time, any additional operating cost, and the Human Calibration scope are shown before an unlock or booking is confirmed.</p>
         </div>
       </section>
 
@@ -155,14 +161,14 @@ export default async function PricingPage() {
         <div className="container pricing-route-layout">
           <SectionHeading
             eyebrow="HOW THE PATH WORKS"
-            title="The next purchase follows evidence."
-            body="The product should become more responsive only when your preparation produces enough signal to justify it."
+            title="Each unlock follows evidence."
+            body="Learn the terrain, unlock live intelligence, then bring in a person only when the remaining gap needs human judgment."
             id="pricing-route-title"
           />
           <ol className="pricing-route">
-            <li><span>01</span><div><h3>Buy the foundation directly</h3><p>The Vault has no email gate before checkout and no optional product added to the order.</p></div></li>
-            <li><span>02</span><div><h3>Upgrade inside your account</h3><p>AI Prep verifies Vault access, then states usage limits and duration before payment.</p></div></li>
-            <li><span>03</span><div><h3>Book after a fit check</h3><p>Coaching opens only with a named gap, explicit scope, real availability, and final terms.</p></div></li>
+            <li><span>01</span><div><h3>Build the flight plan</h3><p>Start Foundation directly. Nothing else is added to the order.</p></div></li>
+            <li><span>02</span><div><h3>Complete measurable clearance</h3><p>Required systems, the baseline diagnostic, a mock checkpoint, and an initial signal profile make the Second Seat unlock visible.</p></div></li>
+            <li><span>03</span><div><h3>Escalate only when evidence says so</h3><p>Human Calibration opens around a named gap, explicit scope, real availability, and final terms.</p></div></li>
           </ol>
         </div>
       </section>
@@ -179,10 +185,10 @@ export default async function PricingPage() {
       <section className="section-pad final-cta" aria-labelledby="pricing-cta-title">
         <div className="container final-cta-inner">
           <p className="eyebrow">START WITH THE FOUNDATION</p>
-          <h2 id="pricing-cta-title">Pay for the layer you can use now.</h2>
-          <p>The Vault is {OFFERS.vault.priceLabel} once. Explore the complete curriculum or enter a sample learner account before deciding.</p>
+          <h2 id="pricing-cta-title">Build the flight plan first.</h2>
+          <p>Foundation is {OFFERS.vault.priceLabel} once. Complete its checkpoints, then unlock the Second Seat when you are ready to use it.</p>
           <div className="section-actions">
-            <CtaLink href="/checkout/vault" event="checkout_started">Get the Vault <span aria-hidden="true">↗</span></CtaLink>
+            <CtaLink href="/checkout/vault" event="foundation_checkout_started">Start Foundation <span aria-hidden="true">↗</span></CtaLink>
             <Link className="text-link" href="/curriculum">Explore the curriculum <span aria-hidden="true">→</span></Link>
           </div>
         </div>
