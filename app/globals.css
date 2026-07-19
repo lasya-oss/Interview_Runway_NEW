@@ -5775,6 +5775,46 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .testimonial-flight-deck .testimonial-record { grid-template-columns: 1fr; }
 }
 
+/* Layer readouts carry the evidence, so they must read as body copy—not telemetry. */
+
+.trajectory-sequence .chapter-readout { margin-top: 32px; }
+.trajectory-sequence .chapter-readout > div {
+  min-height: 118px;
+  padding: 20px 22px;
+}
+.trajectory-sequence .chapter-readout dt {
+  color: #9aafb8;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .11em;
+}
+.trajectory-sequence .chapter-readout dd {
+  margin-top: 11px;
+  color: #edf4f6;
+  font-size: 15.5px;
+  font-weight: 590;
+  line-height: 1.48;
+}
+.trajectory-sequence .chapter-footer {
+  margin-top: 38px;
+  padding-top: 21px;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.trajectory-sequence .chapter-footer > span { color: #9aadb6; }
+.trajectory-sequence .chapter-footer a { font-size: 14px; font-weight: 650; }
+.trajectory-sequence .trajectory-chapter-3 .chapter-readout dt { color: #617985; }
+.trajectory-sequence .trajectory-chapter-3 .chapter-readout dd { color: #243b46; }
+.trajectory-sequence .trajectory-chapter-3 .chapter-footer > span { color: #526b77; }
+
+@media (max-width: 520px) {
+  .trajectory-sequence .chapter-readout > div { min-height: 104px; padding: 17px 18px; }
+  .trajectory-sequence .chapter-readout dt { font-size: 9px; }
+  .trajectory-sequence .chapter-readout dd { font-size: 14px; }
+  .trajectory-sequence .chapter-footer { align-items: flex-start; flex-direction: column; gap: 12px; font-size: 12px; }
+  .trajectory-sequence .chapter-footer a { font-size: 13px; }
+}
+
 /* Member workspace legibility scale.
    Instrument labels stay compact, but no longer fall below a usable reading size. */
 

@@ -328,3 +328,12 @@ test("member demo typography has an explicit legibility floor", async () => {
   assert.match(styles, /\.mock-history-table strong\s*\{\s*font-size:\s*13\.5px/);
   assert.match(styles, /\.member-material-card p\s*\{\s*font-size:\s*var\(--member-body\)/);
 });
+
+test("three-layer evidence readouts use body-copy sizing", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(styles, /\.trajectory-sequence \.chapter-readout dt[\s\S]*font-size:\s*10px/);
+  assert.match(styles, /\.trajectory-sequence \.chapter-readout dd[\s\S]*font-size:\s*15\.5px/);
+  assert.match(styles, /\.trajectory-sequence \.chapter-footer[\s\S]*font-size:\s*13\.5px/);
+  assert.match(styles, /\.trajectory-sequence \.chapter-footer a\s*\{\s*font-size:\s*14px/);
+});
