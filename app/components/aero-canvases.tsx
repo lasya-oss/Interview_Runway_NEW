@@ -22,6 +22,13 @@ function windowWeight(progress: number, start: number, peak: number, end: number
   return smooth((end - progress) / (end - peak));
 }
 
+function plateauWeight(progress: number, start: number, enterEnd: number, exitStart: number, end: number) {
+  if (progress <= start || progress >= end) return 0;
+  if (progress < enterEnd) return smooth((progress - start) / (enterEnd - start));
+  if (progress <= exitStart) return 1;
+  return smooth((end - progress) / (end - exitStart));
+}
+
 function createAirfoilGeometry(lite: boolean) {
   const shape = new THREE.Shape();
   shape.moveTo(-2.65, 0);
@@ -253,7 +260,7 @@ function VaultFlightPlan({ lite, activeSystemRef }: { lite: boolean; activeSyste
 
 // Keep the system curve inside the six-system explorer and the turbine inside
 // the following three-layer sequence. Their windows meet, but never overlap.
-const SYSTEM_CURVE_WINDOW = { start: 0.2, peak: 0.31, end: 0.5 } as const;
+const SYSTEM_CURVE_WINDOW = { start: 0.2, enterEnd: 0.27, exitStart: 0.485, end: 0.5 } as const;
 const LAYER_WHEEL_WINDOW = { start: 0.5, peak: 0.58, end: 0.7 } as const;
 const WORKSPACE_GIMBAL_WINDOW = { start: 0.67, peak: 0.74, end: 0.9 } as const;
 
@@ -299,10 +306,10 @@ function SceneRig({ progressRef, pointerRef, activeSystemRef, tier }: { progress
     }
 
     if (routeRef.current) {
-      const weight = windowWeight(p, SYSTEM_CURVE_WINDOW.start, SYSTEM_CURVE_WINDOW.peak, SYSTEM_CURVE_WINDOW.end);
+      const weight = plateauWeight(p, SYSTEM_CURVE_WINDOW.start, SYSTEM_CURVE_WINDOW.enterEnd, SYSTEM_CURVE_WINDOW.exitStart, SYSTEM_CURVE_WINDOW.end);
       const local = smooth(clamp01((p - SYSTEM_CURVE_WINDOW.start) / (SYSTEM_CURVE_WINDOW.end - SYSTEM_CURVE_WINDOW.start)));
       routeRef.current.visible = weight > 0.002;
-      routeRef.current.scale.setScalar(Math.max(0.001, weight * (0.98 + local * 0.08)));
+      routeRef.current.scale.setScalar(Math.max(0.001, weight * 1.08));
       routeRef.current.position.set(-1.05 - local * 0.35, -0.18, -1.68 + local * 0.08);
       routeRef.current.rotation.set(0.04 + local * 0.03, -0.12 + local * 0.16, -0.06 + local * 0.08);
     }

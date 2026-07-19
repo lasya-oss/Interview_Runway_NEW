@@ -297,7 +297,9 @@ test("homepage 3D curve and wheel are mapped to their intended sections", async 
     "utf8",
   );
 
-  assert.match(source, /SYSTEM_CURVE_WINDOW = \{ start: 0\.2, peak: 0\.31, end: 0\.5 \}/);
+  assert.match(source, /SYSTEM_CURVE_WINDOW = \{ start: 0\.2, enterEnd: 0\.27, exitStart: 0\.485, end: 0\.5 \}/);
+  assert.match(source, /plateauWeight\(p, SYSTEM_CURVE_WINDOW\.start, SYSTEM_CURVE_WINDOW\.enterEnd, SYSTEM_CURVE_WINDOW\.exitStart, SYSTEM_CURVE_WINDOW\.end\)/);
+  assert.match(source, /routeRef\.current\.scale\.setScalar\(Math\.max\(0\.001, weight \* 1\.08\)\)/);
   assert.match(source, /LAYER_WHEEL_WINDOW = \{ start: 0\.5, peak: 0\.58, end: 0\.7 \}/);
   assert.match(source, /WORKSPACE_GIMBAL_WINDOW = \{ start: 0\.67, peak: 0\.74, end: 0\.9 \}/);
   assert.match(source, /firstCrossing = smooth\(\(pathLocal - 0\.38\) \/ 0\.12\)/);
