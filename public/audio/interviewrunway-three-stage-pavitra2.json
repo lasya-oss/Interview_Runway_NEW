@@ -1,0 +1,60 @@
+{
+  "voice": {
+    "name": "Pavitra2",
+    "id": "2e4f5fed-e691-4d6a-bdbe-82880007ad4b",
+    "provider": "CUSTOM_VOICE",
+    "version": "2"
+  },
+  "duration": 115.44,
+  "audio_sha256": "ae6ade0543e12e5492c1afd13644859972f1d0597b6c894e350d6f0f7e6e7587",
+  "scenes": [
+    {
+      "id": "signal",
+      "start": 0.0,
+      "end": 12.04,
+      "duration": 12.04,
+      "caption": "TURN EXPERIENCE INTO INTERVIEW SIGNAL.",
+      "text_sha256": "5fb49f54a00e918111ebce225b3b1e73681d47ec9211fa5863072eda217c2aeb"
+    },
+    {
+      "id": "foundation",
+      "start": 12.04,
+      "end": 33.84,
+      "duration": 21.8,
+      "caption": "01 · FOUNDATION · ₹799 ONCE.",
+      "text_sha256": "581cedd73472fab67b6f21d4a65ccd8ab7b78ccccc85e21aa312cfac72fefb6b"
+    },
+    {
+      "id": "second-seat",
+      "start": 33.84,
+      "end": 67.2,
+      "duration": 33.36,
+      "caption": "02 · THE SECOND SEAT · ₹2,499 AFTER CLEARANCE.",
+      "text_sha256": "5a79f6c3079f9d9146300a017a5d4dd0b369889c29dcbd7aebee5cc1bf823216"
+    },
+    {
+      "id": "whatsapp",
+      "start": 67.2,
+      "end": 82.16,
+      "duration": 14.96,
+      "caption": "ASYNCHRONOUS EXPERT GUIDANCE · WHATSAPP.",
+      "text_sha256": "4b6b30d1df0d63b930e2f78588443ddeae7a948dd7377d0ef55ec7ad9ba254e8"
+    },
+    {
+      "id": "calibration",
+      "start": 82.16,
+      "end": 107.44,
+      "duration": 25.28,
+      "caption": "03 · HUMAN CALIBRATION · ₹9,999.",
+      "text_sha256": "ced6a8a101d1a710886648edecd10197056c81a9a17a3a0cef0cb8748c03bf42"
+    },
+    {
+      "id": "runway",
+      "start": 107.44,
+      "end": 115.4,
+      "duration": 7.96,
+      "caption": "START FOUNDATION · ₹799.",
+      "text_sha256": "a6002091b6a2d6a9dd8aded62ea9f4bbf077b0699193c88229853c707567a33c"
+    }
+  ]
+}

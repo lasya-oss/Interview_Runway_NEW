@@ -10,6 +10,7 @@ export const ANALYTICS_EVENTS = [
   "checkout_completed",
   "foundation_checkout_started",
   "second_seat_preview_started",
+  "second_seat_preview_completed",
   "practice_first_session_completed",
   "mock_score_recorded",
   "learner_story_consent_captured",

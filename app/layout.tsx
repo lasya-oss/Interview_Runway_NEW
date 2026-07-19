@@ -40,21 +40,21 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "InterviewRunway",
     title: "Turn your experience into interview signal",
-    description: "Run the free Interview Signal Check, inspect a populated demo, and add preparation layers only when the evidence justifies them.",
+    description: "Foundation builds the flight plan. The Second Seat brings live AI practice and expert guidance. Human Calibration resolves the remaining gap.",
     images: [
       {
-        url: `${siteUrl}/og-v3.png`,
-        width: 1731,
-        height: 909,
-        alt: "InterviewRunway — Turn engineering experience into interview signal",
+        url: `${siteUrl}/og-three-stage.png`,
+        width: 1734,
+        height: 907,
+        alt: "InterviewRunway — Three stages, one connected interview signal",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Turn your experience into interview signal",
-    description: "Free signal check, populated product demos, and evidence-led interview preparation for engineers in India.",
-    images: [`${siteUrl}/og-v3.png`],
+    description: "Foundation, the live AI Second Seat, and evidence-led Human Calibration for engineers in India.",
+    images: [`${siteUrl}/og-three-stage.png`],
   },
 };
 

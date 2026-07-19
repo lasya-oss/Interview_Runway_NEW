@@ -67,6 +67,10 @@ test("server-renders the finished InterviewRunway homepage", async () => {
     /Turn your experience into interview signal\./i,
   );
   assert.match(text, /₹799/);
+  assert.match(text, /One system · three connected stages/i);
+  assert.match(text, /AI practice that changes with your answers/i);
+  assert.match(text, /WhatsApp guidance from engineers with FAANG and leading-tech experience/i);
+  assert.match(text, /Watch how the three stages work/i);
   assert.match(text, /Check your interview signal/i);
   assert.match(html, /href=["'][^"']*\/diagnostic["'][^>]*data-analytics-event=["']hero_signal_cta_clicked["']/i);
   assert.match(text, /Baseline → intervention → signal change → outcome/i);
@@ -311,6 +315,38 @@ test("homepage uses the original trajectory sequence instead of the rejected Sec
   assert.match(source, /<TrajectorySequence\s*\/>/);
   assert.match(source, /className="hero-signal-console"/);
   assert.doesNotMatch(source, /SecondSeatJourney|SecondSeatPreview|SecondSeatHeroInstrument/);
+});
+
+test("homepage adds the reversible three-stage film without replacing restored aero choreography", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const component = await readFile(
+    new URL("../app/components/opening-flight-path.tsx", import.meta.url),
+    "utf8",
+  );
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const audio = await readFile(
+    new URL("../public/audio/interviewrunway-three-stage-pavitra2.mp3", import.meta.url),
+  );
+  const cueData = JSON.parse(
+    await readFile(
+      new URL("../public/audio/interviewrunway-three-stage-pavitra2.json", import.meta.url),
+      "utf8",
+    ),
+  );
+
+  assert.match(page, /<OpeningFlightPath\s*\/>/);
+  assert.match(page, /<HomeAeroStage\s*\/>[\s\S]*<OpeningFlightPath\s*\/>[\s\S]*<TrajectorySequence\s*\/>/);
+  assert.match(component, /THE SECOND SEAT/);
+  assert.match(component, /WhatsApp guidance from engineers with FAANG and leading-tech experience/);
+  assert.match(component, /role="dialog"/);
+  assert.match(component, /second_seat_preview_completed/);
+  assert.match(styles, /\.opening-flight-path__instrument\s*\{[\s\S]*grid-template-columns:\s*minmax\(235px, \.82fr\) minmax\(500px, 1\.7fr\) minmax\(235px, \.82fr\)/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.opening-flight-path__loop-rotor/);
+  assert.ok(audio.byteLength > 1_000_000, "Pavitra2 narration should be a real mastered audio asset");
+  assert.equal(cueData.voice.name, "Pavitra2");
+  assert.equal(cueData.voice.id, "2e4f5fed-e691-4d6a-bdbe-82880007ad4b");
+  assert.equal(cueData.scenes.length, 6);
+  assert.ok(cueData.duration > 110 && cueData.duration < 120);
 });
 
 test("pricing keeps the accepted dominant Second Seat hierarchy", async () => {

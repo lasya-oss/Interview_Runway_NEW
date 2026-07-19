@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AnalyticsView } from "@/app/components/analytics-view";
 import { HomeAeroStage, TrajectorySequence } from "@/app/components/aero-experience";
 import { Reveal } from "@/app/components/aero-runtime";
+import { OpeningFlightPath } from "@/app/components/opening-flight-path";
 import { PrepSystemExplorer } from "@/app/components/prep-system-explorer";
 import { CtaLink, Footer, Header, SectionHeading } from "@/app/components/site-chrome";
 import { TestimonialFlightDeck } from "@/app/components/testimonial-flight-deck";
@@ -60,6 +61,8 @@ export default function Home() {
       <Header />
 
       <main className="home-v2 narrative-home">
+        <OpeningFlightPath />
+
         <section className="hero-v2 narrative-hero" aria-labelledby="hero-title" data-aero-phase="foundation">
           <div className="hero-atmosphere" aria-hidden="true"><i /><i /><i /></div>
           <div className="container hero-v2-grid">
