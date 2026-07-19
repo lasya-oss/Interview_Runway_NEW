@@ -333,15 +333,32 @@ test("homepage adds the reversible three-stage film without replacing restored a
       "utf8",
     ),
   );
+  const whatsappMark = await readFile(
+    new URL("../public/brand/whatsapp.svg", import.meta.url),
+    "utf8",
+  );
 
   assert.match(page, /<OpeningFlightPath\s*\/>/);
   assert.match(page, /<HomeAeroStage\s*\/>[\s\S]*<OpeningFlightPath\s*\/>[\s\S]*<TrajectorySequence\s*\/>/);
   assert.match(component, /THE SECOND SEAT/);
   assert.match(component, /WhatsApp guidance from engineers with FAANG and leading-tech experience/);
+  assert.match(component, /const FILM_BEATS/);
+  assert.match(component, /flight-film__stage-map/);
+  assert.match(component, /flight-film__stage-block--foundation/);
+  assert.match(component, /flight-film__stage-block--second-seat/);
+  assert.match(component, /flight-film__stage-block--calibration/);
+  assert.match(component, /flight-film__live-caption/);
+  assert.match(component, /flight-film__whatsapp-mark/);
+  assert.doesNotMatch(component, /<b>WA<\/b>/);
   assert.match(component, /role="dialog"/);
   assert.match(component, /second_seat_preview_completed/);
   assert.match(styles, /\.opening-flight-path__instrument\s*\{[\s\S]*grid-template-columns:\s*minmax\(235px, \.82fr\) minmax\(500px, 1\.7fr\) minmax\(235px, \.82fr\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.opening-flight-path__loop-rotor/);
+  assert.match(styles, /\.flight-film__value-annunciator/);
+  assert.match(styles, /\.flight-film__live-caption[\s\S]*font-size:\s*clamp\(1\.35rem, 2\.15vw, 2\.25rem\)/);
+  assert.match(styles, /mask:\s*url\("\/brand\/whatsapp\.svg"\)/);
+  assert.match(whatsappMark, /<title>WhatsApp<\/title>/);
+  assert.match(whatsappMark, /fill="#25D366"/);
   assert.ok(audio.byteLength > 1_000_000, "Pavitra2 narration should be a real mastered audio asset");
   assert.equal(cueData.voice.name, "Pavitra2");
   assert.equal(cueData.voice.id, "2e4f5fed-e691-4d6a-bdbe-82880007ad4b");
