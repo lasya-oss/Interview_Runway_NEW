@@ -63,7 +63,7 @@ export function LibraryClient({ profileId, materials }: { profileId: DemoTier; m
 
       <div className="library-results-heading" aria-live="polite">
         <span>{results.length.toString().padStart(2, "0")} records shown</span>
-        <small>Fictional progress and access state</small>
+        <small>Sample progress and access state</small>
       </div>
 
       {results.length ? (

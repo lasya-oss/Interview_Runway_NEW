@@ -147,7 +147,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
 
         <header className="material-header">
           <div>
-            <p className="member-kicker">Representative {material.format} · fictional progress</p>
+            <p className="member-kicker">Representative {material.format} · sample progress</p>
             <h1>{material.title}</h1>
             <p>{material.description}</p>
           </div>

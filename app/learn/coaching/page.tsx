@@ -35,7 +35,7 @@ export default async function CoachingPage() {
             title="Human calibration is reserved for a named gap."
             body={`${profile.planShort} can see how the private coaching room is structured, but agenda notes, session scheduling, and coach deliverables belong to the premium example engagement. No coach is contacted from this demo.`}
           >
-            <p className="member-locked-evidence">The fictional premium example is triggered only after repeated practice evidence shows a persistent calibration gap.</p>
+            <p className="member-locked-evidence">The premium sample is triggered only after repeated practice evidence shows a persistent calibration gap.</p>
           </LockedMemberPanel>
         </div>
       </MemberShell>
@@ -47,7 +47,7 @@ export default async function CoachingPage() {
       <div className="member-page coaching-workspace">
         <section className="coaching-heading">
           <div>
-            <p className="member-kicker">Fictional premium engagement</p>
+            <p className="member-kicker">Sample premium engagement</p>
             <h1>One gap. <em>Full attention.</em></h1>
             <p>This private room demonstrates the expected premium experience. Coach identity, live availability, package scope, and meeting actions are placeholders until verified and commercially final.</p>
           </div>
@@ -78,7 +78,7 @@ export default async function CoachingPage() {
         <section className="coaching-note" aria-labelledby="coach-note-title">
           <div><span>Private sample note</span><b>17 JUL · 09:10 IST</b></div>
           <blockquote id="coach-note-title">“Your architecture is already credible. The level signal weakens when every decision receives equal narration. Lead with the decisions that were expensive to reverse, then show how other teams changed course because of them.”</blockquote>
-          <p>Fictional note written to demonstrate format; not authored by a real coach.</p>
+          <p>Sample note written to demonstrate format; not authored by a real coach.</p>
         </section>
 
         <section className="coaching-path" aria-labelledby="coaching-path-title">

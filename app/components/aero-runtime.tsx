@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, type ReactNode } from "react";
+import { trackEvent, type AnalyticsEvent } from "@/app/lib/analytics";
 
 export function AeroRuntime() {
   useEffect(() => {
@@ -35,12 +36,26 @@ export function AeroRuntime() {
       }
     };
 
+    const onAnalyticsClick = (event: MouseEvent) => {
+      const target = event.target instanceof Element
+        ? event.target.closest<HTMLElement>("[data-analytics-event]")
+        : null;
+      const analyticsEvent = target?.dataset.analyticsEvent as AnalyticsEvent | undefined;
+      if (!analyticsEvent) return;
+      trackEvent(analyticsEvent, {
+        label: target.dataset.analyticsLabel ?? target.textContent?.trim().slice(0, 120),
+        href: target instanceof HTMLAnchorElement ? target.getAttribute("href") : undefined,
+      });
+    };
+
     updateScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("click", onAnalyticsClick);
     if (!reducedMotion && hasSpecularSurface) window.addEventListener("pointermove", onPointer, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("click", onAnalyticsClick);
       window.removeEventListener("pointermove", onPointer);
       if (frame) window.cancelAnimationFrame(frame);
       if (pointerFrame) window.cancelAnimationFrame(pointerFrame);

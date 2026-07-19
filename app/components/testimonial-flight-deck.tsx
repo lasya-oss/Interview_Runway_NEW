@@ -4,42 +4,42 @@ import Link from "next/link";
 import { useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const SAMPLE_STORIES = [
+const EVIDENCE_RECORDS = [
   {
     number: "01",
-    initials: "AR",
-    name: "Ananya Rao",
-    role: "Backend engineer · Bengaluru",
-    outcome: "Remote SaaS team",
-    path: "12-week Vault path",
-    quote: "I stopped memorising solutions and began explaining why a pattern fit. The interview finally felt like a technical conversation, not a recall test.",
+    system: "Pattern recognition",
+    baseline: "Codes before naming the pattern or invariant",
+    intervention: "Timed recognition pass + rationale rehearsal",
+    change: "Pattern, invariant, and complexity stated before code",
+    outcome: "Awaiting verified learner evidence",
+    timeframe: "Measured across repeated attempts",
   },
   {
     number: "02",
-    initials: "RM",
-    name: "Rohan Menon",
-    role: "Platform engineer · Hyderabad",
-    outcome: "Global infrastructure role",
-    path: "Vault + AI Prep",
-    quote: "The practice loop showed me that my design knowledge was fine—my real gap was making trade-offs visible before the interviewer had to ask.",
+    system: "Systems judgment",
+    baseline: "Architecture appears before constraints and trade-offs",
+    intervention: "Constraint-first mock + transcript correction",
+    change: "Decisions become explicit before diagram detail",
+    outcome: "Awaiting verified learner evidence",
+    timeframe: "Measured across repeated attempts",
   },
   {
     number: "03",
-    initials: "MI",
-    name: "Meera Iyer",
-    role: "Data engineer · Chennai",
-    outcome: "Product data team",
-    path: "4-week accelerated path",
-    quote: "The story bank helped me translate work that sounded ordinary internally into clear evidence of ownership, scale, and cross-team judgment.",
+    system: "Behavioural evidence",
+    baseline: "Team activity obscures individual judgment",
+    intervention: "Evidence-led story reconstruction + follow-up probes",
+    change: "Decision, ownership, proof, and consequence remain visible",
+    outcome: "Awaiting verified learner evidence",
+    timeframe: "Measured across rehearsed stories",
   },
   {
     number: "04",
-    initials: "VD",
-    name: "Vikram Desai",
-    role: "ML infrastructure engineer · Pune",
-    outcome: "AI-adjacent engineering role",
-    path: "Vault + human calibration",
-    quote: "One focused calibration session was more useful than weeks of generic coaching because it targeted the communication pattern my practice data kept exposing.",
+    system: "Career signal",
+    baseline: "Strong work reads as tasks and internal shorthand",
+    intervention: "Evidence-led resume and scope translation",
+    change: "Technical decisions and impact become recruiter-readable",
+    outcome: "Awaiting verified learner evidence",
+    timeframe: "Measured before and after revision",
   },
 ] as const;
 
@@ -104,7 +104,7 @@ export function TestimonialFlightDeck() {
   const move = (direction: -1 | 1) => {
     const viewport = viewportRef.current;
     if (!viewport) return;
-    const targetIndex = (activeIndex + direction + SAMPLE_STORIES.length) % SAMPLE_STORIES.length;
+    const targetIndex = (activeIndex + direction + EVIDENCE_RECORDS.length) % EVIDENCE_RECORDS.length;
     const target = viewport.querySelectorAll<HTMLElement>(".testimonial-card")[targetIndex];
     if (!target) return;
     const max = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
@@ -114,15 +114,15 @@ export function TestimonialFlightDeck() {
     const centeredLeft = targetContentLeft - (viewport.clientWidth - targetRect.width) / 2;
     manualNavigationUntilRef.current = performance.now() + 2400;
     setActiveIndex(targetIndex);
-    setTrackProgress(targetIndex / (SAMPLE_STORIES.length - 1));
+    setTrackProgress(targetIndex / (EVIDENCE_RECORDS.length - 1));
     viewport.scrollTo({
       left: Math.max(0, Math.min(max, centeredLeft)),
       behavior: reduceMotion ? "auto" : "smooth",
     });
   };
 
-  const previousLabel = SAMPLE_STORIES[(activeIndex - 1 + SAMPLE_STORIES.length) % SAMPLE_STORIES.length].number;
-  const nextLabel = SAMPLE_STORIES[(activeIndex + 1) % SAMPLE_STORIES.length].number;
+  const previousLabel = EVIDENCE_RECORDS[(activeIndex - 1 + EVIDENCE_RECORDS.length) % EVIDENCE_RECORDS.length].number;
+  const nextLabel = EVIDENCE_RECORDS[(activeIndex + 1) % EVIDENCE_RECORDS.length].number;
 
   return (
     <section
@@ -137,12 +137,12 @@ export function TestimonialFlightDeck() {
 
         <header className="container testimonial-flight-header">
           <div>
-            <p className="eyebrow">Learner perspectives</p>
-            <h2 id="testimonial-title">Stories from the runway.</h2>
+            <p className="eyebrow">The flight recorder</p>
+            <h2 id="testimonial-title">How progress will be proven.</h2>
           </div>
           <div className="testimonial-flight-intro">
-            <strong>What meaningful progress can sound like.</strong>
-            <p>Placeholder profiles complete the design for now. Publish only after the learner, consent, and outcome source are verified.</p>
+            <strong>Baseline → intervention → signal change → outcome.</strong>
+            <p>No invented customer claims. These are evidence-record structures; outcomes stay empty until a learner, timeframe, consent, and source are verified.</p>
           </div>
         </header>
 
@@ -150,7 +150,7 @@ export function TestimonialFlightDeck() {
           className="testimonial-flight-viewport"
           ref={viewportRef}
           tabIndex={0}
-          aria-label="Learner story previews. Scroll horizontally or use the arrow controls."
+          aria-label="Evidence record formats. Scroll horizontally or use the arrow controls."
           onKeyDown={(event) => {
             if (event.key === "ArrowLeft") {
               event.preventDefault();
@@ -163,25 +163,24 @@ export function TestimonialFlightDeck() {
           }}
         >
           <ol className="testimonial-flight-track">
-            {SAMPLE_STORIES.map((story, index) => (
+            {EVIDENCE_RECORDS.map((story, index) => (
               <li
                 className={`testimonial-card${index === activeIndex ? " is-active" : ""}`}
                 aria-current={index === activeIndex ? "true" : undefined}
                 key={story.number}
               >
-                <article aria-label={`${story.name}, learner story preview`}>
+                <article aria-label={`${story.system} evidence record`}>
                   <div className="testimonial-card-topline">
                     <span>RUNWAY RECORD</span><i /><b>{story.number} / 04</b>
                   </div>
-                  <blockquote>“{story.quote}”</blockquote>
-                  <div className="testimonial-person">
-                    <div aria-hidden="true">{story.initials}</div>
-                    <p><strong>{story.name}</strong><span>{story.role}</span></p>
-                  </div>
+                  <div className="testimonial-record-title"><span>ACTIVE SYSTEM</span><h3>{story.system}</h3><p>Illustrative record structure · not a customer testimonial</p></div>
                   <div className="testimonial-record">
-                    <div><span>ROLE OUTCOME</span><strong>{story.outcome}</strong></div>
-                    <div><span>PREP PATH</span><strong>{story.path}</strong></div>
+                    <div><span>BASELINE</span><strong>{story.baseline}</strong></div>
+                    <div><span>INTERVENTION</span><strong>{story.intervention}</strong></div>
+                    <div><span>SIGNAL CHANGE</span><strong>{story.change}</strong></div>
+                    <div><span>OUTCOME</span><strong>{story.outcome}</strong></div>
                   </div>
+                  <p className="testimonial-timeframe">TIMEFRAME · {story.timeframe}</p>
                   <div className="testimonial-engine-mark" aria-hidden="true"><i /><i /><span /></div>
                 </article>
               </li>
@@ -212,7 +211,7 @@ export function TestimonialFlightDeck() {
               <span className="testimonial-control-copy"><small>PREVIOUS</small><b>{previousLabel}</b></span>
             </button>
             <div className="testimonial-flight-position" aria-live="polite">
-              <span>STORY</span><b>{SAMPLE_STORIES[activeIndex].number}</b><small>/ 04</small>
+              <span>RECORD</span><b>{EVIDENCE_RECORDS[activeIndex].number}</b><small>/ 04</small>
             </div>
             <button type="button" onClick={() => move(1)} aria-label={`Next story, ${nextLabel}`}>
               <span className="testimonial-control-copy"><small>NEXT</small><b>{nextLabel}</b></span>

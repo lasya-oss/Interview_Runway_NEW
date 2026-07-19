@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/app/lib/analytics";
 
 type VerificationStatus =
   | "active"
@@ -51,6 +52,10 @@ export function CheckoutVerification({
   userEmail: string;
 }) {
   const [status, setStatus] = useState(initialStatus);
+
+  useEffect(() => {
+    if (status === "active") trackEvent("checkout_completed", { offer: "vault" });
+  }, [status]);
 
   useEffect(() => {
     if (status !== "pending") return;

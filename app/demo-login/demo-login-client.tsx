@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { trackEvent } from "@/app/lib/analytics";
 import {
   DEMO_PROFILES,
   DEMO_REVIEW_MATERIALS,
@@ -34,6 +35,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
   const startDemo = async (profile: DemoProfile) => {
     setOpening(profile.id);
     setMessage("");
+    trackEvent("demo_tier_selected", { tier: profile.id });
 
     try {
       const response = await fetch("/api/demo-session", {
@@ -47,6 +49,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
         setMessage(result.message ?? "Unable to start the demo workspace.");
         return;
       }
+      trackEvent("demo_action_completed", { tier: profile.id, action: "workspace_opened" });
       window.location.assign(returnTo);
     } catch {
       setOpening(null);
@@ -113,7 +116,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
       })}
 
       {message ? <p className="demo-login-error" role="alert">{message}</p> : null}
-      <p className="demo-login-note">Every workspace uses fictional learner progress. Review-edition materials are selected from the built catalogue and remain clearly marked pending final human editorial review.</p>
+      <p className="demo-login-note">Sample workspace data · Review-edition materials remain marked pending final human editorial review.</p>
     </div>
   );
 }

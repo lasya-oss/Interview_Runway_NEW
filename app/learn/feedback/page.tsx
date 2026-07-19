@@ -51,7 +51,7 @@ export default async function FeedbackPage() {
           <LockedMemberPanel
             tier="AI Prep"
             title="Feedback begins with interview-shaped evidence."
-            body="The Vault provides the preparation system and self-checks. AI Prep adds stored transcripts, category-level practice signals, and corrections tied to specific moments. This preview contains fictional data only."
+            body="The Vault provides the preparation system and self-checks. AI Prep adds stored transcripts, category-level practice signals, and corrections tied to specific moments. This demo uses prewritten sample evidence."
           />
         </div>
       </MemberShell>

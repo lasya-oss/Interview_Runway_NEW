@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { trackEvent } from "@/app/lib/analytics";
 
 const SCRIPT = [
   {
@@ -42,7 +43,11 @@ export function PracticeClient({ learnerName }: { learnerName: string }) {
     const nextAnswers = [...answers, draft.trim()];
     setAnswers(nextAnswers);
     setDraft("");
-    if (step === SCRIPT.length - 1) setState("complete");
+    if (step === SCRIPT.length - 1) {
+      setState("complete");
+      trackEvent("practice_first_session_completed", { tier: "practice", mock: "MOCK-08" });
+      trackEvent("demo_action_completed", { tier: "practice", action: "scripted_mock_completed" });
+    }
     else setStep((value) => value + 1);
   };
 
@@ -73,7 +78,7 @@ export function PracticeClient({ learnerName }: { learnerName: string }) {
           </dl>
         </section>
 
-        <div className="practice-history-note"><i /><p><strong>{learnerName}</strong>, this is fictional product data. Production mocks require explicit transcript retention and deletion controls.</p></div>
+        <div className="practice-history-note"><i /><p><strong>{learnerName}</strong>, this fixed demo does not store or score your response. Production mocks require explicit transcript retention and deletion controls.</p></div>
       </div>
     );
   }
@@ -85,7 +90,7 @@ export function PracticeClient({ learnerName }: { learnerName: string }) {
           <p className="member-kicker">Scripted preview complete</p>
           <span className="practice-complete-mark">03 / 03</span>
           <h1>You completed the interaction shape.</h1>
-          <p>No AI evaluation occurred. The feedback page shows a separate, fictional evidence-based result so you can inspect the intended debrief experience.</p>
+          <p>No AI evaluation occurred. The feedback page shows a separate sample debrief so you can inspect the intended evidence and correction experience.</p>
           <div className="practice-complete-actions">
             <Link className="member-primary-button" href="/learn/feedback">Open sample feedback <span aria-hidden="true">↗</span></Link>
             <button type="button" onClick={begin}>Run the sample again</button>

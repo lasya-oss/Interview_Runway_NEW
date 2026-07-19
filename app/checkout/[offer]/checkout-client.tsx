@@ -2,6 +2,7 @@
 
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 import { useRef, useState } from "react";
+import { trackEvent } from "@/app/lib/analytics";
 
 type CheckoutState = "idle" | "preparing" | "error";
 
@@ -21,6 +22,8 @@ export function CheckoutClient({
 
   const beginCheckout = async () => {
     if (!clientToken || state === "preparing") return;
+
+    trackEvent("checkout_started", { offer: "vault", surface: "paddle_button" });
 
     setState("preparing");
     setMessage("");

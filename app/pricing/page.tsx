@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { PricingWorkspacePreview } from "@/app/components/pricing-workspace-preview";
+import { AnalyticsView } from "@/app/components/analytics-view";
 import { CtaLink, PageShell, SectionHeading } from "@/app/components/site-chrome";
 import { OFFERS } from "@/app/lib/site-data";
 
@@ -95,6 +96,7 @@ export default async function PricingPage() {
           <div className="pricing-layer-grid">
             {PRICING_LAYERS.map((layer, index) => (
               <article className={`pricing-layer pricing-layer-${index + 1}`} key={layer.offer.slug}>
+                <AnalyticsView event="pricing_tier_viewed" payload={{ tier: layer.offer.slug, surface: "pricing" }} />
                 <div className="pricing-layer-top"><span>{layer.number} / {layer.label}</span><b>{layer.status}</b></div>
                 <h2>{layer.offer.name.replace("InterviewRunway ", "")}</h2>
                 <div className="pricing-layer-price"><strong>{layer.offer.priceLabel}</strong><span>{layer.priceNote}</span></div>

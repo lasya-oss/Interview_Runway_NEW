@@ -20,7 +20,7 @@ export default async function DemoLoginPage({ searchParams }: { searchParams: Pr
           <div className="demo-login-intro">
             <p className="eyebrow">Interactive product demo</p>
             <h1 id="demo-login-title">Choose a layer. <em>Enter the workspace.</em></h1>
-            <p>No signup and no empty dashboard. Choose the access level you want to inspect; we will load a fictional learner with realistic progress, unlocked tools, and review-edition material.</p>
+            <p>No signup and no empty dashboard. Choose the access level you want to inspect; the demo opens with realistic progress, unlocked tools, and review-edition material already in context.</p>
             <div className="demo-login-principles">
               <span><b>01</b> Pick Vault, AI Prep, or Premium</span>
               <span><b>02</b> Enter the populated workspace instantly</span>

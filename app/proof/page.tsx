@@ -175,6 +175,38 @@ export default function ProofPage() {
         </div>
       </section>
 
+      <section className="content-section proof-recorder-section" aria-labelledby="recorder-title">
+        <div className="container">
+          <SectionHeading
+            eyebrow="FLIGHT RECORDER FORMAT"
+            title="Record the change before naming the outcome."
+            body="Every future learner story follows the same sequence and carries the fields needed for review. Empty fields stay empty; absence is never filled with marketing copy."
+            id="recorder-title"
+          />
+          <ol className="proof-recorder-flow">
+            <li><span>01</span><strong>Baseline</strong><p>The starting issue, observed attempt, and date.</p></li>
+            <li><span>02</span><strong>Intervention</strong><p>The exact material, practice, or review used.</p></li>
+            <li><span>03</span><strong>Signal change</strong><p>The measurable before/after difference and timeframe.</p></li>
+            <li><span>04</span><strong>Outcome</strong><p>Published only when independently supported and consented.</p></li>
+          </ol>
+          <div className="proof-required-fields">
+            <span>REQUIRED RECORD FIELDS</span>
+            <p>Name or approved pseudonym · starting issue · intervention · measurable improvement · verified outcome, if any · timeframe · consent · reviewable source</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="content-section proof-claim-classes" aria-labelledby="claim-classes-title">
+        <div className="container">
+          <SectionHeading eyebrow="CLAIM CLASSES" title="Say exactly what the evidence permits." id="claim-classes-title" />
+          <div className="content-grid content-grid-three">
+            <article className="content-card glass-card"><p className="module-kicker">CLASS A</p><h3>Product fact</h3><p>What the product contains or does. Supported by the shipped product and access terms.</p></article>
+            <article className="content-card glass-card"><p className="module-kicker">CLASS B</p><h3>Practice change</h3><p>A measured change in a learner&apos;s preparation signal. Requires baseline, intervention, re-test, timeframe, and consent.</p></article>
+            <article className="content-card glass-card"><p className="module-kicker">CLASS C</p><h3>External outcome</h3><p>A hiring or career result. Requires the learner&apos;s source and may not imply InterviewRunway caused the full decision.</p></article>
+          </div>
+        </div>
+      </section>
+
       <section className="section-pad proof-section" aria-labelledby="register-title">
         <div className="container proof-layout">
           <div>

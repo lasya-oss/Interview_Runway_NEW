@@ -12,11 +12,11 @@ const siteUrl = "https://interviewrunway.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "InterviewRunway — Remote tech interview prep for India",
+    default: "InterviewRunway — Turn experience into interview signal",
     template: "%s | InterviewRunway",
   },
   description:
-    "Interview prep for engineers in India targeting remote and AI-adjacent US tech roles. Start with the ₹799 Vault.",
+    "Turn engineering experience into recruiter-visible evidence and rehearse it under pressure for remote and AI-adjacent roles.",
   applicationName: "InterviewRunway",
   icons: {
     icon: [
@@ -39,21 +39,21 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: siteUrl,
     siteName: "InterviewRunway",
-    title: "Remote + AI-adjacent tech interview prep, built for India",
-    description: "Founder-designed prep. India pricing. Start with the ₹799 Vault.",
+    title: "Turn your experience into interview signal",
+    description: "Run the free Interview Signal Check, inspect a populated demo, and add preparation layers only when the evidence justifies them.",
     images: [
       {
         url: `${siteUrl}/og-v3.png`,
         width: 1731,
         height: 909,
-        alt: "InterviewRunway — Remote and AI-adjacent tech interview prep for engineers in India",
+        alt: "InterviewRunway — Turn engineering experience into interview signal",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Remote + AI-adjacent tech interview prep, built for India",
-    description: "Founder-designed prep. India pricing. Start with the ₹799 Vault.",
+    title: "Turn your experience into interview signal",
+    description: "Free signal check, populated product demos, and evidence-led interview preparation for engineers in India.",
     images: [`${siteUrl}/og-v3.png`],
   },
 };

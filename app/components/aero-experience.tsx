@@ -22,11 +22,13 @@ type SceneTier = "static" | "lite" | "full";
 
 const PHASE_TIMELINE = [
   ["foundation", 0],
-  ["path", 0.18],
-  ["vault", 0.38],
-  ["guidance", 0.6],
-  ["fit", 0.76],
+  ["guidance", 0.14],
+  ["vault", 0.31],
+  ["path", 0.52],
+  ["product", 0.67],
+  ["pricing", 0.78],
   ["proof", 0.88],
+  ["fit", 0.94],
   ["start", 1],
 ] as const;
 
@@ -180,8 +182,12 @@ const CHAPTERS = [
   {
     number: "01",
     force: "FOUNDATION",
-    title: "Build the knowledge base.",
-    body: "The Vault turns scattered prep into a structured foundation across DSA, systems, behavioural communication, and remote-career context.",
+    title: "Build the models that interviews expose.",
+    body: "The Vault turns scattered preparation into a structured base across patterns, systems, evidence, role context, and remote reality.",
+    audience: "Engineers with knowledge but no dependable preparation system",
+    problem: "Coverage is scattered and practice has no common language",
+    visible: "A sequenced roadmap, pattern library, and evidence-building workflow",
+    unlock: "A baseline strong enough to test under pressure",
     meta: "₹799 · ONE TIME",
     href: "/vault",
     cta: "Explore the Vault",
@@ -189,8 +195,12 @@ const CHAPTERS = [
   {
     number: "02",
     force: "PRACTICE",
-    title: "Find the gaps before the interview.",
-    body: "AI Prep adds responsive mocks, evidence-backed scoring, and a study plan that changes when your performance changes.",
+    title: "Make the hidden gap measurable.",
+    body: "AI Prep adds responsive mocks, traceable scoring, and a study plan that changes when repeated performance changes.",
+    audience: "Vault owners ready to test recall, judgment, and communication",
+    problem: "Knowing the material does not show what breaks under pressure",
+    visible: "A live attempt, transcript evidence, signal score, and changed next action",
+    unlock: "A repeatable correction loop instead of generic repetition",
     meta: "VAULT OWNERS · OPTIONAL",
     href: "/ai-prep",
     cta: "See the feedback loop",
@@ -198,8 +208,12 @@ const CHAPTERS = [
   {
     number: "03",
     force: "HUMAN CALIBRATION",
-    title: "Use expert time only where it helps.",
-    body: "Founder-led coaching is reserved for a specific, persistent gap—not bundled into the first purchase and not sold as unlimited access.",
+    title: "Calibrate only the persistent gap.",
+    body: "Human review is reserved for one specific pattern that the learner's practice evidence has made worth expert time.",
+    audience: "Prepared learners with a narrow, repeated performance gap",
+    problem: "Self-correction has plateaued or the signal is still miscalibrated",
+    visible: "A coach packet, named gap, review session, and explicit correction plan",
+    unlock: "Targeted human calibration without buying vague access",
     meta: "CAPACITY CAPPED · HUMAN",
     href: "/premium",
     cta: "Review 1:1 coaching",
@@ -224,6 +238,12 @@ function ChapterBody({ chapter, animated }: { chapter: Chapter; animated: boolea
       </motion.div>
       <h3>{chapter.title}</h3>
       <p>{chapter.body}</p>
+      <dl className="chapter-readout">
+        <div><dt>WHO</dt><dd>{chapter.audience}</dd></div>
+        <div><dt>PROBLEM</dt><dd>{chapter.problem}</dd></div>
+        <div><dt>VISIBLE NOW</dt><dd>{chapter.visible}</dd></div>
+        <div><dt>NEXT UNLOCK</dt><dd>{chapter.unlock}</dd></div>
+      </dl>
       <div className="chapter-footer">
         <span>{chapter.meta}</span>
         <Link href={chapter.href}>{chapter.cta} <span aria-hidden="true">↗</span></Link>
@@ -276,8 +296,8 @@ function SequenceFrame({ animated }: { animated: boolean }) {
       <div className="trajectory-atmosphere" aria-hidden="true" />
       <div className="trajectory-intro container">
         <p className="eyebrow">A staged prep path</p>
-        <h2 id="trajectory-title">Three layers. Added when needed.</h2>
-        <p className="trajectory-intro-copy">Start with the foundation. Add practice and human feedback only when your performance gives you a reason.</p>
+        <h2 id="trajectory-title">Three layers. One evidence-led climb.</h2>
+        <p className="trajectory-intro-copy">Foundation builds the model. Practice exposes the gap. Human review calibrates only what repeated work has not fixed.</p>
         <LayerMap animated={animated} />
       </div>
       <div className="trajectory-chapters container">

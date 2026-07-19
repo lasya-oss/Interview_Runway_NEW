@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackEvent } from "@/app/lib/analytics";
 
 type Dimension = { label: string; score: number; delta: string; note: string };
 type Evidence = { time: string; signal: string; excerpt: string; observation: string; correction: string };
@@ -22,11 +23,15 @@ export function FeedbackClient({
 }) {
   const [tab, setTab] = useState<"summary" | "evidence" | "actions">("summary");
 
+  useEffect(() => {
+    trackEvent("mock_score_recorded", { mock: "MOCK-07", score: overall, sample: true });
+  }, [overall]);
+
   return (
     <div className="feedback-workspace">
       <section className="feedback-heading">
         <div>
-          <p className="member-kicker">Fictional debrief · MOCK-07</p>
+          <p className="member-kicker">Sample debrief · MOCK-07</p>
           <h1>Design a metrics pipeline</h1>
           <p>This prewritten result demonstrates how a production transcript should connect observations, scores, and the next study decision. It did not evaluate your scripted mock response.</p>
         </div>
@@ -57,14 +62,14 @@ export function FeedbackClient({
             <span>{premium ? "Coach-visible pattern" : "Adaptive plan change"}</span>
             <h2>Move the consistency decision before the scale discussion.</h2>
             <p>The architecture was credible, but three sample transcripts delayed the durability and consistency model until an interviewer prompted it. The next two design rehearsals now probe that decision first.</p>
-            <div><b>Not a hiring prediction</b><small>Scores are fictional practice signals, not an estimate of receiving an offer.</small></div>
+            <div><b>Not a hiring prediction</b><small>Scores illustrate practice signals, not an estimate of receiving an offer.</small></div>
           </aside>
         </section>
       ) : null}
 
       {tab === "evidence" ? (
         <section className="feedback-evidence" role="tabpanel">
-          <div className="feedback-evidence-intro"><p className="member-kicker">Traceable observations</p><h2>Every correction points back to a moment.</h2><p>These excerpts are fictional sample transcript data written to demonstrate the required evaluation standard.</p></div>
+          <div className="feedback-evidence-intro"><p className="member-kicker">Traceable observations</p><h2>Every correction points back to a moment.</h2><p>These prewritten sample excerpts demonstrate the required evaluation standard.</p></div>
           <div className="feedback-evidence-list">
             {evidence.map((item, index) => (
               <article key={item.time}>

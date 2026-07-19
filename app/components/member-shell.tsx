@@ -27,6 +27,11 @@ export function MemberShell({
     : profile.id === "practice"
       ? { window: "19 days", signal: "78 · practice", event: "Adaptive mock 08", eventTime: "Tue · 20:00" }
       : { window: "13 days", signal: "84 · coach calibrated", event: "Calibration session", eventTime: "Thu · 18:30" };
+  const conversion = profile.id === "foundation"
+    ? { href: "/checkout/vault", label: "Start Vault · ₹799", event: "checkout_started" }
+    : profile.id === "practice"
+      ? { href: "/ai-prep", label: "Review AI Prep access", event: undefined }
+      : { href: "/premium", label: "Review calibration", event: undefined };
 
   return (
     <div className="member-shell" data-member-tier={profile.id}>
@@ -68,9 +73,9 @@ export function MemberShell({
             <div><span>Timezone</span><strong>Asia / Kolkata</strong></div>
           </div>
           <div className="member-topbar-signals">
-            <span><i /> Preview environment · fictional learner data</span>
+            <span><i /> Demo workspace · sample learner data</span>
             <span>{profile.streak}-day rhythm</span>
-            <Link href="/vault">Start real access ↗</Link>
+            <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
           </div>
         </header>
         <main className="member-main">{children}</main>
@@ -98,7 +103,7 @@ export function MemberShell({
             <li className={profile.access.coaching ? "is-on" : ""}><i /> Coach room</li>
           </ul>
         </section>
-        <p>DEMO DATA<br />NOT A PURCHASED ACCOUNT</p>
+        <p>DEMO WORKSPACE<br />NO PURCHASE REQUIRED</p>
       </aside>
     </div>
   );

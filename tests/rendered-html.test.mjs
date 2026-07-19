@@ -56,15 +56,19 @@ test("server-renders the finished InterviewRunway homepage", async () => {
 
   assert.match(
     html,
-    /<title>Interview prep for remote (?:&amp;|&) AI-adjacent tech roles \| InterviewRunway<\/title>/i,
+    /<title>Interview signal for remote (?:&amp;|&) AI-adjacent tech roles \| InterviewRunway<\/title>/i,
   );
   assert.match(html, /href=["'][^"']*\/favicon-32\.png["']/i);
   assert.match(html, /href=["'][^"']*\/apple-touch-icon\.png["']/i);
   assert.match(
     text,
-    /Get interview-ready for remote & AI-adjacent tech roles\./i,
+    /Turn your experience into interview signal\./i,
   );
   assert.match(text, /₹799/);
+  assert.match(text, /Check your interview signal/i);
+  assert.match(html, /href=["'][^"']*\/diagnostic["'][^>]*data-analytics-event=["']hero_signal_cta_clicked["']/i);
+  assert.match(text, /Baseline → intervention → signal change → outcome/i);
+  assert.doesNotMatch(text, /I stopped memorising solutions|One focused calibration session was more useful/i);
 
   assert.match(html, /<html[^>]*\blang=["']en-IN["']/i);
   assert.match(html, /<header\b/i);
@@ -125,6 +129,8 @@ const productRoutes = [
   ["/pricing", [/Three purposeful layers/i, /₹2,499/i, /₹9,999/i]],
   ["/curriculum", [/Curriculum/i, /Five records below have been built as pilot outputs/i]],
   ["/demo-login", [/Choose a layer/i, /Enter the workspace/i, /Ananya Rao/i, /Rohan Mehta/i, /Meera Iyer/i, /Sliding Window Pattern Reference/i]],
+  ["/diagnostic", [/Free interview signal check/i, /Find the gap that is hiding your experience/i, /Start the 7–10 minute scan/i, /No payment/i]],
+  ["/proof", [/Flight recorder format/i, /Baseline/i, /Intervention/i, /Signal change/i, /No learner claims are live yet/i]],
 ];
 
 for (const [pathname, expected] of productRoutes) {
@@ -202,6 +208,24 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const dashboardText = visibleText(await dashboard.text());
   assert.match(dashboardText, /Good evening, Rohan/i);
   assert.match(dashboardText, /Every attempt leaves evidence/i);
+  assert.match(dashboardText, /Demo workspace · sample learner data/i);
+  assert.doesNotMatch(dashboardText, /fictional learner data/i);
+});
+
+test("analytics contract is present on acquisition and payment surfaces", async () => {
+  const homepage = await render();
+  const homepageHtml = await homepage.text();
+  assert.match(homepageHtml, /data-analytics-event=["']hero_signal_cta_clicked["']/i);
+  assert.match(homepageHtml, /pricing_tier_viewed/i);
+
+  const checkout = await render("/checkout/vault", {
+    headers: {
+      accept: "text/html",
+      "oai-authenticated-user-email": "buyer@example.com",
+    },
+  });
+  assert.equal(checkout.status, 200);
+  assert.match(await checkout.text(), /Continue securely with Paddle|Checkout configuration unavailable/i);
 });
 
 test("Paddle checkout requires an authenticated account", async () => {

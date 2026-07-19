@@ -66,11 +66,11 @@ export function PrepSystemExplorer() {
     <div className="prep-explorer">
       <div className="payload-sticky">
         <div className="section-heading">
-          <p className="eyebrow">Inside the ₹799 Vault</p>
-          <h2 id="inside-title">Six systems.<br />One flight plan.</h2>
+          <p className="eyebrow">The diagnostic model</p>
+          <h2 id="inside-title">Six systems.<br />One signal.</h2>
           <p>
-            Move across the systems to see how each one turns scattered practice
-            into a repeatable interview signal.
+            Scroll through the systems. The instrument follows the active row and
+            shows the capability, gap, practice, change, and representative test.
           </p>
         </div>
 
@@ -101,29 +101,16 @@ export function PrepSystemExplorer() {
                 <strong>{activeModule.title}</strong>
               </div>
 
-              <div className="flight-plan-stages">
-                {activeModule.flow.map((stage, index) => (
-                  <div key={stage}>
-                    <span>0{index + 1}</span>
-                    <small>{["INPUT", "SYSTEM", "INTERVIEW SIGNAL"][index]}</small>
-                    <strong>{stage}</strong>
-                  </div>
-                ))}
-                <i className="flight-plan-line" aria-hidden="true"><b /><b /><b /></i>
-              </div>
+              <dl className="diagnostic-readout">
+                <div><dt>CAPABILITY TESTED</dt><dd>{activeModule.capability}</dd></div>
+                <div className="is-gap"><dt>VISIBLE GAP</dt><dd>{activeModule.gap}</dd></div>
+                <div><dt>LEARNER PRACTISES</dt><dd>{activeModule.practice}</dd></div>
+                <div className="is-change"><dt>SIGNAL CHANGE</dt><dd>{activeModule.improvement}</dd></div>
+              </dl>
 
-              <div className="flight-plan-value">
-                <span>WHAT THIS UNLOCKS</span>
-                <p>{activeModule.outcome}</p>
-              </div>
-
-              <div className="instrument-capabilities">
-                <span>THE LEARNER CAN NOW</span>
-                <ol>
-                  {activeModule.facets.map((facet, index) => (
-                    <li key={facet}><b>0{index + 1}</b><span>{facet}</span></li>
-                  ))}
-                </ol>
+              <div className="diagnostic-exercise">
+                <span>REPRESENTATIVE EXERCISE</span>
+                <p>{activeModule.exercise}</p>
               </div>
               </motion.div>
             </AnimatePresence>
