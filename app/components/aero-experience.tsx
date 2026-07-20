@@ -215,8 +215,8 @@ const CHAPTERS = [
     visible: "A coach packet, named gap, review session, and explicit correction plan",
     unlock: "Targeted human calibration without buying vague access",
     meta: "CAPACITY CAPPED · HUMAN",
-    href: "/premium",
-    cta: "Review 1:1 coaching",
+    href: "/qualify",
+    cta: "Check if you qualify",
   },
 ] as const;
 

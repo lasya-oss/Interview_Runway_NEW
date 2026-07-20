@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ApprovedVideoBriefing } from "@/app/components/approved-video-briefing";
 import { trackEvent } from "@/app/lib/analytics";
 import {
   useCallback,
@@ -80,8 +81,8 @@ const FILM_SCENES: readonly FilmScene[] = [
     end: 107.44,
     label: "Human calibration",
     narration:
-      "When repeated evidence reveals a gap that needs human judgment, Human Calibration joins the final approach. For ₹9,999, a scheduled one-to-one session begins with your practice record, focuses on the specific pattern holding you back, and produces a clear correction plan—not a generic coaching script. Evidence first. Human time where it matters.",
-    caption: "03 · HUMAN CALIBRATION · ₹9,999.",
+      "When repeated evidence reveals a gap that needs human judgment, Human Calibration joins the final approach. Entry is by qualification after Foundation and the Second Seat. A scheduled one-to-one engagement begins with your practice record, focuses on the specific pattern holding you back, and produces a clear correction plan—not a generic coaching script. Evidence first. Human time where it matters.",
+    caption: "03 · HUMAN CALIBRATION · BY QUALIFICATION.",
   },
   {
     id: "runway",
@@ -114,7 +115,7 @@ const FILM_BEATS: readonly FilmBeat[] = [
   { id: "whatsapp-material", start: 76.8, end: 79.5, stage: "second-seat", visual: "whatsapp-material", caption: "Experts can return material selected for the gap your practice exposed.", value: "YOUR GAP DECIDES THE MATERIAL." },
   { id: "whatsapp-boundary", start: 79.5, end: 82.16, stage: "second-seat", visual: "whatsapp-boundary", caption: "This is preparation guidance, not covert help during a restricted interview.", value: "YOUR GAP DECIDES THE MATERIAL." },
   { id: "calibration-gap", start: 82.16, end: 88.95, stage: "calibration", visual: "calibration-gap", caption: "When repeated evidence reveals a gap that needs human judgment, Human Calibration joins the final approach.", value: "USE HUMAN TIME ONLY WHERE IT MATTERS." },
-  { id: "calibration-price", start: 88.95, end: 96.2, stage: "calibration", visual: "calibration-brief", caption: "For ₹9,999, a scheduled one-to-one session begins with your practice record.", value: "USE HUMAN TIME ONLY WHERE IT MATTERS." },
+  { id: "calibration-price", start: 88.95, end: 96.2, stage: "calibration", visual: "calibration-brief", caption: "Entry is by qualification, and the review begins with your practice record.", value: "USE HUMAN TIME ONLY WHERE IT MATTERS." },
   { id: "calibration-focus", start: 96.2, end: 102.15, stage: "calibration", visual: "calibration-focus", caption: "It focuses on the specific pattern holding you back and produces a clear correction plan—not a generic coaching script.", value: "FIX THE PATTERN—NOT EVERYTHING." },
   { id: "calibration-evidence", start: 102.15, end: 104.76, stage: "calibration", visual: "calibration-evidence", caption: "Evidence first.", value: "FIX THE PATTERN—NOT EVERYTHING." },
   { id: "calibration-human", start: 104.76, end: 107.44, stage: "calibration", visual: "calibration-human", caption: "Human time where it matters.", value: "FIX THE PATTERN—NOT EVERYTHING." },
@@ -411,7 +412,7 @@ function FilmVisual({ beat, storyProgress }: { beat: FilmBeat; storyProgress: nu
         </article>
 
         <article className={`flight-film__stage-block flight-film__stage-block--calibration ${stageClass("calibration", 3)}`}>
-          <header><span>03</span><div><small>HUMAN CALIBRATION</small><strong>₹9,999</strong></div></header>
+          <header><span>03</span><div><small>HUMAN CALIBRATION</small><strong>BY QUALIFICATION</strong></div></header>
           <div className="flight-film__calibration-system">
             <div className="flight-film__evidence-stack"><span>MOCK 05 · TRADE-OFF</span><span>MOCK 06 · TRADE-OFF</span><span>MOCK 07 · TRADE-OFF</span></div>
             <i />
@@ -521,16 +522,6 @@ export function OpeningFlightPath() {
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [closeFilm, isOpen]);
-
-  const openFilm = () => {
-    const audio = audioRef.current;
-    setCurrentTime(0);
-    setIsOpen(true);
-    if (!audio || isReducedMotion) return;
-    audio.currentTime = 0;
-    const playback = audio.play();
-    if (playback) playback.catch(() => setIsPlaying(false));
-  };
 
   const togglePlayback = () => {
     const audio = audioRef.current;
@@ -657,7 +648,7 @@ export function OpeningFlightPath() {
             >
               <article aria-labelledby="opening-calibration-title">
                 <PanelHoverTelemetry panel="calibration" />
-                <header><p><span>03</span> HUMAN CALIBRATION</p><strong>₹9,999</strong></header>
+                <header><p><span>03</span> HUMAN CALIBRATION</p><strong>BY QUALIFICATION</strong></header>
                 <h3 id="opening-calibration-title">Use human time on the gap practice could not fix.</h3>
                 <p>A focused 1:1 review begins with your evidence—not a generic coaching agenda.</p>
                 <CalibrationPacket />
@@ -668,17 +659,7 @@ export function OpeningFlightPath() {
 
           <div className="opening-flight-path__footer">
             <p><span>01</span><i /><span>02</span><i /><span>03</span></p>
-            <button
-              ref={triggerRef}
-              className="opening-flight-path__film-trigger"
-              type="button"
-              onClick={openFilm}
-              aria-haspopup="dialog"
-              data-analytics-event="second_seat_preview_started"
-              data-analytics-label="Watch the three-stage film"
-            >
-              <span>Watch how the three stages work</span><small>1:55</small><b aria-hidden="true">↗</b>
-            </button>
+            <ApprovedVideoBriefing />
           </div>
         </div>
       </section>
@@ -686,7 +667,7 @@ export function OpeningFlightPath() {
       <audio
         ref={audioRef}
         src={AUDIO_URL}
-        preload="metadata"
+        preload="none"
         onLoadedMetadata={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : NOMINAL_DURATION)}
         onDurationChange={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : NOMINAL_DURATION)}
         onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}

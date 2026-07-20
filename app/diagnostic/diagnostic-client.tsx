@@ -136,7 +136,7 @@ export function DiagnosticClient() {
       : average < 3.35
         ? { name: "Practice · The Second Seat", href: "/second-seat", reason: "Use repeated attempts to make the gap measurable." }
         : scores[riskIndex] < 3
-          ? { name: "Calibration · Human Review", href: "/premium", reason: "The base is strong; one narrow gap needs expert calibration." }
+          ? { name: "Calibration · Human Review", href: "/qualify", reason: "The base is strong; one narrow gap may qualify for expert calibration." }
           : { name: "Practice · The Second Seat", href: "/second-seat", reason: "Stress-test the signal before spending on human review." };
 
     return {

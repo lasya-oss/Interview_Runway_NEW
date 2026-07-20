@@ -19,12 +19,12 @@ export const OFFERS = {
   },
   premium: {
     slug: "premium",
-    eyebrow: "1:1 COACHING",
-    name: "InterviewRunway 1:1 Coaching",
-    price: 9999,
-    priceLabel: "₹9,999",
-    description: "Focused founder-led coaching for gaps that repeated practice has not fixed.",
-    entitlement: "Final package scope confirmed before booking",
+    eyebrow: "HUMAN CALIBRATION",
+    name: "InterviewRunway Human Calibration",
+    price: null,
+    priceLabel: "By qualification",
+    description: "Evidence-led 1:1 calibration for a persistent gap that repeated practice has not fixed.",
+    entitlement: "Qualification, scope, availability, and quote confirmed before booking",
   },
 } as const;
 

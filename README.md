@@ -92,6 +92,16 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 - `npm test`: build the starter and verify its rendered loading skeleton
 - `npm run db:generate`: generate Drizzle migrations after schema changes
 
+## Phase 3 Qualification Notifications
+
+Qualification applications are stored in D1 before any notification is attempted. The provider-neutral notification adapter activates when these runtime values are configured:
+
+- `QUALIFICATION_NOTIFICATION_WEBHOOK_URL`: HTTPS endpoint that accepts the structured application payload.
+- `QUALIFICATION_NOTIFICATION_EMAIL`: recipient email included in that payload.
+- `QUALIFICATION_NOTIFICATION_WEBHOOK_TOKEN`: optional bearer token for the endpoint.
+
+Without these values, applications remain safely stored with a pending notification status. The adapter can later be replaced with the selected email provider without changing the public form or stored records.
+
 ## Learn More
 
 - [vinext Documentation](https://github.com/cloudflare/vinext)

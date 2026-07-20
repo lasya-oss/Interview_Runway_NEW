@@ -31,7 +31,7 @@ export function MemberShell({
     ? { href: "/checkout/vault", label: "Start Vault · ₹799", event: "checkout_started" }
     : profile.id === "practice"
       ? { href: "/second-seat", label: "Review Second Seat access", event: undefined }
-      : { href: "/premium", label: "Review calibration", event: undefined };
+      : { href: "/qualify", label: "Check Phase 3 eligibility", event: undefined };
 
   return (
     <div className="member-shell" data-member-tier={profile.id}>

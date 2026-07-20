@@ -9,7 +9,7 @@ const TIER_ORDER: Record<DemoTier, number> = { foundation: 0, practice: 1, premi
 function accessLabel(tier: DemoTier) {
   if (tier === "foundation") return "Vault";
   if (tier === "practice") return "The Second Seat";
-  return "Premium";
+  return "Human Calibration";
 }
 
 export function LibraryClient({ profileId, materials }: { profileId: DemoTier; materials: readonly LearningMaterial[] }) {

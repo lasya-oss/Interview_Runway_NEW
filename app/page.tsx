@@ -43,8 +43,8 @@ const HOME_PRICING_LAYERS = [
     for: "Repeated work exposes one persistent gap",
     visible: "Coach packet, targeted review, explicit correction",
     unlock: "Human calibration where it is worth the cost",
-    href: "/premium",
-    cta: "Review calibration",
+    href: "/qualify",
+    cta: "Check if you qualify",
   },
 ] as const;
 
@@ -116,7 +116,7 @@ export default function Home() {
         <section className="workspace-preview-section" aria-labelledby="workspace-preview-title" data-aero-phase="product">
           <div className="container">
             <Reveal>
-              <SectionHeading eyebrow="Enter the product before buying" title="One cockpit. Three levels of evidence." body="Choose Vault, the Second Seat, or Premium Calibration. Each demo opens populated, includes real review-edition material, and gives you a meaningful action within the first minute." id="workspace-preview-title" />
+              <SectionHeading eyebrow="Enter the product before buying" title="One cockpit. Three levels of evidence." body="Choose Foundation, the Second Seat, or Human Calibration. Each demo opens populated, includes real review-edition material, and gives you a meaningful action within the first minute." id="workspace-preview-title" />
             </Reveal>
 
             <Reveal className="workspace-preview-frame" direction="right">
@@ -136,7 +136,7 @@ export default function Home() {
                 </div>
               </div>
             </Reveal>
-            <div className="workspace-preview-footer"><div className="workspace-access-states" aria-label="Demo access levels"><span><b>Vault</b> Learn the model</span><span><b>The Second Seat</b> Expose the gap</span><span><b>Premium</b> Calibrate the signal</span></div><Link className="primary-cta" href="/demo-login">Choose a demo cockpit <span aria-hidden="true">↗</span></Link></div>
+            <div className="workspace-preview-footer"><div className="workspace-access-states" aria-label="Demo access levels"><span><b>Foundation</b> Learn the model</span><span><b>The Second Seat</b> Expose the gap</span><span><b>Human Calibration</b> Calibrate the signal</span></div><Link className="primary-cta" href="/demo-login">Choose a demo cockpit <span aria-hidden="true">↗</span></Link></div>
           </div>
         </section>
 
@@ -154,7 +154,7 @@ export default function Home() {
                 </Reveal>
               ))}
             </div>
-            <div className="home-pricing-footer"><span>INR pricing · Taxes and exact entitlement shown before payment · Vault refund terms linked at checkout</span><Link className="text-link" href="/pricing">Compare every layer <span aria-hidden="true">→</span></Link></div>
+            <div className="home-pricing-footer"><span>Foundation and Second Seat prices in INR · Phase 3 by qualification · Exact terms shown before payment</span><Link className="text-link" href="/pricing">Compare every layer <span aria-hidden="true">→</span></Link></div>
           </div>
         </section>
 

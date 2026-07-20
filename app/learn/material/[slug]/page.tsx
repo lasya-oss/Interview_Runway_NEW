@@ -89,7 +89,7 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
       { time: "03", title: "Influence map", detail: "Distinguish authority, alignment, escalation, and durable mechanisms." },
       { time: "04", title: "Live calibration", detail: "Use the private session to compress the story without losing evidence." },
     ],
-    principle: "Premium coaching should correct a named, repeated gap—not add more generic preparation.",
+    principle: "Human Calibration should correct a named, repeated gap—not add more generic preparation.",
     exercise: "Bring two examples showing how your decision changed another team’s plan, risk, or operating model.",
     related: "Open the private coaching room",
   },
@@ -97,7 +97,7 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
 
 function tierLabel(tier: DemoTier) {
   if (tier === "practice") return "The Second Seat";
-  if (tier === "premium") return "Premium coaching";
+  if (tier === "premium") return "Human Calibration";
   return "The Vault";
 }
 

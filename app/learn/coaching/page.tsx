@@ -31,11 +31,11 @@ export default async function CoachingPage() {
       <MemberShell profile={profile} active="coaching">
         <div className="member-page">
           <LockedMemberPanel
-            tier="Premium coaching"
+            tier="Human Calibration"
             title="Human calibration is reserved for a named gap."
-            body={`${profile.planShort} can see how the private coaching room is structured, but agenda notes, session scheduling, and coach deliverables belong to the premium example engagement. No coach is contacted from this demo.`}
+            body={`${profile.planShort} can see how the private coaching room is structured, but agenda notes, session scheduling, and coach deliverables belong to the qualification-based example engagement. No coach is contacted from this demo.`}
           >
-            <p className="member-locked-evidence">The premium sample is triggered only after repeated practice evidence shows a persistent calibration gap.</p>
+            <p className="member-locked-evidence">The Human Calibration sample is triggered only after repeated practice evidence shows a persistent gap.</p>
           </LockedMemberPanel>
         </div>
       </MemberShell>
@@ -47,9 +47,9 @@ export default async function CoachingPage() {
       <div className="member-page coaching-workspace">
         <section className="coaching-heading">
           <div>
-            <p className="member-kicker">Sample premium engagement</p>
+            <p className="member-kicker">Sample Human Calibration engagement</p>
             <h1>One gap. <em>Full attention.</em></h1>
-            <p>This private room demonstrates the expected premium experience. Coach identity, live availability, package scope, and meeting actions are placeholders until verified and commercially final.</p>
+            <p>This private room demonstrates the expected qualification-based experience. Coach identity, live availability, package scope, and meeting actions are placeholders until verified and commercially final.</p>
           </div>
           <div className="coaching-status"><i /><span>Example engagement</span><strong>02 / 03</strong><small>sample session path</small></div>
         </section>

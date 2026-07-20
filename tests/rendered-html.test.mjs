@@ -70,7 +70,8 @@ test("server-renders the finished InterviewRunway homepage", async () => {
   assert.match(text, /One system · three connected stages/i);
   assert.match(text, /AI practice that changes with your answers/i);
   assert.match(text, /WhatsApp guidance from engineers with FAANG and leading-tech experience/i);
-  assert.match(text, /Watch how the three stages work/i);
+  assert.match(text, /Why capable candidates still get overlooked/i);
+  assert.match(text, /How InterviewRunway closes the gap/i);
   assert.match(text, /Check your interview signal/i);
   assert.match(html, /href=["'][^"']*\/diagnostic["'][^>]*data-analytics-event=["']hero_signal_cta_clicked["']/i);
   assert.match(text, /Baseline → intervention → signal change → outcome/i);
@@ -107,7 +108,7 @@ const coreRoutes = [
   },
   {
     pathname: "/premium",
-    expected: [/(?:1:1 Coaching|1:1 Premium)/i, /(?:capacity|founder|₹9,999)/i],
+    expected: [/(?:1:1 Coaching|Human Calibration)/i, /(?:capacity|qualification|evidence review)/i],
   },
   {
     pathname: "/checkout/vault",
@@ -135,7 +136,8 @@ for (const { pathname, expected, init } of coreRoutes) {
 }
 
 const productRoutes = [
-  ["/pricing", [/One continuous flight path/i, /The Second Seat/i, /Human Calibration/i, /₹2,499/i, /₹9,999/i]],
+  ["/pricing", [/One continuous flight path/i, /The Second Seat/i, /Human Calibration/i, /₹2,499/i, /By qualification/i]],
+  ["/qualify", [/Phase 03 · Human Calibration/i, /Check if I qualify/i, /Foundation complete/i, /Second Seat evidence/i]],
   ["/curriculum", [/Curriculum/i, /Five records below have been built as pilot outputs/i]],
   ["/demo-login", [/Choose a layer/i, /Enter the workspace/i, /Ananya Rao/i, /Rohan Mehta/i, /Meera Iyer/i, /Sliding Window Pattern Reference/i]],
   ["/diagnostic", [/Free interview signal check/i, /Find the gap that is hiding your experience/i, /Start the 7–10 minute scan/i, /No payment/i]],
@@ -257,6 +259,20 @@ test("Paddle checkout requires an authenticated account", async () => {
   assert.deepEqual(await checkout.json(), { error: "Authentication required" });
 });
 
+test("Phase 3 qualification rejects incomplete submissions before persistence", async () => {
+  const response = await request("/api/qualification", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ accountEmail: "not-an-email" }),
+  });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /email address/i);
+});
+
 test("Paddle webhook rejects unsigned requests before fulfillment", async () => {
   const webhook = await request("/api/webhooks/paddle", {
     method: "POST",
@@ -317,13 +333,23 @@ test("homepage uses the original trajectory sequence instead of the rejected Sec
   assert.doesNotMatch(source, /SecondSeatJourney|SecondSeatPreview|SecondSeatHeroInstrument/);
 });
 
-test("homepage adds the reversible three-stage film without replacing restored aero choreography", async () => {
+test("homepage adds the approved two-part briefing without replacing restored aero choreography", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const component = await readFile(
     new URL("../app/components/opening-flight-path.tsx", import.meta.url),
     "utf8",
   );
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const approvedVideo = await readFile(
+    new URL("../app/components/approved-video-briefing.tsx", import.meta.url),
+    "utf8",
+  );
+  const problemVideo = await readFile(
+    new URL("../public/video/interviewrunway-part-1-problem-reframed.mp4", import.meta.url),
+  );
+  const solutionVideo = await readFile(
+    new URL("../public/video/interviewrunway-part-2-three-phases.mp4", import.meta.url),
+  );
   const audio = await readFile(
     new URL("../public/audio/interviewrunway-three-stage-pavitra2.mp3", import.meta.url),
   );
@@ -352,7 +378,13 @@ test("homepage adds the reversible three-stage film without replacing restored a
   assert.match(component, /flight-film__foundation-scatter/);
   assert.match(component, /flight-film__finale-actions/);
   assert.match(component, /Start Foundation · ₹799 once/);
-  assert.match(component, /const openFilm = \(\) => \{[\s\S]*setCurrentTime\(0\)[\s\S]*audio\.currentTime = 0/);
+  assert.match(component, /<ApprovedVideoBriefing\s*\/>/);
+  assert.match(approvedVideo, /interviewrunway-part-1-problem-reframed\.mp4/);
+  assert.match(approvedVideo, /interviewrunway-part-2-three-phases\.mp4/);
+  assert.match(approvedVideo, /<video[\s\S]*controls[\s\S]*playsInline/);
+  assert.match(approvedVideo, /role="dialog"/);
+  assert.match(approvedVideo, /Continue to Part 2/);
+  assert.match(approvedVideo, /Check Phase 3 eligibility/);
   assert.match(component, /if \(isFinale\) return "is-final"/);
   assert.match(component, /if \(beat\.stage === "overview"\) return "is-unrevealed"/);
   assert.match(component, /if \(activeOrder > order\) return "is-complete is-revealed"/);
@@ -378,6 +410,10 @@ test("homepage adds the reversible three-stage film without replacing restored a
   assert.match(whatsappMark, /<title>WhatsApp<\/title>/);
   assert.match(whatsappMark, /fill="#25D366"/);
   assert.ok(audio.byteLength > 1_000_000, "Pavitra2 narration should be a real mastered audio asset");
+  assert.ok(problemVideo.byteLength > 8_000_000, "Part 1 should be a real web video asset");
+  assert.ok(solutionVideo.byteLength > 8_000_000, "Part 2 should be a real web video asset");
+  assert.ok(problemVideo.byteLength < 25 * 1024 * 1024, "Part 1 should stay below the static asset limit");
+  assert.ok(solutionVideo.byteLength < 25 * 1024 * 1024, "Part 2 should stay below the static asset limit");
   assert.equal(cueData.voice.name, "Pavitra2");
   assert.equal(cueData.voice.id, "2e4f5fed-e691-4d6a-bdbe-82880007ad4b");
   assert.equal(cueData.scenes.length, 6);

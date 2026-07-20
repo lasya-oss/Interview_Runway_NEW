@@ -19,10 +19,10 @@ export default function PremiumPage() {
       >
         <div className="availability-panel">
           <span className="availability-light" aria-hidden="true" />
-          <div><strong>Live availability is not connected yet</strong><p>No slot count will be shown until it comes from the real calendar. Working package price: ₹9,999.</p></div>
+          <div><strong>Admission follows an evidence review</strong><p>There is no public checkout. Complete Foundation and the Second Seat, then apply with the recurring gap your practice exposed.</p></div>
         </div>
         <div className="hero-actions">
-          <CtaLink href="#scope">Review the coaching scope</CtaLink>
+          <CtaLink href="/qualify">Check if you qualify</CtaLink>
           <Link className="text-link" href="/about">Verify the founder standard <span aria-hidden="true">→</span></Link>
         </div>
       </PageHero>
@@ -53,9 +53,9 @@ export default function PremiumPage() {
       <section className="content-section method-section" aria-labelledby="package-title">
         <div className="container method-layout">
           <SectionHeading
-            eyebrow="WORKING LAUNCH PACKAGE"
+            eyebrow="QUALIFICATION BEFORE A QUOTE"
             title="The scope gets explicit before the calendar opens."
-            body="₹9,999 is the current working price. Final session count, duration, preparation, rescheduling, EMI eligibility, and deliverables must be published together before bookings are accepted."
+            body="A reviewer first confirms that Foundation and the Second Seat are complete, that the gap is supported by evidence, and that human judgment is the right intervention. The proposed scope and private quote arrive together."
             id="package-title"
           />
           <article className="content-card">
@@ -73,10 +73,10 @@ export default function PremiumPage() {
 
       <section className="section-pad final-cta" aria-labelledby="premium-cta-title">
         <div className="container final-cta-inner">
-          <p className="eyebrow">TRUST BEFORE SCARCITY</p>
-          <h2 id="premium-cta-title">No fake slot counter.</h2>
-          <p>The booking path will open only after the founder profile, package scope, and live calendar are connected and verified.</p>
-          <CtaLink href="/checkout/premium">Preview the ₹9,999 order summary</CtaLink>
+          <p className="eyebrow">EVIDENCE BEFORE HUMAN TIME</p>
+          <h2 id="premium-cta-title">Show the gap that still remains.</h2>
+          <p>Connect your account, confirm the first two phases, and submit the pattern that repeated practice could not correct.</p>
+          <CtaLink href="/qualify">Check if you qualify</CtaLink>
         </div>
       </section>
     </PageShell>

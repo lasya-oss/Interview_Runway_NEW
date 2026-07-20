@@ -55,3 +55,35 @@ export const paddleEvents = sqliteTable("paddle_events", {
   occurredAt: text("occurred_at").notNull(),
   processedAt: text("processed_at").notNull(),
 });
+
+export const qualificationApplications = sqliteTable(
+  "qualification_applications",
+  {
+    id: text("id").primaryKey(),
+    accountEmail: text("account_email").notNull(),
+    phaseOneStatus: text("phase_one_status").notNull(),
+    phaseTwoStatus: text("phase_two_status").notNull(),
+    whatsappSupportPerson: text("whatsapp_support_person").notNull(),
+    targetRole: text("target_role").notNull(),
+    visibleGap: text("visible_gap").notNull(),
+    additionalContext: text("additional_context"),
+    consent: integer("consent", { mode: "boolean" }).notNull(),
+    status: text("status").notNull().default("submitted"),
+    notificationStatus: text("notification_status").notNull().default("pending"),
+    notificationAttempts: integer("notification_attempts").notNull().default(0),
+    notificationLastError: text("notification_last_error"),
+    notifiedAt: text("notified_at"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [
+    index("qualification_applications_email_created_idx").on(
+      table.accountEmail,
+      table.createdAt,
+    ),
+    index("qualification_applications_notification_created_idx").on(
+      table.notificationStatus,
+      table.createdAt,
+    ),
+  ],
+);

@@ -46,13 +46,13 @@ const PRICING_LAYERS = [
     label: "HUMAN CALIBRATION",
     offer: OFFERS.premium,
     displayName: "Human Calibration",
-    entitlement: "Evidence-led · capacity capped · final scope confirmed before booking",
-    status: "EVIDENCE-LED · CAPACITY CAPPED",
-    priceNote: "Focused package",
-    body: "Add a real person when repeated evidence identifies a persistent gap.",
+    entitlement: "Evidence-led · capacity capped · scope and quote confirmed after review",
+    status: "APPLICATION REQUIRED",
+    priceNote: "No public checkout",
+    body: "Apply for a real person only when repeated evidence identifies a persistent gap.",
     includes: ["Flight-recorder evidence packet", "Focused review of one persistent gap", "Human judgment and mentoring", "Explicit correction and next-action plan"],
-    href: "/premium",
-    cta: "Review Human Calibration",
+    href: "/qualify",
+    cta: "Check if you qualify",
   },
 ] as const;
 
@@ -81,7 +81,7 @@ const PRICING_FAQS = [
   },
   {
     question: "When does Human Calibration make sense?",
-    answer: "When repeated Second Seat practice exposes the same narrow gap and human judgment is more useful than more repetition. Package scope, availability, and final terms are confirmed before booking.",
+    answer: "When repeated Second Seat practice exposes the same narrow gap and human judgment is more useful than more repetition. Qualification, package scope, availability, and a private quote are confirmed before booking.",
   },
 ] as const;
 
@@ -159,7 +159,7 @@ export default async function PricingPage() {
               </tbody>
             </table>
           </div>
-          <p className="pricing-disclosure">The public path never skips Foundation clearance. Included practice time, any additional operating cost, and the Human Calibration scope are shown before an unlock or booking is confirmed.</p>
+          <p className="pricing-disclosure">The public path never skips Foundation clearance. Included practice time and any additional operating cost are shown before an unlock. Human Calibration has no public checkout: qualification, scope, availability, and a private quote come first.</p>
         </div>
       </section>
 
@@ -174,7 +174,7 @@ export default async function PricingPage() {
           <ol className="pricing-route">
             <li><span>01</span><div><h3>Build the flight plan</h3><p>Start Foundation directly. Nothing else is added to the order.</p></div></li>
             <li><span>02</span><div><h3>Complete measurable clearance</h3><p>Required systems, the baseline diagnostic, a mock checkpoint, and an initial signal profile make the Second Seat unlock visible.</p></div></li>
-            <li><span>03</span><div><h3>Escalate only when evidence says so</h3><p>Human Calibration opens around a named gap, explicit scope, real availability, and final terms.</p></div></li>
+            <li><span>03</span><div><h3>Apply only when evidence says so</h3><p>Human Calibration opens around a named gap, completed prerequisites, explicit scope, and real availability.</p><Link className="text-link" href="/qualify">Check if you qualify <span aria-hidden="true">↗</span></Link></div></li>
           </ol>
         </div>
       </section>
