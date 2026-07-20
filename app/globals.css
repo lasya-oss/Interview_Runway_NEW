@@ -8414,3 +8414,175 @@ html[data-second-seat-film="open"] .home-aero-stage {
   .flight-film__opening-sequence,
   .flight-film__opening-signal i { animation: none !important; transition-duration: 0ms !important; }
 }
+
+/* Opening viewport scale correction. Keep this scoped to the static acquisition
+   panel so the restored scroll choreography and the full-screen film stay intact. */
+@media (min-width: 901px) {
+  .opening-flight-path {
+    min-height: 100svh;
+    padding: clamp(5.9rem, 10.5vh, 6.6rem) 0 clamp(1rem, 2vh, 1.4rem);
+    align-items: start;
+  }
+
+  .opening-flight-path .opening-flight-path__inner {
+    width: min(1160px, calc(100% - 64px));
+  }
+
+  .opening-flight-path .opening-flight-path__header {
+    min-height: 54px;
+    margin-bottom: clamp(.65rem, 1.4vh, .9rem);
+    grid-template-columns: minmax(0, 1fr) minmax(390px, .72fr);
+    gap: 2.25rem;
+  }
+
+  .opening-flight-path .opening-flight-path__eyebrow { font-size: 10px; }
+
+  .opening-flight-path .opening-flight-path__header h2 {
+    max-width: 570px;
+    font-size: clamp(1.8rem, 2.25vw, 2.25rem);
+    line-height: .98;
+  }
+
+  .opening-flight-path .opening-flight-path__instrument {
+    min-height: clamp(420px, 50vh, 510px);
+    grid-template-columns: minmax(225px, .92fr) minmax(480px, 1.55fr) minmax(225px, .92fr);
+  }
+
+  .opening-flight-path .opening-flight-path__instrument::before { left: 25.1%; }
+  .opening-flight-path .opening-flight-path__instrument::after { right: 25.1%; }
+
+  .opening-flight-path .opening-flight-path__panel > article {
+    min-height: 0;
+    padding: clamp(19px, 1.65vw, 25px);
+  }
+
+  .opening-flight-path .opening-flight-path__panel > article > header {
+    gap: 12px;
+    font-size: 9px;
+  }
+
+  .opening-flight-path .opening-flight-path__panel > article > header strong { font-size: 10px; }
+
+  .opening-flight-path .opening-flight-path__panel h3 {
+    margin-top: clamp(13px, 1.8vh, 18px);
+    font-size: clamp(1.7rem, 2.05vw, 2rem);
+    line-height: 1;
+  }
+
+  .opening-flight-path .opening-flight-path__panel--second-seat {
+    margin: -9px 0;
+  }
+
+  .opening-flight-path .opening-flight-path__panel--second-seat h3 {
+    max-width: 560px;
+    font-size: clamp(2.15rem, 2.75vw, 2.65rem);
+  }
+
+  .opening-flight-path .opening-flight-path__panel > article > p,
+  .opening-flight-path .opening-flight-path__panel--second-seat > article > p {
+    margin-top: 9px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .opening-flight-path .opening-flight-path__foundation-route {
+    min-height: 124px;
+    margin: 12px 0 10px;
+    padding: 12px 0 17px;
+  }
+
+  .opening-flight-path .opening-flight-path__foundation-route::before {
+    inset-block: 29px 27px;
+  }
+
+  .opening-flight-path .opening-flight-path__foundation-route ol { gap: 8px 7px; }
+  .opening-flight-path .opening-flight-path__foundation-route li { font-size: 10px; }
+
+  .opening-flight-path .opening-flight-path__second-seat-loop {
+    height: clamp(118px, 15vh, 145px);
+    margin: 9px 0 8px;
+  }
+
+  .opening-flight-path .opening-flight-path__loop-engine { width: 82px; }
+  .opening-flight-path .opening-flight-path__loop-gap strong { font-size: 19px; }
+  .opening-flight-path .opening-flight-path__loop-perspectives { gap: 4px; }
+  .opening-flight-path .opening-flight-path__loop-perspectives span { min-height: 21px; padding: 3px 6px; }
+
+  .opening-flight-path .opening-flight-path__expert-band {
+    min-height: 68px;
+    padding: 8px 10px;
+    grid-template-columns: minmax(250px, .95fr) minmax(210px, 1.05fr);
+    gap: 12px;
+  }
+
+  .opening-flight-path .opening-flight-path__expert-band > p {
+    font-size: 11.5px;
+    line-height: 1.38;
+  }
+
+  .opening-flight-path .opening-flight-path__whatsapp-flow { gap: 5px; }
+  .opening-flight-path .opening-flight-path__whatsapp-flow > i { min-width: 8px; }
+
+  .opening-flight-path .opening-flight-path__calibration-packet {
+    min-height: 145px;
+    margin: 12px 0 10px;
+    gap: 7px;
+  }
+
+  .opening-flight-path .opening-flight-path__packet-stack { height: 56px; }
+  .opening-flight-path .opening-flight-path__packet-stack span {
+    inset: calc(var(--packet-index) * 6px) calc((2 - var(--packet-index)) * 6px) auto calc(var(--packet-index) * 6px);
+    min-height: 38px;
+    padding: 8px 10px;
+  }
+
+  .opening-flight-path .opening-flight-path__packet-lock { height: 10px; }
+  .opening-flight-path .opening-flight-path__packet-review,
+  .opening-flight-path .opening-flight-path__packet-output {
+    min-height: 35px;
+    padding: 7px 9px;
+  }
+
+  .opening-flight-path .opening-flight-path__packet-review span { font-size: 13px; }
+  .opening-flight-path .opening-flight-path__packet-arrow { width: 8px; height: 8px; margin: -3px auto; }
+
+  .opening-flight-path .opening-flight-path__panel footer {
+    padding-top: 11px;
+    font-size: 9px;
+  }
+
+  .opening-flight-path .opening-flight-path__footer { margin-top: clamp(.65rem, 1.35vh, .9rem); }
+  .opening-flight-path .opening-flight-path__film-trigger { min-height: 50px; }
+  .opening-flight-path .opening-flight-path__film-trigger span { font-size: 13px; }
+  .opening-flight-path .opening-flight-path__film-trigger b { width: 37px; height: 37px; }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  .opening-flight-path .opening-flight-path__inner {
+    width: calc(100% - 40px);
+  }
+
+  .opening-flight-path .opening-flight-path__header {
+    grid-template-columns: minmax(0, 1fr) minmax(330px, .72fr);
+    gap: 1.5rem;
+  }
+
+  .opening-flight-path .opening-flight-path__instrument {
+    min-height: clamp(440px, 54vh, 500px);
+    grid-template-columns: minmax(180px, .86fr) minmax(360px, 1.5fr) minmax(180px, .86fr);
+  }
+
+  .opening-flight-path .opening-flight-path__instrument::before { left: 26.7%; }
+  .opening-flight-path .opening-flight-path__instrument::after { right: 26.7%; }
+  .opening-flight-path .opening-flight-path__panel > article { padding: 18px; }
+  .opening-flight-path .opening-flight-path__panel h3 { font-size: clamp(1.55rem, 2.8vw, 1.9rem); }
+  .opening-flight-path .opening-flight-path__panel--second-seat h3 { font-size: clamp(2rem, 3.7vw, 2.45rem); }
+  .opening-flight-path .opening-flight-path__panel > article > p,
+  .opening-flight-path .opening-flight-path__panel--second-seat > article > p { font-size: 13.5px; }
+  .opening-flight-path .opening-flight-path__expert-band {
+    min-height: 88px;
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  .opening-flight-path .opening-flight-path__expert-band > p { font-size: 10.5px; }
+}

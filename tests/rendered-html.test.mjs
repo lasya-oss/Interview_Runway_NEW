@@ -363,6 +363,9 @@ test("homepage adds the reversible three-stage film without replacing restored a
   assert.match(component, /second_seat_preview_completed/);
   assert.match(styles, /\.opening-flight-path__instrument\s*\{[\s\S]*grid-template-columns:\s*minmax\(235px, \.82fr\) minmax\(500px, 1\.7fr\) minmax\(235px, \.82fr\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.opening-flight-path__loop-rotor/);
+  assert.match(styles, /@media \(min-width: 901px\)[\s\S]*\.opening-flight-path \.opening-flight-path__inner\s*\{[\s\S]*width:\s*min\(1160px, calc\(100% - 64px\)\)/);
+  assert.match(styles, /@media \(min-width: 901px\)[\s\S]*\.opening-flight-path \.opening-flight-path__instrument\s*\{[\s\S]*min-height:\s*clamp\(420px, 50vh, 510px\)/);
+  assert.match(styles, /@media \(min-width: 901px\) and \(max-width: 1180px\)[\s\S]*grid-template-columns:\s*minmax\(180px, \.86fr\) minmax\(360px, 1\.5fr\) minmax\(180px, \.86fr\)/);
   assert.match(styles, /\.flight-film__value-annunciator/);
   assert.match(styles, /\.flight-film__live-caption[\s\S]*font-size:\s*clamp\(1rem, 1\.3vw, 1\.35rem\)/);
   assert.match(styles, /\.flight-film__stage-block\.is-unrevealed[\s\S]*visibility:\s*hidden/);
