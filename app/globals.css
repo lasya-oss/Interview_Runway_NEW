@@ -8586,3 +8586,281 @@ html[data-second-seat-film="open"] .home-aero-stage {
   }
   .opening-flight-path .opening-flight-path__expert-band > p { font-size: 10.5px; }
 }
+
+/* Directional stage inspection. The default composition remains unchanged;
+   hover/focus opens one stage into a larger instrument surface. */
+.opening-flight-path__panel {
+  outline: 0;
+  transform-style: preserve-3d;
+  transition:
+    opacity 420ms ease,
+    filter 420ms ease,
+    transform 620ms var(--ease-out-expo),
+    box-shadow 420ms ease,
+    background 420ms ease;
+}
+
+.opening-flight-path__panel > article { position: relative; overflow: hidden; isolation: isolate; }
+.opening-flight-path__panel > article > :not(.opening-flight-path__hover-telemetry) { position: relative; z-index: 2; }
+
+.opening-flight-path__hover-telemetry {
+  --telemetry-direction: -1;
+  position: absolute;
+  z-index: 1;
+  inset: 29% 3% 10%;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(calc(var(--telemetry-direction) * -54px), 0, -20px) scale(.95);
+  transform-style: preserve-3d;
+  transition: opacity 260ms ease, transform 720ms var(--ease-out-expo);
+}
+
+.opening-flight-path__hover-telemetry--calibration { --telemetry-direction: 1; }
+.opening-flight-path__hover-telemetry--second-seat { --telemetry-direction: 0; inset-inline: 2%; }
+
+.opening-flight-path__hover-telemetry ol {
+  position: absolute;
+  inset: 8% 0 auto;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  list-style: none;
+}
+
+.opening-flight-path__hover-telemetry li {
+  position: relative;
+  width: min(72%, 420px);
+  min-height: 34px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: solid rgba(155,201,218,.2);
+  border-width: 1px 1px 1px 0;
+  border-radius: 0 999px 999px 0;
+  color: rgba(221,234,239,.88);
+  background: linear-gradient(90deg, rgba(255,107,44,.16), rgba(59,131,158,.09), transparent);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 560;
+  letter-spacing: .1em;
+  opacity: 0;
+  transform: translateX(-105%);
+  transition:
+    opacity 280ms ease calc(var(--telemetry-index) * 75ms),
+    transform 760ms var(--ease-out-expo) calc(var(--telemetry-index) * 75ms);
+}
+
+.opening-flight-path__hover-telemetry li > i {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border: 1px solid #ff7440;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(255,107,44,.55);
+}
+
+.opening-flight-path__hover-telemetry--calibration ol { justify-items: end; }
+.opening-flight-path__hover-telemetry--calibration li {
+  justify-content: flex-end;
+  border-width: 1px 0 1px 1px;
+  border-radius: 999px 0 0 999px;
+  background: linear-gradient(270deg, rgba(255,107,44,.16), rgba(59,131,158,.09), transparent);
+  transform: translateX(105%);
+}
+
+.opening-flight-path__hover-telemetry--calibration li > i { order: 2; }
+.opening-flight-path__hover-telemetry--second-seat ol {
+  inset: 6% 0 auto;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 19%;
+}
+
+.opening-flight-path__hover-telemetry--second-seat li { width: 100%; }
+.opening-flight-path__hover-telemetry--second-seat li:nth-child(even) {
+  justify-content: flex-end;
+  border-width: 1px 0 1px 1px;
+  border-radius: 999px 0 0 999px;
+  background: linear-gradient(270deg, rgba(255,107,44,.16), rgba(59,131,158,.09), transparent);
+  transform: translateX(105%);
+}
+.opening-flight-path__hover-telemetry--second-seat li:nth-child(even) > i { order: 2; }
+.opening-flight-path__hover-telemetry--second-seat li:last-child { grid-column: 1 / -1; justify-self: center; width: 52%; border-width: 1px; border-radius: 999px; transform: translateY(35px) scaleX(.72); }
+
+.opening-flight-path__telemetry-orbit {
+  position: absolute;
+  z-index: 3;
+  right: 8%;
+  top: 43%;
+  width: clamp(90px, 10vw, 138px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(147,200,220,.26);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(5,22,31,.96) 0 24%, rgba(32,74,88,.22) 25% 45%, transparent 46%);
+  box-shadow: inset 0 0 34px rgba(75,157,187,.11), 0 0 45px rgba(3,12,18,.72);
+  opacity: 0;
+  transform: perspective(520px) rotateX(66deg) rotateZ(-18deg) scale(.55);
+  transition: opacity 350ms ease 110ms, transform 850ms var(--ease-out-expo) 60ms;
+}
+
+.opening-flight-path__hover-telemetry--calibration .opening-flight-path__telemetry-orbit { right: auto; left: 8%; transform: perspective(520px) rotateX(66deg) rotateZ(18deg) scale(.55); }
+.opening-flight-path__hover-telemetry--second-seat .opening-flight-path__telemetry-orbit { right: 50%; top: 37%; translate: 50% 0; }
+
+.opening-flight-path__telemetry-orbit > i {
+  position: absolute;
+  inset: calc(11px * var(--orbit-index, 1));
+  border: 1px solid rgba(135,198,221,.28);
+  border-radius: 50%;
+}
+.opening-flight-path__telemetry-orbit > i:nth-child(1) { --orbit-index: 1; border-color: rgba(255,107,44,.8) transparent rgba(255,107,44,.3); animation: opening-telemetry-orbit 5.5s linear infinite; }
+.opening-flight-path__telemetry-orbit > i:nth-child(2) { --orbit-index: 2; border-color: rgba(129,204,231,.32) rgba(129,204,231,.08) transparent; animation: opening-telemetry-orbit 3.8s linear reverse infinite; }
+.opening-flight-path__telemetry-orbit > i:nth-child(3) { --orbit-index: 3; border-style: dashed; animation: opening-telemetry-orbit 8s linear infinite; }
+.opening-flight-path__telemetry-orbit > b { color: #edf5f7; font-family: var(--font-mono); font-size: 15px; font-weight: 520; text-shadow: 0 0 18px rgba(255,107,44,.55); }
+
+.opening-flight-path__telemetry-sweep { position: absolute; inset: 0; }
+.opening-flight-path__telemetry-sweep i {
+  position: absolute;
+  left: 0;
+  top: calc(18% + var(--sweep-index, 0) * 22%);
+  width: 100%;
+  height: 1px;
+  overflow: hidden;
+  background: linear-gradient(90deg, transparent, rgba(119,184,208,.13), transparent);
+}
+.opening-flight-path__telemetry-sweep i::after {
+  display: block;
+  width: 22%;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, #ff6b2c, rgba(130,206,233,.82), transparent);
+  transform: translateX(-120%);
+}
+.opening-flight-path__telemetry-sweep i:nth-child(1) { --sweep-index: 0; }
+.opening-flight-path__telemetry-sweep i:nth-child(2) { --sweep-index: 1; }
+.opening-flight-path__telemetry-sweep i:nth-child(3) { --sweep-index: 2; }
+.opening-flight-path__telemetry-sweep i:nth-child(4) { --sweep-index: 3; }
+
+@media (min-width: 901px) {
+  .opening-flight-path__instrument {
+    transition: grid-template-columns 760ms var(--ease-out-expo), border-color 320ms ease, box-shadow 320ms ease;
+  }
+
+  .opening-flight-path__instrument[data-active-panel="foundation"] { grid-template-columns: minmax(500px, 1.68fr) minmax(250px, .72fr) minmax(210px, .62fr); }
+  .opening-flight-path__instrument[data-active-panel="second-seat"] { grid-template-columns: minmax(210px, .64fr) minmax(560px, 1.85fr) minmax(210px, .64fr); }
+  .opening-flight-path__instrument[data-active-panel="calibration"] { grid-template-columns: minmax(210px, .62fr) minmax(250px, .72fr) minmax(500px, 1.68fr); }
+
+  .opening-flight-path__instrument[data-active-panel]:not([data-active-panel="none"])::before,
+  .opening-flight-path__instrument[data-active-panel]:not([data-active-panel="none"])::after { opacity: 0; transition: opacity 180ms ease; }
+
+  .opening-flight-path__instrument[data-active-panel]:not([data-active-panel="none"]) .opening-flight-path__panel:not([data-panel]) { opacity: 1; }
+  .opening-flight-path__instrument[data-active-panel="foundation"] .opening-flight-path__panel:not([data-panel="foundation"]),
+  .opening-flight-path__instrument[data-active-panel="second-seat"] .opening-flight-path__panel:not([data-panel="second-seat"]),
+  .opening-flight-path__instrument[data-active-panel="calibration"] .opening-flight-path__panel:not([data-panel="calibration"]) {
+    opacity: .24;
+    filter: saturate(.42) brightness(.62);
+  }
+
+  .opening-flight-path__instrument[data-active-panel="foundation"] .opening-flight-path__panel:not([data-panel="foundation"]) { transform: translate3d(18px, 0, -28px) scale(.97); }
+  .opening-flight-path__instrument[data-active-panel="calibration"] .opening-flight-path__panel:not([data-panel="calibration"]) { transform: translate3d(-18px, 0, -28px) scale(.97); }
+  .opening-flight-path__instrument[data-active-panel="second-seat"] .opening-flight-path__panel--foundation { transform: translate3d(-12px, 0, -28px) scale(.97); }
+  .opening-flight-path__instrument[data-active-panel="second-seat"] .opening-flight-path__panel--calibration { transform: translate3d(12px, 0, -28px) scale(.97); }
+
+  .opening-flight-path__instrument[data-active-panel="foundation"] [data-panel="foundation"],
+  .opening-flight-path__instrument[data-active-panel="second-seat"] [data-panel="second-seat"],
+  .opening-flight-path__instrument[data-active-panel="calibration"] [data-panel="calibration"] {
+    z-index: 8;
+    opacity: 1;
+    filter: none;
+    transform: translate3d(0, -5px, 26px) scale(1.012);
+    background: radial-gradient(circle at 62% 44%, rgba(71,157,190,.16), transparent 36%), linear-gradient(145deg, rgba(14,42,54,.97), rgba(4,17,25,.98));
+    box-shadow: 0 38px 95px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,107,44,.52), inset 0 1px rgba(255,255,255,.1), 0 0 48px rgba(255,107,44,.08);
+  }
+
+  .opening-flight-path__instrument[data-active-panel="foundation"] [data-panel="foundation"] .opening-flight-path__hover-telemetry,
+  .opening-flight-path__instrument[data-active-panel="second-seat"] [data-panel="second-seat"] .opening-flight-path__hover-telemetry,
+  .opening-flight-path__instrument[data-active-panel="calibration"] [data-panel="calibration"] .opening-flight-path__hover-telemetry {
+    opacity: .84;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .opening-flight-path__foundation-route,
+  .opening-flight-path__second-seat-loop,
+  .opening-flight-path__expert-band,
+  .opening-flight-path__calibration-packet {
+    transition: opacity 320ms ease, filter 320ms ease, transform 620ms var(--ease-out-expo);
+  }
+
+  .opening-flight-path__instrument[data-active-panel="foundation"] [data-panel="foundation"] .opening-flight-path__foundation-route,
+  .opening-flight-path__instrument[data-active-panel="second-seat"] [data-panel="second-seat"] .opening-flight-path__second-seat-loop,
+  .opening-flight-path__instrument[data-active-panel="second-seat"] [data-panel="second-seat"] .opening-flight-path__expert-band,
+  .opening-flight-path__instrument[data-active-panel="calibration"] [data-panel="calibration"] .opening-flight-path__calibration-packet {
+    z-index: 0;
+    opacity: .12;
+    filter: saturate(.55) blur(.35px);
+  }
+
+  .opening-flight-path__instrument[data-active-panel="foundation"] [data-panel="foundation"] .opening-flight-path__hover-telemetry li,
+  .opening-flight-path__instrument[data-active-panel="second-seat"] [data-panel="second-seat"] .opening-flight-path__hover-telemetry li,
+  .opening-flight-path__instrument[data-active-panel="calibration"] [data-panel="calibration"] .opening-flight-path__hover-telemetry li {
+    opacity: 1;
+    transform: translate(0) scaleX(1);
+  }
+
+  .opening-flight-path__instrument[data-active-panel="foundation"] [data-panel="foundation"] .opening-flight-path__telemetry-orbit,
+  .opening-flight-path__instrument[data-active-panel="second-seat"] [data-panel="second-seat"] .opening-flight-path__telemetry-orbit,
+  .opening-flight-path__instrument[data-active-panel="calibration"] [data-panel="calibration"] .opening-flight-path__telemetry-orbit {
+    opacity: 1;
+    transform: perspective(520px) rotateX(64deg) rotateZ(0deg) scale(1);
+  }
+
+  .opening-flight-path__instrument[data-active-panel="foundation"] [data-panel="foundation"] .opening-flight-path__telemetry-sweep i::after,
+  .opening-flight-path__instrument[data-active-panel="second-seat"] [data-panel="second-seat"] .opening-flight-path__telemetry-sweep i::after {
+    animation: opening-panel-sweep-ltr 2.6s linear calc(var(--sweep-index) * 180ms) infinite;
+  }
+  .opening-flight-path__instrument[data-active-panel="second-seat"] [data-panel="second-seat"] .opening-flight-path__telemetry-sweep i:nth-child(even)::after,
+  .opening-flight-path__instrument[data-active-panel="calibration"] [data-panel="calibration"] .opening-flight-path__telemetry-sweep i::after {
+    animation-name: opening-panel-sweep-rtl;
+  }
+
+  .opening-flight-path__instrument[data-active-panel="foundation"] .opening-flight-path__foundation-route li {
+    animation: opening-feature-arrive-left 700ms var(--ease-out-expo) calc(var(--route-index) * 55ms) both;
+  }
+  .opening-flight-path__instrument[data-active-panel="second-seat"] .opening-flight-path__loop-engine { animation: opening-engine-inspect 4.4s ease-in-out infinite; }
+  .opening-flight-path__instrument[data-active-panel="second-seat"] .opening-flight-path__loop-perspectives span { animation-duration: 1.8s; }
+  .opening-flight-path__instrument[data-active-panel="calibration"] .opening-flight-path__packet-stack span,
+  .opening-flight-path__instrument[data-active-panel="calibration"] .opening-flight-path__packet-review,
+  .opening-flight-path__instrument[data-active-panel="calibration"] .opening-flight-path__packet-output {
+    animation: opening-feature-arrive-right 720ms var(--ease-out-expo) calc(var(--packet-index, 0) * 70ms) both;
+  }
+}
+
+@keyframes opening-panel-sweep-ltr { from { transform: translateX(-120%); } to { transform: translateX(560%); } }
+@keyframes opening-panel-sweep-rtl { from { transform: translateX(560%); } to { transform: translateX(-120%); } }
+@keyframes opening-feature-arrive-left { from { opacity: .2; transform: translateX(-42px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes opening-feature-arrive-right { from { opacity: .2; transform: translateX(42px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes opening-engine-inspect {
+  0%, 100% { transform: translate(-50%, -50%) perspective(500px) rotateY(-7deg) scale(1); }
+  50% { transform: translate(-50%, -50%) perspective(500px) rotateY(7deg) scale(1.1); }
+}
+@keyframes opening-telemetry-orbit { to { rotate: 1turn; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .opening-flight-path__instrument,
+  .opening-flight-path__panel,
+  .opening-flight-path__hover-telemetry,
+  .opening-flight-path__hover-telemetry li,
+  .opening-flight-path__telemetry-orbit { transition-duration: 0ms !important; }
+  .opening-flight-path__telemetry-sweep,
+  .opening-flight-path__hover-telemetry { display: none; }
+  .opening-flight-path__telemetry-orbit > i { animation: none !important; }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  .opening-flight-path__instrument[data-active-panel="foundation"] { grid-template-columns: minmax(0, 1.62fr) minmax(0, .62fr) minmax(0, .56fr); }
+  .opening-flight-path__instrument[data-active-panel="second-seat"] { grid-template-columns: minmax(0, .58fr) minmax(0, 1.72fr) minmax(0, .58fr); }
+  .opening-flight-path__instrument[data-active-panel="calibration"] { grid-template-columns: minmax(0, .56fr) minmax(0, .62fr) minmax(0, 1.62fr); }
+}

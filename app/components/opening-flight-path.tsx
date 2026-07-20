@@ -25,6 +25,7 @@ type FilmScene = {
 };
 
 type FilmStage = "overview" | "foundation" | "second-seat" | "calibration";
+type OpeningPanel = Exclude<FilmStage, "overview">;
 
 type FilmBeat = {
   id: string;
@@ -223,6 +224,32 @@ function CalibrationPacket({ compact = false }: { compact?: boolean }) {
   );
 }
 
+const PANEL_TELEMETRY: Record<OpeningPanel, readonly string[]> = {
+  foundation: ["LEARN THE MAP", "CHECK YOUR RECALL", "HEAR THE INTERVIEW"],
+  "second-seat": ["ANSWER", "READ THE SIGNAL", "ADAPT THE NEXT ROUND"],
+  calibration: ["REVIEW THE EVIDENCE", "ISOLATE THE GAP", "LEAVE WITH A PLAN"],
+};
+
+function PanelHoverTelemetry({ panel }: { panel: OpeningPanel }) {
+  return (
+    <div className={`opening-flight-path__hover-telemetry opening-flight-path__hover-telemetry--${panel}`} aria-hidden="true">
+      <div className="opening-flight-path__telemetry-orbit">
+        <i /><i /><i />
+        <b>{panel === "foundation" ? "30+" : panel === "second-seat" ? "AI" : "1:1"}</b>
+      </div>
+      <ol>
+        {PANEL_TELEMETRY[panel].map((label, index) => (
+          <li key={label} style={{ "--telemetry-index": index } as React.CSSProperties}>
+            <i />
+            <span>{label}</span>
+          </li>
+        ))}
+      </ol>
+      <div className="opening-flight-path__telemetry-sweep"><i /><i /><i /><i /></div>
+    </div>
+  );
+}
+
 function FilmVisual({ beat, storyProgress }: { beat: FilmBeat; storyProgress: number }) {
   const isFinale = beat.visual.startsWith("runway-");
   const isScaffold = beat.visual === "signal-connected";
@@ -326,6 +353,7 @@ export function OpeningFlightPath() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(NOMINAL_DURATION);
   const [isReducedMotion, setIsReducedMotion] = useState(false);
+  const [activePanel, setActivePanel] = useState<OpeningPanel | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -483,9 +511,26 @@ export function OpeningFlightPath() {
             <h2 id="opening-flight-path-title">Build the signal. Pressure-test it. Calibrate what remains.</h2>
           </header>
 
-          <ol className="opening-flight-path__instrument" aria-label="The three InterviewRunway stages">
-            <li className="opening-flight-path__panel opening-flight-path__panel--foundation">
+          <ol
+            className="opening-flight-path__instrument"
+            aria-label="The three InterviewRunway stages"
+            data-active-panel={activePanel ?? "none"}
+            onMouseLeave={() => setActivePanel(null)}
+            onPointerLeave={() => setActivePanel(null)}
+          >
+            <li
+              className="opening-flight-path__panel opening-flight-path__panel--foundation"
+              tabIndex={0}
+              data-panel="foundation"
+              onPointerEnter={() => setActivePanel("foundation")}
+              onPointerMove={() => setActivePanel("foundation")}
+              onFocus={() => setActivePanel("foundation")}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setActivePanel(null);
+              }}
+            >
               <article aria-labelledby="opening-foundation-title">
+                <PanelHoverTelemetry panel="foundation" />
                 <header><p><span>01</span> FOUNDATION</p><strong>₹799 once</strong></header>
                 <h3 id="opening-foundation-title">Stop guessing what to prepare.</h3>
                 <p>A clear 4- or 12-week path for what to learn, practise, and prove.</p>
@@ -494,8 +539,19 @@ export function OpeningFlightPath() {
               </article>
             </li>
 
-            <li className="opening-flight-path__panel opening-flight-path__panel--second-seat">
+            <li
+              className="opening-flight-path__panel opening-flight-path__panel--second-seat"
+              tabIndex={0}
+              data-panel="second-seat"
+              onPointerEnter={() => setActivePanel("second-seat")}
+              onPointerMove={() => setActivePanel("second-seat")}
+              onFocus={() => setActivePanel("second-seat")}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setActivePanel(null);
+              }}
+            >
               <article aria-labelledby="opening-second-seat-title">
+                <PanelHoverTelemetry panel="second-seat" />
                 <header><p><span>02</span> THE SECOND SEAT</p><strong>₹2,499</strong></header>
                 <h3 id="opening-second-seat-title">AI practice that changes with your answers.</h3>
                 <p>Expert guidance stays connected to your plan.</p>
@@ -508,8 +564,19 @@ export function OpeningFlightPath() {
               </article>
             </li>
 
-            <li className="opening-flight-path__panel opening-flight-path__panel--calibration">
+            <li
+              className="opening-flight-path__panel opening-flight-path__panel--calibration"
+              tabIndex={0}
+              data-panel="calibration"
+              onPointerEnter={() => setActivePanel("calibration")}
+              onPointerMove={() => setActivePanel("calibration")}
+              onFocus={() => setActivePanel("calibration")}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setActivePanel(null);
+              }}
+            >
               <article aria-labelledby="opening-calibration-title">
+                <PanelHoverTelemetry panel="calibration" />
                 <header><p><span>03</span> HUMAN CALIBRATION</p><strong>₹9,999</strong></header>
                 <h3 id="opening-calibration-title">Use human time on the gap practice could not fix.</h3>
                 <p>A focused 1:1 review begins with your evidence—not a generic coaching agenda.</p>
