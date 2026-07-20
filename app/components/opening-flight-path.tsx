@@ -94,35 +94,35 @@ const FILM_SCENES: readonly FilmScene[] = [
 ] as const;
 
 const FILM_BEATS: readonly FilmBeat[] = [
-  { id: "experience", start: 0, end: 2.95, stage: "overview", visual: "signal-scattered", caption: "Most engineers don’t lack experience.", value: "EXPERIENCE IS NOT THE PROBLEM." },
-  { id: "pressure", start: 2.95, end: 6.62, stage: "overview", visual: "signal-pressure", caption: "They lose signal when an interview puts that experience under pressure.", value: "THE SIGNAL BREAKS UNDER PRESSURE." },
-  { id: "flight-path", start: 6.62, end: 12.04, stage: "overview", visual: "signal-connected", caption: "InterviewRunway turns scattered preparation into a three-stage flight path.", value: "THREE STAGES. ONE CONNECTED SIGNAL." },
-  { id: "foundation-price", start: 12.04, end: 15.26, stage: "foundation", visual: "foundation-price", caption: "First, Foundation. ₹799 once.", value: "FOUNDATION · ₹799 ONCE." },
-  { id: "foundation-systems", start: 15.26, end: 23.96, stage: "foundation", visual: "foundation-systems", caption: "Structured flight plans connect DSA patterns, system design, behavioural evidence, role intelligence, and remote-career decisions.", value: "6 SYSTEMS. ONE PREPARATION BASELINE." },
-  { id: "foundation-baseline", start: 23.96, end: 29.45, stage: "foundation", visual: "foundation-baseline", caption: "Diagnostics and checkpoints turn disconnected study into a baseline you can test.", value: "A BASELINE YOU CAN TEST." },
-  { id: "foundation-clearance", start: 29.45, end: 33.84, stage: "foundation", visual: "foundation-clearance", caption: "Complete Foundation clearance—and the cockpit comes alive.", value: "CLEARANCE UNLOCKS LIVE PRACTICE." },
-  { id: "seat-intro", start: 33.84, end: 36.57, stage: "second-seat", visual: "seat-intro", caption: "Meet the Second Seat—the primary product.", value: "THE PRIMARY PRODUCT." },
-  { id: "seat-price", start: 36.57, end: 44.28, stage: "second-seat", visual: "seat-answer", caption: "For ₹2,499 after clearance, its live AI practice system responds to each answer.", value: "₹2,499 AFTER CLEARANCE." },
-  { id: "seat-perspectives", start: 44.28, end: 51.72, stage: "second-seat", visual: "seat-perspectives", caption: "One question is examined from interviewer, system-designer, and communication perspectives.", value: "ONE ANSWER. THREE PERSPECTIVES." },
+  { id: "experience", start: 0, end: 2.95, stage: "overview", visual: "signal-scattered", caption: "Most engineers don’t lack experience.", value: "YOU HAVE THE EXPERIENCE." },
+  { id: "pressure", start: 2.95, end: 6.62, stage: "overview", visual: "signal-pressure", caption: "They lose signal when an interview puts that experience under pressure.", value: "PRESSURE HIDES THE SIGNAL." },
+  { id: "flight-path", start: 6.62, end: 12.04, stage: "overview", visual: "signal-connected", caption: "InterviewRunway turns scattered preparation into a three-stage flight path.", value: "TURN EXPERIENCE INTO INTERVIEW SIGNAL." },
+  { id: "foundation-price", start: 12.04, end: 15.26, stage: "foundation", visual: "foundation-price", caption: "First, Foundation. ₹799 once.", value: "STOP GUESSING WHAT TO PREPARE." },
+  { id: "foundation-systems", start: 15.26, end: 23.96, stage: "foundation", visual: "foundation-systems", caption: "Structured flight plans connect DSA patterns, system design, behavioural evidence, role intelligence, and remote-career decisions.", value: "STOP GUESSING WHAT TO PREPARE." },
+  { id: "foundation-baseline", start: 23.96, end: 29.45, stage: "foundation", visual: "foundation-baseline", caption: "Diagnostics and checkpoints turn disconnected study into a baseline you can test.", value: "BUILD A BASELINE YOU CAN TEST." },
+  { id: "foundation-clearance", start: 29.45, end: 33.84, stage: "foundation", visual: "foundation-clearance", caption: "Complete Foundation clearance—and the cockpit comes alive.", value: "BUILD A BASELINE YOU CAN TEST." },
+  { id: "seat-intro", start: 33.84, end: 36.57, stage: "second-seat", visual: "seat-intro", caption: "Meet the Second Seat—the primary product.", value: "PRACTICE THAT RESPONDS TO YOU." },
+  { id: "seat-price", start: 36.57, end: 44.28, stage: "second-seat", visual: "seat-answer", caption: "For ₹2,499 after clearance, its live AI practice system responds to each answer.", value: "PRACTICE THAT RESPONDS TO YOU." },
+  { id: "seat-perspectives", start: 44.28, end: 51.72, stage: "second-seat", visual: "seat-perspectives", caption: "One question is examined from interviewer, system-designer, and communication perspectives.", value: "SEE HOW AN INTERVIEWER HEARS YOUR ANSWER." },
   { id: "seat-adaptive", start: 51.72, end: 57.07, stage: "second-seat", visual: "seat-adaptive", caption: "The next question changes because your last answer changed.", value: "YOUR LAST ANSWER CHANGES THE NEXT QUESTION." },
-  { id: "seat-evidence", start: 57.07, end: 63.01, stage: "second-seat", visual: "seat-evidence", caption: "Practice evidence, progress, specialist training systems, and included practice time stay connected.", value: "EVIDENCE → GAP → NEXT PRACTICE." },
-  { id: "seat-correct", start: 63.01, end: 65.83, stage: "second-seat", visual: "seat-correct", caption: "See the gap, correct it, and run the loop again.", value: "SEE IT. CORRECT IT. RUN IT AGAIN." },
-  { id: "seat-command", start: 65.83, end: 67.2, stage: "second-seat", visual: "seat-command", caption: "You remain in command.", value: "YOU REMAIN IN COMMAND." },
-  { id: "whatsapp-channel", start: 67.2, end: 72.4, stage: "second-seat", visual: "whatsapp-channel", caption: "Between sessions, asynchronous expert guidance can continue through WhatsApp.", value: "GUIDANCE CONTINUES BETWEEN SESSIONS." },
-  { id: "whatsapp-exchange", start: 72.4, end: 76.8, stage: "second-seat", visual: "whatsapp-exchange", caption: "Questions and next-step direction do not have to wait for a scheduled call.", value: "NO SCHEDULED CALL REQUIRED." },
-  { id: "whatsapp-material", start: 76.8, end: 79.5, stage: "second-seat", visual: "whatsapp-material", caption: "Experts can return material selected for the gap your practice exposed.", value: "SPECIFIC MATERIAL FOR YOUR SPECIFIC GAP." },
-  { id: "whatsapp-boundary", start: 79.5, end: 82.16, stage: "second-seat", visual: "whatsapp-boundary", caption: "This is preparation guidance, not covert help during a restricted interview.", value: "PREPARATION GUIDANCE. NEVER COVERT INTERVIEW HELP." },
-  { id: "calibration-gap", start: 82.16, end: 88.95, stage: "calibration", visual: "calibration-gap", caption: "When repeated evidence reveals a gap that needs human judgment, Human Calibration joins the final approach.", value: "ONE GAP. ONE HUMAN REVIEW." },
-  { id: "calibration-price", start: 88.95, end: 96.2, stage: "calibration", visual: "calibration-brief", caption: "For ₹9,999, a scheduled one-to-one session begins with your practice record.", value: "₹9,999 · ONE TARGETED 1:1." },
-  { id: "calibration-focus", start: 96.2, end: 102.15, stage: "calibration", visual: "calibration-focus", caption: "It focuses on the specific pattern holding you back and produces a clear correction plan—not a generic coaching script.", value: "FIX THE PATTERN. NOT EVERYTHING." },
-  { id: "calibration-evidence", start: 102.15, end: 104.76, stage: "calibration", visual: "calibration-evidence", caption: "Evidence first.", value: "EVIDENCE FIRST." },
-  { id: "calibration-human", start: 104.76, end: 107.44, stage: "calibration", visual: "calibration-human", caption: "Human time where it matters.", value: "HUMAN TIME WHERE IT MATTERS." },
-  { id: "runway-learn", start: 107.44, end: 109.45, stage: "overview", visual: "runway-learn", caption: "Learn the terrain.", value: "LEARN." },
-  { id: "runway-practice", start: 109.45, end: 110.7, stage: "overview", visual: "runway-practice", caption: "Unlock live AI.", value: "PRESSURE-TEST." },
-  { id: "runway-calibrate", start: 110.7, end: 111.95, stage: "overview", visual: "runway-calibrate", caption: "Calibrate with a person.", value: "CALIBRATE." },
-  { id: "runway-start", start: 111.95, end: 113.1, stage: "overview", visual: "runway-start", caption: "Start Foundation.", value: "START FOUNDATION." },
-  { id: "runway-plan", start: 113.1, end: 114.15, stage: "overview", visual: "runway-plan", caption: "Build the flight plan.", value: "BUILD THE FLIGHT PLAN." },
-  { id: "runway-seat", start: 114.15, end: 115.45, stage: "overview", visual: "runway-seat", caption: "Bring the Second Seat alive.", value: "BRING THE SECOND SEAT ALIVE." },
+  { id: "seat-evidence", start: 57.07, end: 63.01, stage: "second-seat", visual: "seat-evidence", caption: "Practice evidence, progress, specialist training systems, and included practice time stay connected.", value: "LEAVE EACH SESSION KNOWING WHAT TO FIX." },
+  { id: "seat-correct", start: 63.01, end: 65.83, stage: "second-seat", visual: "seat-correct", caption: "See the gap, correct it, and run the loop again.", value: "LEAVE EACH SESSION KNOWING WHAT TO FIX." },
+  { id: "seat-command", start: 65.83, end: 67.2, stage: "second-seat", visual: "seat-command", caption: "You remain in command.", value: "LEAVE EACH SESSION KNOWING WHAT TO FIX." },
+  { id: "whatsapp-channel", start: 67.2, end: 72.4, stage: "second-seat", visual: "whatsapp-channel", caption: "Between sessions, asynchronous expert guidance can continue through WhatsApp.", value: "AN EXPERT UNBLOCKS YOUR NEXT PRACTICE." },
+  { id: "whatsapp-exchange", start: 72.4, end: 76.8, stage: "second-seat", visual: "whatsapp-exchange", caption: "Questions and next-step direction do not have to wait for a scheduled call.", value: "AN EXPERT UNBLOCKS YOUR NEXT PRACTICE." },
+  { id: "whatsapp-material", start: 76.8, end: 79.5, stage: "second-seat", visual: "whatsapp-material", caption: "Experts can return material selected for the gap your practice exposed.", value: "YOUR GAP DECIDES THE MATERIAL." },
+  { id: "whatsapp-boundary", start: 79.5, end: 82.16, stage: "second-seat", visual: "whatsapp-boundary", caption: "This is preparation guidance, not covert help during a restricted interview.", value: "YOUR GAP DECIDES THE MATERIAL." },
+  { id: "calibration-gap", start: 82.16, end: 88.95, stage: "calibration", visual: "calibration-gap", caption: "When repeated evidence reveals a gap that needs human judgment, Human Calibration joins the final approach.", value: "USE HUMAN TIME ONLY WHERE IT MATTERS." },
+  { id: "calibration-price", start: 88.95, end: 96.2, stage: "calibration", visual: "calibration-brief", caption: "For ₹9,999, a scheduled one-to-one session begins with your practice record.", value: "USE HUMAN TIME ONLY WHERE IT MATTERS." },
+  { id: "calibration-focus", start: 96.2, end: 102.15, stage: "calibration", visual: "calibration-focus", caption: "It focuses on the specific pattern holding you back and produces a clear correction plan—not a generic coaching script.", value: "FIX THE PATTERN—NOT EVERYTHING." },
+  { id: "calibration-evidence", start: 102.15, end: 104.76, stage: "calibration", visual: "calibration-evidence", caption: "Evidence first.", value: "FIX THE PATTERN—NOT EVERYTHING." },
+  { id: "calibration-human", start: 104.76, end: 107.44, stage: "calibration", visual: "calibration-human", caption: "Human time where it matters.", value: "FIX THE PATTERN—NOT EVERYTHING." },
+  { id: "runway-learn", start: 107.44, end: 109.45, stage: "overview", visual: "runway-learn", caption: "Learn the terrain.", value: "KNOW WHAT TO PREPARE. KNOW WHAT BREAKS. KNOW WHAT TO FIX." },
+  { id: "runway-practice", start: 109.45, end: 110.7, stage: "overview", visual: "runway-practice", caption: "Unlock live AI.", value: "KNOW WHAT TO PREPARE. KNOW WHAT BREAKS. KNOW WHAT TO FIX." },
+  { id: "runway-calibrate", start: 110.7, end: 111.95, stage: "overview", visual: "runway-calibrate", caption: "Calibrate with a person.", value: "KNOW WHAT TO PREPARE. KNOW WHAT BREAKS. KNOW WHAT TO FIX." },
+  { id: "runway-start", start: 111.95, end: 113.1, stage: "overview", visual: "runway-start", caption: "Start Foundation.", value: "ONE PATH. THE RIGHT HELP AT THE RIGHT TIME." },
+  { id: "runway-plan", start: 113.1, end: 114.15, stage: "overview", visual: "runway-plan", caption: "Build the flight plan.", value: "ONE PATH. THE RIGHT HELP AT THE RIGHT TIME." },
+  { id: "runway-seat", start: 114.15, end: 115.45, stage: "overview", visual: "runway-seat", caption: "Bring the Second Seat alive.", value: "ONE PATH. THE RIGHT HELP AT THE RIGHT TIME." },
 ] as const;
 
 const FILM_STAGE_CHAPTERS = [
@@ -224,20 +224,31 @@ function CalibrationPacket({ compact = false }: { compact?: boolean }) {
 }
 
 function FilmVisual({ beat, storyProgress }: { beat: FilmBeat; storyProgress: number }) {
+  const isFinale = beat.visual.startsWith("runway-");
+  const isScaffold = beat.visual === "signal-connected";
   const activeOrder = beat.stage === "foundation" ? 1 : beat.stage === "second-seat" ? 2 : beat.stage === "calibration" ? 3 : 0;
   const stageClass = (stage: Exclude<FilmStage, "overview">, order: number) => {
-    if (beat.stage === "overview") return "is-overview";
-    if (beat.stage === stage) return "is-active";
-    if (activeOrder > order) return "is-complete";
-    return "is-queued";
+    if (isFinale) return "is-final";
+    if (beat.stage === "overview") return "is-unrevealed";
+    if (beat.stage === stage) return "is-active is-revealed";
+    if (activeOrder > order) return "is-complete is-revealed";
+    return "is-unrevealed";
   };
+  const phase = isFinale ? "finale" : isScaffold ? "scaffold" : beat.stage === "overview" ? "intro" : beat.stage;
 
   return (
-    <div className="flight-film__visual" data-stage={beat.stage} data-beat={beat.visual} aria-hidden="true">
+    <div className="flight-film__visual" data-stage={beat.stage} data-phase={phase} data-beat={beat.visual} aria-hidden="true">
       <div className="flight-film__horizon"><i /><i /><i /></div>
 
-      <div className="flight-film__value-annunciator" key={`value-${beat.id}`}>
-        <span>{beat.stage === "overview" ? "THE COMPLETE FLIGHT PATH" : beat.stage.replace("-", " ")}</span>
+      <div className="flight-film__opening-sequence">
+        <div className="flight-film__opening-source"><span>WHAT YOU KNOW</span><strong>EXPERIENCE</strong></div>
+        <div className="flight-film__opening-signal"><i /><i /><i /><i /><b>PRESSURE</b></div>
+        <div className="flight-film__opening-target"><span>WHAT THEY CAN SEE</span><strong>INTERVIEW SIGNAL</strong></div>
+        <ol aria-hidden="true"><li>01</li><li>02</li><li>03</li></ol>
+      </div>
+
+      <div className="flight-film__value-annunciator" key={`value-${beat.value}`}>
+        <span>{phase === "intro" ? "THE PROBLEM" : phase === "scaffold" ? "THE FLIGHT PATH" : phase === "finale" ? "THE COMPLETE SYSTEM" : beat.stage.replace("-", " ")}</span>
         <strong>{beat.value}</strong>
       </div>
 
@@ -250,11 +261,19 @@ function FilmVisual({ beat, storyProgress }: { beat: FilmBeat; storyProgress: nu
         <article className={`flight-film__stage-block flight-film__stage-block--foundation ${stageClass("foundation", 1)}`}>
           <header><span>01</span><div><small>FOUNDATION</small><strong>₹799 ONCE</strong></div></header>
           <div className="flight-film__foundation-system">
+            <section className="flight-film__foundation-scatter">
+              <span><small>RANDOM PROBLEM LIST</small><b>38 saved links</b></span>
+              <span><small>DESIGN VIDEOS</small><b>No sequence</b></span>
+              <span><small>STORY NOTES</small><b>7 loose drafts</b></span>
+              <i aria-hidden="true">→</i>
+              <strong>ONE DATED PLAN</strong>
+            </section>
             <ol>
               {FOUNDATION_SYSTEMS.map((system) => <li key={system}><i /><span>{system === "Stories" ? "Behavioural" : system}</span></li>)}
             </ol>
             <div><span>DIAGNOSTIC</span><b>TESTABLE BASELINE</b><i /></div>
           </div>
+          <div className="flight-film__stage-summary"><span>FOUNDATION RESULT</span><strong>BASELINE READY</strong></div>
           <footer>FLIGHT PLAN · CLEARANCE</footer>
         </article>
 
@@ -262,9 +281,13 @@ function FilmVisual({ beat, storyProgress }: { beat: FilmBeat; storyProgress: nu
           <header><span>02</span><div><small>THE SECOND SEAT</small><strong>₹2,499 AFTER CLEARANCE</strong></div></header>
           <div className="flight-film__second-seat-system">
             <div className="flight-film__pilot-marker"><i /><span>YOU</span><small>IN COMMAND</small></div>
-            <div className="flight-film__answer-signal"><span>YOUR ANSWER</span><i /></div>
+            <div className="flight-film__answer-signal"><span>ANSWER 01</span><strong>Token bucket in Redis.</strong><i /></div>
             <div className="flight-film__ai-core"><i /><i /><b>AI</b><small>LIVE</small></div>
-            <div className="flight-film__perspective-lenses"><span>INTERVIEWER</span><span>SYSTEM DESIGN</span><span>COMMUNICATION</span></div>
+            <div className="flight-film__perspective-lenses">
+              <span><small>INTERVIEWER</small><b>Decision not justified</b></span>
+              <span><small>SYSTEM DESIGN</small><b>Regional failure missing</b></span>
+              <span><small>COMMUNICATION</small><b>Trade-off stays implicit</b></span>
+            </div>
             <div className="flight-film__adaptive-question"><span>NEXT QUESTION</span><b>How does this design fail during a regional outage?</b></div>
             <div className="flight-film__evidence-loop"><span>TRANSCRIPT</span><i /><span>VISIBLE GAP</span><i /><span>NEXT PRACTICE</span></div>
 
@@ -276,18 +299,20 @@ function FilmVisual({ beat, storyProgress }: { beat: FilmBeat; storyProgress: nu
               <small>PREPARATION GUIDANCE · NOT LIVE INTERVIEW HELP</small>
             </div>
           </div>
+          <div className="flight-film__stage-summary"><span>PRACTICE RESULT</span><strong>EVIDENCE CAPTURED</strong></div>
           <footer>LIVE AI LOOP · ASYNC EXPERT GUIDANCE</footer>
         </article>
 
         <article className={`flight-film__stage-block flight-film__stage-block--calibration ${stageClass("calibration", 3)}`}>
           <header><span>03</span><div><small>HUMAN CALIBRATION</small><strong>₹9,999</strong></div></header>
           <div className="flight-film__calibration-system">
-            <div className="flight-film__evidence-stack"><span>TRANSCRIPT</span><span>RECURRING GAP</span><span>TARGET ROLE</span></div>
+            <div className="flight-film__evidence-stack"><span>MOCK 05 · TRADE-OFF</span><span>MOCK 06 · TRADE-OFF</span><span>MOCK 07 · TRADE-OFF</span></div>
             <i />
-            <div className="flight-film__human-reticle"><span>1:1</span><b>ONE GAP</b></div>
+            <div className="flight-film__human-reticle"><span>1:1</span><b>REPEATED GAP</b></div>
             <i />
-            <div className="flight-film__correction-plan"><span>CLEAR</span><b>CORRECTION PLAN</b></div>
+            <div className="flight-film__correction-plan"><span>CORRECTION PLAN</span><b>Constraint → failure → decision</b></div>
           </div>
+          <div className="flight-film__stage-summary"><span>HUMAN RESULT</span><strong>CORRECTION PLAN READY</strong></div>
           <footer>EVIDENCE FIRST · TARGETED REVIEW</footer>
         </article>
       </div>
@@ -317,8 +342,18 @@ export function OpeningFlightPath() {
     return index >= 0 ? index : FILM_BEATS.length - 1;
   }, [currentTime]);
   const activeBeat = FILM_BEATS[activeBeatIndex];
+  const isFinale = activeBeat.visual.startsWith("runway-");
   const progress = Math.min(100, Math.max(0, (currentTime / Math.max(1, duration)) * 100));
   const storyProgress = getStoryProgress(currentTime);
+  const revealedChapterCount = activeBeat.visual.startsWith("runway-")
+    ? 3
+    : activeBeat.stage === "calibration"
+      ? 3
+      : activeBeat.stage === "second-seat"
+        ? 2
+        : activeBeat.stage === "foundation"
+          ? 1
+          : 0;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -519,7 +554,7 @@ export function OpeningFlightPath() {
 
       {isOpen ? (
         <div
-          className={`flight-film${isPlaying ? " is-playing" : " is-paused"}${isReducedMotion ? " is-reduced-motion" : ""}`}
+          className={`flight-film${isPlaying ? " is-playing" : " is-paused"}${isReducedMotion ? " is-reduced-motion" : ""}${isFinale ? " is-finale" : ""}`}
           data-active-scene={activeScene.id}
           onPointerMove={(event) => event.stopPropagation()}
           onMouseDown={(event) => {
@@ -543,10 +578,17 @@ export function OpeningFlightPath() {
 
             <FilmVisual beat={activeBeat} storyProgress={storyProgress} />
 
+            {isFinale ? (
+              <div className="flight-film__finale-actions">
+                <Link href="/checkout/vault">Start Foundation · ₹799 once <span aria-hidden="true">→</span></Link>
+                <Link href="/diagnostic">Check your signal first <span aria-hidden="true">↗</span></Link>
+              </div>
+            ) : null}
+
             <div className="flight-film__live-caption" key={`caption-${activeBeat.id}`} aria-hidden="true">
               <span>LIVE TRANSCRIPT</span><p>{activeBeat.caption}</p>
             </div>
-            <p id="flight-film-caption" className="sr-only">{activeBeat.caption}</p>
+            <p id="flight-film-caption" className="sr-only" role="status" aria-live="polite" aria-atomic="true">{activeBeat.caption}</p>
             <p id="flight-film-transcript" className="sr-only">{activeScene.narration}</p>
 
             <nav className="flight-film__chapters" aria-label="Film chapters">
@@ -554,7 +596,7 @@ export function OpeningFlightPath() {
                 <button
                   key={stage}
                   type="button"
-                  className={activeBeat.stage === stage ? "is-active" : ""}
+                  className={`${activeBeat.stage === stage ? "is-active " : ""}${index < revealedChapterCount ? "is-revealed" : "is-unrevealed"}`}
                   onClick={() => seekToScene(scene)}
                   aria-current={activeBeat.stage === stage ? "step" : undefined}
                   aria-label={`Jump to ${label}, ${formatTime(scene.start)}`}

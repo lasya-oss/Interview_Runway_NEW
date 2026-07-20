@@ -3849,6 +3849,441 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   }
 }
 
+/* Progressive conversion-led film reveal. Product stages enter only after the
+   narration earns them; completed stages collapse into proof and the finale
+   resolves the full system. */
+
+.flight-film__opening-sequence {
+  position: absolute;
+  z-index: 6;
+  top: 55%;
+  left: 50%;
+  width: min(820px, 70%);
+  min-height: 190px;
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(220px, 1.4fr) minmax(160px, 1fr);
+  align-items: center;
+  gap: 28px;
+  transform: translate(-50%, -50%);
+  transition: opacity 420ms ease, transform 620ms var(--ease-out-expo);
+}
+
+.flight-film__opening-source,
+.flight-film__opening-target {
+  display: grid;
+  gap: 7px;
+  padding: 20px;
+  border: 1px solid rgba(145, 190, 207, .18);
+  border-radius: 18px 4px 18px 4px;
+  background: rgba(4, 19, 28, .78);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .035);
+}
+
+.flight-film__opening-source span,
+.flight-film__opening-target span {
+  color: #748f9a;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: .12em;
+}
+
+.flight-film__opening-source strong,
+.flight-film__opening-target strong {
+  color: #edf4f6;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 1.65vw, 1.8rem);
+  letter-spacing: -.035em;
+}
+
+.flight-film__opening-target {
+  opacity: .16;
+  transform: translateX(14px);
+  transition: opacity 420ms ease, transform 520ms var(--ease-out-expo), border-color 420ms ease;
+}
+
+.flight-film__opening-signal {
+  position: relative;
+  height: 86px;
+}
+
+.flight-film__opening-signal::before,
+.flight-film__opening-signal::after {
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  content: "";
+  background: linear-gradient(90deg, rgba(255, 107, 44, .82), rgba(103, 189, 221, .74));
+  box-shadow: 0 0 18px rgba(255, 107, 44, .24);
+}
+
+.flight-film__opening-signal::before { left: 0; width: 41%; transform: translateY(-9px) rotate(4deg); }
+.flight-film__opening-signal::after { right: 0; width: 35%; transform: translateY(8px) rotate(-5deg); opacity: .22; }
+.flight-film__opening-signal i {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #ff7540;
+  border-radius: 50%;
+  background: #071722;
+  box-shadow: 0 0 16px rgba(255, 107, 44, .26);
+}
+.flight-film__opening-signal i:nth-child(1) { top: 6px; left: 12%; }
+.flight-film__opening-signal i:nth-child(2) { top: 56px; left: 34%; }
+.flight-film__opening-signal i:nth-child(3) { top: 18px; left: 63%; }
+.flight-film__opening-signal i:nth-child(4) { top: 63px; right: 4%; }
+.flight-film__opening-signal b {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  padding: 5px 8px;
+  transform: translate(-50%, -50%);
+  color: #ff8050;
+  background: #071722;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: .12em;
+  opacity: 0;
+}
+
+.flight-film__opening-sequence ol {
+  position: absolute;
+  inset: 50% 4% auto;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  transform: translateY(-50%);
+  list-style: none;
+  opacity: 0;
+}
+.flight-film__opening-sequence ol::before {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  content: "";
+  background: linear-gradient(90deg, #ff6b2c, #73c3e0);
+  box-shadow: 0 0 24px rgba(255, 107, 44, .28);
+}
+.flight-film__opening-sequence li {
+  position: relative;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  border: 1px solid rgba(255, 117, 64, .72);
+  border-radius: 50%;
+  color: #ff7b48;
+  background: #071722;
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+.flight-film__visual[data-beat="signal-pressure"] .flight-film__opening-signal b { opacity: 1; }
+.flight-film__visual[data-beat="signal-pressure"] .flight-film__opening-signal i { animation: film-pressure-jitter 540ms steps(2, end) infinite; }
+.flight-film__visual[data-beat="signal-pressure"] .flight-film__opening-target { opacity: .08; transform: translateX(22px); }
+.flight-film__visual[data-phase="scaffold"] .flight-film__opening-source,
+.flight-film__visual[data-phase="scaffold"] .flight-film__opening-target,
+.flight-film__visual[data-phase="scaffold"] .flight-film__opening-signal { opacity: 0; }
+.flight-film__visual[data-phase="scaffold"] .flight-film__opening-sequence ol { opacity: 1; animation: film-route-resolve 620ms var(--ease-out-expo) both; }
+.flight-film__visual:not([data-phase="intro"]):not([data-phase="scaffold"]) .flight-film__opening-sequence {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -43%) scale(.94);
+}
+
+@keyframes film-pressure-jitter {
+  0%, 100% { transform: translate(0); }
+  50% { transform: translate(5px, -4px); }
+}
+@keyframes film-route-resolve {
+  from { opacity: 0; transform: translateY(-50%) scaleX(.55); }
+  to { opacity: 1; transform: translateY(-50%) scaleX(1); }
+}
+
+.flight-film__value-annunciator {
+  top: clamp(15px, 2.4vh, 28px);
+  width: min(980px, calc(100% - 80px));
+  min-height: clamp(68px, 9.5vh, 92px);
+  padding: 10px clamp(20px, 3vw, 38px);
+  gap: 4px;
+}
+.flight-film__value-annunciator span { font-size: 8px; }
+.flight-film__value-annunciator strong {
+  max-width: 28ch;
+  font-size: clamp(1.8rem, 3.15vw, 3.75rem);
+  line-height: .96;
+}
+
+.flight-film__stage-map {
+  top: 55%;
+  width: min(1260px, 84%);
+  min-height: clamp(250px, 34vh, 340px);
+  display: block;
+  transition: width 560ms var(--ease-out-expo), opacity 420ms ease, transform 560ms var(--ease-out-expo);
+}
+
+.flight-film__signal-track { opacity: 0; transition: opacity 360ms ease; }
+.flight-film__visual[data-phase="foundation"] .flight-film__signal-track,
+.flight-film__visual[data-phase="second-seat"] .flight-film__signal-track,
+.flight-film__visual[data-phase="calibration"] .flight-film__signal-track,
+.flight-film__visual[data-phase="finale"] .flight-film__signal-track { opacity: .66; }
+
+.flight-film__stage-block,
+.flight-film__stage-block--second-seat {
+  position: absolute;
+  top: 50%;
+  margin: 0;
+  min-height: 0;
+  height: 100%;
+  padding: clamp(14px, 1.35vw, 20px);
+  gap: 10px;
+  transform: translateY(-50%) scale(.96);
+  transition:
+    left 620ms var(--ease-out-expo), right 620ms var(--ease-out-expo), width 620ms var(--ease-out-expo),
+    height 620ms var(--ease-out-expo), opacity 420ms ease, transform 620ms var(--ease-out-expo),
+    filter 420ms ease, visibility 0s;
+}
+
+.flight-film__stage-block.is-unrevealed {
+  width: 0;
+  height: 58%;
+  padding-inline: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-42%) scale(.9);
+  transition-delay: 0s, 0s, 0s, 0s, 0s, 0s, 0s, 460ms;
+}
+.flight-film__stage-block.is-revealed,
+.flight-film__stage-block.is-final { visibility: visible; }
+
+.flight-film__visual[data-phase="foundation"] .flight-film__stage-block--foundation {
+  left: 50%;
+  width: 56%;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.015);
+}
+
+.flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--foundation {
+  left: 0;
+  width: 20%;
+  height: 46%;
+  opacity: .25;
+  filter: saturate(.35) brightness(.7);
+  transform: translateY(-50%) scale(.96);
+}
+.flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--second-seat {
+  left: 50%;
+  width: 59%;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.015);
+}
+
+.flight-film__visual[data-phase="calibration"] .flight-film__stage-block--foundation {
+  left: 0;
+  width: 17%;
+  height: 42%;
+  opacity: .18;
+  filter: saturate(.3) brightness(.66);
+  transform: translateY(-50%) scale(.94);
+}
+.flight-film__visual[data-phase="calibration"] .flight-film__stage-block--second-seat {
+  left: 19%;
+  width: 22%;
+  height: 46%;
+  opacity: .25;
+  filter: saturate(.35) brightness(.7);
+  transform: translateY(-50%) scale(.96);
+}
+.flight-film__visual[data-phase="calibration"] .flight-film__stage-block--calibration {
+  left: 69%;
+  width: 56%;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.015);
+}
+
+.flight-film__visual[data-phase="finale"] .flight-film__stage-block {
+  height: 82%;
+  opacity: 1;
+  filter: none;
+  transform: translateY(-50%) scale(1);
+  border-color: rgba(255, 107, 44, .54);
+  box-shadow: 0 18px 58px rgba(0, 0, 0, .28), 0 0 30px rgba(255, 107, 44, .08);
+}
+.flight-film__visual[data-phase="finale"] .flight-film__stage-block--foundation { left: 0; width: 27%; }
+.flight-film__visual[data-phase="finale"] .flight-film__stage-block--second-seat { left: 29%; width: 42%; }
+.flight-film__visual[data-phase="finale"] .flight-film__stage-block--calibration { right: 0; width: 27%; }
+.flight-film__visual[data-beat="runway-practice"] .flight-film__stage-block--second-seat,
+.flight-film__visual[data-beat="runway-seat"] .flight-film__stage-block--second-seat {
+  transform: translateY(-50%) scale(1.025);
+}
+
+.flight-film__stage-summary {
+  position: absolute;
+  inset: 61px 14px 14px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 320ms ease;
+}
+.flight-film__stage-summary span {
+  color: #738e99;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: .1em;
+}
+.flight-film__stage-summary strong {
+  color: #dce9ed;
+  font-family: var(--font-display);
+  font-size: clamp(.82rem, 1.1vw, 1.08rem);
+  line-height: 1.08;
+}
+.flight-film__stage-block.is-complete > div:not(.flight-film__stage-summary),
+.flight-film__stage-block.is-complete > footer,
+.flight-film__stage-block.is-final > div:not(.flight-film__stage-summary),
+.flight-film__stage-block.is-final > footer { opacity: 0; visibility: hidden; }
+.flight-film__stage-block.is-complete > .flight-film__stage-summary,
+.flight-film__stage-block.is-final > .flight-film__stage-summary { opacity: 1; visibility: visible; }
+.flight-film__stage-block.is-complete > header > div strong { display: none; }
+
+.flight-film__answer-signal {
+  width: 29%;
+  display: grid;
+  gap: 3px;
+  font-family: var(--font-body);
+}
+.flight-film__answer-signal span {
+  color: #ff8050;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: .09em;
+}
+.flight-film__answer-signal strong {
+  color: #e4eef1;
+  font-size: clamp(.72rem, .88vw, .9rem);
+  font-weight: 560;
+  line-height: 1.22;
+}
+.flight-film__perspective-lenses span {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+}
+.flight-film__perspective-lenses small {
+  color: #74bcd7;
+  font-family: var(--font-mono);
+  font-size: 6px;
+  letter-spacing: .08em;
+}
+.flight-film__perspective-lenses b {
+  color: #c6d6dc;
+  font-family: var(--font-body);
+  font-size: clamp(.62rem, .72vw, .78rem);
+  font-weight: 520;
+  letter-spacing: 0;
+}
+
+.flight-film__stage-block > header strong { opacity: 0; transition: opacity 240ms ease; }
+.flight-film__visual[data-beat^="foundation-"] .flight-film__stage-block--foundation > header strong,
+.flight-film__visual[data-beat="seat-answer"] .flight-film__stage-block--second-seat > header strong,
+.flight-film__visual[data-beat="seat-perspectives"] .flight-film__stage-block--second-seat > header strong,
+.flight-film__visual[data-beat="seat-adaptive"] .flight-film__stage-block--second-seat > header strong,
+.flight-film__visual[data-beat="seat-evidence"] .flight-film__stage-block--second-seat > header strong,
+.flight-film__visual[data-beat="seat-correct"] .flight-film__stage-block--second-seat > header strong,
+.flight-film__visual[data-beat="seat-command"] .flight-film__stage-block--second-seat > header strong,
+.flight-film__visual[data-beat^="whatsapp-"] .flight-film__stage-block--second-seat > header strong,
+.flight-film__visual[data-beat="calibration-brief"] .flight-film__stage-block--calibration > header strong,
+.flight-film__visual[data-beat="calibration-focus"] .flight-film__stage-block--calibration > header strong,
+.flight-film__visual[data-beat="calibration-evidence"] .flight-film__stage-block--calibration > header strong,
+.flight-film__visual[data-beat="calibration-human"] .flight-film__stage-block--calibration > header strong,
+.flight-film__visual[data-phase="finale"] .flight-film__stage-block > header strong { opacity: 1; }
+
+.flight-film__live-caption {
+  bottom: 104px;
+  width: min(860px, calc(100% - 64px));
+  min-height: 52px;
+  padding: 9px 18px;
+  grid-template-columns: 1fr;
+  gap: 0;
+  border-radius: 4px 14px 4px 14px;
+  text-align: center;
+}
+.flight-film__live-caption span { display: none; }
+.flight-film__live-caption p {
+  max-width: 62ch;
+  justify-self: center;
+  font-size: clamp(1rem, 1.3vw, 1.35rem);
+  line-height: 1.24;
+  letter-spacing: -.018em;
+}
+
+@media (max-width: 900px) {
+  .flight-film__opening-sequence { width: 84%; grid-template-columns: 1fr 1.15fr 1fr; gap: 14px; }
+  .flight-film__stage-map { width: 92%; }
+  .flight-film__visual[data-phase="foundation"] .flight-film__stage-block--foundation { width: 70%; }
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--foundation { width: 18%; }
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--second-seat { width: 68%; }
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--foundation { width: 14%; }
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--second-seat { left: 15%; width: 18%; }
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--calibration { left: 67%; width: 64%; }
+}
+
+@media (max-width: 620px) {
+  .flight-film__opening-sequence { width: calc(100% - 34px); min-height: 160px; grid-template-columns: 1fr; }
+  .flight-film__opening-source,
+  .flight-film__opening-target { width: 62%; justify-self: center; padding: 13px; text-align: center; }
+  .flight-film__opening-signal { position: absolute; inset: 0 12% auto; }
+  .flight-film__opening-sequence ol { inset-inline: 2%; }
+  .flight-film__value-annunciator { width: calc(100% - 28px); min-height: 64px; padding: 8px 14px; }
+  .flight-film__value-annunciator strong { font-size: clamp(1.35rem, 5.5vw, 2rem); }
+  .flight-film__stage-map { width: calc(100% - 28px); min-height: 250px; }
+  .flight-film__visual[data-phase="foundation"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--second-seat,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--calibration {
+    left: 50%;
+    width: 88%;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--second-seat { opacity: 0; visibility: hidden; }
+  .flight-film__visual[data-phase="finale"] .flight-film__stage-block--foundation { left: 0; width: 30%; }
+  .flight-film__visual[data-phase="finale"] .flight-film__stage-block--second-seat { left: 31%; width: 38%; }
+  .flight-film__visual[data-phase="finale"] .flight-film__stage-block--calibration { right: 0; width: 30%; }
+  .flight-film__stage-summary strong { font-size: .7rem; }
+  .flight-film__live-caption { bottom: 98px; width: calc(100% - 22px); min-height: 46px; padding: 7px 12px; }
+  .flight-film__live-caption p { font-size: .92rem; }
+}
+
+@media (max-height: 760px) and (min-width: 621px) {
+  .flight-film__value-annunciator { top: 9px; min-height: 56px; padding-block: 6px; }
+  .flight-film__value-annunciator strong { max-width: 29ch; font-size: clamp(1.35rem, 2.25vw, 1.95rem); }
+  .flight-film__opening-sequence { top: 53%; min-height: 150px; }
+  .flight-film__stage-map { top: 55%; min-height: 220px; }
+  .flight-film__stage-block,
+  .flight-film__stage-block--second-seat { height: 220px; }
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--second-seat { height: 116px; }
+  .flight-film__visual[data-phase="finale"] .flight-film__stage-block { height: 186px; }
+  .flight-film__live-caption { bottom: 98px; min-height: 46px; }
+  .flight-film__live-caption p { font-size: .98rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flight-film__stage-block.is-unrevealed,
+  .flight-film__stage-block.is-revealed,
+  .flight-film__stage-block.is-final,
+  .flight-film__opening-sequence,
+  .flight-film__opening-signal i { animation: none !important; transition-duration: 0ms !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-progress { display: none; }
   .home-aero-stage canvas { display: none; }
@@ -7430,9 +7865,6 @@ html[data-second-seat-film="open"] .home-aero-stage {
 }
 
 .flight-film__stage-block.is-complete { opacity: .5; transform: scale(.985); }
-.flight-film__stage-block.is-overview { opacity: .72; transform: scale(.985); }
-.flight-film__visual[data-beat="signal-connected"] .flight-film__stage-block.is-overview,
-.flight-film__visual[data-beat^="runway-"] .flight-film__stage-block.is-overview { opacity: 1; transform: scale(1); border-color: rgba(255, 107, 44, .5); }
 .flight-film__visual[data-beat="runway-practice"] .flight-film__stage-block--second-seat,
 .flight-film__visual[data-beat="runway-seat"] .flight-film__stage-block--second-seat { transform: translateY(-7px) scale(1.035); border-color: #ff7440; box-shadow: 0 0 48px rgba(255, 107, 44, .16); }
 
@@ -7444,7 +7876,41 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .flight-film__stage-block > footer { align-self: end; padding-top: 11px; border-top: 1px solid rgba(169, 207, 221, .13); color: #7b929c; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .09em; }
 .flight-film__stage-block.is-active > header > span { color: #07131b; background: #ff6b2c; box-shadow: 0 0 24px rgba(255, 107, 44, .4); }
 
-.flight-film__foundation-system { min-height: 0; display: grid; grid-template-rows: 1fr auto; gap: 12px; }
+.flight-film__foundation-system { position: relative; min-height: 0; display: grid; grid-template-rows: 1fr auto; gap: 12px; }
+.flight-film__foundation-scatter {
+  position: absolute;
+  inset: 7px 0 58px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto minmax(100px, .8fr);
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+}
+.flight-film__foundation-scatter span {
+  min-height: 54px;
+  padding: 8px 9px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  border: 1px solid rgba(150, 193, 209, .2);
+  border-radius: 8px;
+  color: #a8bbc3;
+  background: rgba(5, 20, 29, .92);
+}
+.flight-film__foundation-scatter span:nth-child(1) { transform: translateY(-9px) rotate(-1.6deg); }
+.flight-film__foundation-scatter span:nth-child(2) { transform: translateY(9px) rotate(1.8deg); }
+.flight-film__foundation-scatter span:nth-child(3) { transform: translateY(-4px) rotate(-1deg); }
+.flight-film__foundation-scatter small { color: #78919b; font-family: var(--font-mono); font-size: 6px; letter-spacing: .07em; }
+.flight-film__foundation-scatter b { color: #dce8eb; font-size: 10px; }
+.flight-film__foundation-scatter > i { color: #ff7440; font-style: normal; font-size: 1.15rem; }
+.flight-film__foundation-scatter > strong { padding: 12px 10px; border-left: 2px solid #ff6b2c; color: #eef4f5; background: linear-gradient(90deg, rgba(255, 107, 44, .14), transparent); font-family: var(--font-mono); font-size: 9px; letter-spacing: .06em; }
+.flight-film__visual[data-beat="foundation-price"] .flight-film__foundation-scatter { opacity: 1; animation: film-scatter-arrive 520ms var(--ease-out-expo) both; }
+.flight-film__visual[data-beat="foundation-price"] .flight-film__foundation-system > ol,
+.flight-film__visual[data-beat="foundation-price"] .flight-film__foundation-system > div { opacity: .08; }
+.flight-film__visual[data-beat="foundation-systems"] .flight-film__foundation-scatter { animation: film-scatter-resolve 620ms var(--ease-out-expo) both; }
+@keyframes film-scatter-arrive { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes film-scatter-resolve { from { opacity: .58; transform: none; } to { opacity: 0; transform: scale(.86) translateX(18%); } }
 .flight-film__foundation-system ol { margin: 0; padding: 4px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: center; gap: 12px 8px; list-style: none; }
 .flight-film__foundation-system li { display: flex; align-items: center; gap: 7px; color: #a8bbc3; font-size: 12px; }
 .flight-film__foundation-system li i { width: 9px; height: 9px; flex: 0 0 auto; border: 1px solid #698c9a; border-radius: 50%; background: #09202a; }
@@ -7495,6 +7961,20 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .flight-film__visual[data-beat="seat-perspectives"] .flight-film__perspective-lenses span:nth-child(2) { animation-delay: 240ms; }
 .flight-film__visual[data-beat="seat-perspectives"] .flight-film__perspective-lenses span:nth-child(3) { animation-delay: 480ms; }
 .flight-film__visual[data-beat="seat-adaptive"] .flight-film__adaptive-question { opacity: 1; transform: none; }
+.flight-film__visual[data-beat="seat-adaptive"] .flight-film__answer-signal { opacity: .24; transform: none; }
+.flight-film__visual[data-beat="seat-adaptive"] .flight-film__perspective-lenses { opacity: 1; transform: none; }
+.flight-film__visual[data-beat="seat-adaptive"] .flight-film__perspective-lenses span { opacity: .16; }
+.flight-film__visual[data-beat="seat-adaptive"] .flight-film__perspective-lenses span:nth-child(2) { opacity: .82; border-color: rgba(255, 107, 44, .72); color: #f3c2ad; box-shadow: 0 0 22px rgba(255, 107, 44, .12); }
+.flight-film__visual[data-beat="seat-adaptive"] .flight-film__adaptive-question::before {
+  position: absolute;
+  right: 24%;
+  bottom: 100%;
+  width: 1px;
+  height: 38px;
+  content: "";
+  background: linear-gradient(#ff6b2c, rgba(255, 107, 44, .08));
+  box-shadow: 0 0 12px rgba(255, 107, 44, .35);
+}
 .flight-film__visual[data-beat="seat-evidence"] .flight-film__evidence-loop,
 .flight-film__visual[data-beat="seat-correct"] .flight-film__evidence-loop,
 .flight-film__visual[data-beat="seat-command"] .flight-film__evidence-loop { opacity: 1; transform: none; }
@@ -7549,10 +8029,27 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .flight-film__correction-plan { min-height: 92px; padding: 13px; display: grid; align-content: center; gap: 5px; border: 1px solid rgba(151, 196, 213, .22); border-radius: 9px; background: rgba(7, 25, 34, .88); }
 .flight-film__correction-plan span { color: #6f8a95; font-family: var(--font-mono); font-size: 8px; }
 .flight-film__correction-plan b { color: #dbe7eb; font-size: 11px; }
-.flight-film__visual[data-beat="calibration-gap"] .flight-film__human-reticle,
-.flight-film__visual[data-beat="calibration-human"] .flight-film__human-reticle { box-shadow: 0 0 32px rgba(255, 107, 44, .25); animation: film-reticle-lock 620ms var(--ease-out-expo) both; }
+.flight-film__calibration-system > i,
+.flight-film__human-reticle,
+.flight-film__correction-plan { opacity: 0; transition: opacity 360ms ease, transform 520ms var(--ease-out-expo), border-color 360ms ease, box-shadow 360ms ease; }
+.flight-film__human-reticle { transform: scale(.72); }
+.flight-film__correction-plan { transform: translateX(18px); }
+.flight-film__visual[data-beat="calibration-gap"] .flight-film__evidence-stack,
 .flight-film__visual[data-beat="calibration-brief"] .flight-film__evidence-stack,
 .flight-film__visual[data-beat="calibration-evidence"] .flight-film__evidence-stack { filter: drop-shadow(0 0 15px rgba(106, 186, 214, .2)); }
+.flight-film__visual[data-beat="calibration-brief"] .flight-film__calibration-system > i:first-of-type,
+.flight-film__visual[data-beat="calibration-brief"] .flight-film__human-reticle,
+.flight-film__visual[data-beat="calibration-focus"] .flight-film__calibration-system > i,
+.flight-film__visual[data-beat="calibration-focus"] .flight-film__human-reticle,
+.flight-film__visual[data-beat="calibration-focus"] .flight-film__correction-plan,
+.flight-film__visual[data-beat="calibration-evidence"] .flight-film__calibration-system > i,
+.flight-film__visual[data-beat="calibration-evidence"] .flight-film__human-reticle,
+.flight-film__visual[data-beat="calibration-evidence"] .flight-film__correction-plan,
+.flight-film__visual[data-beat="calibration-human"] .flight-film__calibration-system > i,
+.flight-film__visual[data-beat="calibration-human"] .flight-film__human-reticle,
+.flight-film__visual[data-beat="calibration-human"] .flight-film__correction-plan { opacity: 1; transform: none; }
+.flight-film__visual[data-beat="calibration-brief"] .flight-film__human-reticle,
+.flight-film__visual[data-beat="calibration-human"] .flight-film__human-reticle { box-shadow: 0 0 32px rgba(255, 107, 44, .25); animation: film-reticle-lock 620ms var(--ease-out-expo) both; }
 .flight-film__visual[data-beat="calibration-focus"] .flight-film__correction-plan,
 .flight-film__visual[data-beat="calibration-human"] .flight-film__correction-plan { border-color: rgba(255, 107, 44, .65); box-shadow: 0 0 28px rgba(255, 107, 44, .1); }
 @keyframes film-reticle-lock { from { opacity: .25; transform: scale(1.28) rotate(18deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
@@ -7595,6 +8092,8 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .flight-film__chapters button { grid-template-columns: 26px auto 1fr; gap: 8px; }
 .flight-film__chapters button strong { color: #869da6; font-size: 10px; font-weight: 570; }
 .flight-film__chapters button.is-active strong { color: #eaf2f4; }
+.flight-film__chapters button.is-unrevealed strong { opacity: 0; }
+.flight-film__chapters button.is-unrevealed i { opacity: .18; }
 
 .flight-film__controls {
   position: relative;
@@ -7607,6 +8106,22 @@ html[data-second-seat-film="open"] .home-aero-stage {
 
 .flight-film__controls:hover,
 .flight-film__controls:focus-within { opacity: 1; }
+.flight-film__finale-actions {
+  position: absolute;
+  z-index: 37;
+  left: 50%;
+  bottom: clamp(172px, 19vh, 210px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform: translateX(-50%);
+  animation: film-finale-cta 520ms var(--ease-out-expo) both;
+}
+.flight-film__finale-actions a:first-child { min-height: 44px; padding: 0 22px; display: inline-flex; align-items: center; gap: 18px; border: 1px solid #ff8a58; border-radius: 999px; color: #140c08; background: #ff6b2c; box-shadow: 0 14px 42px rgba(255, 107, 44, .22); font-size: 13px; font-weight: 760; white-space: nowrap; }
+.flight-film__finale-actions a:last-child { color: #b8c8ce; font-size: 11px; font-weight: 650; white-space: nowrap; }
+.flight-film:not(.is-finale) .flight-film__actions a:last-child { opacity: .38; filter: saturate(.55); }
+.flight-film.is-finale .flight-film__actions { opacity: 0; visibility: hidden; pointer-events: none; }
+@keyframes film-finale-cta { from { opacity: 0; transform: translate(-50%, 16px) scale(.96); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
 .flight-film.is-paused .flight-film__ai-core > i,
 .flight-film.is-paused .flight-film__perspective-lenses span,
 .flight-film.is-paused .flight-film__evidence-loop i::after,
@@ -7746,4 +8261,156 @@ html[data-second-seat-film="open"] .home-aero-stage {
   .flight-film__adaptive-question,
   .flight-film__evidence-loop,
   .flight-film__whatsapp-exchange { transition-duration: 180ms !important; }
+}
+
+/* Cascade seal: this progressive choreography intentionally follows every
+   legacy film rule so no older breakpoint can restore the all-at-once layout. */
+.flight-film__value-annunciator {
+  top: clamp(15px, 2.4vh, 28px);
+  width: min(980px, calc(100% - 80px));
+  min-height: clamp(68px, 9.5vh, 92px);
+  padding: 10px clamp(20px, 3vw, 38px);
+  gap: 4px;
+}
+.flight-film__value-annunciator span { font-size: 8px; }
+.flight-film__value-annunciator strong { max-width: 28ch; font-size: clamp(1.8rem, 3.15vw, 3.75rem); line-height: .96; }
+
+.flight-film__stage-map {
+  top: 55%;
+  width: min(1260px, 84%);
+  min-height: clamp(250px, 34vh, 340px);
+  display: block;
+  grid-template-columns: none;
+  transition: width 560ms var(--ease-out-expo), opacity 420ms ease, transform 560ms var(--ease-out-expo);
+}
+.flight-film__stage-block,
+.flight-film__stage-block--second-seat {
+  position: absolute;
+  top: 50%;
+  margin: 0;
+  min-height: 0;
+  height: 100%;
+  padding: clamp(14px, 1.35vw, 20px);
+  gap: 10px;
+  transform: translateY(-50%) scale(.96);
+  transition:
+    left 620ms var(--ease-out-expo), right 620ms var(--ease-out-expo), width 620ms var(--ease-out-expo),
+    height 620ms var(--ease-out-expo), opacity 420ms ease, transform 620ms var(--ease-out-expo),
+    filter 420ms ease, visibility 0s;
+}
+.flight-film__stage-block.is-unrevealed {
+  width: 0;
+  height: 58%;
+  min-height: 0;
+  padding-inline: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-42%) scale(.9);
+}
+.flight-film__stage-block.is-revealed,
+.flight-film__stage-block.is-final { visibility: visible; }
+.flight-film__visual[data-phase="foundation"] .flight-film__stage-block--foundation { left: 50%; width: 56%; opacity: 1; transform: translate(-50%, -50%) scale(1.015); }
+.flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--foundation { left: 0; width: 20%; height: 46%; opacity: .25; filter: saturate(.35) brightness(.7); transform: translateY(-50%) scale(.96); }
+.flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--second-seat { left: 50%; width: 59%; opacity: 1; transform: translate(-50%, -50%) scale(1.015); }
+.flight-film__visual[data-phase="calibration"] .flight-film__stage-block--foundation { left: 0; width: 17%; height: 42%; opacity: .18; filter: saturate(.3) brightness(.66); transform: translateY(-50%) scale(.94); }
+.flight-film__visual[data-phase="calibration"] .flight-film__stage-block--second-seat { left: 19%; width: 22%; height: 46%; opacity: .25; filter: saturate(.35) brightness(.7); transform: translateY(-50%) scale(.96); }
+.flight-film__visual[data-phase="calibration"] .flight-film__stage-block--calibration { left: 69%; width: 56%; opacity: 1; transform: translate(-50%, -50%) scale(1.015); }
+.flight-film__visual[data-phase="finale"] .flight-film__stage-block { height: 82%; min-height: 0; opacity: 1; filter: none; transform: translateY(-50%) scale(1); border-color: rgba(255, 107, 44, .54); }
+.flight-film__visual[data-phase="finale"] .flight-film__stage-block--foundation { left: 0; width: 27%; }
+.flight-film__visual[data-phase="finale"] .flight-film__stage-block--second-seat { left: 29%; width: 42%; }
+.flight-film__visual[data-phase="finale"] .flight-film__stage-block--calibration { right: 0; width: 27%; }
+.flight-film__visual[data-beat="runway-practice"] .flight-film__stage-block--second-seat,
+.flight-film__visual[data-beat="runway-seat"] .flight-film__stage-block--second-seat { transform: translateY(-50%) scale(1.025); }
+
+.flight-film__live-caption {
+  bottom: 104px;
+  width: min(860px, calc(100% - 64px));
+  min-height: 52px;
+  padding: 9px 18px;
+  grid-template-columns: 1fr;
+  gap: 0;
+  border-radius: 4px 14px 4px 14px;
+  text-align: center;
+}
+.flight-film__live-caption span { display: none; }
+.flight-film__live-caption p { width: 100%; max-width: 62ch; justify-self: center; font-size: clamp(1rem, 1.3vw, 1.35rem); line-height: 1.24; letter-spacing: -.018em; text-align: center; }
+
+@media (max-width: 900px) {
+  .flight-film__value-annunciator { top: 12px; width: calc(100% - 34px); min-height: 66px; padding: 9px 16px; }
+  .flight-film__value-annunciator strong { font-size: clamp(1.45rem, 4.2vw, 2.35rem); }
+  .flight-film__stage-map { top: 55%; width: 92%; min-height: 260px; }
+  .flight-film__stage-block,
+  .flight-film__stage-block--second-seat { min-height: 0; height: 100%; }
+  .flight-film__visual[data-phase="foundation"] .flight-film__stage-block--foundation { width: 70%; }
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--foundation { width: 18%; }
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--second-seat { width: 68%; }
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--foundation { width: 14%; }
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--second-seat { left: 15%; width: 18%; }
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--calibration { left: 67%; width: 64%; }
+  .flight-film__live-caption { bottom: 102px; min-height: 48px; padding-block: 8px; }
+  .flight-film__live-caption p { font-size: 1rem; }
+}
+
+@media (max-width: 620px) {
+  .flight-film__stage-map { width: calc(100% - 28px); min-height: 250px; }
+  .flight-film__visual[data-phase="foundation"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--second-seat,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--calibration { left: 50%; width: 88%; transform: translate(-50%, -50%) scale(1); }
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--second-seat { opacity: 0; visibility: hidden; }
+  .flight-film__visual[data-phase="finale"] .flight-film__stage-block { min-height: 0; }
+  .flight-film__visual[data-phase="finale"] .flight-film__stage-block--foundation { left: 0; width: 30%; }
+  .flight-film__visual[data-phase="finale"] .flight-film__stage-block--second-seat { left: 31%; width: 38%; }
+  .flight-film__visual[data-phase="finale"] .flight-film__stage-block--calibration { right: 0; width: 30%; }
+  .flight-film__foundation-scatter { inset: 5px 0 46px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+  .flight-film__foundation-scatter span { min-height: 42px; padding: 5px; }
+  .flight-film__foundation-scatter small { font-size: 5px; }
+  .flight-film__foundation-scatter b { font-size: 7px; }
+  .flight-film__foundation-scatter > i { grid-column: 1 / 2; justify-self: end; }
+  .flight-film__foundation-scatter > strong { grid-column: 2 / 4; padding: 7px; font-size: 7px; }
+  .flight-film__finale-actions { bottom: 158px; }
+  .flight-film__finale-actions a:first-child { min-height: 42px; padding-inline: 18px; font-size: 12px; }
+  .flight-film__finale-actions a:last-child { display: none; }
+  .flight-film__live-caption { bottom: 96px; width: calc(100% - 22px); min-height: 44px; }
+  .flight-film__live-caption p { font-size: .9rem; }
+}
+
+@media (max-height: 760px) and (min-width: 621px) {
+  .flight-film__value-annunciator { top: 9px; width: min(940px, calc(100% - 80px)); min-height: 56px; padding: 6px 18px; }
+  .flight-film__value-annunciator strong { max-width: 29ch; font-size: clamp(1.35rem, 2.25vw, 1.95rem); }
+  .flight-film__stage-map { top: 55%; min-height: 256px; }
+  .flight-film__stage-block,
+  .flight-film__stage-block--second-seat { min-height: 0; height: 256px; }
+  .flight-film__stage-block.is-active > footer { display: none; }
+  .flight-film__foundation-system ol { gap: 7px 12px; padding: 0; }
+  .flight-film__foundation-system > div { min-height: 46px; padding: 7px 10px; }
+  .flight-film__whatsapp-exchange { inset: 7px; padding: 9px 10px; gap: 5px 8px; }
+  .flight-film__whatsapp-mark { width: 30px; height: 30px; }
+  .flight-film__whatsapp-head { gap: 8px; }
+  .flight-film__whatsapp-head b { font-size: 11px; }
+  .flight-film__whatsapp-head small,
+  .flight-film__whatsapp-exchange p span,
+  .flight-film__whatsapp-exchange > small { font-size: 6px; }
+  .flight-film__whatsapp-exchange p { padding: 6px 8px; font-size: .66rem; line-height: 1.18; }
+  .flight-film__visual[data-beat="seat-adaptive"] .flight-film__answer-signal { top: 8%; }
+  .flight-film__visual[data-beat="seat-adaptive"] .flight-film__perspective-lenses { top: 6%; gap: 4px; }
+  .flight-film__visual[data-beat="seat-adaptive"] .flight-film__perspective-lenses span { min-height: 24px; padding: 4px 8px; }
+  .flight-film__visual[data-beat="seat-adaptive"] .flight-film__adaptive-question { bottom: 8px; min-height: 58px; padding: 8px 11px; }
+  .flight-film__finale-actions { bottom: 188px; }
+  .flight-film__visual[data-phase="second-seat"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--foundation,
+  .flight-film__visual[data-phase="calibration"] .flight-film__stage-block--second-seat { height: 116px; }
+  .flight-film__visual[data-phase="finale"] .flight-film__stage-block { height: 186px; min-height: 0; }
+  .flight-film__live-caption { bottom: 118px; min-height: 42px; padding-block: 6px; }
+  .flight-film__live-caption p { max-width: 76ch; font-size: .9rem; line-height: 1.18; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flight-film__stage-block.is-unrevealed,
+  .flight-film__stage-block.is-revealed,
+  .flight-film__stage-block.is-final,
+  .flight-film__opening-sequence,
+  .flight-film__opening-signal i { animation: none !important; transition-duration: 0ms !important; }
 }
