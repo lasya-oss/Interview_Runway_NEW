@@ -224,28 +224,108 @@ function CalibrationPacket({ compact = false }: { compact?: boolean }) {
   );
 }
 
-const PANEL_TELEMETRY: Record<OpeningPanel, readonly string[]> = {
-  foundation: ["LEARN THE MAP", "CHECK YOUR RECALL", "HEAR THE INTERVIEW"],
-  "second-seat": ["ANSWER", "READ THE SIGNAL", "ADAPT THE NEXT ROUND"],
-  calibration: ["REVIEW THE EVIDENCE", "ISOLATE THE GAP", "LEAVE WITH A PLAN"],
-};
-
 function PanelHoverTelemetry({ panel }: { panel: OpeningPanel }) {
-  return (
-    <div className={`opening-flight-path__hover-telemetry opening-flight-path__hover-telemetry--${panel}`} aria-hidden="true">
-      <div className="opening-flight-path__telemetry-orbit">
-        <i /><i /><i />
-        <b>{panel === "foundation" ? "30+" : panel === "second-seat" ? "AI" : "1:1"}</b>
+  if (panel === "foundation") {
+    return (
+      <div className="opening-flight-path__inspection opening-flight-path__inspection--foundation" aria-hidden="true">
+        <div className="opening-flight-path__inspection-flow">
+          <section className="opening-flight-path__inspection-card opening-flight-path__inspection-card--study">
+            <header><span>01</span><b>STUDY</b></header>
+            <strong>Learn only what the round demands.</strong>
+            <p>Focused PDFs, handouts, and role guides replace scattered preparation.</p>
+            <div className="opening-flight-path__document-stack"><i>GUIDE</i><i>NOTES</i><i>MAP</i></div>
+          </section>
+          <i className="opening-flight-path__inspection-link"><b>LEARNED</b></i>
+          <section className="opening-flight-path__inspection-card opening-flight-path__inspection-card--quiz">
+            <header><span>02</span><b>CHECK</b></header>
+            <strong>Check whether you can use it.</strong>
+            <p>Interview-style quizzes expose weak recall before the real conversation.</p>
+            <div className="opening-flight-path__quiz-signal"><b>08/10</b><i><span /></i><small>READY TO APPLY</small></div>
+          </section>
+          <i className="opening-flight-path__inspection-link"><b>TESTED</b></i>
+          <section className="opening-flight-path__inspection-card opening-flight-path__inspection-card--listen">
+            <header><span>03</span><b>LISTEN</b></header>
+            <strong>Hear the standard in practice.</strong>
+            <p>A two-person mock shows how a strong interview answer actually sounds.</p>
+            <div className="opening-flight-path__mock-signal"><span>A</span><i /><i /><i /><i /><i /><b>B</b></div>
+          </section>
+        </div>
+        <div className="opening-flight-path__inspection-outcome">
+          <span>THE ₹799 FOUNDATION</span>
+          <strong>Study → test → hear it performed</strong>
+          <p><b>10 cycles</b> build the recommended baseline. <b>30+ modules</b> are ready when you want to go further.</p>
+        </div>
       </div>
-      <ol>
-        {PANEL_TELEMETRY[panel].map((label, index) => (
-          <li key={label} style={{ "--telemetry-index": index } as React.CSSProperties}>
-            <i />
-            <span>{label}</span>
-          </li>
-        ))}
-      </ol>
-      <div className="opening-flight-path__telemetry-sweep"><i /><i /><i /><i /></div>
+    );
+  }
+
+  if (panel === "second-seat") {
+    return (
+      <div className="opening-flight-path__inspection opening-flight-path__inspection--second-seat" aria-hidden="true">
+        <div className="opening-flight-path__adaptive-flow">
+          <section className="opening-flight-path__answer-card">
+            <span>YOUR ANSWER</span>
+            <strong>“I would start with a queue…”</strong>
+            <i><b /></i>
+          </section>
+          <div className="opening-flight-path__ai-core"><i /><i /><i /><b>AI</b><small>SECOND SEAT</small></div>
+          <section className="opening-flight-path__signal-readout">
+            <span>LIVE READOUT</span>
+            <p><b>TECHNICAL</b><i><em style={{ "--signal": "82%" } as React.CSSProperties} /></i><strong>82</strong></p>
+            <p><b>STRUCTURE</b><i><em style={{ "--signal": "64%" } as React.CSSProperties} /></i><strong>64</strong></p>
+            <p><b>CLARITY</b><i><em style={{ "--signal": "71%" } as React.CSSProperties} /></i><strong>71</strong></p>
+          </section>
+          <section className="opening-flight-path__next-prompt">
+            <span>NEXT QUESTION · ADAPTED</span>
+            <strong>“What breaks when traffic spikes 10×?”</strong>
+            <p>Your previous answer changes what the AI asks next.</p>
+          </section>
+        </div>
+        <div className="opening-flight-path__expert-lane">
+          <div className="opening-flight-path__expert-lane-mark"><b className="opening-flight-path__wa-mark" /><span>WHATSAPP</span></div>
+          <i />
+          <p><span>YOUR BLOCKER</span><strong>“I keep missing the trade-off.”</strong></p>
+          <i />
+          <p><span>EXPERT RESPONSE</span><strong>Targeted explanation + selected material</strong></p>
+          <i />
+          <p><span>NEXT PRACTICE</span><strong>One specific correction to test</strong></p>
+        </div>
+        <div className="opening-flight-path__inspection-outcome">
+          <span>AI + ASYNC EXPERT SUPPORT</span>
+          <strong>See the gap. Correct it. Test again.</strong>
+          <p>Your attempts decide both <b>the next question</b> and <b>the expert help.</b></p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="opening-flight-path__inspection opening-flight-path__inspection--calibration" aria-hidden="true">
+      <div className="opening-flight-path__calibration-flow">
+        <section className="opening-flight-path__evidence-dossier">
+          <header><span>01</span><b>EVIDENCE ARRIVES FIRST</b></header>
+          <strong>Your expert starts with proof—not introductions.</strong>
+          <p>Practice history makes the expensive human hour specific from minute one.</p>
+          <ol><li><span>3</span> scored attempts</li><li><span>1</span> recurring gap</li><li><span>1</span> target role</li></ol>
+        </section>
+        <i className="opening-flight-path__calibration-link"><b>FOCUSED BRIEF</b></i>
+        <section className="opening-flight-path__mentor-console">
+          <header><span>02</span><b>LIVE 1:1 REVIEW</b></header>
+          <div><i>YOU</i><span><b>SPECIFIC GAP</b><em /></span><i>EXPERT</i></div>
+          <strong>An ex-FAANG engineer challenges the decision that keeps breaking.</strong>
+        </section>
+        <i className="opening-flight-path__calibration-link"><b>CLEAR DECISION</b></i>
+        <section className="opening-flight-path__correction-plan">
+          <header><span>03</span><b>YOU LEAVE WITH</b></header>
+          <strong>A named correction—not another hour of advice.</strong>
+          <ol><li><b>STOP</b><span>The habit hiding your signal</span></li><li><b>CHANGE</b><span>The decision or explanation</span></li><li><b>TEST</b><span>The next practice checkpoint</span></li></ol>
+        </section>
+      </div>
+      <div className="opening-flight-path__inspection-outcome">
+        <span>NOT GENERIC COACHING</span>
+        <strong>Evidence → expert judgment → precise correction</strong>
+        <p>Your practice data shows the expert exactly where <b>human judgment is worth using.</b></p>
+      </div>
     </div>
   );
 }
