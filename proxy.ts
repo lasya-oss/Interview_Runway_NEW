@@ -42,6 +42,12 @@ function unauthorized(request: NextRequest) {
 }
 
 export async function proxy(request: NextRequest) {
+  if (request.nextUrl.hostname === "www.interviewrunway.com") {
+    const canonicalUrl = request.nextUrl.clone();
+    canonicalUrl.hostname = "interviewrunway.com";
+    return NextResponse.redirect(canonicalUrl);
+  }
+
   if (request.method === "OPTIONS" || isPublicPath(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
