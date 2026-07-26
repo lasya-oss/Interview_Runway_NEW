@@ -42,7 +42,12 @@ function unauthorized(request: NextRequest) {
 }
 
 export async function proxy(request: NextRequest) {
-  if (request.nextUrl.hostname === "www.interviewrunway.com") {
+  const forwardedHost =
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
+  const incomingHostname =
+    forwardedHost.split(",")[0]?.trim().split(":")[0] ||
+    request.nextUrl.hostname;
+  if (incomingHostname === "www.interviewrunway.com") {
     const canonicalUrl = request.nextUrl.clone();
     canonicalUrl.hostname = "interviewrunway.com";
     return NextResponse.redirect(canonicalUrl);

@@ -155,6 +155,19 @@ test("anonymous visitors are sent to the Vivid Labs Google sign-in", async () =>
   assert.match(signInText, /@vividlabsai\.com/i);
 });
 
+test("www traffic uses the Google-enabled apex domain", async () => {
+  const response = await request(
+    "/pricing?source=www",
+    { headers: { host: "www.interviewrunway.com" } },
+    false,
+  );
+  assert.equal(response.status, 307);
+  assert.equal(
+    response.headers.get("location"),
+    "http://interviewrunway.com/pricing?source=www",
+  );
+});
+
 const coreRoutes = [
   {
     pathname: "/vault",
