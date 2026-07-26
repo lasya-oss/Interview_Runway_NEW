@@ -9881,3 +9881,206 @@ html[data-second-seat-film="open"] .home-aero-stage {
   .qualification-choice-group:first-of-type > div { grid-template-columns: 1fr; }
   .qualification-form__submit { grid-template-columns: 1fr; }
 }
+
+/* Vivid Labs Google Workspace access gate */
+.vivid-sign-in {
+  position: relative;
+  min-height: 100svh;
+  padding: 40px 24px;
+  display: grid;
+  place-items: center;
+  color: #eaf5f7;
+  background:
+    radial-gradient(circle at 72% 16%, rgba(255, 107, 44, .14), transparent 27%),
+    radial-gradient(circle at 18% 84%, rgba(59, 189, 192, .12), transparent 30%),
+    #061019;
+  overflow: hidden;
+}
+
+.vivid-sign-in::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .32;
+  background-image:
+    linear-gradient(rgba(116, 159, 168, .12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(116, 159, 168, .12) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, #000, transparent 88%);
+}
+
+.vivid-sign-in > section {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 660px);
+  padding: clamp(30px, 6vw, 64px);
+  border: 1px solid rgba(150, 205, 212, .2);
+  border-radius: 28px;
+  background: rgba(8, 24, 35, .84);
+  box-shadow: 0 44px 120px rgba(0, 0, 0, .38);
+  backdrop-filter: blur(20px);
+}
+
+.vivid-sign-in__atmosphere i,
+.vivid-sign-in__atmosphere span {
+  position: absolute;
+  border: 1px solid rgba(255, 107, 44, .16);
+  border-radius: 50%;
+}
+
+.vivid-sign-in__atmosphere i:first-child {
+  width: 440px;
+  height: 440px;
+  top: -190px;
+  right: -110px;
+}
+
+.vivid-sign-in__atmosphere i:nth-child(2) {
+  width: 220px;
+  height: 220px;
+  right: 5%;
+  bottom: -95px;
+}
+
+.vivid-sign-in__atmosphere span {
+  width: 9px;
+  height: 9px;
+  top: 19%;
+  right: 16%;
+  border: 0;
+  background: #ff6b2c;
+  box-shadow: 0 0 32px #ff6b2c;
+}
+
+.vivid-sign-in__mark {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.vivid-sign-in__mark span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .26);
+  border-radius: 12px;
+  color: #07111b;
+  background: #ff6b2c;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.vivid-sign-in__mark p {
+  margin: 0;
+  font-weight: 760;
+  letter-spacing: -.02em;
+}
+
+.vivid-sign-in__eyebrow {
+  margin: 52px 0 18px;
+  color: #72c8ca;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+
+.vivid-sign-in h1 {
+  margin: 0;
+  font-size: clamp(3.2rem, 9vw, 6rem);
+  line-height: .91;
+  letter-spacing: -.065em;
+}
+
+.vivid-sign-in h1 em {
+  display: block;
+  color: #ff6b2c;
+  font-style: normal;
+}
+
+.vivid-sign-in__lede {
+  max-width: 540px;
+  margin: 25px 0 0;
+  color: #9db2ba;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.vivid-sign-in__card {
+  margin-top: 36px;
+  padding: 20px;
+  border: 1px solid rgba(137, 188, 196, .19);
+  border-radius: 18px;
+  background: rgba(3, 13, 20, .62);
+}
+
+.vivid-sign-in__card > div:first-child {
+  margin-bottom: 18px;
+  padding-bottom: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid rgba(137, 188, 196, .13);
+}
+
+.vivid-sign-in__card span {
+  color: #708b94;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+
+.vivid-sign-in__card strong {
+  color: #d8e8eb;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.google-sign-in > div {
+  min-height: 44px;
+  transition: opacity 180ms;
+}
+
+.google-sign-in > div.is-submitting {
+  opacity: .45;
+  pointer-events: none;
+}
+
+.google-sign-in p,
+.vivid-sign-in__card > p {
+  margin: 13px 0 0;
+  color: #8299a2;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.vivid-sign-in__footnote {
+  margin: 21px 0 0;
+  color: #5f7781;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+@media (max-width: 560px) {
+  .vivid-sign-in {
+    padding: 14px;
+  }
+
+  .vivid-sign-in > section {
+    padding: 28px 22px;
+    border-radius: 20px;
+  }
+
+  .vivid-sign-in__eyebrow {
+    margin-top: 40px;
+  }
+
+  .vivid-sign-in__card > div:first-child {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+}

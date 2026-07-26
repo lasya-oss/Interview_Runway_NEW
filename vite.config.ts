@@ -31,6 +31,11 @@ const localBindingConfig = {
         },
       ]
     : [],
+  vars: {
+    AUTH_ALLOWED_DOMAIN: process.env.AUTH_ALLOWED_DOMAIN ?? "vividlabsai.com",
+    AUTH_SESSION_SECRET: process.env.AUTH_SESSION_SECRET ?? "",
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? "",
+  },
 };
 
 export default defineConfig(async () => {

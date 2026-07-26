@@ -2,29 +2,72 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { SignJWT } from "jose";
 
 let renderSequence = 0;
 const testSessionSecret = "interviewrunway-test-session-secret-2026-07-17";
+const testAuthSessionSecret =
+  "interviewrunway-google-auth-test-session-secret-2026-07-26";
+const testGoogleClientId = "test-client.apps.googleusercontent.com";
 process.env.DEMO_SESSION_SECRET = testSessionSecret;
+process.env.AUTH_ALLOWED_DOMAIN = "vividlabsai.com";
+process.env.AUTH_SESSION_SECRET = testAuthSessionSecret;
+process.env.GOOGLE_CLIENT_ID = testGoogleClientId;
 
-async function request(pathname = "/", init = {}) {
+let workspaceSessionCookie;
+
+async function getWorkspaceSessionCookie() {
+  if (workspaceSessionCookie) return workspaceSessionCookie;
+
+  const token = await new SignJWT({
+    email: "pratheep@vividlabsai.com",
+    hd: "vividlabsai.com",
+    name: "Pratheep Venkataiah",
+  })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setSubject("test-vivid-labs-user")
+    .setIssuer("interviewrunway")
+    .setAudience("interviewrunway-web")
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(new TextEncoder().encode(testAuthSessionSecret));
+
+  workspaceSessionCookie = `interviewrunway_session=${token}`;
+  return workspaceSessionCookie;
+}
+
+async function request(pathname = "/", init = {}, authenticated = true) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set(
     "test",
     `${process.pid}-${Date.now()}-${renderSequence++}`,
   );
   const { default: worker } = await import(workerUrl.href);
+  const headers = new Headers({ accept: "text/html" });
+  if (authenticated) {
+    headers.set("cookie", await getWorkspaceSessionCookie());
+  }
+  for (const [key, value] of new Headers(init.headers).entries()) {
+    if (key === "cookie" && headers.has("cookie")) {
+      headers.set("cookie", `${headers.get("cookie")}; ${value}`);
+    } else {
+      headers.set(key, value);
+    }
+  }
 
   return worker.fetch(
     new Request(new URL(pathname, "http://localhost"), {
-      headers: { accept: "text/html" },
       ...init,
+      headers,
     }),
     {
       ASSETS: {
         fetch: async () => new Response("Not found", { status: 404 }),
       },
+      AUTH_ALLOWED_DOMAIN: "vividlabsai.com",
+      AUTH_SESSION_SECRET: testAuthSessionSecret,
       DEMO_SESSION_SECRET: testSessionSecret,
+      GOOGLE_CLIENT_ID: testGoogleClientId,
     },
     {
       waitUntil() {},
@@ -95,6 +138,21 @@ test("server-renders the finished InterviewRunway homepage", async () => {
     html,
     /codex-preview|react-loading-skeleton|Codex is working|Your site is taking shape/i,
   );
+});
+
+test("anonymous visitors are sent to the Vivid Labs Google sign-in", async () => {
+  const response = await request("/", {}, false);
+  assert.equal(response.status, 307);
+  assert.match(
+    response.headers.get("location") ?? "",
+    /\/sign-in\?return_to=%2F$/,
+  );
+
+  const signIn = await request("/sign-in", {}, false);
+  assert.equal(signIn.status, 200);
+  const signInText = visibleText(await signIn.text());
+  assert.match(signInText, /Authorized crew only/i);
+  assert.match(signInText, /@vividlabsai\.com/i);
 });
 
 const coreRoutes = [
@@ -254,9 +312,12 @@ test("Paddle checkout requires an authenticated account", async () => {
       origin: "http://localhost",
     },
     body: JSON.stringify({ offer: "vault" }),
-  });
+  }, false);
   assert.equal(checkout.status, 401);
-  assert.deepEqual(await checkout.json(), { error: "Authentication required" });
+  assert.deepEqual(await checkout.json(), {
+    ok: false,
+    message: "Google sign-in is required.",
+  });
 });
 
 test("Phase 3 qualification rejects incomplete submissions before persistence", async () => {
