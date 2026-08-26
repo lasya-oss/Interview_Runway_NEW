@@ -5,6 +5,7 @@ import test from "node:test";
 import { SignJWT } from "jose";
 
 let renderSequence = 0;
+const requestedAssets = [];
 const testSessionSecret = "interviewrunway-test-session-secret-2026-07-17";
 const testAuthSessionSecret =
   "interviewrunway-google-auth-test-session-secret-2026-07-26";
@@ -62,7 +63,14 @@ async function request(pathname = "/", init = {}, authenticated = true) {
     }),
     {
       ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
+        fetch: async (assetRequest) => {
+          const assetPath = new URL(assetRequest.url).pathname;
+          requestedAssets.push(assetPath);
+          if (assetPath === "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-00") {
+            return new Response("static replay chunk", { status: 200 });
+          }
+          return new Response("Not found", { status: 404 });
+        },
       },
       AUTH_ALLOWED_DOMAIN: "vividlabsai.com",
       AUTH_SESSION_SECRET: testAuthSessionSecret,
@@ -166,6 +174,24 @@ test("www traffic uses the Google-enabled apex domain", async () => {
     response.headers.get("location"),
     "http://interviewrunway.com/pricing?source=www",
   );
+});
+
+test("chunked replay assets remain public while application pages stay protected", async () => {
+  const response = await request(
+    "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-00",
+    {},
+    false,
+  );
+  assert.equal(response.status, 200);
+  assert.ok(
+    requestedAssets.includes(
+      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-00",
+    ),
+  );
+
+  const protectedPage = await request("/learn/practice", {}, false);
+  assert.equal(protectedPage.status, 307);
+  assert.match(protectedPage.headers.get("location") ?? "", /\/sign-in\?/i);
 });
 
 const coreRoutes = [
