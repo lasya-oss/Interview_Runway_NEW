@@ -124,6 +124,29 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
       "/video/replays/mock_behavioral_ownership-failure_01.mp4.part-02",
     ],
   },
+  {
+    slug: "behavioural-leadership-without-manager-title-04",
+    title: "Leadership without a manager title mock interview",
+    filename: "mock_behavioral_influence_04.mp4",
+    category: "Behavioural",
+    collection: "Behavioural mock interview replays",
+    description: "A supplied behavioural replay about leading a consequential change without formal manager authority.",
+    objective: "Study how the candidate creates alignment, makes the decision owner explicit, and shows durable influence without relying on a manager title.",
+    kind: "Mock interview replay",
+    accessTier: "The Second Seat",
+    sourceFileId: "1lA7PeRlyBNBKaTCAVBTS6JwpqxWT0Y74",
+    sourceBytes: 48343918,
+    storage: "static-public-chunked",
+    durationSeconds: 1267.249,
+    transcript: "Not supplied",
+    roadmapTaskId: "12w-7-stories",
+    videoParts: [
+      "/video/replays/mock_behavioral_influence_04.mp4.part-00",
+      "/video/replays/mock_behavioral_influence_04.mp4.part-01",
+      "/video/replays/mock_behavioral_influence_04.mp4.part-02",
+      "/video/replays/mock_behavioral_influence_04.mp4.part-03",
+    ],
+  },
 ];
 
 export function findPracticeReplay(slug: string): PracticeReplay | null {

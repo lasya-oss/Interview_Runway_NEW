@@ -404,6 +404,22 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(ownershipFailureHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(ownershipFailureHtml, /href=["'][^"']*\/learn\/material\/outage-story["']/i);
 
+  const influenceReplay = await request("/learn/practice/replays/behavioural-leadership-without-manager-title-04", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(influenceReplay.status, 200);
+  const influenceHtml = await influenceReplay.text();
+  const influenceText = visibleText(influenceHtml);
+  assert.match(influenceText, /Leadership without a manager title mock interview/i);
+  assert.match(influenceText, /Replay 06/i);
+  assert.match(influenceText, /Source unchanged/i);
+  assert.match(influenceText, /Transcript \/ captions\s+Not supplied/i);
+  assert.match(influenceHtml, /data-replay-part-count=["']4["']/i);
+  assert.doesNotMatch(influenceHtml, /data-google-drive-file-id=["']1lA7PeRlyBNBKaTCAVBTS6JwpqxWT0Y74["']/i);
+  assert.doesNotMatch(influenceHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.doesNotMatch(influenceHtml, /<iframe[^>]+drive\.google\.com/i);
+  assert.match(influenceHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+
   const vaultLogin = await request("/api/demo-session", {
     method: "POST",
     headers: {
