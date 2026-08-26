@@ -16,7 +16,6 @@ function isPublicPath(pathname: string): boolean {
     PUBLIC_ROUTES.has(pathname) ||
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/_vinext/") ||
-    /^\/video\/replays\/[^/]+\.mp4\.part-\d+$/i.test(pathname) ||
     /\.[a-z0-9]+$/i.test(pathname)
   );
 }

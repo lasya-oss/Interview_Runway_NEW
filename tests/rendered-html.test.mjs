@@ -5,7 +5,6 @@ import test from "node:test";
 import { SignJWT } from "jose";
 
 let renderSequence = 0;
-const requestedAssets = [];
 const testSessionSecret = "interviewrunway-test-session-secret-2026-07-17";
 const testAuthSessionSecret =
   "interviewrunway-google-auth-test-session-secret-2026-07-26";
@@ -64,11 +63,7 @@ async function request(pathname = "/", init = {}, authenticated = true) {
     {
       ASSETS: {
         fetch: async (assetRequest) => {
-          const assetPath = new URL(assetRequest.url).pathname;
-          requestedAssets.push(assetPath);
-          if (assetPath === "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-00") {
-            return new Response("static replay chunk", { status: 200 });
-          }
+          void assetRequest;
           return new Response("Not found", { status: 404 });
         },
       },
@@ -176,19 +171,7 @@ test("www traffic uses the Google-enabled apex domain", async () => {
   );
 });
 
-test("chunked replay assets remain public while application pages stay protected", async () => {
-  const response = await request(
-    "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-00",
-    {},
-    false,
-  );
-  assert.equal(response.status, 200);
-  assert.ok(
-    requestedAssets.includes(
-      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-00",
-    ),
-  );
-
+test("application pages stay protected", async () => {
   const protectedPage = await request("/learn/practice", {}, false);
   assert.equal(protectedPage.status, 307);
   assert.match(protectedPage.headers.get("location") ?? "", /\/sign-in\?/i);
@@ -457,6 +440,10 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(customerIntegrityText, /Source unchanged/i);
   assert.match(customerIntegrityText, /Transcript \/ captions\s+Not supplied/i);
   assert.match(customerIntegrityHtml, /data-replay-part-count=["']4["']/i);
+  assert.match(
+    customerIntegrityHtml,
+    /raw\.githubusercontent\.com\/vividlabsai\/InterviewRunway\/37346b97f6080fb72d907b6a7b5f25636f320a49\/public\/video\/replays\/mock_behavioral_customer-integrity_05\.mp4\.part-00/i,
+  );
   assert.doesNotMatch(customerIntegrityHtml, /data-google-drive-file-id=["']1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO["']/i);
   assert.doesNotMatch(customerIntegrityHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(customerIntegrityHtml, /<iframe[^>]+drive\.google\.com/i);
@@ -473,6 +460,10 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(conflictResolutionText, /Source unchanged/i);
   assert.match(conflictResolutionText, /Transcript \/ captions\s+Not supplied/i);
   assert.match(conflictResolutionHtml, /data-replay-part-count=["']4["']/i);
+  assert.match(
+    conflictResolutionHtml,
+    /raw\.githubusercontent\.com\/vividlabsai\/InterviewRunway\/37346b97f6080fb72d907b6a7b5f25636f320a49\/public\/video\/replays\/mock_behavioral_conflict_02\.mp4\.part-00/i,
+  );
   assert.doesNotMatch(conflictResolutionHtml, /data-google-drive-file-id=["']1MTv2BG_lIO8lM3ee0DMykRd26n5G2hRq["']/i);
   assert.doesNotMatch(conflictResolutionHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(conflictResolutionHtml, /<iframe[^>]+drive\.google\.com/i);

@@ -18,6 +18,16 @@ export type PracticeReplay = {
   videoParts?: readonly string[];
 };
 
+const REPLAY_ASSET_BASE =
+  "https://raw.githubusercontent.com/vividlabsai/InterviewRunway/37346b97f6080fb72d907b6a7b5f25636f320a49/public/video/replays";
+
+function replayAssetParts(filename: string, count: number): readonly string[] {
+  return Array.from(
+    { length: count },
+    (_, index) => `${REPLAY_ASSET_BASE}/${filename}.part-${String(index).padStart(2, "0")}`,
+  );
+}
+
 export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
   {
     slug: "coding-dynamic-programming-05",
@@ -51,11 +61,7 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     durationSeconds: 1090,
     transcript: "Not supplied",
     roadmapTaskId: "4w-2-scope",
-    videoParts: [
-      "/video/replays/mock_behavioral_ambiguity_03.mp4.part-00",
-      "/video/replays/mock_behavioral_ambiguity_03.mp4.part-01",
-      "/video/replays/mock_behavioral_ambiguity_03.mp4.part-02",
-    ],
+    videoParts: replayAssetParts("mock_behavioral_ambiguity_03.mp4", 3),
   },
   {
     slug: "coding-bfs-debugging-06",
@@ -73,12 +79,7 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     durationSeconds: 1297.948,
     transcript: "Not supplied",
     roadmapTaskId: "12w-3-graph",
-    videoParts: [
-      "/video/replays/mock_coding_bfs-debugging_06.mp4.part-00",
-      "/video/replays/mock_coding_bfs-debugging_06.mp4.part-01",
-      "/video/replays/mock_coding_bfs-debugging_06.mp4.part-02",
-      "/video/replays/mock_coding_bfs-debugging_06.mp4.part-03",
-    ],
+    videoParts: replayAssetParts("mock_coding_bfs-debugging_06.mp4", 4),
   },
   {
     slug: "behavioural-remote-collaboration-06",
@@ -96,11 +97,7 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     durationSeconds: 1075.1,
     transcript: "Not supplied",
     roadmapTaskId: "12w-7-stories",
-    videoParts: [
-      "/video/replays/mock_behavioral_remote-collaboration_06.mp4.part-00",
-      "/video/replays/mock_behavioral_remote-collaboration_06.mp4.part-01",
-      "/video/replays/mock_behavioral_remote-collaboration_06.mp4.part-02",
-    ],
+    videoParts: replayAssetParts("mock_behavioral_remote-collaboration_06.mp4", 3),
   },
   {
     slug: "behavioural-ownership-after-failure-01",
@@ -118,11 +115,7 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     durationSeconds: 984.6,
     transcript: "Not supplied",
     roadmapTaskId: "12w-7-followups",
-    videoParts: [
-      "/video/replays/mock_behavioral_ownership-failure_01.mp4.part-00",
-      "/video/replays/mock_behavioral_ownership-failure_01.mp4.part-01",
-      "/video/replays/mock_behavioral_ownership-failure_01.mp4.part-02",
-    ],
+    videoParts: replayAssetParts("mock_behavioral_ownership-failure_01.mp4", 3),
   },
   {
     slug: "behavioural-leadership-without-manager-title-04",
@@ -140,12 +133,7 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     durationSeconds: 1267.249,
     transcript: "Not supplied",
     roadmapTaskId: "12w-7-stories",
-    videoParts: [
-      "/video/replays/mock_behavioral_influence_04.mp4.part-00",
-      "/video/replays/mock_behavioral_influence_04.mp4.part-01",
-      "/video/replays/mock_behavioral_influence_04.mp4.part-02",
-      "/video/replays/mock_behavioral_influence_04.mp4.part-03",
-    ],
+    videoParts: replayAssetParts("mock_behavioral_influence_04.mp4", 4),
   },
   {
     slug: "behavioural-customer-integrity-05",
@@ -163,12 +151,7 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     durationSeconds: 1200.9,
     transcript: "Not supplied",
     roadmapTaskId: "12w-7-stories",
-    videoParts: [
-      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-00",
-      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-01",
-      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-02",
-      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-03",
-    ],
+    videoParts: replayAssetParts("mock_behavioral_customer-integrity_05.mp4", 4),
   },
   {
     slug: "behavioural-conflict-resolution-02",
@@ -186,12 +169,7 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     durationSeconds: 1132.707,
     transcript: "Not supplied",
     roadmapTaskId: "12w-7-stories",
-    videoParts: [
-      "/video/replays/mock_behavioral_conflict_02.mp4.part-00",
-      "/video/replays/mock_behavioral_conflict_02.mp4.part-01",
-      "/video/replays/mock_behavioral_conflict_02.mp4.part-02",
-      "/video/replays/mock_behavioral_conflict_02.mp4.part-03",
-    ],
+    videoParts: replayAssetParts("mock_behavioral_conflict_02.mp4", 4),
   },
 ];
 
