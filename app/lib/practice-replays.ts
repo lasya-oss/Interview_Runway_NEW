@@ -80,6 +80,22 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
       "/video/replays/mock_coding_bfs-debugging_06.mp4.part-03",
     ],
   },
+  {
+    slug: "behavioural-remote-collaboration-06",
+    title: "Remote collaboration mock interview",
+    filename: "mock_behavioral_remote-collaboration_06.mp4",
+    category: "Behavioural",
+    collection: "Behavioural mock interview replays",
+    description: "A supplied behavioural replay focused on communicating, aligning, and delivering across a remote team.",
+    objective: "Study how the candidate makes collaboration visible, explains alignment decisions across distance and context, and connects them to the delivery outcome.",
+    kind: "Mock interview replay",
+    accessTier: "The Second Seat",
+    sourceFileId: "1UdJnFdWLB1jPSLXW3biHcBGFomeCCyxQ",
+    sourceBytes: 42308004,
+    storage: "google-drive-api",
+    transcript: "Not supplied",
+    roadmapTaskId: "12w-7-stories",
+  },
 ];
 
 export function findPracticeReplay(slug: string): PracticeReplay | null {

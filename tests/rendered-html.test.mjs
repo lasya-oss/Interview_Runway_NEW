@@ -372,6 +372,21 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(bfsHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(bfsHtml, /href=["'][^"']*\/learn\/material\/graph-traversal["']/i);
 
+  const remoteCollaborationReplay = await request("/learn/practice/replays/behavioural-remote-collaboration-06", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(remoteCollaborationReplay.status, 200);
+  const remoteCollaborationHtml = await remoteCollaborationReplay.text();
+  const remoteCollaborationText = visibleText(remoteCollaborationHtml);
+  assert.match(remoteCollaborationText, /Remote collaboration mock interview/i);
+  assert.match(remoteCollaborationText, /Replay 04/i);
+  assert.match(remoteCollaborationText, /Source unchanged/i);
+  assert.match(remoteCollaborationText, /Transcript \/ captions\s+Not supplied/i);
+  assert.match(remoteCollaborationHtml, /data-google-drive-file-id=["']1UdJnFdWLB1jPSLXW3biHcBGFomeCCyxQ["']/i);
+  assert.match(remoteCollaborationHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.doesNotMatch(remoteCollaborationHtml, /<iframe[^>]+drive\.google\.com/i);
+  assert.match(remoteCollaborationHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+
   const vaultLogin = await request("/api/demo-session", {
     method: "POST",
     headers: {
