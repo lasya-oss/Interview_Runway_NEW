@@ -372,8 +372,13 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(replayText, /Dynamic programming mock interview/i);
   assert.match(replayText, /Source unchanged/i);
   assert.match(replayText, /Transcript \/ captions\s+Not supplied/i);
-  assert.match(replayHtml, /data-google-drive-file-id=["']1cuV_ejln62nazWnyteKqe2koReazYmin["']/i);
-  assert.match(replayHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.match(replayHtml, /data-replay-part-count=["']4["']/i);
+  assert.match(
+    replayHtml,
+    /\/api\/replay-assets\/mock_coding_dynamic-programming_05\.mp4\.part-00/i,
+  );
+  assert.doesNotMatch(replayHtml, /data-google-drive-file-id=/i);
+  assert.doesNotMatch(replayHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(replayHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(replayHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-1-patterns["']/i);
 

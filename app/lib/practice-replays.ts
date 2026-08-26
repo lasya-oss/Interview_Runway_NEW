@@ -40,9 +40,11 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     accessTier: "The Second Seat",
     sourceFileId: "1cuV_ejln62nazWnyteKqe2koReazYmin",
     sourceBytes: 57128544,
-    storage: "google-drive-api",
+    storage: "static-public-chunked",
+    durationSeconds: 1447.3,
     transcript: "Not supplied",
     roadmapTaskId: "4w-1-patterns",
+    videoParts: replayAssetParts("mock_coding_dynamic-programming_05.mp4", 4),
   },
   {
     slug: "behavioural-prioritizing-under-product-ambiguity-03",
