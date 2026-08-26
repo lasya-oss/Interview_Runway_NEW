@@ -159,9 +159,16 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     accessTier: "The Second Seat",
     sourceFileId: "1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO",
     sourceBytes: 49058951,
-    storage: "google-drive-api",
+    storage: "static-public-chunked",
+    durationSeconds: 1200.9,
     transcript: "Not supplied",
     roadmapTaskId: "12w-7-stories",
+    videoParts: [
+      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-00",
+      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-01",
+      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-02",
+      "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-03",
+    ],
   },
 ];
 

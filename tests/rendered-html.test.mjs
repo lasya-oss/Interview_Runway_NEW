@@ -430,8 +430,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(customerIntegrityText, /Replay 07/i);
   assert.match(customerIntegrityText, /Source unchanged/i);
   assert.match(customerIntegrityText, /Transcript \/ captions\s+Not supplied/i);
-  assert.match(customerIntegrityHtml, /data-google-drive-file-id=["']1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO["']/i);
-  assert.match(customerIntegrityHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.match(customerIntegrityHtml, /data-replay-part-count=["']4["']/i);
+  assert.doesNotMatch(customerIntegrityHtml, /data-google-drive-file-id=["']1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO["']/i);
+  assert.doesNotMatch(customerIntegrityHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(customerIntegrityHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(customerIntegrityHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
 
