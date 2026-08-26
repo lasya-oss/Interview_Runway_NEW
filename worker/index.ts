@@ -6,7 +6,6 @@ interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
   REPLAY_ASSETS: R2Bucket;
-  REPLAY_UPLOAD_SECRET?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -26,19 +25,6 @@ function replayAssetName(pathname: string): string | null {
 }
 
 async function handleReplayAsset(request: Request, env: Env, name: string): Promise<Response> {
-  if (request.method === "PUT") {
-    const configuredSecret = env.REPLAY_UPLOAD_SECRET;
-    const providedSecret = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-    if (!configuredSecret || providedSecret !== configuredSecret || !request.body) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
-    await env.REPLAY_ASSETS.put(name, request.body, {
-      httpMetadata: { contentType: "application/octet-stream" },
-    });
-    return new Response(null, { status: 204 });
-  }
-
   if (request.method !== "GET" && request.method !== "HEAD") {
     return new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD" } });
   }
