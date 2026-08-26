@@ -387,6 +387,21 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(remoteCollaborationHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(remoteCollaborationHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
 
+  const ownershipFailureReplay = await request("/learn/practice/replays/behavioural-ownership-after-failure-01", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(ownershipFailureReplay.status, 200);
+  const ownershipFailureHtml = await ownershipFailureReplay.text();
+  const ownershipFailureText = visibleText(ownershipFailureHtml);
+  assert.match(ownershipFailureText, /Ownership after failure mock interview/i);
+  assert.match(ownershipFailureText, /Replay 05/i);
+  assert.match(ownershipFailureText, /Source unchanged/i);
+  assert.match(ownershipFailureText, /Transcript \/ captions\s+Not supplied/i);
+  assert.match(ownershipFailureHtml, /data-google-drive-file-id=["']10uxp_B7ia6Zx1JZ7vZODNds7LPpovN3Z["']/i);
+  assert.match(ownershipFailureHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.doesNotMatch(ownershipFailureHtml, /<iframe[^>]+drive\.google\.com/i);
+  assert.match(ownershipFailureHtml, /href=["'][^"']*\/learn\/material\/outage-story["']/i);
+
   const vaultLogin = await request("/api/demo-session", {
     method: "POST",
     headers: {

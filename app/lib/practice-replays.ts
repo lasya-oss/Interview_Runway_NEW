@@ -96,6 +96,22 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     transcript: "Not supplied",
     roadmapTaskId: "12w-7-stories",
   },
+  {
+    slug: "behavioural-ownership-after-failure-01",
+    title: "Ownership after failure mock interview",
+    filename: "mock_behavioral_ownership-failure_01.mp4",
+    category: "Behavioural",
+    collection: "Behavioural mock interview replays",
+    description: "A supplied behavioural replay about owning a delivery failure, communicating what changed, and showing learning without deflecting.",
+    objective: "Study how the candidate names their responsibility, explains the recovery, and turns the failure into evidence of changed behaviour.",
+    kind: "Mock interview replay",
+    accessTier: "The Second Seat",
+    sourceFileId: "10uxp_B7ia6Zx1JZ7vZODNds7LPpovN3Z",
+    sourceBytes: 39706365,
+    storage: "google-drive-api",
+    transcript: "Not supplied",
+    roadmapTaskId: "12w-7-followups",
+  },
 ];
 
 export function findPracticeReplay(slug: string): PracticeReplay | null {
