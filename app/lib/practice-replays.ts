@@ -18,8 +18,7 @@ export type PracticeReplay = {
   videoParts?: readonly string[];
 };
 
-const REPLAY_ASSET_BASE =
-  "https://raw.githubusercontent.com/vividlabsai/InterviewRunway/37346b97f6080fb72d907b6a7b5f25636f320a49/public/video/replays";
+const REPLAY_ASSET_BASE = "/api/replay-assets";
 
 function replayAssetParts(filename: string, count: number): readonly string[] {
   return Array.from(

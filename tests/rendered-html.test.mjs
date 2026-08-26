@@ -9,6 +9,7 @@ const testSessionSecret = "interviewrunway-test-session-secret-2026-07-17";
 const testAuthSessionSecret =
   "interviewrunway-google-auth-test-session-secret-2026-07-26";
 const testGoogleClientId = "test-client.apps.googleusercontent.com";
+const testReplayChunk = "static replay chunk";
 process.env.DEMO_SESSION_SECRET = testSessionSecret;
 process.env.AUTH_ALLOWED_DOMAIN = "vividlabsai.com";
 process.env.AUTH_SESSION_SECRET = testAuthSessionSecret;
@@ -67,6 +68,18 @@ async function request(pathname = "/", init = {}, authenticated = true) {
           return new Response("Not found", { status: 404 });
         },
       },
+      REPLAY_ASSETS: {
+        get: async (name) => {
+          if (name !== "mock_behavioral_customer-integrity_05.mp4.part-00") return null;
+          return {
+            body: new Blob([testReplayChunk]).stream(),
+            size: testReplayChunk.length,
+            httpEtag: '"test-replay-etag"',
+          };
+        },
+        put: async () => {},
+      },
+      REPLAY_UPLOAD_SECRET: "test-replay-upload-secret",
       AUTH_ALLOWED_DOMAIN: "vividlabsai.com",
       AUTH_SESSION_SECRET: testAuthSessionSecret,
       DEMO_SESSION_SECRET: testSessionSecret,
@@ -175,6 +188,17 @@ test("application pages stay protected", async () => {
   const protectedPage = await request("/learn/practice", {}, false);
   assert.equal(protectedPage.status, 307);
   assert.match(protectedPage.headers.get("location") ?? "", /\/sign-in\?/i);
+});
+
+test("R2 replay assets are served without a separate Drive permission", async () => {
+  const response = await request(
+    "/api/replay-assets/mock_behavioral_customer-integrity_05.mp4.part-00",
+    {},
+    false,
+  );
+  assert.equal(response.status, 200);
+  assert.equal(await response.text(), testReplayChunk);
+  assert.equal(response.headers.get("cache-control"), "public, max-age=31536000, immutable");
 });
 
 const coreRoutes = [
@@ -442,7 +466,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(customerIntegrityHtml, /data-replay-part-count=["']4["']/i);
   assert.match(
     customerIntegrityHtml,
-    /raw\.githubusercontent\.com\/vividlabsai\/InterviewRunway\/37346b97f6080fb72d907b6a7b5f25636f320a49\/public\/video\/replays\/mock_behavioral_customer-integrity_05\.mp4\.part-00/i,
+    /\/api\/replay-assets\/mock_behavioral_customer-integrity_05\.mp4\.part-00/i,
   );
   assert.doesNotMatch(customerIntegrityHtml, /data-google-drive-file-id=["']1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO["']/i);
   assert.doesNotMatch(customerIntegrityHtml, /Allow replay access|Preparing the protected replay/i);
@@ -462,7 +486,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(conflictResolutionHtml, /data-replay-part-count=["']4["']/i);
   assert.match(
     conflictResolutionHtml,
-    /raw\.githubusercontent\.com\/vividlabsai\/InterviewRunway\/37346b97f6080fb72d907b6a7b5f25636f320a49\/public\/video\/replays\/mock_behavioral_conflict_02\.mp4\.part-00/i,
+    /\/api\/replay-assets\/mock_behavioral_conflict_02\.mp4\.part-00/i,
   );
   assert.doesNotMatch(conflictResolutionHtml, /data-google-drive-file-id=["']1MTv2BG_lIO8lM3ee0DMykRd26n5G2hRq["']/i);
   assert.doesNotMatch(conflictResolutionHtml, /Allow replay access|Preparing the protected replay/i);
