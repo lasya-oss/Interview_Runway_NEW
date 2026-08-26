@@ -10,8 +10,7 @@ export type PracticeReplay = {
   accessTier: "The Second Seat";
   sourceFileId: string;
   sourceBytes: number;
-  storage: "google-drive-preview";
-  playbackPath: string;
+  storage: "google-drive-api";
   transcript: "Not supplied";
   roadmapTaskId?: string;
 };
@@ -29,8 +28,7 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     accessTier: "The Second Seat",
     sourceFileId: "1cuV_ejln62nazWnyteKqe2koReazYmin",
     sourceBytes: 57128544,
-    storage: "google-drive-preview",
-    playbackPath: "/api/practice/replays/coding-dynamic-programming-05/playback",
+    storage: "google-drive-api",
     transcript: "Not supplied",
     roadmapTaskId: "4w-1-patterns",
   },

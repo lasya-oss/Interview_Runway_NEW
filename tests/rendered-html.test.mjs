@@ -341,14 +341,10 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(replayText, /Dynamic programming mock interview/i);
   assert.match(replayText, /Source unchanged/i);
   assert.match(replayText, /Transcript \/ captions\s+Not supplied/i);
-  assert.match(replayHtml, /src=["']\/api\/practice\/replays\/coding-dynamic-programming-05\/playback["']/i);
+  assert.match(replayHtml, /data-google-drive-file-id=["']1cuV_ejln62nazWnyteKqe2koReazYmin["']/i);
+  assert.match(replayHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.doesNotMatch(replayHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(replayHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-1-patterns["']/i);
-
-  const playback = await request("/api/practice/replays/coding-dynamic-programming-05/playback", {
-    headers: { accept: "text/html", cookie: sessionCookie },
-  });
-  assert.equal(playback.status, 307);
-  assert.match(playback.headers.get("location") ?? "", /drive\.google\.com\/file\/d\/1cuV_ejln62nazWnyteKqe2koReazYmin\/preview/i);
 
   const vaultLogin = await request("/api/demo-session", {
     method: "POST",

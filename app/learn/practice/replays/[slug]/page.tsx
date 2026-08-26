@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
+import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { findPracticeReplay, formatMegabytes } from "@/app/lib/practice-replays";
+import { DriveReplayPlayer } from "../drive-replay-player";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +35,8 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
     );
   }
 
+  const workspaceUser = await getChatGPTUser();
+
   return (
     <MemberShell profile={profile} active="practice">
       <article className="member-page practice-replay-page">
@@ -57,14 +61,14 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
           <section className="practice-replay-player" aria-labelledby="practice-replay-player-title">
             <div className="practice-replay-player-top"><span id="practice-replay-player-title">Replay / coding / 01</span><b>Source unchanged</b></div>
             <div className="practice-replay-frame">
-              <iframe
-                title={`${replay.title} video`}
-                src={replay.playbackPath}
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
+              <DriveReplayPlayer
+                clientId={process.env.GOOGLE_CLIENT_ID?.trim() ?? ""}
+                fileId={replay.sourceFileId}
+                loginHint={workspaceUser?.email ?? null}
+                title={replay.title}
               />
             </div>
-            <p className="practice-replay-player-note">Playback is delivered through the signed-in practice route. The original MP4 is not transcoded or edited by InterviewRunway.</p>
+            <p className="practice-replay-player-note">Playback uses your existing InterviewRunway sign-in and a read-only Google Drive permission for this replay. The original MP4 is not transcoded or edited by InterviewRunway.</p>
           </section>
 
           <aside className="practice-replay-notes">
