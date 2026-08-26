@@ -420,6 +420,21 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(influenceHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(influenceHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
 
+  const customerIntegrityReplay = await request("/learn/practice/replays/behavioural-customer-integrity-05", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(customerIntegrityReplay.status, 200);
+  const customerIntegrityHtml = await customerIntegrityReplay.text();
+  const customerIntegrityText = visibleText(customerIntegrityHtml);
+  assert.match(customerIntegrityText, /Customer integrity mock interview/i);
+  assert.match(customerIntegrityText, /Replay 07/i);
+  assert.match(customerIntegrityText, /Source unchanged/i);
+  assert.match(customerIntegrityText, /Transcript \/ captions\s+Not supplied/i);
+  assert.match(customerIntegrityHtml, /data-google-drive-file-id=["']1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO["']/i);
+  assert.match(customerIntegrityHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.doesNotMatch(customerIntegrityHtml, /<iframe[^>]+drive\.google\.com/i);
+  assert.match(customerIntegrityHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+
   const vaultLogin = await request("/api/demo-session", {
     method: "POST",
     headers: {

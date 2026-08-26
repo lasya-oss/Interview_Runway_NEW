@@ -147,6 +147,22 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
       "/video/replays/mock_behavioral_influence_04.mp4.part-03",
     ],
   },
+  {
+    slug: "behavioural-customer-integrity-05",
+    title: "Customer integrity mock interview",
+    filename: "mock_behavioral_customer-integrity_05.mp4",
+    category: "Behavioural",
+    collection: "Behavioural mock interview replays",
+    description: "A supplied behavioural replay focused on protecting customer trust while making a difficult delivery or product decision.",
+    objective: "Study how the candidate identifies the customer impact, communicates the trade-off, and turns an integrity decision into a durable operating choice.",
+    kind: "Mock interview replay",
+    accessTier: "The Second Seat",
+    sourceFileId: "1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO",
+    sourceBytes: 49058951,
+    storage: "google-drive-api",
+    transcript: "Not supplied",
+    roadmapTaskId: "12w-7-stories",
+  },
 ];
 
 export function findPracticeReplay(slug: string): PracticeReplay | null {
