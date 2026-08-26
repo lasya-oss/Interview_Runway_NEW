@@ -77,9 +77,7 @@ async function request(pathname = "/", init = {}, authenticated = true) {
             httpEtag: '"test-replay-etag"',
           };
         },
-        put: async () => {},
       },
-      REPLAY_UPLOAD_SECRET: "test-replay-upload-secret",
       AUTH_ALLOWED_DOMAIN: "vividlabsai.com",
       AUTH_SESSION_SECRET: testAuthSessionSecret,
       DEMO_SESSION_SECRET: testSessionSecret,
