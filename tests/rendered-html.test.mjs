@@ -382,8 +382,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(remoteCollaborationText, /Replay 04/i);
   assert.match(remoteCollaborationText, /Source unchanged/i);
   assert.match(remoteCollaborationText, /Transcript \/ captions\s+Not supplied/i);
-  assert.match(remoteCollaborationHtml, /data-google-drive-file-id=["']1UdJnFdWLB1jPSLXW3biHcBGFomeCCyxQ["']/i);
-  assert.match(remoteCollaborationHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.match(remoteCollaborationHtml, /data-replay-part-count=["']3["']/i);
+  assert.doesNotMatch(remoteCollaborationHtml, /data-google-drive-file-id=["']1UdJnFdWLB1jPSLXW3biHcBGFomeCCyxQ["']/i);
+  assert.doesNotMatch(remoteCollaborationHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(remoteCollaborationHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(remoteCollaborationHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
 
@@ -397,8 +398,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(ownershipFailureText, /Replay 05/i);
   assert.match(ownershipFailureText, /Source unchanged/i);
   assert.match(ownershipFailureText, /Transcript \/ captions\s+Not supplied/i);
-  assert.match(ownershipFailureHtml, /data-google-drive-file-id=["']10uxp_B7ia6Zx1JZ7vZODNds7LPpovN3Z["']/i);
-  assert.match(ownershipFailureHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.match(ownershipFailureHtml, /data-replay-part-count=["']3["']/i);
+  assert.doesNotMatch(ownershipFailureHtml, /data-google-drive-file-id=["']10uxp_B7ia6Zx1JZ7vZODNds7LPpovN3Z["']/i);
+  assert.doesNotMatch(ownershipFailureHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(ownershipFailureHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(ownershipFailureHtml, /href=["'][^"']*\/learn\/material\/outage-story["']/i);
 

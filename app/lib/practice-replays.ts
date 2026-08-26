@@ -92,9 +92,15 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     accessTier: "The Second Seat",
     sourceFileId: "1UdJnFdWLB1jPSLXW3biHcBGFomeCCyxQ",
     sourceBytes: 42308004,
-    storage: "google-drive-api",
+    storage: "static-public-chunked",
+    durationSeconds: 1075.1,
     transcript: "Not supplied",
     roadmapTaskId: "12w-7-stories",
+    videoParts: [
+      "/video/replays/mock_behavioral_remote-collaboration_06.mp4.part-00",
+      "/video/replays/mock_behavioral_remote-collaboration_06.mp4.part-01",
+      "/video/replays/mock_behavioral_remote-collaboration_06.mp4.part-02",
+    ],
   },
   {
     slug: "behavioural-ownership-after-failure-01",
@@ -108,9 +114,15 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     accessTier: "The Second Seat",
     sourceFileId: "10uxp_B7ia6Zx1JZ7vZODNds7LPpovN3Z",
     sourceBytes: 39706365,
-    storage: "google-drive-api",
+    storage: "static-public-chunked",
+    durationSeconds: 984.6,
     transcript: "Not supplied",
     roadmapTaskId: "12w-7-followups",
+    videoParts: [
+      "/video/replays/mock_behavioral_ownership-failure_01.mp4.part-00",
+      "/video/replays/mock_behavioral_ownership-failure_01.mp4.part-01",
+      "/video/replays/mock_behavioral_ownership-failure_01.mp4.part-02",
+    ],
   },
 ];
 
