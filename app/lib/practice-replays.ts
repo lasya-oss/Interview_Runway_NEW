@@ -158,7 +158,7 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     kind: "Mock interview replay",
     accessTier: "The Second Seat",
     sourceFileId: "1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO",
-    sourceBytes: 49058951,
+    sourceBytes: 49057792,
     storage: "static-public-chunked",
     durationSeconds: 1200.9,
     transcript: "Not supplied",
