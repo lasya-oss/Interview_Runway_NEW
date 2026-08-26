@@ -1,19 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useMemo, useSyncExternalStore } from "react";
+import type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
 
-export type RoadmapTask = {
-  id: string;
-  title: string;
-  meta: string;
-};
-
-export type RoadmapWeek = {
-  week: number;
-  title: string;
-  detail: string;
-  tasks: readonly RoadmapTask[];
-};
+export type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
 
 function parseCompleted(value: string, fallback: readonly string[]) {
   try {
@@ -84,6 +75,11 @@ export function RoadmapChecklist({
 
   const reset = () => persist(new Set(initialCompleted));
 
+  const learningHref = (task: RoadmapTask) =>
+    task.learning.kind === "material"
+      ? `/learn/material/${task.learning.slug}`
+      : `/learn/roadmap/task/${task.id}`;
+
   return (
     <div className="roadmap-workspace">
       <section className="roadmap-overview" aria-labelledby="roadmap-overview-title">
@@ -124,14 +120,30 @@ export function RoadmapChecklist({
                   <b>{weekCompleted} / {week.tasks.length}</b>
                 </div>
                 <div className="roadmap-task-list">
-                  {week.tasks.map((task) => (
-                    <label className={completed.has(task.id) ? "is-complete" : ""} key={task.id}>
-                      <input type="checkbox" checked={completed.has(task.id)} onChange={() => toggle(task.id)} />
-                      <span aria-hidden="true" />
-                      <strong>{task.title}</strong>
-                      <small>{task.meta}</small>
-                    </label>
-                  ))}
+                  {week.tasks.map((task) => {
+                    const isComplete = completed.has(task.id);
+                    const contentLabel = task.learning.kind === "material" ? "Open learning content" : "View learning brief";
+                    return (
+                      <div className={`roadmap-task-row ${isComplete ? "is-complete" : ""}`} key={task.id}>
+                        <label className="roadmap-task-check">
+                          <input
+                            type="checkbox"
+                            checked={isComplete}
+                            aria-label={`Mark ${task.title} complete`}
+                            onChange={() => toggle(task.id)}
+                          />
+                          <span aria-hidden="true" />
+                        </label>
+                        <Link className="roadmap-task-learning" href={learningHref(task)}>
+                          <span className="roadmap-task-copy">
+                            <strong>{task.title}</strong>
+                            <small>{task.meta}</small>
+                          </span>
+                          <span className="roadmap-task-link-label">{contentLabel} <span aria-hidden="true">↗</span></span>
+                        </Link>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </section>

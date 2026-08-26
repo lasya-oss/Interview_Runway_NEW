@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { PracticeClient } from "./practice-client";
+import { PracticeReplayCollection } from "./replay-card";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,10 @@ export default async function PracticePage() {
     <MemberShell profile={profile} active="practice">
       <div className="member-page">
         {profile.access.practice ? (
-          <PracticeClient learnerName={profile.firstName} />
+          <>
+            <PracticeReplayCollection />
+            <PracticeClient learnerName={profile.firstName} />
+          </>
         ) : (
           <LockedMemberPanel
             tier="The Second Seat"
