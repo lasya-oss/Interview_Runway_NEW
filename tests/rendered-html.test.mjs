@@ -462,6 +462,22 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(customerIntegrityHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(customerIntegrityHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
 
+  const conflictResolutionReplay = await request("/learn/practice/replays/behavioural-conflict-resolution-02", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(conflictResolutionReplay.status, 200);
+  const conflictResolutionHtml = await conflictResolutionReplay.text();
+  const conflictResolutionText = visibleText(conflictResolutionHtml);
+  assert.match(conflictResolutionText, /Conflict resolution mock interview/i);
+  assert.match(conflictResolutionText, /Replay 08/i);
+  assert.match(conflictResolutionText, /Source unchanged/i);
+  assert.match(conflictResolutionText, /Transcript \/ captions\s+Not supplied/i);
+  assert.match(conflictResolutionHtml, /data-replay-part-count=["']4["']/i);
+  assert.doesNotMatch(conflictResolutionHtml, /data-google-drive-file-id=["']1MTv2BG_lIO8lM3ee0DMykRd26n5G2hRq["']/i);
+  assert.doesNotMatch(conflictResolutionHtml, /Allow replay access|Preparing the protected replay/i);
+  assert.doesNotMatch(conflictResolutionHtml, /<iframe[^>]+drive\.google\.com/i);
+  assert.match(conflictResolutionHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+
   const vaultLogin = await request("/api/demo-session", {
     method: "POST",
     headers: {

@@ -170,6 +170,29 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
       "/video/replays/mock_behavioral_customer-integrity_05.mp4.part-03",
     ],
   },
+  {
+    slug: "behavioural-conflict-resolution-02",
+    title: "Conflict resolution mock interview",
+    filename: "mock_behavioral_conflict_02.mp4",
+    category: "Behavioural",
+    collection: "Behavioural mock interview replays",
+    description: "A supplied behavioural replay focused on navigating disagreement, aligning on a decision, and maintaining trust under pressure.",
+    objective: "Study how the candidate surfaces the disagreement, makes the decision path explicit, and keeps delivery moving without avoiding the tension.",
+    kind: "Mock interview replay",
+    accessTier: "The Second Seat",
+    sourceFileId: "1MTv2BG_lIO8lM3ee0DMykRd26n5G2hRq",
+    sourceBytes: 45662127,
+    storage: "static-public-chunked",
+    durationSeconds: 1132.707,
+    transcript: "Not supplied",
+    roadmapTaskId: "12w-7-stories",
+    videoParts: [
+      "/video/replays/mock_behavioral_conflict_02.mp4.part-00",
+      "/video/replays/mock_behavioral_conflict_02.mp4.part-01",
+      "/video/replays/mock_behavioral_conflict_02.mp4.part-02",
+      "/video/replays/mock_behavioral_conflict_02.mp4.part-03",
+    ],
+  },
 ];
 
 export function findPracticeReplay(slug: string): PracticeReplay | null {
