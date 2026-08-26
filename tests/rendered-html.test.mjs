@@ -359,6 +359,19 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(behavioralHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(behavioralHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
 
+  const bfsReplay = await request("/learn/practice/replays/coding-bfs-debugging-06", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(bfsReplay.status, 200);
+  const bfsHtml = await bfsReplay.text();
+  const bfsText = visibleText(bfsHtml);
+  assert.match(bfsText, /BFS debugging mock interview/i);
+  assert.match(bfsText, /Replay 03/i);
+  assert.match(bfsText, /Source unchanged/i);
+  assert.match(bfsHtml, /data-replay-part-count=["']4["']/i);
+  assert.doesNotMatch(bfsHtml, /<iframe[^>]+drive\.google\.com/i);
+  assert.match(bfsHtml, /href=["'][^"']*\/learn\/material\/graph-traversal["']/i);
+
   const vaultLogin = await request("/api/demo-session", {
     method: "POST",
     headers: {

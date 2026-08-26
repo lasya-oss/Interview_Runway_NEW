@@ -54,7 +54,7 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
     <MemberShell profile={profile} active="practice">
       <article className="member-page practice-replay-page">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/learn/practice">Practice</Link><span>/</span><span>{replay.category}</span><span>/</span><strong>Replay 01</strong>
+          <Link href="/learn/practice">Practice</Link><span>/</span><span>{replay.category}</span><span>/</span><strong>Replay {replayNumber}</strong>
         </nav>
 
         <header className="practice-replay-header">

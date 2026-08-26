@@ -57,6 +57,29 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
       "/video/replays/mock_behavioral_ambiguity_03.mp4.part-02",
     ],
   },
+  {
+    slug: "coding-bfs-debugging-06",
+    title: "BFS debugging mock interview",
+    filename: "mock_coding_bfs-debugging_06.mp4",
+    category: "Coding",
+    collection: "Coding mock interview replays",
+    description: "A supplied coding mock replay focused on diagnosing breadth-first-search reasoning and debugging under interview pressure.",
+    objective: "Study how the candidate traces BFS state, isolates a bug, validates the correction, and explains the resulting complexity.",
+    kind: "Mock interview replay",
+    accessTier: "The Second Seat",
+    sourceFileId: "1bDrlUTIBVYz9vYTcGZdHIXj4rxZJc0h0",
+    sourceBytes: 49884677,
+    storage: "static-public-chunked",
+    durationSeconds: 1297.948,
+    transcript: "Not supplied",
+    roadmapTaskId: "12w-3-graph",
+    videoParts: [
+      "/video/replays/mock_coding_bfs-debugging_06.mp4.part-00",
+      "/video/replays/mock_coding_bfs-debugging_06.mp4.part-01",
+      "/video/replays/mock_coding_bfs-debugging_06.mp4.part-02",
+      "/video/replays/mock_coding_bfs-debugging_06.mp4.part-03",
+    ],
+  },
 ];
 
 export function findPracticeReplay(slug: string): PracticeReplay | null {
