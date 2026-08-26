@@ -346,6 +346,19 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(replayHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(replayHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-1-patterns["']/i);
 
+  const behavioralReplay = await request("/learn/practice/replays/behavioural-prioritizing-under-product-ambiguity-03", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(behavioralReplay.status, 200);
+  const behavioralHtml = await behavioralReplay.text();
+  const behavioralText = visibleText(behavioralHtml);
+  assert.match(behavioralText, /Prioritizing under product ambiguity/i);
+  assert.match(behavioralText, /Source unchanged/i);
+  assert.match(behavioralText, /Transcript \/ captions\s+Not supplied/i);
+  assert.match(behavioralHtml, /data-replay-part-count=["']3["']/i);
+  assert.doesNotMatch(behavioralHtml, /<iframe[^>]+drive\.google\.com/i);
+  assert.match(behavioralHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+
   const vaultLogin = await request("/api/demo-session", {
     method: "POST",
     headers: {

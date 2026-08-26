@@ -42,6 +42,3 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
-
-# Large replay assets are reconstructed from committed chunks before builds.
-/public/video/replays/mock_behavioral_ambiguity_03.mp4

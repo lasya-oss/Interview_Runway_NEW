@@ -11,10 +11,11 @@ export type PracticeReplay = {
   sourceFileId?: string;
   videoPath?: string;
   sourceBytes: number;
-  storage: "google-drive-api" | "static-public";
+  storage: "google-drive-api" | "static-public" | "static-public-chunked";
   durationSeconds?: number;
   transcript: "Not supplied";
   roadmapTaskId?: string;
+  videoParts?: readonly string[];
 };
 
 export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
@@ -46,10 +47,15 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     accessTier: "The Second Seat",
     videoPath: "/video/replays/mock_behavioral_ambiguity_03.mp4",
     sourceBytes: 42503540,
-    storage: "static-public",
+    storage: "static-public-chunked",
     durationSeconds: 1090,
     transcript: "Not supplied",
     roadmapTaskId: "4w-2-scope",
+    videoParts: [
+      "/video/replays/mock_behavioral_ambiguity_03.mp4.part-00",
+      "/video/replays/mock_behavioral_ambiguity_03.mp4.part-01",
+      "/video/replays/mock_behavioral_ambiguity_03.mp4.part-02",
+    ],
   },
 ];
 
