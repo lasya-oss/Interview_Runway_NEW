@@ -8,9 +8,11 @@ export type PracticeReplay = {
   objective: string;
   kind: "Mock interview replay";
   accessTier: "The Second Seat";
-  sourceFileId: string;
+  sourceFileId?: string;
+  videoPath?: string;
   sourceBytes: number;
-  storage: "google-drive-api";
+  storage: "google-drive-api" | "static-public";
+  durationSeconds?: number;
   transcript: "Not supplied";
   roadmapTaskId?: string;
 };
@@ -32,10 +34,32 @@ export const PRACTICE_REPLAYS: readonly PracticeReplay[] = [
     transcript: "Not supplied",
     roadmapTaskId: "4w-1-patterns",
   },
+  {
+    slug: "behavioural-prioritizing-under-product-ambiguity-03",
+    title: "Prioritizing under product ambiguity",
+    filename: "mock_behavioral_ambiguity_03.mp4",
+    category: "Behavioural",
+    collection: "Behavioural mock interview replays",
+    description: "A supplied behavioural replay focused on prioritising work when product requirements are ambiguous and outcomes still need to be owned.",
+    objective: "Study how the candidate frames an unclear product situation, explains the prioritisation decision, and connects execution choices to the outcome.",
+    kind: "Mock interview replay",
+    accessTier: "The Second Seat",
+    videoPath: "/video/replays/mock_behavioral_ambiguity_03.mp4",
+    sourceBytes: 42503540,
+    storage: "static-public",
+    durationSeconds: 1090,
+    transcript: "Not supplied",
+    roadmapTaskId: "4w-2-scope",
+  },
 ];
 
 export function findPracticeReplay(slug: string): PracticeReplay | null {
   return PRACTICE_REPLAYS.find((replay) => replay.slug === slug) ?? null;
+}
+
+export function getPracticeReplayNumber(slug: string): string {
+  const index = PRACTICE_REPLAYS.findIndex((replay) => replay.slug === slug);
+  return index >= 0 ? String(index + 1).padStart(2, "0") : "00";
 }
 
 export function formatMegabytes(bytes: number) {

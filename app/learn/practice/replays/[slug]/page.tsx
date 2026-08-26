@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { requireDemoProfile } from "@/app/lib/demo-session";
-import { findPracticeReplay, formatMegabytes } from "@/app/lib/practice-replays";
+import { findPracticeReplay, formatMegabytes, getPracticeReplayNumber } from "@/app/lib/practice-replays";
+import { findRoadmapTask } from "@/app/lib/roadmap-data";
 import { DriveReplayPlayer } from "../drive-replay-player";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +36,17 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
     );
   }
 
-  const workspaceUser = await getChatGPTUser();
+  const linkedRoadmapTask = replay.roadmapTaskId ? findRoadmapTask(replay.roadmapTaskId) : null;
+  const linkedRoadmapHref = linkedRoadmapTask
+    ? linkedRoadmapTask.learning.kind === "material"
+      ? `/learn/material/${linkedRoadmapTask.learning.slug}`
+      : `/learn/roadmap/task/${linkedRoadmapTask.id}`
+    : null;
+  const linkedRoadmapLabel = linkedRoadmapTask?.learning.kind === "material"
+    ? "Open linked learning material"
+    : "Open linked roadmap task";
+  const replayNumber = getPracticeReplayNumber(replay.slug);
+  const workspaceUser = replay.storage === "google-drive-api" ? await getChatGPTUser() : null;
 
   return (
     <MemberShell profile={profile} active="practice">
@@ -59,16 +70,24 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
 
         <div className="practice-replay-layout">
           <section className="practice-replay-player" aria-labelledby="practice-replay-player-title">
-            <div className="practice-replay-player-top"><span id="practice-replay-player-title">Replay / coding / 01</span><b>Source unchanged</b></div>
+            <div className="practice-replay-player-top"><span id="practice-replay-player-title">Replay / {replay.category.toLowerCase()} / {replayNumber}</span><b>Source unchanged</b></div>
             <div className="practice-replay-frame">
-              <DriveReplayPlayer
-                clientId={process.env.GOOGLE_CLIENT_ID?.trim() ?? ""}
-                fileId={replay.sourceFileId}
-                loginHint={workspaceUser?.email ?? null}
-                title={replay.title}
-              />
+              {replay.storage === "static-public" && replay.videoPath ? (
+                <video aria-label={`${replay.title} video`} controls playsInline preload="metadata" src={replay.videoPath} />
+              ) : (
+                <DriveReplayPlayer
+                  clientId={process.env.GOOGLE_CLIENT_ID?.trim() ?? ""}
+                  fileId={replay.sourceFileId ?? ""}
+                  loginHint={workspaceUser?.email ?? null}
+                  title={replay.title}
+                />
+              )}
             </div>
-            <p className="practice-replay-player-note">Playback uses your existing InterviewRunway sign-in and a read-only Google Drive permission for this replay. The original MP4 is not transcoded or edited by InterviewRunway.</p>
+            <p className="practice-replay-player-note">
+              {replay.storage === "static-public"
+                ? "This original MP4 is served directly by InterviewRunway, so it plays without a Google Drive sign-in or permission prompt. It is not transcoded or edited."
+                : "Playback uses your existing InterviewRunway sign-in and a read-only Google Drive permission for this replay. The original MP4 is not transcoded or edited by InterviewRunway."}
+            </p>
           </section>
 
           <aside className="practice-replay-notes">
@@ -88,11 +107,11 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
         <footer className="practice-replay-next-step">
           <div>
             <p className="member-kicker">Connected practice</p>
-            <h2>Use the replay to sharpen the pattern signal.</h2>
-            <p>This replay supplements the DSA baseline task; it does not replace the task’s learning brief or mark it complete.</p>
+            <h2>Use the replay to sharpen the {replay.category.toLowerCase()} signal.</h2>
+            <p>{linkedRoadmapTask ? `This replay supplements “${linkedRoadmapTask.title}”; it does not replace the task’s learning brief or mark it complete.` : "This replay is a practice supplement and does not mark a roadmap task complete."}</p>
           </div>
           <div className="practice-replay-next-actions">
-            {replay.roadmapTaskId ? <Link className="member-primary-button" href={`/learn/roadmap/task/${replay.roadmapTaskId}`}>Open linked roadmap task <span aria-hidden="true">↗</span></Link> : null}
+            {linkedRoadmapHref ? <Link className="member-primary-button" href={linkedRoadmapHref}>{linkedRoadmapLabel} <span aria-hidden="true">↗</span></Link> : null}
             <Link href="/learn/practice">Back to Practice</Link>
           </div>
         </footer>

@@ -14,9 +14,9 @@ export function PracticeReplayCollection() {
       </div>
 
       <div className="practice-replay-list">
-        {PRACTICE_REPLAYS.map((replay) => (
+        {PRACTICE_REPLAYS.map((replay, index) => (
           <article className="practice-replay-card" key={replay.slug}>
-            <div className="practice-replay-card-index"><span>01</span><i /></div>
+            <div className="practice-replay-card-index"><span>{String(index + 1).padStart(2, "0")}</span><i /></div>
             <div className="practice-replay-card-copy">
               <small>{replay.category} · {replay.kind}</small>
               <h3>{replay.title}</h3>
