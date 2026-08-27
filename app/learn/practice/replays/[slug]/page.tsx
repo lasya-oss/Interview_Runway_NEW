@@ -2,12 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
-import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { findPracticeReplay, formatMegabytes, getPracticeReplayNumber } from "@/app/lib/practice-replays";
 import { findRoadmapTask } from "@/app/lib/roadmap-data";
 import { ChunkedReplayPlayer } from "../chunked-replay-player";
-import { DriveReplayPlayer } from "../drive-replay-player";
 
 export const dynamic = "force-dynamic";
 
@@ -47,8 +45,6 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
     ? "Open linked learning material"
     : "Open linked roadmap task";
   const replayNumber = getPracticeReplayNumber(replay.slug);
-  const workspaceUser = replay.storage === "google-drive-api" ? await getChatGPTUser() : null;
-  const isStaticReplay = replay.storage === "static-public" || replay.storage === "static-public-chunked";
 
   return (
     <MemberShell profile={profile} active="practice">
@@ -76,21 +72,12 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
             <div className="practice-replay-frame">
               {replay.storage === "static-public" && replay.videoPath ? (
                 <video aria-label={`${replay.title} video`} controls playsInline preload="metadata" src={replay.videoPath} />
-              ) : replay.storage === "static-public-chunked" && replay.videoParts ? (
+              ) : replay.videoParts ? (
                 <ChunkedReplayPlayer parts={replay.videoParts} title={replay.title} />
-              ) : (
-                <DriveReplayPlayer
-                  clientId={process.env.GOOGLE_CLIENT_ID?.trim() ?? ""}
-                  fileId={replay.sourceFileId ?? ""}
-                  loginHint={workspaceUser?.email ?? null}
-                  title={replay.title}
-                />
-              )}
+              ) : null}
             </div>
             <p className="practice-replay-player-note">
-              {isStaticReplay
-                ? "This original MP4 is served directly by InterviewRunway, so it plays without a Google Drive sign-in or permission prompt. It is not transcoded or edited."
-                : "Playback uses your existing InterviewRunway sign-in and a read-only Google Drive permission for this replay. The original MP4 is not transcoded or edited by InterviewRunway."}
+              This original MP4 is served directly by InterviewRunway, so it plays without a Google Drive sign-in or permission prompt. It is not transcoded or edited.
             </p>
           </section>
 

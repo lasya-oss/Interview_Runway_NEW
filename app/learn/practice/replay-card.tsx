@@ -10,7 +10,7 @@ export function PracticeReplayCollection() {
           <h2 id="practice-replay-title">Mock interview replays.</h2>
           <p>Review a real supplied replay after your own attempt. These recordings are practice evidence, not teaching lessons or scored sessions.</p>
         </div>
-        <span>{PRACTICE_REPLAYS.length.toString().padStart(2, "0")} replay</span>
+        <span>{PRACTICE_REPLAYS.length.toString().padStart(2, "0")} replays</span>
       </div>
 
       <div className="practice-replay-list">

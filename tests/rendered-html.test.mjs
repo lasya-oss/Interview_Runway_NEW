@@ -361,6 +361,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal(practice.status, 200);
   const practiceHtml = await practice.text();
   assert.match(visibleText(practiceHtml), /Mock interview replays/i);
+  assert.match(visibleText(practiceHtml), /30 replays/i);
   assert.match(practiceHtml, /href=["'][^"']*\/learn\/practice\/replays\/coding-dynamic-programming-05["']/i);
 
   const replay = await request("/learn/practice/replays/coding-dynamic-programming-05", {
@@ -495,6 +496,44 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(conflictResolutionHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(conflictResolutionHtml, /<iframe[^>]+drive\.google\.com/i);
   assert.match(conflictResolutionHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+
+  const newlyIntegratedReplays = [
+    ["coding-heap-stream-04", "mock_coding_heap-stream_04.mp4", 4],
+    ["coding-intervals-02", "mock_coding_intervals_02.mp4", 3],
+    ["coding-sliding-window-01", "mock_coding_sliding-window_01.mp4", 4],
+    ["coding-topological-sort-03", "mock_coding_topological-sort_03.mp4", 4],
+    ["manager-api-migration-03", "mock_manager_api-migration_03.mp4", 4],
+    ["manager-async-execution-06", "mock_manager_async-execution_06.mp4", 4],
+    ["manager-backend-project-01", "mock_manager_backend-project_01.mp4", 4],
+    ["manager-frontend-performance-04", "mock_manager_frontend-performance_04.mp4", 4],
+    ["manager-incident-02", "mock_manager_incident_02.mp4", 4],
+    ["manager-quality-mentoring-05", "mock_manager_quality-mentoring_05.mp4", 5],
+    ["recruiter-data-short-tenure-05", "mock_recruiter_data-short-tenure_05.mp4", 3],
+    ["recruiter-frontend-growth-02", "mock_recruiter_frontend-growth_02.mp4", 2],
+    ["recruiter-fullstack-contractor-06", "mock_recruiter_fullstack-contractor_06.mp4", 3],
+    ["recruiter-platform-eor-03", "mock_recruiter_platform-eor_03.mp4", 3],
+    ["recruiter-remote-saas-backend-01", "mock_recruiter_remote-saas-backend_01.mp4", 3],
+    ["recruiter-services-to-product-04", "mock_recruiter_services-to-product_04.mp4", 2],
+    ["system-design-chat-04", "mock_sysdesign_chat_04.mp4", 4],
+    ["system-design-file-storage-06", "mock_sysdesign_file-storage_06.mp4", 5],
+    ["system-design-job-scheduler-05", "mock_sysdesign_job-scheduler_05.mp4", 5],
+    ["system-design-notification-platform-02", "mock_sysdesign_notification-platform_02.mp4", 5],
+    ["system-design-url-shortener-01", "mock_sysdesign_url-shortener_01.mp4", 5],
+    ["system-design-webhook-delivery-03", "mock_sysdesign_webhook-delivery_03.mp4", 4],
+  ];
+
+  for (const [slug, filename, partCount] of newlyIntegratedReplays) {
+    const integratedReplay = await request(`/learn/practice/replays/${slug}`, {
+      headers: { accept: "text/html", cookie: sessionCookie },
+    });
+    assert.equal(integratedReplay.status, 200, slug);
+    const integratedHtml = await integratedReplay.text();
+    assert.match(integratedHtml, new RegExp(`data-replay-part-count=["']${partCount}["']`, "i"), slug);
+    assert.ok(integratedHtml.includes(`/api/replay-assets/${filename}.part-00`), slug);
+    assert.doesNotMatch(integratedHtml, /data-google-drive-file-id=/i, slug);
+    assert.doesNotMatch(integratedHtml, /Allow replay access|Preparing the protected replay/i, slug);
+    assert.doesNotMatch(integratedHtml, /<iframe[^>]+drive\.google\.com/i, slug);
+  }
 
   const vaultLogin = await request("/api/demo-session", {
     method: "POST",
