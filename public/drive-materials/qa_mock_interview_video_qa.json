@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "expected": 1,
+  "found": 1,
+  "duration_hours": 0.236,
+  "results": [
+    {
+      "interview_id": "mock_recruiter_remote-saas-backend_01",
+      "checks": {
+        "status": true,
+        "not_publishable": true,
+        "natural_timing": true,
+        "logo_hash": true,
+        "photo_hash": true,
+        "timeline_hash": true,
+        "audio_hash": true,
+        "output_exists": true,
+        "background_hash": true,
+        "caption_hash": true,
+        "caption_events": true,
+        "output_hash": true,
+        "video_format": true,
+        "audio_format": true,
+        "av_duration": true
+      },
+      "duration_seconds": 848.3
+    }
+  ],
+  "errors": []
+}

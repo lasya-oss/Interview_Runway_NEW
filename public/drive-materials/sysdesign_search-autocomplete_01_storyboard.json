@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.search-autocomplete.01",
+  "filename": "sysdesign_search-autocomplete_01.mp4",
+  "title": "Design a Search Autocomplete",
+  "category": "sysdesign",
+  "topic": "search-autocomplete",
+  "target_duration_minutes": 14,
+  "transcript_word_count": 804,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Return low-latency prefix suggestions ranked by relevance and freshness.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Trie or search index",
+        "aggregation pipeline",
+        "personalization",
+        "typo handling",
+        "and cache tiers."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Offensive suggestions",
+        "trend spikes",
+        "stale rankings",
+        "and high-cardinality prefixes."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

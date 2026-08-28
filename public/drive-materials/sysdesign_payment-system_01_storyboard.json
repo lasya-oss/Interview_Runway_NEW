@@ -1,0 +1,85 @@
+{
+  "asset_id": "video.sysdesign.payment-system.01",
+  "filename": "sysdesign_payment-system_01.mp4",
+  "title": "Design a Payment System",
+  "category": "sysdesign",
+  "topic": "payment-system",
+  "target_duration_minutes": 14,
+  "transcript_word_count": 807,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Move money through an auditable state machine where retries never duplicate financial effects.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Ledger",
+        "authorization/capture",
+        "idempotency",
+        "reconciliation",
+        "webhooks",
+        "and compliance boundaries."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Double charge",
+        "lost webhook",
+        "ledger mismatch",
+        "partial refund",
+        "and provider outage."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

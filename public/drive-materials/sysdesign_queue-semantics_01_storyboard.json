@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.queue-semantics.01",
+  "filename": "sysdesign_queue-semantics_01.mp4",
+  "title": "Queue Delivery Semantics",
+  "category": "sysdesign",
+  "topic": "queue-semantics",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 802,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Choose delivery and ordering guarantees together with consumer idempotency and recovery behavior.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "At-most/at-least/exactly-once claims",
+        "partitions",
+        "acknowledgements",
+        "visibility timeout",
+        "and replay."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Duplicate effects",
+        "poison loops",
+        "reordering",
+        "and unbounded retention."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

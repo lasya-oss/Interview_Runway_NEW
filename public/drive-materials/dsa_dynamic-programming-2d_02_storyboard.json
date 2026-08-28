@@ -1,0 +1,82 @@
+{
+  "asset_id": "video.dsa.dynamic-programming-2d.02",
+  "filename": "dsa_dynamic-programming-2d_02.mp4",
+  "title": "2D Dynamic Programming: Worked interview problem",
+  "category": "dsa",
+  "topic": "dynamic-programming-2d",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 831,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Represent progress along two dimensions\u2014positions, capacities, or strings\u2014and reuse already solved cells.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "two sequences",
+        "grid paths",
+        "capacity plus item index",
+        "edit or alignment operations"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "Each cell answers the same question for a precisely smaller pair of dimensions.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "name both axes",
+        "derive predecessor cells",
+        "initialize first row and column",
+        "verify traversal order",
+        "separate reconstruction from score"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "Longest common subsequence compares final characters; equal characters extend the diagonal, otherwise take the better neighbor.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "Commonly O(rows \u00d7 columns) time and space; rolling rows can reduce memory when reconstruction is unnecessary.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "off-by-one indexing between strings and table",
+        "uninitialized boundaries",
+        "reading future cells",
+        "compressing before validating dependencies"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

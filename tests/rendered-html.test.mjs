@@ -423,6 +423,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(driveShelf, /aria-haspopup="dialog"/i);
   assert.match(driveShelf, /library-material-dialog/i);
   assert.match(driveShelf, /DRIVE_MATERIAL_CONTENT/i);
+  assert.match(driveShelf, /driveMaterialCompanionAssetHref/i);
   assert.doesNotMatch(driveShelf, /<Link\b/i);
   const pdfShelf = await readFile(
     new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
@@ -446,9 +447,10 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(visibleText(driveMaterialHtml), /Weekly Prep Tracker/i);
   assert.match(visibleText(driveMaterialHtml), /Editable Word templates/i);
   assert.match(visibleText(driveMaterialHtml), /Open material/i);
-  assert.match(visibleText(driveMaterialHtml), /will open here without a separate Drive sign-in/i);
+  assert.match(visibleText(driveMaterialHtml), /This document is available inside InterviewRunway/i);
+  assert.match(visibleText(driveMaterialHtml), /Save document/i);
   assert.match(driveMaterialHtml, /class="library-material-viewer"/i);
-  assert.match(driveMaterialHtml, /data-material-file-id="1RY9eae4F8Vl2B9q87oJTMePLYzOVXjY1"/i);
+  assert.match(driveMaterialHtml, /download="template_weekly-prep-tracker\.docx"/i);
   assert.doesNotMatch(visibleText(driveMaterialHtml), /Open in Drive/i);
   assert.doesNotMatch(driveMaterialHtml, /drive\.google\.com/i);
   assert.match(driveMaterialHtml, /Original file preserved/i);
@@ -470,6 +472,8 @@ test("demo sign-in issues a protected session and opens the learner product", as
     "utf8",
   );
   assert.match(materialViewer, /content\?: string \| null/i);
+  assert.match(materialViewer, /fallbackAssetUrl\?: string \| null/i);
+  assert.match(materialViewer, /Text companion preview/i);
   assert.match(materialViewer, /library-material-text/i);
   assert.match(materialViewer, /without a separate Drive sign-in/i);
   assert.doesNotMatch(materialViewer, /Allow material access/i);

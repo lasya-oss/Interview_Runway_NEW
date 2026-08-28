@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.backpressure.01",
+  "filename": "sysdesign_backpressure_01.mp4",
+  "title": "Backpressure and Load Shedding",
+  "category": "sysdesign",
+  "topic": "backpressure",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 808,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Make overload visible upstream so work is slowed, rejected, or degraded before queues become unbounded.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Bounded queues",
+        "admission control",
+        "priorities",
+        "concurrency limits",
+        "and load shedding."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Memory exhaustion",
+        "unfair shedding",
+        "retry amplification",
+        "and silent drops."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

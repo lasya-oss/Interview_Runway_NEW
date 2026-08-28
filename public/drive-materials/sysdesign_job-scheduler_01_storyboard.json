@@ -1,0 +1,84 @@
+{
+  "asset_id": "video.sysdesign.job-scheduler.01",
+  "filename": "sysdesign_job-scheduler_01.mp4",
+  "title": "Design a Distributed Job Scheduler",
+  "category": "sysdesign",
+  "topic": "job-scheduler",
+  "target_duration_minutes": 14,
+  "transcript_word_count": 807,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Execute durable jobs at or after a target time with ownership, retries, and visibility.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Time buckets",
+        "leasing",
+        "queues",
+        "idempotency",
+        "priorities",
+        "and backfill."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Duplicate execution",
+        "missed jobs",
+        "clock skew",
+        "and retry pileups."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

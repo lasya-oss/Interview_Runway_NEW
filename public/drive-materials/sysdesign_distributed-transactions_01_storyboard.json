@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.distributed-transactions.01",
+  "filename": "sysdesign_distributed-transactions_01.mp4",
+  "title": "Sagas and Distributed Transactions",
+  "category": "sysdesign",
+  "topic": "distributed-transactions",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 805,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Coordinate multi-service business changes using local commits, explicit state, and compensating actions.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Saga choreography vs orchestration",
+        "outbox",
+        "compensation",
+        "timeouts",
+        "and audit trail."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Irreversible steps",
+        "compensation failure",
+        "ambiguous ownership",
+        "and hidden coupling."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InterviewRunway Vault asset review",
+  "type": "object",
+  "required": [
+    "asset_id",
+    "source_review",
+    "technical_review",
+    "editorial_review",
+    "visual_qa",
+    "publishable"
+  ],
+  "properties": {
+    "asset_id": {"type": "string"},
+    "source_review": {"enum": ["not_started", "in_progress", "passed", "failed", "not_applicable"]},
+    "technical_review": {"enum": ["human_review_required", "passed", "changes_requested"]},
+    "editorial_review": {"enum": ["human_review_required", "passed", "changes_requested"]},
+    "visual_qa": {"enum": ["not_started", "passed", "failed"]},
+    "reviewer_name": {"type": ["string", "null"]},
+    "reviewed_at": {"type": ["string", "null"], "format": "date-time"},
+    "freshness_review_due": {"type": ["string", "null"], "format": "date"},
+    "notes": {"type": "array", "items": {"type": "string"}},
+    "publishable": {
+      "type": "boolean",
+      "default": false,
+      "description": "May become true only after every named human review and brand gate passes."
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,81 @@
+{
+  "asset_id": "video.dsa.heap-priority-queue.02",
+  "filename": "dsa_heap-priority-queue_02.mp4",
+  "title": "Heap and Priority Queue: Worked interview problem",
+  "category": "dsa",
+  "topic": "heap-priority-queue",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 840,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Keep the next best candidate accessible while updates cost logarithmic time instead of repeatedly sorting everything.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "top k",
+        "streaming minimum or maximum",
+        "merge sorted inputs",
+        "schedule next event"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "The root is the best element under the chosen ordering; heap contents are exactly the active candidates.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "choose min-heap or max-heap",
+        "store tie-breakers",
+        "bound heap size for top k",
+        "remove stale entries when using lazy deletion"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "For top k largest values, keep a min-heap of size k; its root is the cutoff.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "O(log k) per bounded update and O(k) space; full heap construction can be O(n).",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "reversing heap direction",
+        "unstable tuple comparisons",
+        "forgetting stale entries",
+        "sorting when incremental answers are required"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.chat-system.01",
+  "filename": "sysdesign_chat-system_01.mp4",
+  "title": "Design a Chat System",
+  "category": "sysdesign",
+  "topic": "chat-system",
+  "target_duration_minutes": 14,
+  "transcript_word_count": 802,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Deliver ordered-enough, durable conversations across intermittently connected clients.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Connection management",
+        "conversation partitioning",
+        "message IDs",
+        "delivery/read state",
+        "and offline sync."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Duplicate delivery",
+        "gaps",
+        "fan-out spikes",
+        "and presence storms."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "asset_id": "video.dsa.shortest-path.01",
+  "filename": "dsa_shortest-path_01.mp4",
+  "title": "Graph Shortest Path: Pattern recognition and reusable templates",
+  "category": "dsa",
+  "topic": "shortest-path",
+  "target_duration_minutes": 8,
+  "transcript_word_count": 842,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Expand paths in an order that guarantees a finalized distance cannot later improve.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "minimum weighted cost",
+        "nonnegative edges",
+        "few negative edges requiring another algorithm",
+        "path reconstruction"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "A popped non-stale Dijkstra entry has the smallest unsettled distance; finalized distances are optimal.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "classify edge weights",
+        "choose BFS, 0-1 BFS, Dijkstra, or Bellman-Ford",
+        "relax edges",
+        "skip stale heap entries",
+        "store parents if needed"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "Dijkstra pushes a new pair whenever dist[u] + weight improves dist[v]; stale older pairs are ignored on pop.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "Dijkstra with adjacency lists and a binary heap is O((V + E) log V); storage is O(V + E).",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "using Dijkstra with negative edges",
+        "marking visited on push",
+        "overflow in large distances",
+        "forgetting unreachable nodes"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

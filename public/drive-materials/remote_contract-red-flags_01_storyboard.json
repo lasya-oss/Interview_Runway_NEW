@@ -1,0 +1,84 @@
+{
+  "asset_id": "video.remote.contract-red-flags.01",
+  "filename": "remote_contract-red-flags_01.mp4",
+  "title": "Remote Contract Red Flags",
+  "category": "remote",
+  "topic": "contract-red-flags",
+  "target_duration_minutes": 8,
+  "transcript_word_count": 809,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Dated decision guide",
+      "bullets": [
+        "Contract Red Flags",
+        "Reviewed 2026-07-18",
+        "Verify official sources",
+        "Get professional advice"
+      ]
+    },
+    {
+      "title": "Engagement model",
+      "bullets": [
+        "Direct employee",
+        "Employer of record",
+        "Independent contractor",
+        "Actual terms over labels"
+      ]
+    },
+    {
+      "title": "Money path",
+      "bullets": [
+        "Invoice currency",
+        "Fees + FX spread",
+        "Settlement time",
+        "Payment records"
+      ]
+    },
+    {
+      "title": "Tax and GST questions",
+      "bullets": [
+        "Income classification",
+        "Advance tax",
+        "Export-of-services conditions",
+        "Professional review"
+      ]
+    },
+    {
+      "title": "Contract review",
+      "bullets": [
+        "Payment + termination",
+        "IP + confidentiality",
+        "Liability",
+        "Governing law"
+      ]
+    },
+    {
+      "title": "Location and visa",
+      "bullets": [
+        "Where work is performed",
+        "Company location policy",
+        "US physical work",
+        "Written permission"
+      ]
+    },
+    {
+      "title": "Compare the whole offer",
+      "bullets": [
+        "Cash after fees",
+        "Benefits + leave",
+        "Equity risk",
+        "Operating sustainability"
+      ]
+    },
+    {
+      "title": "Acceptance checklist",
+      "bullets": [
+        "Terms in writing",
+        "Qualified review",
+        "Document folder",
+        "90-day freshness check"
+      ]
+    }
+  ]
+}

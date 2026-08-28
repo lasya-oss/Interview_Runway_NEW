@@ -1,0 +1,82 @@
+{
+  "asset_id": "video.dsa.sliding-window.02",
+  "filename": "dsa_sliding-window_02.mp4",
+  "title": "Sliding Window: Worked interview problem",
+  "category": "dsa",
+  "topic": "sliding-window",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 850,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Represent a contiguous range with incrementally maintained state instead of recomputing every candidate.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "contiguous substring or subarray",
+        "longest or shortest valid range",
+        "fixed-size range",
+        "state can be updated at both ends"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "The state describes exactly the inclusive range from left through right, and the shrink loop restores validity.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "identify fixed versus variable length",
+        "define validity",
+        "add right once",
+        "shrink with a while loop",
+        "record at the correct moment"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "For longest substring with at most k distinct values, add right, shrink while distinct count exceeds k, then record length.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "O(n) because each element enters and leaves the window at most once; state is usually O(k) or O(alphabet).",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "using if instead of while",
+        "stale counts",
+        "recording before restoring validity",
+        "using monotonic-sum logic with negative values"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

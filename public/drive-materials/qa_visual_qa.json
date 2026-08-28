@@ -1,0 +1,21 @@
+{
+  "reviewed_at": "2026-07-18",
+  "scope": {
+    "pdf_pages_rendered": 938,
+    "docx_pages_rendered": 25,
+    "video_frames_rendered": 336,
+    "video_frame_sampling": "three frames from each of 112 videos"
+  },
+  "contact_sheets": {
+    "pdf": 38,
+    "docx": 1,
+    "video": 14
+  },
+  "result": "passed",
+  "defects_corrected": [
+    "Removed an unintended blank page after generic PDF covers.",
+    "Corrected the PDF QA renderer orientation before final inspection.",
+    "Replaced the mismatched yellow and category-specific accents with the website's #FF6B2C afterburner orange and #FF8A54 hot-orange variant."
+  ],
+  "publication_effect": "none; named human editorial and technical review remains required"
+}

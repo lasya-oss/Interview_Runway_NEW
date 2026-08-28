@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.database-indexing.01",
+  "filename": "sysdesign_database-indexing_01.mp4",
+  "title": "Database Indexing: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "database-indexing",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 810,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Trade write and storage cost for faster access paths aligned to real query predicates.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Composite order",
+        "selectivity",
+        "covering indexes",
+        "range scans",
+        "and maintenance."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Unused indexes",
+        "write amplification",
+        "low-selectivity scans",
+        "and query-plan drift."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

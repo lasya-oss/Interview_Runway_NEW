@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.data-modeling.01",
+  "filename": "sysdesign_data-modeling_01.mp4",
+  "title": "Interview-Ready Data Modeling",
+  "category": "sysdesign",
+  "topic": "data-modeling",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 805,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Shape entities and access paths around product invariants, query patterns, and change rates.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Keys",
+        "relationships",
+        "normalization",
+        "indexes",
+        "history",
+        "and tenancy."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Missing uniqueness constraints",
+        "unbounded collections",
+        "and schema that mirrors UI rather than domain."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

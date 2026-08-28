@@ -1,0 +1,65 @@
+{
+  "asset_id": "pdf.company.paypal",
+  "company": "PayPal",
+  "research_status": "requires_named_human_verification_before_publish",
+  "method": "Original practice prompts derived from public company product, engineering, careers, and role context. No verbatim proprietary question set was copied.",
+  "profile": {
+    "domain": "global digital payments",
+    "emphases": [
+      "risk",
+      "transaction systems",
+      "availability"
+    ]
+  },
+  "source_requirements": {
+    "minimum_independent_sources": 3,
+    "recent_source_required": true,
+    "verbatim_copy_prohibited": true
+  },
+  "sources": [
+    {
+      "url": "https://paypal.com/",
+      "publisher": "PayPal",
+      "source_type": "official_company",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    },
+    {
+      "url": "https://www.glassdoor.com/Interview/PayPal-Software-Engineer-Interview-Questions-EI_IE9848.0,6_KO7,24.htm",
+      "publisher": "glassdoor",
+      "source_type": "public_interview_discussion_or_guide",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    },
+    {
+      "url": "https://www.interviewquery.com/guides/paypal-software-engineer",
+      "publisher": "interviewquery.com",
+      "source_type": "public_interview_discussion_or_guide",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    },
+    {
+      "url": "https://medium.com/frontend-army/paypal-senior-software-engineer-interview-experience-2026-d7d7853906c5",
+      "publisher": "medium.com",
+      "source_type": "public_interview_discussion_or_guide",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    }
+  ],
+  "frequency_claims": [],
+  "exclusion_if_gate_fails": true,
+  "automated_collection": {
+    "query": "\"PayPal\" software engineer interview official careers engineering Glassdoor 2026",
+    "collected_at": "2026-07-18",
+    "candidate_count": 4,
+    "human_verification_complete": false
+  }
+}

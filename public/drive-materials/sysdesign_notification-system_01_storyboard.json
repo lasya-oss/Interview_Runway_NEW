@@ -1,0 +1,84 @@
+{
+  "asset_id": "video.sysdesign.notification-system.01",
+  "filename": "sysdesign_notification-system_01.mp4",
+  "title": "Design a Notification System",
+  "category": "sysdesign",
+  "topic": "notification-system",
+  "target_duration_minutes": 14,
+  "transcript_word_count": 806,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Accept notification intent and deliver through multiple channels with policy, retries, and preference enforcement.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Templates",
+        "routing",
+        "user preferences",
+        "deduplication",
+        "provider abstraction",
+        "and receipts."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Duplicate sends",
+        "provider outage",
+        "invalid tokens",
+        "and runaway campaigns."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

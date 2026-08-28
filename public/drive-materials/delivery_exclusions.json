@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-07-18T20:55:33.461306+00:00",
+  "excluded": [
+    {
+      "item": "Real mock interview recordings",
+      "reason": "Explicitly excluded by user; not generated, simulated, or represented as authentic."
+    },
+    {
+      "item": "Real student interview debriefs",
+      "reason": "Explicitly excluded by user; not generated, simulated, or represented as authentic."
+    },
+    {
+      "item": "Hume voice audio",
+      "reason": "Deferred by user; all video masters are intentionally silent and include transcripts/SRT."
+    }
+  ]
+}

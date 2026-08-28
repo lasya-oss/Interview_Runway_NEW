@@ -5955,6 +5955,10 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .library-material-audio audio { width: min(100%, 430px); margin-top: 9px; }
 .library-material-document p { max-width: 360px; margin: 0; color: #9eb1b8; font-size: 10px; line-height: 1.55; }
 .library-material-document a { margin-top: 7px; font-size: 9px; font-weight: 730; }
+.library-material-companion { flex: 1; min-height: 220px; display: flex; flex-direction: column; }
+.library-material-companion > span { margin-top: 18px; color: var(--afterburner); font-family: var(--font-mono); font-size: 8px; letter-spacing: .12em; text-transform: uppercase; }
+.library-material-companion > p { max-width: 680px; margin: 8px 0 0; color: #9eb1b8; font-size: 10px; line-height: 1.55; }
+.library-material-companion .library-material-text { max-height: 360px; min-height: 170px; margin-top: 14px; }
 .library-material-decision { max-width: 800px; }
 .library-record-meta > button.library-record-open { margin-top: 13px; padding: 0; border: 0; color: #983b1b; background: transparent; font: inherit; font-size: 9px; font-weight: 730; cursor: pointer; }
 .library-record-open span { display: inline-block; margin-left: 4px; transition: transform 180ms ease; }

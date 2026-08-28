@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { MemberShell } from "@/app/components/member-shell";
 import {
   driveMaterialCategory,
+  driveMaterialCompanionAssetHref,
   driveMaterialKindLabel,
   driveMaterialTitle,
+  driveMaterialPrimaryAssetHref,
   findDriveMaterial,
   formatMaterialSize,
   DRIVE_MATERIALS,
@@ -69,6 +71,8 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
                 mimeType={material.mimeType}
                 title={title}
                 content={DRIVE_MATERIAL_CONTENT[material.id]}
+                assetUrl={driveMaterialPrimaryAssetHref(material)}
+                fallbackAssetUrl={driveMaterialCompanionAssetHref(material)}
               />
             </div>
             <div className="material-stage-controls"><span>01</span><i><b /></i><span>{category}</span></div>

@@ -1,0 +1,82 @@
+{
+  "asset_id": "video.sysdesign.consistent-hashing.01",
+  "filename": "sysdesign_consistent-hashing_01.mp4",
+  "title": "Consistent Hashing: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "consistent-hashing",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 810,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Map keys to a ring so membership changes move only a bounded fraction of keys.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Virtual nodes",
+        "weighting",
+        "replication",
+        "membership propagation",
+        "and hotspot mitigation."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Uneven rings",
+        "correlated replicas",
+        "and churn during rebalancing."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

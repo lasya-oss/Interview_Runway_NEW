@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   driveMaterialCategory,
+  driveMaterialCompanionAssetHref,
   driveMaterialKindLabel,
+  driveMaterialPrimaryAssetHref,
   driveMaterialTitle,
   formatMaterialSize,
   type DriveMaterial,
@@ -163,6 +165,8 @@ export function DriveMaterialShelf({
                 mimeType={activeMaterial.mimeType}
                 title={driveMaterialTitle(activeMaterial.filename)}
                 content={DRIVE_MATERIAL_CONTENT[activeMaterial.id]}
+                assetUrl={driveMaterialPrimaryAssetHref(activeMaterial)}
+                fallbackAssetUrl={driveMaterialCompanionAssetHref(activeMaterial)}
               />
             </div>
           </div>

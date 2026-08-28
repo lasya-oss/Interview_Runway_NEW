@@ -1,0 +1,82 @@
+{
+  "asset_id": "video.sysdesign.thundering-herd.01",
+  "filename": "sysdesign_thundering-herd_01.mp4",
+  "title": "The Thundering Herd Problem",
+  "category": "sysdesign",
+  "topic": "thundering-herd",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 805,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Prevent many clients from repeating the same expensive work when shared state expires or a dependency recovers.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Jitter",
+        "single-flight",
+        "stale-while-revalidate",
+        "admission control",
+        "and warmup."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Synchronized TTLs",
+        "retry alignment",
+        "and recovery overload."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

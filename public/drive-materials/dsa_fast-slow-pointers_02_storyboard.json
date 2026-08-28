@@ -1,0 +1,81 @@
+{
+  "asset_id": "video.dsa.fast-slow-pointers.02",
+  "filename": "dsa_fast-slow-pointers_02.mp4",
+  "title": "Fast and Slow Pointers: Worked interview problem",
+  "category": "dsa",
+  "topic": "fast-slow-pointers",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 843,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Move two traversals at different speeds so their relative motion reveals cycles, midpoints, or phase boundaries.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "linked-list cycle",
+        "middle node",
+        "repeated state transition",
+        "constant-space sequence detection"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "Both pointers follow the same deterministic next relation; only their speed or restart position differs.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "guard every multi-step dereference",
+        "explain relative speed",
+        "separate detection from entry location",
+        "test odd and even lengths"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "After slow and fast meet in a cycle, reset one pointer to head and move both one step to find the entry.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "O(n) time and O(1) space for linked structures or deterministic state machines.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "unsafe fast.next.next access",
+        "returning the meeting point as the entry",
+        "misstating even-length midpoint",
+        "using it when transitions are nondeterministic"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

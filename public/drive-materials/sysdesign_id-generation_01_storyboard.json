@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.id-generation.01",
+  "filename": "sysdesign_id-generation_01.mp4",
+  "title": "Distributed ID Generation: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "id-generation",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 811,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Create unique, scalable identifiers with acceptable ordering, coordination, and information leakage.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "UUID variants",
+        "database sequences",
+        "Snowflake-style IDs",
+        "clock behavior",
+        "and shard locality."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Clock rollback",
+        "duplicate worker IDs",
+        "hotspotting",
+        "and guessable IDs."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

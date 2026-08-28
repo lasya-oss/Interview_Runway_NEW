@@ -1,0 +1,84 @@
+{
+  "asset_id": "video.sysdesign.api-gateway.01",
+  "filename": "sysdesign_api-gateway_01.mp4",
+  "title": "API Gateway: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "api-gateway",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 807,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Centralize edge concerns while keeping domain logic out of a potentially high-blast-radius tier.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Routing",
+        "auth",
+        "quotas",
+        "transformation",
+        "aggregation",
+        "and versioning."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Gateway bottlenecks",
+        "hidden coupling",
+        "policy drift",
+        "and cascading latency."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

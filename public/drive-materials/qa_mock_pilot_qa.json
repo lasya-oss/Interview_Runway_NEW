@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "category_count": 5,
+  "interview_count": 30,
+  "pilot_count": 2,
+  "pilots": [
+    {
+      "id": "mock_recruiter_remote-saas-backend_01",
+      "turns": 66,
+      "candidate_words": 1300,
+      "interviewer_words": 742,
+      "overlaps": 2,
+      "duration_target_minutes": 18
+    },
+    {
+      "id": "mock_sysdesign_webhook-delivery_03",
+      "turns": 101,
+      "candidate_words": 2814,
+      "interviewer_words": 965,
+      "overlaps": 3,
+      "duration_target_minutes": 35
+    }
+  ],
+  "errors": []
+}

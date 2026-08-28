@@ -1,0 +1,81 @@
+{
+  "asset_id": "video.dsa.monotonic-stack.01",
+  "filename": "dsa_monotonic-stack_01.mp4",
+  "title": "Monotonic Stack: Pattern recognition and reusable templates",
+  "category": "dsa",
+  "topic": "monotonic-stack",
+  "target_duration_minutes": 8,
+  "transcript_word_count": 834,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Keep unresolved candidates in monotonic order; a new value resolves every dominated candidate once.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "next greater or smaller",
+        "span",
+        "histogram area",
+        "nearest boundary"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "Stack indices remain monotonic by value and each stored index is still waiting for its resolving boundary.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "store indices",
+        "choose strict or non-strict comparison",
+        "resolve during pops",
+        "flush with a sentinel when necessary"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "For next greater element, pop smaller values when a larger value arrives and assign the current index as their answer.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "O(n) time because each index is pushed and popped at most once; O(n) space.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "wrong equality rule",
+        "storing values without positions",
+        "missing final flush",
+        "confusing previous and next boundaries"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

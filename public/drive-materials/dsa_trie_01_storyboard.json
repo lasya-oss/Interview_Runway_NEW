@@ -1,0 +1,81 @@
+{
+  "asset_id": "video.dsa.trie.01",
+  "filename": "dsa_trie_01.mp4",
+  "title": "Trie: Pattern recognition and reusable templates",
+  "category": "dsa",
+  "topic": "trie",
+  "target_duration_minutes": 8,
+  "transcript_word_count": 833,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Store strings by shared prefixes so lookup cost depends on key length rather than number of stored keys.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "prefix queries",
+        "dictionary word search",
+        "autocomplete",
+        "many string lookups with shared prefixes"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "The path from root to a node spells one prefix; an end marker distinguishes full words from prefixes.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "choose child representation",
+        "mark terminal nodes",
+        "separate exact and prefix search",
+        "consider memory tradeoffs"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "Autocomplete follows the query prefix, then enumerates terminal descendants subject to a result limit.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "O(L) insert and lookup for key length L; memory is proportional to stored prefix nodes.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "forgetting end markers",
+        "treating prefix as a full word",
+        "oversized fixed alphabets",
+        "unbounded enumeration after prefix match"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

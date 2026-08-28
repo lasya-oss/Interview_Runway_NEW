@@ -6331,6 +6331,34 @@ export function driveMaterialHref(material: Pick<DriveMaterial, "id" | "filename
   return "/learn/library/material/" + driveMaterialSlug(material);
 }
 
+export function driveMaterialAssetHref(filename: string) {
+  return "/drive-materials/" + encodeURIComponent(filename);
+}
+
+export function driveMaterialPrimaryAssetHref(material: Pick<DriveMaterial, "filename" | "kind">) {
+  // The source archive intentionally keeps the large media masters in Drive;
+  // use their mirrored text companions for an authorization-free preview.
+  if (material.kind === "narrated" || material.kind === "silent" || material.kind === "mock-audio") {
+    return null;
+  }
+  return driveMaterialAssetHref(material.filename);
+}
+
+export function driveMaterialCompanionFilename(material: Pick<DriveMaterial, "filename" | "kind">) {
+  if (material.kind === "narrated" || material.kind === "silent") {
+    return material.filename.replace(/\.mp4$/i, "_transcript.md");
+  }
+  if (material.kind === "mock-audio") {
+    return material.filename.replace(/\.m4a$/i, ".md");
+  }
+  return null;
+}
+
+export function driveMaterialCompanionAssetHref(material: Pick<DriveMaterial, "filename" | "kind">) {
+  const filename = driveMaterialCompanionFilename(material);
+  return filename ? driveMaterialAssetHref(filename) : null;
+}
+
 export function formatMaterialSize(bytes: number) {
   if (bytes >= 1_000_000_000) return (bytes / 1_000_000_000).toFixed(1) + " GB";
   if (bytes >= 1_000_000) return (bytes / 1_000_000).toFixed(1) + " MB";

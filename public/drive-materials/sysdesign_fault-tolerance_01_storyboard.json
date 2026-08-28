@@ -1,0 +1,84 @@
+{
+  "asset_id": "video.sysdesign.fault-tolerance.01",
+  "filename": "sysdesign_fault-tolerance_01.mp4",
+  "title": "Fault Tolerance: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "fault-tolerance",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 809,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Keep critical behavior within acceptable limits when dependencies, nodes, or regions fail.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Timeouts",
+        "retries",
+        "circuit breakers",
+        "bulkheads",
+        "redundancy",
+        "and graceful degradation."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Retry storms",
+        "correlated failure",
+        "false redundancy",
+        "and silent data loss."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

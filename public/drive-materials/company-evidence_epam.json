@@ -1,0 +1,47 @@
+{
+  "asset_id": "pdf.company.epam",
+  "company": "EPAM",
+  "research_status": "requires_named_human_verification_before_publish",
+  "method": "Original practice prompts derived from public company product, engineering, careers, and role context. No verbatim proprietary question set was copied.",
+  "profile": {
+    "domain": "global digital engineering services",
+    "emphases": [
+      "client delivery",
+      "system design",
+      "distributed teamwork"
+    ]
+  },
+  "source_requirements": {
+    "minimum_independent_sources": 3,
+    "recent_source_required": true,
+    "verbatim_copy_prohibited": true
+  },
+  "sources": [
+    {
+      "url": "https://epam.com/",
+      "publisher": "EPAM",
+      "source_type": "official_company",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    },
+    {
+      "url": "https://www.glassdoor.com/Interview/EPAM-Systems-Software-Engineer-Interview-Questions-EI_IE15544.0,12_KO13,30.htm",
+      "publisher": "glassdoor",
+      "source_type": "public_interview_discussion_or_guide",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    }
+  ],
+  "frequency_claims": [],
+  "exclusion_if_gate_fails": true,
+  "automated_collection": {
+    "query": "\"EPAM\" software engineer interview official careers engineering Glassdoor 2026",
+    "collected_at": "2026-07-18",
+    "candidate_count": 2,
+    "human_verification_complete": false
+  }
+}

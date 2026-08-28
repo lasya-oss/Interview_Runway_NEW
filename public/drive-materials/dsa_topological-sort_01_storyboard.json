@@ -1,0 +1,81 @@
+{
+  "asset_id": "video.dsa.topological-sort.01",
+  "filename": "dsa_topological-sort_01.mp4",
+  "title": "Topological Sort: Pattern recognition and reusable templates",
+  "category": "dsa",
+  "topic": "topological-sort",
+  "target_duration_minutes": 8,
+  "transcript_word_count": 811,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Order a directed acyclic graph so every prerequisite appears before what depends on it.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "prerequisites",
+        "build order",
+        "dependency scheduling",
+        "detect directed cycle"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "Every queued node currently has zero unresolved incoming dependencies.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "build adjacency and indegree",
+        "seed all zero-indegree nodes",
+        "decrement each outgoing edge once",
+        "compare output count with node count"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "Course Schedule succeeds when Kahn's algorithm emits all courses; a shorter output proves a cycle.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "O(V + E) time and space.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "reversing edge direction",
+        "missing isolated nodes",
+        "duplicate-edge indegree errors",
+        "using undirected cycle logic"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

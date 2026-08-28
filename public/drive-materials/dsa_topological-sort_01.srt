@@ -1,0 +1,191 @@
+1
+00:00:00,000 --> 00:00:09,950
+This lesson builds an interview-ready mental model for Topological Sort, with emphasis on recognition and reusable template. The
+
+2
+00:00:10,000 --> 00:00:19,950
+goal is not to memorize a code shape. The goal is to recognize when the pattern is justified,
+
+3
+00:00:20,000 --> 00:00:29,950
+name the invariant before implementation, and explain why every pointer, state update, or recursive step preserves correctness. The
+
+4
+00:00:30,000 --> 00:00:39,950
+core mental model is simple: Order a directed acyclic graph so every prerequisite appears before what depends on
+
+5
+00:00:40,000 --> 00:00:49,950
+it. During an interview, say the model out loud before touching the editor. That gives the interviewer a
+
+6
+00:00:50,000 --> 00:00:59,950
+testable plan and gives you a reference point when
+
+7
+00:01:00,000 --> 00:01:09,950
+edge cases appear. Strong cues include prerequisites, build order, dependency scheduling, and detect directed cycle. These phrases are
+
+8
+00:01:10,000 --> 00:01:19,950
+evidence, not proof. Translate the prompt into three questions: what part of the input is active, what summary
+
+9
+00:01:20,000 --> 00:01:29,950
+changes incrementally, and what decision lets you discard work permanently? If those answers line up with this pattern,
+
+10
+00:01:30,000 --> 00:01:39,950
+proceed. If the prompt requires arbitrary reordering, nonlocal updates, or a guarantee the pattern cannot provide, choose another
+
+11
+00:01:40,000 --> 00:01:49,950
+tool. A disciplined candidate explains both why a pattern fits and what would make it fail. Write the
+
+12
+00:01:50,000 --> 00:01:59,950
+invariant in one sentence: Every queued node currently has
+
+13
+00:02:00,000 --> 00:02:09,950
+zero unresolved incoming dependencies. Treat that sentence as a contract. Before the loop or recursion begins, show why
+
+14
+00:02:10,000 --> 00:02:19,950
+it is true. For every update, explain why it remains true. At termination, connect it directly to the
+
+15
+00:02:20,000 --> 00:02:29,950
+returned answer. This structure turns code narration into a short correctness proof. It also exposes common bugs early:
+
+16
+00:02:30,000 --> 00:02:39,950
+if a variable cannot be connected to the invariant, it may be unnecessary or updated at the wrong
+
+17
+00:02:40,000 --> 00:02:49,950
+time. Use this sequence: build adjacency and indegree, seed all zero-indegree nodes, decrement each outgoing edge once, and
+
+18
+00:02:50,000 --> 00:02:59,950
+compare output count with node count. Start with the
+
+19
+00:03:00,000 --> 00:03:09,950
+clearest correct implementation, then discuss optimization. Name boundary conventions explicitly. If duplicates, empty inputs, or invalid parameters change
+
+20
+00:03:10,000 --> 00:03:19,950
+behavior, decide that behavior before coding. Keep the implementation vocabulary aligned with your explanation: names such as left,
+
+21
+00:03:20,000 --> 00:03:29,950
+right, distance, parent, count, or best should describe their role, not their type. This makes the dry run
+
+22
+00:03:30,000 --> 00:03:39,950
+and test discussion much faster. Use this representative example: Course Schedule succeeds when Kahn's algorithm emits all courses;
+
+23
+00:03:40,000 --> 00:03:49,950
+a shorter output proves a cycle. Before calculating, predict what the state should mean after the first meaningful
+
+24
+00:03:50,000 --> 00:03:59,950
+step. Then trace at least one normal transition, one
+
+25
+00:04:00,000 --> 00:04:09,950
+boundary transition, and one transition that changes the best answer. Do not narrate every assignment. Narrate the decisions
+
+26
+00:04:10,000 --> 00:04:19,950
+that rule out alternatives. In a live interview, a small table with input position, active state, and current
+
+27
+00:04:20,000 --> 00:04:29,950
+answer is usually enough to make the reasoning visible. The target analysis is: O(V + E) time and
+
+28
+00:04:30,000 --> 00:04:39,950
+space. Explain the bound by counting operations, not by pointing at the visual nesting of loops. A nested
+
+29
+00:04:40,000 --> 00:04:49,950
+loop can still be linear when a pointer moves only forward across the entire execution. Conversely, a short
+
+30
+00:04:50,000 --> 00:04:59,950
+implementation can hide expensive copies, slicing, sorting, or repeated
+
+31
+00:05:00,000 --> 00:05:09,950
+hashing. State time, auxiliary space, output space when relevant, and the assumptions behind the bound. The most common
+
+32
+00:05:10,000 --> 00:05:19,950
+mistakes are reversing edge direction, missing isolated nodes, duplicate-edge indegree errors, and using undirected cycle logic. Test each
+
+33
+00:05:20,000 --> 00:05:29,950
+one deliberately. Use an empty input, a single item, all-equal values, no valid answer, an answer at the
+
+34
+00:05:30,000 --> 00:05:39,950
+first or last position, and the smallest input that forces the main state transition. For numeric problems, add
+
+35
+00:05:40,000 --> 00:05:49,950
+zero, negative values, and overflow-sized totals when the prompt permits them. A good final check is to restate
+
+36
+00:05:50,000 --> 00:05:59,950
+the invariant and verify every mutation preserves it. A
+
+37
+00:06:00,000 --> 00:06:09,950
+concise talk track is: I see Topological Sort because the prompt contains the relevant structural cues. My state
+
+38
+00:06:10,000 --> 00:06:19,950
+will represent the active portion of the input, and my invariant is the contract I just stated. I
+
+39
+00:06:20,000 --> 00:06:29,950
+will update one boundary or decision at a time, restore validity when necessary, and record the answer only
+
+40
+00:06:30,000 --> 00:06:39,950
+when the invariant guarantees it is meaningful. The resulting complexity follows from the bounded number of state transitions.
+
+41
+00:06:40,000 --> 00:06:49,950
+I will dry-run a boundary case before I call the solution complete. Practice in three passes. First, classify
+
+42
+00:06:50,000 --> 00:06:59,950
+six prompts without coding and write only the state
+
+43
+00:07:00,000 --> 00:07:09,950
+and invariant. Second, implement two canonical problems from a blank editor while speaking the proof. Third, take one
+
+44
+00:07:10,000 --> 00:07:19,950
+near-miss problem where this pattern looks tempting but is wrong, and explain the disqualifying condition. Revisit the set
+
+45
+00:07:20,000 --> 00:07:29,950
+after forty-eight hours. A pattern counts as learned only when you can identify it, reject it when inappropriate,
+
+46
+00:07:30,000 --> 00:07:39,950
+implement it, test it, and explain its complexity without notes. Finish by writing one new edge case and
+
+47
+00:07:40,000 --> 00:07:49,950
+predicting the result before running code; that prediction is evidence that the mental model, not the syntax, is
+
+48
+00:07:50,000 --> 00:07:59,950
+doing the work.

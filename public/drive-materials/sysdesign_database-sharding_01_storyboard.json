@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.database-sharding.01",
+  "filename": "sysdesign_database-sharding_01.mp4",
+  "title": "Database Sharding: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "database-sharding",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 805,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Partition data so storage and throughput scale beyond one database boundary.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Shard key",
+        "routing",
+        "rebalancing",
+        "cross-shard queries",
+        "and tenant isolation."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Hot shards",
+        "skew",
+        "resharding",
+        "and distributed transactions."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}
