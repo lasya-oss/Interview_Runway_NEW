@@ -406,7 +406,6 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const libraryHtml = await library.text();
   assert.match(visibleText(libraryHtml), /Drive PDF guides/i);
   assert.match(visibleText(libraryHtml), /320 guides available/i);
-  assert.match(libraryHtml, /href=["'][^"']*\/learn\/library\/material\/template-weekly-prep-tracker-[^"']*["'][^>]*>\s*Open\s*</i);
   assert.match(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
   assert.match(libraryHtml, /class="library-record library-pdf-record"/i);
   assert.match(visibleText(libraryHtml), /Original PDF/i);
@@ -414,9 +413,17 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(visibleText(libraryHtml), /Drive material archive/i);
   assert.match(visibleText(libraryHtml), /778 source records available/i);
   assert.match(visibleText(libraryHtml), /Weekly Prep Tracker/i);
-  assert.match(libraryHtml, /href=["'][^"']*\/learn\/library\/material\/template-weekly-prep-tracker-/i);
   assert.doesNotMatch(visibleText(libraryHtml), /sysdesign_url-shortener-walkthrough\.pdf/i);
   assert.doesNotMatch(libraryHtml, /<a[^>]+drive\.google\.com/i);
+  const driveShelf = await readFile(
+    new URL("../app/learn/library/drive-material-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(driveShelf, /className="library-record-open"/i);
+  assert.match(driveShelf, /aria-haspopup="dialog"/i);
+  assert.match(driveShelf, /library-material-dialog/i);
+  assert.match(driveShelf, /DRIVE_MATERIAL_CONTENT/i);
+  assert.doesNotMatch(driveShelf, /<Link\b/i);
   const pdfShelf = await readFile(
     new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
     "utf8",
@@ -445,6 +452,8 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(visibleText(driveMaterialHtml), /Open in Drive/i);
   assert.doesNotMatch(driveMaterialHtml, /drive\.google\.com/i);
   assert.match(driveMaterialHtml, /Original file preserved/i);
+  assert.doesNotMatch(visibleText(driveMaterialHtml), /Material context/i);
+  assert.doesNotMatch(driveMaterialHtml, /class="material-next-step"/i);
 
   const materialViewer = await readFile(
     new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
