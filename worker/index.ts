@@ -16,8 +16,10 @@ interface Env {
 }
 
 const REPLAY_ASSET_PATH = "/api/replay-assets/";
+const PDF_GUIDE_PATH = "/pdf-guides/";
 const REPLAY_ASSET_NAME = /^[a-z0-9-]+(?:_[a-z0-9-]+)*\.mp4\.part-\d{2}$/i;
 const REPLAY_VIDEO_NAME = /^[a-z0-9-]+(?:_[a-z0-9-]+)*\.mp4$/i;
+const PDF_GUIDE_NAME = /^[a-z0-9-]+(?:_[a-z0-9-]+)*\.pdf$/i;
 
 type ReplayPart = {
   key: string;
@@ -49,6 +51,40 @@ function replayVideoName(pathname: string): string | null {
     return null;
   }
   return REPLAY_VIDEO_NAME.test(name) ? name : null;
+}
+
+function pdfGuideName(pathname: string): string | null {
+  if (!pathname.startsWith(PDF_GUIDE_PATH)) return null;
+  let name: string;
+  try {
+    name = decodeURIComponent(pathname.slice(PDF_GUIDE_PATH.length));
+  } catch {
+    return null;
+  }
+  return PDF_GUIDE_NAME.test(name) ? name : null;
+}
+
+async function handlePdfGuide(request: Request, env: Env | undefined, ctx: ExecutionContext): Promise<Response> {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD" } });
+  }
+
+  // vinext's local production server does not provide Cloudflare bindings;
+  // let its asset handler serve the copied PDF during local verification.
+  if (!env?.ASSETS) return handler.fetch(request, env, ctx);
+
+  const assetResponse = await env.ASSETS.fetch(request);
+  if (!assetResponse.ok) return assetResponse;
+
+  const headers = new Headers(assetResponse.headers);
+  headers.set("content-type", "application/pdf");
+  headers.set("content-disposition", "inline");
+  headers.set("cache-control", "public, max-age=31536000, immutable");
+  return new Response(request.method === "HEAD" ? null : assetResponse.body, {
+    status: assetResponse.status,
+    statusText: assetResponse.statusText,
+    headers,
+  });
 }
 
 async function listReplayParts(env: Env, filename: string): Promise<readonly ReplayPart[]> {
@@ -216,6 +252,8 @@ const worker = {
 
     const assetName = replayAssetName(url.pathname);
     if (assetName) return handleReplayAsset(request, env, assetName);
+
+    if (pdfGuideName(url.pathname)) return handlePdfGuide(request, env, ctx);
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];

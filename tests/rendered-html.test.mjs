@@ -64,7 +64,11 @@ async function request(pathname = "/", init = {}, authenticated = true) {
     {
       ASSETS: {
         fetch: async (assetRequest) => {
-          void assetRequest;
+          if (new URL(assetRequest.url).pathname === "/pdf-guides/sysdesign_url-shortener-walkthrough.pdf") {
+            return new Response("%PDF-test", {
+              headers: { "content-type": "application/octet-stream", "content-length": "9" },
+            });
+          }
           return new Response("Not found", { status: 404 });
         },
       },
@@ -230,6 +234,18 @@ test("R2 replay videos stream as one range-capable MP4 without buffering every c
   assert.equal(await response.text(), "replay chunk");
 });
 
+test("PDF guides are served inline from first-party assets without Drive authorization", async () => {
+  const response = await request(
+    "/pdf-guides/sysdesign_url-shortener-walkthrough.pdf",
+    {},
+    false,
+  );
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "application/pdf");
+  assert.equal(response.headers.get("content-disposition"), "inline");
+  assert.equal(await response.text(), "%PDF-test");
+});
+
 const coreRoutes = [
   {
     pathname: "/vault",
@@ -381,6 +397,8 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(pdfShelf, /aria-haspopup="dialog"/i);
   assert.match(pdfShelf, /role="dialog"/i);
   assert.match(pdfShelf, /drivePdfPreviewHref\(activeGuide\.id\)/i);
+  assert.doesNotMatch(pdfShelf, /drive\.google\.com/i);
+  assert.match(pdfShelf, /pdf-guides/);
 
   const roadmap = await request("/learn/roadmap", {
     headers: { accept: "text/html", cookie: sessionCookie },

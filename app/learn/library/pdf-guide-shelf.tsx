@@ -132,7 +132,7 @@ export function PdfGuideShelf({
             <div className="library-pdf-dialog__viewer">
               <iframe
                 key={activeGuide.id}
-                src={drivePdfPreviewHref(activeGuide.id)}
+                src={drivePdfPreviewHref(activeGuide.id) ?? "about:blank"}
                 title={`PDF viewer for ${drivePdfTitle(activeGuide.filename)}`}
                 loading="eager"
                 allow="fullscreen"

@@ -327,7 +327,8 @@ export const DRIVE_PDF_GUIDES: readonly DrivePdfGuide[] = [
 ] as const;
 
 export function drivePdfPreviewHref(id: string) {
-  return `https://drive.google.com/file/d/${id}/preview?usp=drivesdk`;
+  const guide = DRIVE_PDF_GUIDES.find((candidate) => candidate.id === id);
+  return guide ? `/pdf-guides/${encodeURIComponent(guide.filename)}` : null;
 }
 
 const ACRONYMS: Record<string, string> = {
