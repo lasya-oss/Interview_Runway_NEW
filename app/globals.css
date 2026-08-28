@@ -5133,6 +5133,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .readiness-dial { width: 112px; height: 112px; }
   .member-command-grid, .signal-grid { grid-template-columns: 1fr; }
   .member-material-row { grid-template-columns: 1fr 1fr; }
+  .library-pdf-grid { grid-template-columns: 1fr 1fr; }
   .demo-login-layout { grid-template-columns: 1fr; gap: 50px; }
   .demo-login-intro { position: static; }
 }
@@ -5925,6 +5926,15 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .library-empty { min-height: 260px; display: grid; place-content: center; gap: 16px; text-align: center; }
 .library-empty strong { font-family: var(--font-display); font-size: 24px; }
 .library-empty button { border: 0; color: #963918; background: none; font-size: 10px; cursor: pointer; }
+.library-pdf-section { margin-top: 72px; }
+.library-pdf-section .member-section-heading > span { color: #788991; font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; }
+.library-pdf-grid { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.library-pdf-card { min-height: 190px; padding: 24px; display: flex; flex-direction: column; border: 1px solid rgba(31,65,78,.14); border-radius: 16px; color: inherit; background: rgba(255,255,255,.48); text-decoration: none; transition: transform 180ms var(--ease-out-expo), border-color 180ms ease, background 180ms ease; }
+.library-pdf-card:hover, .library-pdf-card:focus-visible { transform: translateY(-4px); border-color: rgba(255,107,44,.45); background: rgba(255,255,255,.72); }
+.library-pdf-card > span { color: #a6421d; font-family: var(--font-mono); font-size: 7px; letter-spacing: .06em; text-transform: uppercase; }
+.library-pdf-card strong { margin-top: 24px; font-family: var(--font-display); font-size: 21px; font-weight: 570; line-height: 1.08; letter-spacing: -.04em; }
+.library-pdf-card small { margin-top: 11px; overflow: hidden; color: #7a8b93; font-family: var(--font-mono); font-size: 7px; line-height: 1.5; text-overflow: ellipsis; white-space: nowrap; }
+.library-pdf-card b { margin-top: auto; padding-top: 20px; color: #983b1b; font-size: 9px; font-weight: 730; }
 
 /* Material workbench */
 
@@ -6222,6 +6232,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .library-record { grid-template-columns: 35px 1fr; }
   .library-record-meta { grid-column: 2; align-items: flex-start; text-align: left; }
   .library-record-meta > i { max-width: 180px; }
+  .library-pdf-grid { grid-template-columns: 1fr; }
   .material-stage { min-height: 500px; padding: 25px; }
   .material-stage-visual { margin-inline: -25px; }
   .material-stage-top { align-items: flex-start; flex-direction: column; }

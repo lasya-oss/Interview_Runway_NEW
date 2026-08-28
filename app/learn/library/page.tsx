@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MemberShell } from "@/app/components/member-shell";
+import { DRIVE_PDF_GUIDES } from "@/app/lib/drive-pdf-guides";
 import { LEARNING_MATERIALS } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { LibraryClient } from "./library-client";
@@ -17,7 +18,7 @@ export default async function LibraryPage() {
   return (
     <MemberShell profile={profile} active="library">
       <div className="member-page">
-        <LibraryClient profileId={profile.id} materials={LEARNING_MATERIALS} />
+        <LibraryClient profileId={profile.id} materials={LEARNING_MATERIALS} pdfGuides={DRIVE_PDF_GUIDES} />
       </div>
     </MemberShell>
   );

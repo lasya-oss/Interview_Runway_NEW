@@ -361,6 +361,15 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(dashboardText, /Demo workspace · sample learner data/i);
   assert.doesNotMatch(dashboardText, /fictional learner data/i);
 
+  const library = await request("/learn/library", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(library.status, 200);
+  const libraryHtml = await library.text();
+  assert.match(visibleText(libraryHtml), /Drive PDF guides/i);
+  assert.match(visibleText(libraryHtml), /320 guides available/i);
+  assert.match(libraryHtml, /https:\/\/drive\.google\.com\/file\/d\/1qEuogOoczDyUOl7mHcci43gzSwBbmDXy\/view/i);
+
   const roadmap = await request("/learn/roadmap", {
     headers: { accept: "text/html", cookie: sessionCookie },
   });
