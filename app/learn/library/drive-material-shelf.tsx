@@ -21,11 +21,17 @@ export function DriveMaterialShelf({
   startNumber: number;
 }) {
   const [activeMaterial, setActiveMaterial] = useState<DriveMaterial | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const viewerRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
 
   const closeViewer = useCallback(() => {
+    if (document.fullscreenElement === viewerRef.current) {
+      void document.exitFullscreen?.().catch(() => undefined);
+    }
+    setIsFullscreen(false);
     setActiveMaterial(null);
     window.requestAnimationFrame(() => returnFocusRef.current?.focus());
   }, []);
@@ -35,12 +41,21 @@ export function DriveMaterialShelf({
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const syncFullscreenState = () => {
+      setIsFullscreen(document.fullscreenElement === viewerRef.current);
+    };
+    syncFullscreenState();
     window.requestAnimationFrame(() => closeRef.current?.focus());
+    document.addEventListener("fullscreenchange", syncFullscreenState);
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        closeViewer();
+        if (document.fullscreenElement === viewerRef.current) {
+          void document.exitFullscreen?.().catch(() => undefined);
+        } else {
+          closeViewer();
+        }
         return;
       }
 
@@ -66,11 +81,27 @@ export function DriveMaterialShelf({
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("fullscreenchange", syncFullscreenState);
     };
   }, [activeMaterial, closeViewer]);
 
+  const toggleFullscreen = useCallback(() => {
+    const viewer = viewerRef.current;
+    if (!viewer) return;
+
+    if (document.fullscreenElement === viewer) {
+      void document.exitFullscreen?.().catch(() => undefined);
+      return;
+    }
+
+    if (typeof viewer.requestFullscreen === "function") {
+      void viewer.requestFullscreen().catch(() => undefined);
+    }
+  }, []);
+
   const openViewer = (material: DriveMaterial, trigger: HTMLButtonElement) => {
     returnFocusRef.current = trigger;
+    setIsFullscreen(false);
     setActiveMaterial(material);
   };
 
@@ -127,7 +158,7 @@ export function DriveMaterialShelf({
     </section>
     {activeMaterial ? (
       <div
-        className="library-material-dialog"
+        className={`library-material-dialog${isFullscreen ? " is-fullscreen" : ""}`}
         onMouseDown={(event) => {
           if (event.target === event.currentTarget) closeViewer();
         }}
@@ -147,12 +178,21 @@ export function DriveMaterialShelf({
               <p id="library-material-dialog-description">Open the material here without leaving InterviewRunway or authorizing Google Drive.</p>
             </div>
             <div className="library-pdf-dialog__actions">
+              <button
+                className="library-pdf-dialog__fullscreen"
+                type="button"
+                onClick={toggleFullscreen}
+                aria-label={isFullscreen ? "Exit full screen" : "Open PDF in full screen"}
+                title={isFullscreen ? "Exit full screen" : "Open PDF in full screen"}
+              >
+                <span aria-hidden="true">⛶</span>
+              </button>
               <button className="library-pdf-dialog__close" ref={closeRef} type="button" onClick={closeViewer} aria-label="Close material viewer">
                 <span>CLOSE</span><b aria-hidden="true">×</b>
               </button>
             </div>
           </header>
-          <div className="library-material-dialog__body">
+          <div ref={viewerRef} className="library-material-dialog__body">
             <div className="library-material-viewer">
               <div className="library-material-viewer-label">
                 <span>Open material</span>

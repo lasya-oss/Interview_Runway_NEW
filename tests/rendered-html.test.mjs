@@ -447,11 +447,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(visibleText(driveMaterialHtml), /Weekly Prep Tracker/i);
   assert.match(visibleText(driveMaterialHtml), /Editable Word templates/i);
   assert.match(visibleText(driveMaterialHtml), /Open material/i);
-  assert.match(visibleText(driveMaterialHtml), /Document preview/i);
-  assert.match(visibleText(driveMaterialHtml), /Read the document here/i);
-  assert.match(visibleText(driveMaterialHtml), /Loading the material inside InterviewRunway/i);
+  assert.match(visibleText(driveMaterialHtml), /PDF Preparing the PDF preview inside InterviewRunway/i);
   assert.match(driveMaterialHtml, /class="library-material-viewer"/i);
-  assert.match(driveMaterialHtml, /download="template_weekly-prep-tracker\.docx"/i);
+  assert.match(driveMaterialHtml, /class="library-material-pdf-state library-material-state"/i);
   assert.doesNotMatch(visibleText(driveMaterialHtml), /Open in Drive/i);
   assert.doesNotMatch(driveMaterialHtml, /drive\.google\.com/i);
   assert.match(driveMaterialHtml, /Original file preserved/i);
@@ -463,9 +461,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   });
   assert.equal(vaultReadme.status, 200);
   const vaultReadmeHtml = await vaultReadme.text();
-  assert.match(visibleText(vaultReadmeHtml), /InterviewRunway Vault production workspace/i);
-  assert.match(visibleText(vaultReadmeHtml), /Built delivery/i);
-  assert.match(vaultReadmeHtml, /library-material-text/i);
+  assert.match(visibleText(vaultReadmeHtml), /PDF Preparing the PDF preview inside InterviewRunway/i);
+  assert.match(vaultReadmeHtml, /class="library-material-pdf-state library-material-state"/i);
+  assert.doesNotMatch(vaultReadmeHtml, /class="library-material-text"/i);
   assert.doesNotMatch(visibleText(vaultReadmeHtml), /catalogued in InterviewRunway/i);
 
   const materialViewer = await readFile(
@@ -474,14 +472,18 @@ test("demo sign-in issues a protected session and opens the learner product", as
   );
   assert.match(materialViewer, /content\?: string \| null/i);
   assert.match(materialViewer, /fallbackAssetUrl\?: string \| null/i);
-  assert.match(materialViewer, /Text companion preview/i);
-  assert.match(materialViewer, /Document preview/i);
+  assert.match(materialViewer, /createTextPdf/i);
+  assert.match(materialViewer, /application\/pdf/i);
+  assert.match(materialViewer, /library-material-pdf-frame/i);
+  assert.match(materialViewer, /PDF preview for/i);
   assert.doesNotMatch(materialViewer, /catalogued in InterviewRunway and will open here/i);
-  assert.match(materialViewer, /library-material-text/i);
-  assert.match(materialViewer, /without a separate Drive sign-in/i);
+  assert.match(materialViewer, /in-app PDF preview/i);
   assert.doesNotMatch(materialViewer, /Allow material access/i);
   assert.doesNotMatch(materialViewer, /requestAccessToken|accounts\.oauth2|Authorization:.*Bearer/i);
   assert.doesNotMatch(materialViewer, /drive\.google\.com/i);
+  assert.match(driveShelf, /library-pdf-dialog__fullscreen/i);
+  assert.match(driveShelf, /requestFullscreen\(\)/i);
+  assert.match(driveShelf, /fullscreenchange/i);
 
   const roadmap = await request("/learn/roadmap", {
     headers: { accept: "text/html", cookie: sessionCookie },
