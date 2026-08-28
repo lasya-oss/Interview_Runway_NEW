@@ -135,7 +135,7 @@ export function PdfGuideShelf({
 
       {activeGuide ? (
         <div
-          className="library-pdf-dialog"
+          className={`library-pdf-dialog${isFullscreen ? " is-fullscreen" : ""}`}
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeViewer();
           }}

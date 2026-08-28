@@ -263,6 +263,8 @@ test("PDF viewer shows a record header and user-controlled fullscreen option", a
   assert.match(pdfShelf, /viewer\.requestFullscreen\(\)/);
   assert.match(pdfShelf, /viewerRef/);
   assert.match(styles, /\.library-pdf-dialog__viewer:fullscreen\s*\{[^}]*padding:\s*0;/);
+  assert.match(pdfShelf, /library-pdf-dialog\$\{isFullscreen/);
+  assert.match(styles, /\.library-pdf-dialog\.is-fullscreen \.library-pdf-dialog__header\s*\{[^}]*display:\s*none;/);
   assert.doesNotMatch(pdfShelf, /document\.documentElement\.requestFullscreen\(\)/);
 });
 
