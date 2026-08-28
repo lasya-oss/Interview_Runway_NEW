@@ -11,6 +11,7 @@ import {
   DRIVE_MATERIALS,
 } from "@/app/lib/drive-materials";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { DRIVE_MATERIAL_CONTENT } from "@/app/lib/drive-material-content";
 import { MaterialViewer } from "../../material-viewer";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +44,6 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
   const kind = driveMaterialKindLabel(material.kind);
   const title = driveMaterialTitle(material.filename);
   const number = materialNumber(material.id);
-  const clientId = process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
 
   return (
     <MemberShell profile={profile} active="library">
@@ -72,11 +72,11 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
               <div className="library-material-viewer-label"><span>Open material</span><b>{kind}</b></div>
               <h2 id="drive-material-stage-title">{title}</h2>
               <MaterialViewer
-                clientId={clientId}
                 fileId={material.id}
                 filename={material.filename}
                 mimeType={material.mimeType}
                 title={title}
+                content={DRIVE_MATERIAL_CONTENT[material.id]}
               />
             </div>
             <p>Material context</p>

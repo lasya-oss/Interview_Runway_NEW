@@ -439,9 +439,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(visibleText(driveMaterialHtml), /Weekly Prep Tracker/i);
   assert.match(visibleText(driveMaterialHtml), /Editable Word templates/i);
   assert.match(visibleText(driveMaterialHtml), /Open material/i);
-  assert.match(visibleText(driveMaterialHtml), /Preparing this material inside InterviewRunway/i);
+  assert.match(visibleText(driveMaterialHtml), /will open here without a separate Drive sign-in/i);
   assert.match(driveMaterialHtml, /class="library-material-viewer"/i);
-  assert.match(driveMaterialHtml, /data-google-drive-file-id="1RY9eae4F8Vl2B9q87oJTMePLYzOVXjY1"/i);
+  assert.match(driveMaterialHtml, /data-material-file-id="1RY9eae4F8Vl2B9q87oJTMePLYzOVXjY1"/i);
   assert.doesNotMatch(visibleText(driveMaterialHtml), /Open in Drive/i);
   assert.doesNotMatch(driveMaterialHtml, /drive\.google\.com/i);
   assert.match(driveMaterialHtml, /Original file preserved/i);
@@ -450,10 +450,11 @@ test("demo sign-in issues a protected session and opens the learner product", as
     new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(materialViewer, /alt=media/i);
+  assert.match(materialViewer, /content\?: string \| null/i);
   assert.match(materialViewer, /library-material-text/i);
-  assert.match(materialViewer, /library-material-media/i);
-  assert.match(materialViewer, /Allow material access/i);
+  assert.match(materialViewer, /without a separate Drive sign-in/i);
+  assert.doesNotMatch(materialViewer, /Allow material access/i);
+  assert.doesNotMatch(materialViewer, /requestAccessToken|accounts\.oauth2|Authorization:.*Bearer/i);
   assert.doesNotMatch(materialViewer, /drive\.google\.com/i);
 
   const roadmap = await request("/learn/roadmap", {
