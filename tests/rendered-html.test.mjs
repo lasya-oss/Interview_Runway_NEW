@@ -455,6 +455,16 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(visibleText(driveMaterialHtml), /Material context/i);
   assert.doesNotMatch(driveMaterialHtml, /class="material-next-step"/i);
 
+  const vaultReadme = await request("/learn/library/material/vault-readme-md-nqbojpax", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(vaultReadme.status, 200);
+  const vaultReadmeHtml = await vaultReadme.text();
+  assert.match(visibleText(vaultReadmeHtml), /InterviewRunway Vault production workspace/i);
+  assert.match(visibleText(vaultReadmeHtml), /Built delivery/i);
+  assert.match(vaultReadmeHtml, /library-material-text/i);
+  assert.doesNotMatch(visibleText(vaultReadmeHtml), /catalogued in InterviewRunway/i);
+
   const materialViewer = await readFile(
     new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
     "utf8",
