@@ -368,7 +368,15 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const libraryHtml = await library.text();
   assert.match(visibleText(libraryHtml), /Drive PDF guides/i);
   assert.match(visibleText(libraryHtml), /320 guides available/i);
-  assert.match(libraryHtml, /https:\/\/drive\.google\.com\/file\/d\/1qEuogOoczDyUOl7mHcci43gzSwBbmDXy\/view/i);
+  assert.match(visibleText(libraryHtml), /Read inside InterviewRunway/i);
+  assert.doesNotMatch(libraryHtml, /<a[^>]+drive\.google\.com/i);
+  const pdfShelf = await readFile(
+    new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(pdfShelf, /aria-haspopup="dialog"/i);
+  assert.match(pdfShelf, /role="dialog"/i);
+  assert.match(pdfShelf, /drivePdfPreviewHref\(activeGuide\.id\)/i);
 
   const roadmap = await request("/learn/roadmap", {
     headers: { accept: "text/html", cookie: sessionCookie },

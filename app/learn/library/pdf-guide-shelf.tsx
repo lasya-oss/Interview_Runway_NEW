@@ -1,0 +1,131 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  drivePdfCategory,
+  drivePdfPreviewHref,
+  drivePdfTitle,
+  type DrivePdfGuide,
+} from "@/app/lib/drive-pdf-guides";
+
+export function PdfGuideShelf({ guides }: { guides: readonly DrivePdfGuide[] }) {
+  const [activeGuide, setActiveGuide] = useState<DrivePdfGuide | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLButtonElement | null>(null);
+
+  const closeViewer = useCallback(() => {
+    setActiveGuide(null);
+    window.requestAnimationFrame(() => returnFocusRef.current?.focus());
+  }, []);
+
+  useEffect(() => {
+    if (!activeGuide) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => closeRef.current?.focus());
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeViewer();
+        return;
+      }
+
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [activeGuide, closeViewer]);
+
+  const openViewer = (guide: DrivePdfGuide, trigger: HTMLButtonElement) => {
+    returnFocusRef.current = trigger;
+    setActiveGuide(guide);
+  };
+
+  return (
+    <>
+      <div className="library-pdf-grid">
+        {guides.map((guide) => (
+          <button
+            className="library-pdf-card"
+            key={guide.id}
+            type="button"
+            onClick={(event) => openViewer(guide, event.currentTarget)}
+            aria-haspopup="dialog"
+          >
+            <span>PDF · {drivePdfCategory(guide.filename)}</span>
+            <strong>{drivePdfTitle(guide.filename)}</strong>
+            <small>{guide.filename}</small>
+            <b>Read inside InterviewRunway <span aria-hidden="true">→</span></b>
+          </button>
+        ))}
+      </div>
+
+      {activeGuide ? (
+        <div
+          className="library-pdf-dialog"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeViewer();
+          }}
+        >
+          <div
+            ref={dialogRef}
+            className="library-pdf-dialog__surface"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="library-pdf-viewer-title"
+            aria-describedby="library-pdf-viewer-description"
+          >
+            <header className="library-pdf-dialog__header">
+              <div>
+                <span>INTERVIEWRUNWAY / PDF GUIDE</span>
+                <h2 id="library-pdf-viewer-title">{drivePdfTitle(activeGuide.filename)}</h2>
+                <p id="library-pdf-viewer-description">Read the original guide here without leaving the InterviewRunway workspace.</p>
+              </div>
+              <button ref={closeRef} type="button" onClick={closeViewer} aria-label="Close PDF viewer">
+                <span>CLOSE</span><b aria-hidden="true">×</b>
+              </button>
+            </header>
+
+            <div className="library-pdf-dialog__viewer">
+              <iframe
+                key={activeGuide.id}
+                src={drivePdfPreviewHref(activeGuide.id)}
+                title={`PDF viewer for ${drivePdfTitle(activeGuide.filename)}`}
+                loading="eager"
+                allow="fullscreen"
+                allowFullScreen
+              />
+            </div>
+
+            <footer className="library-pdf-dialog__footer">
+              <span>{activeGuide.filename}</span>
+              <small>Original PDF · embedded in this workspace</small>
+            </footer>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}

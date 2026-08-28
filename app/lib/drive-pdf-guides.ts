@@ -326,8 +326,8 @@ export const DRIVE_PDF_GUIDES: readonly DrivePdfGuide[] = [
   { id: "1fTZJJqRqqAaFFJTL_xr6WfnGfueUBmAZ", filename: "behavioral_ambiguity-answer-lab.pdf" },
 ] as const;
 
-export function drivePdfHref(id: string) {
-  return `https://drive.google.com/file/d/${id}/view?usp=drivesdk`;
+export function drivePdfPreviewHref(id: string) {
+  return `https://drive.google.com/file/d/${id}/preview?usp=drivesdk`;
 }
 
 const ACRONYMS: Record<string, string> = {

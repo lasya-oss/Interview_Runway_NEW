@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
-import { drivePdfCategory, drivePdfHref, drivePdfTitle, type DrivePdfGuide } from "@/app/lib/drive-pdf-guides";
+import { drivePdfCategory, drivePdfTitle, type DrivePdfGuide } from "@/app/lib/drive-pdf-guides";
 import type { DemoTier, LearningMaterial } from "@/app/lib/demo-data";
+import { PdfGuideShelf } from "./pdf-guide-shelf";
 
 const TIER_ORDER: Record<DemoTier, number> = { foundation: 0, practice: 1, premium: 2 };
 
@@ -57,7 +58,7 @@ export function LibraryClient({
         <div>
           <p className="member-kicker">Member material library</p>
           <h1>Everything has a place in the plan.</h1>
-          <p>Search the library by the interview decision it helps you make. The PDF guide shelf below opens the original Drive material in its viewer, while the learning records show the product structure around it.</p>
+          <p>Search the library by the interview decision it helps you make. The PDF guide shelf below opens the original material in an in-app viewer, while the learning records show the product structure around it.</p>
         </div>
         <div className="library-index" aria-label="Sample catalogue summary">
           <strong>{(materials.length + pdfGuides.length).toString().padStart(2, "0")}</strong>
@@ -130,16 +131,7 @@ export function LibraryClient({
             </div>
             <span>{pdfResults.length} guides available</span>
           </div>
-          <div className="library-pdf-grid">
-            {pdfResults.map((guide) => (
-              <a className="library-pdf-card" href={drivePdfHref(guide.id)} target="_blank" rel="noreferrer" key={guide.id}>
-                <span>PDF · {drivePdfCategory(guide.filename)}</span>
-                <strong>{drivePdfTitle(guide.filename)}</strong>
-                <small>{guide.filename}</small>
-                <b>Open in Drive viewer ↗</b>
-              </a>
-            ))}
-          </div>
+          <PdfGuideShelf guides={pdfResults} />
         </section>
       ) : null}
     </div>
