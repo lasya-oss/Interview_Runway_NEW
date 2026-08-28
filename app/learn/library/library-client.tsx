@@ -131,7 +131,7 @@ export function LibraryClient({
             </div>
             <span>{pdfResults.length} guides available</span>
           </div>
-          <PdfGuideShelf guides={pdfResults} />
+          <PdfGuideShelf guides={pdfResults} startNumber={materials.length + 1} />
         </section>
       ) : null}
     </div>

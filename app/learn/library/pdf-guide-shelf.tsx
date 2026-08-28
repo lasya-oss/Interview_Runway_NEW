@@ -8,7 +8,13 @@ import {
   type DrivePdfGuide,
 } from "@/app/lib/drive-pdf-guides";
 
-export function PdfGuideShelf({ guides }: { guides: readonly DrivePdfGuide[] }) {
+export function PdfGuideShelf({
+  guides,
+  startNumber,
+}: {
+  guides: readonly DrivePdfGuide[];
+  startNumber: number;
+}) {
   const [activeGuide, setActiveGuide] = useState<DrivePdfGuide | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -65,21 +71,36 @@ export function PdfGuideShelf({ guides }: { guides: readonly DrivePdfGuide[] }) 
 
   return (
     <>
-      <div className="library-pdf-grid">
-        {guides.map((guide) => (
-          <button
-            className="library-pdf-card"
-            key={guide.id}
-            type="button"
-            onClick={(event) => openViewer(guide, event.currentTarget)}
-            aria-haspopup="dialog"
-          >
-            <span>PDF · {drivePdfCategory(guide.filename)}</span>
-            <strong>{drivePdfTitle(guide.filename)}</strong>
-            <small>{guide.filename}</small>
-            <b>Read inside InterviewRunway <span aria-hidden="true">→</span></b>
-          </button>
-        ))}
+      <div className="library-record-list library-pdf-record-list">
+        {guides.map((guide, index) => {
+          const title = drivePdfTitle(guide.filename);
+          const category = drivePdfCategory(guide.filename);
+
+          return (
+            <button
+              className="library-record library-pdf-record"
+              key={guide.id}
+              type="button"
+              onClick={(event) => openViewer(guide, event.currentTarget)}
+              aria-haspopup="dialog"
+              aria-label={`Read ${title} inside InterviewRunway`}
+            >
+              <span className="library-record-number">{String(startNumber + index).padStart(2, "0")}</span>
+              <div className="library-record-copy">
+                <small>{category} · PDF guide</small>
+                <h2>{title}</h2>
+                <p>Original {category.toLowerCase()} material connected to the InterviewRunway learning path.</p>
+                <div><span>Original PDF</span><span>Read in workspace</span></div>
+              </div>
+              <div className="library-record-meta">
+                <span>PDF · Original guide</span>
+                <small>Library material<br />In-app reader</small>
+                <b>Included in Library</b>
+                <b className="library-record-open">Read inside InterviewRunway <span aria-hidden="true">→</span></b>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {activeGuide ? (
