@@ -246,6 +246,13 @@ test("PDF guides are served inline from first-party assets without Drive authori
   assert.equal(await response.text(), "%PDF-test");
 });
 
+test("PDF viewer uses the full viewport on desktop and mobile", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(styles, /\.library-pdf-dialog\s*\{[^}]*inset:\s*0;[^}]*padding:\s*0;/);
+  assert.match(styles, /\.library-pdf-dialog__surface\s*\{[^}]*width:\s*100%;[^}]*height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
+});
+
 const coreRoutes = [
   {
     pathname: "/vault",
