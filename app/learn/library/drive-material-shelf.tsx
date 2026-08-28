@@ -193,22 +193,15 @@ export function DriveMaterialShelf({
             </div>
           </header>
           <div ref={viewerRef} className="library-material-dialog__body">
-            <div className="library-material-viewer">
-              <div className="library-material-viewer-label">
-                <span>Open material</span>
-                <b>{driveMaterialKindLabel(activeMaterial.kind)}</b>
-              </div>
-              <h3>{driveMaterialTitle(activeMaterial.filename)}</h3>
-              <MaterialViewer
-                fileId={activeMaterial.id}
-                filename={activeMaterial.filename}
-                mimeType={activeMaterial.mimeType}
-                title={driveMaterialTitle(activeMaterial.filename)}
-                content={DRIVE_MATERIAL_CONTENT[activeMaterial.id]}
-                assetUrl={driveMaterialPrimaryAssetHref(activeMaterial)}
-                fallbackAssetUrl={driveMaterialCompanionAssetHref(activeMaterial)}
-              />
-            </div>
+            <MaterialViewer
+              fileId={activeMaterial.id}
+              filename={activeMaterial.filename}
+              mimeType={activeMaterial.mimeType}
+              title={driveMaterialTitle(activeMaterial.filename)}
+              content={DRIVE_MATERIAL_CONTENT[activeMaterial.id]}
+              assetUrl={driveMaterialPrimaryAssetHref(activeMaterial)}
+              fallbackAssetUrl={driveMaterialCompanionAssetHref(activeMaterial)}
+            />
           </div>
         </div>
       </div>

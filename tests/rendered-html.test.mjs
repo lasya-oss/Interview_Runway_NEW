@@ -252,6 +252,10 @@ test("PDF viewer shows a record header and user-controlled fullscreen option", a
     new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
     "utf8",
   );
+  const driveShelf = await readFile(
+    new URL("../app/learn/library/drive-material-shelf.tsx", import.meta.url),
+    "utf8",
+  );
 
   assert.match(styles, /\.library-pdf-dialog\s*\{[^}]*inset:\s*0;[^}]*padding:\s*0;/);
   assert.match(styles, /\.library-pdf-dialog__surface\s*\{[^}]*width:\s*100%;[^}]*height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
@@ -266,6 +270,12 @@ test("PDF viewer shows a record header and user-controlled fullscreen option", a
   assert.match(pdfShelf, /library-pdf-dialog\$\{isFullscreen/);
   assert.match(styles, /\.library-pdf-dialog\.is-fullscreen \.library-pdf-dialog__header\s*\{[^}]*display:\s*none;/);
   assert.doesNotMatch(pdfShelf, /document\.documentElement\.requestFullscreen\(\)/);
+  assert.match(styles, /\.library-material-dialog\s*\{[^}]*inset:\s*0;[^}]*padding:\s*0;/);
+  assert.match(styles, /\.library-material-dialog__surface\s*\{[^}]*width:\s*100%;[^}]*height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
+  assert.match(styles, /\.library-material-dialog__body\s*>\s*\.library-material-pdf-frame\s*\{[^}]*width:\s*100%;[^}]*min-height:\s*0;/);
+  assert.match(styles, /\.library-material-dialog__body:fullscreen\s*\{[^}]*width:\s*100vw;[^}]*height:\s*100dvh;/);
+  assert.match(driveShelf, /<div ref=\{viewerRef\} className="library-material-dialog__body">\s*<MaterialViewer/);
+  assert.doesNotMatch(driveShelf, /<div className="library-material-viewer">/);
 });
 
 const coreRoutes = [
