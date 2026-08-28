@@ -1,0 +1,22 @@
+INTERVIEWRUNWAY VAULT
+Recruiter Screen Notes Template
+Structured notes for capturing role facts and deciding whether to proceed.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Role facts
+Company / legal entity: [____________]
+Role / level / team: [____________]
+Location and permitted work country: [____________]
+Employee / EOR / contractor: [____________]
+Compensation range and currency: [____________]
+Interview loop and timeline: [____________]
+Questions
+What outcomes define success in six months?
+Why is the role open?
+Who is the manager and where is the team?
+What overlap and on-call expectations apply?
+What is the current interview process?
+Decision
+Proceed / clarify / decline: [____________]
+Reason: [____________]
+Next date: [____________]
+

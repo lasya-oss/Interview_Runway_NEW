@@ -1,0 +1,14 @@
+INTERVIEWRUNWAY VAULT
+Hiring Manager Outreach Message
+Hiring-manager outreach centered on a product or engineering problem.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Message template
+Hi [Name] - I saw the opening for [role] on [team]. The team's work on [specific product/problem] stood out because I have [relevant evidence].
+In my recent work I [decision/action] for [scope], producing [result]. I would be glad to share how that experience maps to [team challenge].
+Would a short conversation be useful? [Resume/portfolio link]
+Checks
+Demonstrate real team research
+Lead with relevance, not need
+Avoid asking for special treatment
+Make reply easy
+

@@ -1,0 +1,15 @@
+INTERVIEWRUNWAY VAULT
+Referral Request Message
+Referral request that lets the other person assess fit before attaching their name.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Message template
+Hi [Name] - I hope you are well. I am considering [role + link] at [company]. My background in [two requirements] and [one result] appears aligned.
+Would you be comfortable taking a quick look at my resume and telling me whether the fit seems credible? If so, and if you are comfortable referring me, I would appreciate it. No pressure either way.
+Resume: [link] | Role: [link]
+Referral packet
+Role link and ID
+One-page resume
+Three-sentence fit summary
+Location/work-authorization facts
+Deadline, if real
+

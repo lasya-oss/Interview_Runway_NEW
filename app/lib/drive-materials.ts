@@ -6345,6 +6345,9 @@ export function driveMaterialPrimaryAssetHref(material: Pick<DriveMaterial, "fil
 }
 
 export function driveMaterialCompanionFilename(material: Pick<DriveMaterial, "filename" | "kind">) {
+  if (material.kind === "template") {
+    return material.filename.replace(/\.[^.]+$/i, ".preview.txt");
+  }
   if (material.kind === "narrated" || material.kind === "silent") {
     return material.filename.replace(/\.mp4$/i, "_transcript.md");
   }

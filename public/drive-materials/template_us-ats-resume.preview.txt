@@ -1,0 +1,31 @@
+[FIRST LAST]
+[City, India] | [+91 phone] | [email] | [LinkedIn URL] | [GitHub/portfolio URL]
+PROFESSIONAL SUMMARY
+[Software engineer with X years of experience in domain/stack. Built or operated systems at measurable scale. Strongest evidence: outcome, scope, or ownership. Targeting role type and the remote collaboration value you bring.]
+TECHNICAL SKILLS
+Languages: [Java, Python, TypeScript - list only interview-ready skills]
+Backend / Data: [Spring Boot, Node.js, PostgreSQL, Redis, Kafka]
+Cloud / Infrastructure: [AWS, Kubernetes, Terraform, CI/CD]
+Practices: [System design, distributed systems, observability, testing]
+EXPERIENCE
+[US-recognizable functional title] | [Company name]
+[City, India / Remote] | [Mon YYYY - Present]
+[Led/built/improved] [specific system or workflow] for [users/traffic/team scope], resulting in [metric or observable business/engineering outcome].
+Reduced [latency/cost/incidents/manual work] by [X percent or amount] through [technical decision], while preserving [reliability/security/quality constraint].
+Owned [project or service] from [design/requirements] through [launch/operations], coordinating with [functions/regions] across [time-zone or stakeholder complexity].
+Diagnosed [high-impact problem] using [evidence or tooling], implemented [change], and prevented recurrence with [test/monitor/runbook/process].
+[Previous functional title] | [Previous company]
+[City, India / Hybrid] | [Mon YYYY - Mon YYYY]
+Delivered [feature/system] used by [scope], improving [metric] from [baseline] to [result].
+Collaborated with [product/design/data/operations] to resolve [constraint], choosing [tradeoff] because [reason].
+Mentored/reviewed/standardized [scope] for [number] engineers or teams, improving [quality, speed, or consistency evidence].
+SELECTED PROJECTS
+[Project name] | [Technology stack] | [Repository or live URL]
+Built [what it does] for [user/problem]; designed [notable architecture decision] and verified [performance/reliability result].
+Documented [API/design/testing/deployment] so another engineer can run, evaluate, or extend the project.
+EDUCATION
+[Degree in Field] | [Institution]
+[City, India] | [Graduation year]
+ADDITIONAL
+[Open-source contributions, relevant certifications, publications, languages, or work-overlap availability - include only when job-relevant.]
+

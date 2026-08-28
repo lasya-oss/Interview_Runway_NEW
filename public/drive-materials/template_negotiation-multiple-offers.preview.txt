@@ -1,0 +1,17 @@
+INTERVIEWRUNWAY VAULT
+Multiple-Offer Leverage Email
+Multiple-offer leverage email that is factual, respectful, and deadline-aware.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Email template
+Subject: Offer timing and package discussion
+Hi [Name],
+I want to be transparent that I have another written offer with a decision date of [date]. InterviewRunway note: disclose only real, documentable facts.
+Your role remains compelling because [specific reason]. The other package is [high-level comparable fact, if useful]. If there is flexibility to improve [specific component] to [target], I would be ready to prioritize this opportunity.
+Could you let me know what is possible by [reasonable date]?
+Best, [Name]
+Guardrails
+Do not fabricate an offer or deadline
+Compare equivalent annual cash and risk
+Avoid forwarding confidential offer letters unless comfortable and permitted
+Leave the relationship intact if the answer is no
+

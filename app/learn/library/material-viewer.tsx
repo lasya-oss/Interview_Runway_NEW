@@ -61,6 +61,19 @@ export function MaterialViewer({
     );
   }
 
+  if (assetUrl && fallbackAssetUrl && displayKind === "document") {
+    return (
+      <div className="library-material-companion library-material-document-preview">
+        <div className="library-material-document-preview__topline">
+          <span>Document preview</span>
+          <a href={assetUrl} download={filename}>Save original <span aria-hidden="true">↓</span></a>
+        </div>
+        <p>Read the document here without a separate Drive sign-in, or save the original editable Word file for your own notes.</p>
+        <TextMaterial assetUrl={fallbackAssetUrl} fileId={fileId} title={`${title} content`} />
+      </div>
+    );
+  }
+
   if (!assetUrl && fallbackAssetUrl && (displayKind === "video" || displayKind === "audio")) {
     return (
       <div className="library-material-companion">
@@ -84,8 +97,8 @@ export function MaterialViewer({
 
   return (
     <div className="library-material-state" data-material-file-id={fileId} aria-live="polite">
-      <span aria-hidden="true">{displayKind === "video" ? "VIDEO" : displayKind === "audio" ? "AUDIO" : "DOC"}</span>
-      <p>This material is catalogued in InterviewRunway and will open here without a separate Drive sign-in.</p>
+      <span aria-hidden="true">{displayKind === "video" ? "VIDEO" : displayKind === "audio" ? "AUDIO" : "PREVIEW"}</span>
+      <p>This material’s in-app preview is temporarily unavailable.</p>
     </div>
   );
 }

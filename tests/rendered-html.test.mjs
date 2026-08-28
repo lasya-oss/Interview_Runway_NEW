@@ -447,8 +447,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(visibleText(driveMaterialHtml), /Weekly Prep Tracker/i);
   assert.match(visibleText(driveMaterialHtml), /Editable Word templates/i);
   assert.match(visibleText(driveMaterialHtml), /Open material/i);
-  assert.match(visibleText(driveMaterialHtml), /This document is available inside InterviewRunway/i);
-  assert.match(visibleText(driveMaterialHtml), /Save document/i);
+  assert.match(visibleText(driveMaterialHtml), /Document preview/i);
+  assert.match(visibleText(driveMaterialHtml), /Read the document here/i);
+  assert.match(visibleText(driveMaterialHtml), /Loading the material inside InterviewRunway/i);
   assert.match(driveMaterialHtml, /class="library-material-viewer"/i);
   assert.match(driveMaterialHtml, /download="template_weekly-prep-tracker\.docx"/i);
   assert.doesNotMatch(visibleText(driveMaterialHtml), /Open in Drive/i);
@@ -474,6 +475,8 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(materialViewer, /content\?: string \| null/i);
   assert.match(materialViewer, /fallbackAssetUrl\?: string \| null/i);
   assert.match(materialViewer, /Text companion preview/i);
+  assert.match(materialViewer, /Document preview/i);
+  assert.doesNotMatch(materialViewer, /catalogued in InterviewRunway and will open here/i);
   assert.match(materialViewer, /library-material-text/i);
   assert.match(materialViewer, /without a separate Drive sign-in/i);
   assert.doesNotMatch(materialViewer, /Allow material access/i);

@@ -1,0 +1,18 @@
+INTERVIEWRUNWAY VAULT
+Remote Role Cover Letter
+Short remote-role cover letter that earns attention without repeating the resume.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Template
+Dear [Hiring manager / team],
+I am applying for [role] because [specific product, technical, or customer reason]. In my current/recent work, I [one relevant ownership example] for [scope], resulting in [evidence].
+The role's emphasis on [requirement] matches my experience with [specific system/decision]. I can contribute [two capabilities], and I have worked effectively across [time zones/functions/remote context].
+I would welcome a conversation about [high-signal problem from the role]. Thank you for your consideration.
+Regards,
+[Name] | [LinkedIn] | [Portfolio/GitHub]
+Customization checklist
+Name the product/team reason
+Use one evidence-rich result
+Connect directly to two role requirements
+Keep to roughly 180-250 words
+Do not claim US work authorization unless accurate
+

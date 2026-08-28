@@ -1,0 +1,18 @@
+INTERVIEWRUNWAY VAULT
+Interview Availability Email
+Availability email that prevents time-zone and scheduling ambiguity.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Email template
+Hi [Name],
+Thank you for the invitation. I am available in [time zone] at:
+- [Day, date]: [start-end] [time zone]
+- [Day, date]: [start-end] [time zone]
+- [Day, date]: [start-end] [time zone]
+Please confirm the interview duration, format, participants, and platform. I can provide additional options if needed.
+Best, [Name]
+Checks
+Write dates, not only weekdays
+Include time zone on every option
+Confirm daylight-saving conversion
+Request accommodation early if needed
+

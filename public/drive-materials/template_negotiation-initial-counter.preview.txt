@@ -1,0 +1,17 @@
+INTERVIEWRUNWAY VAULT
+Initial Counter-Offer Email
+Evidence-led initial counter-offer email with scope, package, and decision timing.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Email template
+Subject: [Role] offer - compensation discussion
+Hi [Name],
+Thank you for the offer and for the conversations with the team. I am excited about [specific role/team reason].
+Based on the scope of [two responsibilities], my experience with [relevant evidence], and the full package, I would be comfortable moving forward at [target amount/range and currency]. Could we explore adjusting [base / fixed cash / equity / joining support] toward that level?
+I remain very interested and can make a decision by [date] once we align on the package.
+Best, [Name]
+Before sending
+Normalize currency and contractor/employee differences
+Choose a supported target, not an arbitrary percentage
+Prioritize one or two package components
+Keep enthusiasm genuine and avoid ultimatums
+

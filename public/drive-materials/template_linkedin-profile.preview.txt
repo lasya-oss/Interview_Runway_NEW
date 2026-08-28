@@ -1,0 +1,24 @@
+INTERVIEWRUNWAY VAULT
+LinkedIn Profile Template
+Fill-in profile system for remote-hiring recruiter discovery and credible positioning.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Headline formula
+[Target role] | [Strongest technical/domain signal] | [Evidence or scale] | [Remote collaboration signal]
+Draft: [________________________________________________________________]
+About section
+Line 1 - role and years: [________________________________]
+Lines 2-3 - systems and evidence: [________________________________]
+Line 4 - strongest ownership example: [________________________________]
+Line 5 - target role and location/overlap: [________________________________]
+Experience entry
+One-sentence team/product context
+Three to five evidence-first bullets
+Truthful keywords from target roles
+No confidential details or unsupported metrics
+Searchability checklist
+Standard role family in headline
+Location and remote preference set accurately
+Top skills match demonstrated experience
+Custom URL and contact method
+Featured section supports claims
+

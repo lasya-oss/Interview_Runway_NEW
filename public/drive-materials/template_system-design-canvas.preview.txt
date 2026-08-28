@@ -1,0 +1,31 @@
+INTERVIEWRUNWAY VAULT
+System Design Answer Canvas
+Reusable answer canvas for requirements, estimates, architecture, data, and failure analysis.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+1. Problem frame
+Users and critical actions: [____________]
+Non-goals: [____________]
+Top quality attributes: [____________]
+2. Capacity
+Peak RPS: [____]
+Read/write ratio: [____]
+Payload/retention: [____]
+Headroom: [____]
+3. API and data
+Endpoints/events: [____________]
+Entities and invariants: [____________]
+Partition key: [____________]
+4. Architecture
+Synchronous path: [____________]
+Asynchronous path: [____________]
+Source of truth: [____________]
+5. Failure drill
+Timeout/retry: [____________]
+Duplicate/idempotency: [____________]
+Overload/degradation: [____________]
+Recovery/reconciliation: [____________]
+6. Close
+Primary tradeoff: [____________]
+Alternative: [____________]
+First bottleneck: [____________]
+

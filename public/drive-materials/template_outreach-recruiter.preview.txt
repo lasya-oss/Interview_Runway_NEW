@@ -1,0 +1,15 @@
+INTERVIEWRUNWAY VAULT
+Recruiter Outreach Message
+Cold recruiter outreach with a clear fit signal and low-friction ask.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Message template
+Hi [Name] - I am a [role] with [X years] working on [relevant systems/domain]. I recently [one evidence-rich result].
+I am interested in [specific role/team] because [specific reason]. My experience with [two requirements] appears relevant.
+If you are the right contact, would you be open to a brief conversation? Resume/portfolio: [link]. Thank you.
+Checks
+Under 100 words
+Specific role or team
+One defensible result
+One simple ask
+No generic praise
+
