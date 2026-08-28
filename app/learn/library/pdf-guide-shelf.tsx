@@ -21,6 +21,9 @@ export function PdfGuideShelf({
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
 
   const closeViewer = useCallback(() => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen?.().catch(() => undefined);
+    }
     setActiveGuide(null);
     window.requestAnimationFrame(() => returnFocusRef.current?.focus());
   }, []);
@@ -67,6 +70,12 @@ export function PdfGuideShelf({
   const openViewer = (guide: DrivePdfGuide, trigger: HTMLButtonElement) => {
     returnFocusRef.current = trigger;
     setActiveGuide(guide);
+
+    // Enter the browser's native fullscreen mode from the row's click gesture.
+    // The viewport-sized dialog remains the fallback for browsers that reject it.
+    if (!document.fullscreenElement && typeof document.documentElement.requestFullscreen === "function") {
+      void document.documentElement.requestFullscreen().catch(() => undefined);
+    }
   };
 
   return (
@@ -115,20 +124,8 @@ export function PdfGuideShelf({
             className="library-pdf-dialog__surface"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="library-pdf-viewer-title"
-            aria-describedby="library-pdf-viewer-description"
+            aria-label={`PDF viewer for ${drivePdfTitle(activeGuide.filename)}`}
           >
-            <header className="library-pdf-dialog__header">
-              <div>
-                <span>INTERVIEWRUNWAY / PDF GUIDE</span>
-                <h2 id="library-pdf-viewer-title">{drivePdfTitle(activeGuide.filename)}</h2>
-                <p id="library-pdf-viewer-description">Read the original guide here without leaving the InterviewRunway workspace.</p>
-              </div>
-              <button ref={closeRef} type="button" onClick={closeViewer} aria-label="Close PDF viewer">
-                <span>CLOSE</span><b aria-hidden="true">×</b>
-              </button>
-            </header>
-
             <div className="library-pdf-dialog__viewer">
               <iframe
                 key={activeGuide.id}
@@ -139,11 +136,9 @@ export function PdfGuideShelf({
                 allowFullScreen
               />
             </div>
-
-            <footer className="library-pdf-dialog__footer">
-              <span>{activeGuide.filename}</span>
-              <small>Original PDF · embedded in this workspace</small>
-            </footer>
+            <button className="library-pdf-dialog__close" ref={closeRef} type="button" onClick={closeViewer} aria-label="Close PDF viewer">
+              <span>CLOSE</span><b aria-hidden="true">×</b>
+            </button>
           </div>
         </div>
       ) : null}

@@ -248,9 +248,18 @@ test("PDF guides are served inline from first-party assets without Drive authori
 
 test("PDF viewer uses the full viewport on desktop and mobile", async () => {
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const pdfShelf = await readFile(
+    new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
+    "utf8",
+  );
 
   assert.match(styles, /\.library-pdf-dialog\s*\{[^}]*inset:\s*0;[^}]*padding:\s*0;/);
   assert.match(styles, /\.library-pdf-dialog__surface\s*\{[^}]*width:\s*100%;[^}]*height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
+  assert.match(styles, /\.library-pdf-dialog__viewer\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;/);
+  assert.match(styles, /\.library-pdf-dialog__viewer iframe\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
+  assert.match(pdfShelf, /document\.documentElement\.requestFullscreen\(\)/);
+  assert.doesNotMatch(pdfShelf, /library-pdf-dialog__header/);
+  assert.doesNotMatch(pdfShelf, /library-pdf-dialog__footer/);
 });
 
 const coreRoutes = [
