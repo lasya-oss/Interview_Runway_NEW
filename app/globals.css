@@ -5928,7 +5928,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .library-empty button { border: 0; color: #963918; background: none; font-size: 10px; cursor: pointer; }
 .library-pdf-section { margin-top: 72px; }
 .library-pdf-section .member-section-heading > span { color: #788991; font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; }
-.library-record-open { margin-top: 13px; color: #983b1b; font-size: 9px; font-weight: 730; }
+.library-record-meta > b.library-record-open { margin-top: 13px; color: #983b1b; font-size: 9px; font-weight: 730; }
 .library-record-open span { display: inline-block; margin-left: 4px; transition: transform 180ms ease; }
 .library-pdf-record:hover .library-record-open span, .library-pdf-record:focus-visible .library-record-open span { transform: translateX(3px); }
 .library-pdf-dialog { position: fixed; z-index: 1400; inset: 0; padding: 18px; display: grid; place-items: center; color: #edf5f7; background: rgba(1,8,13,.94); backdrop-filter: blur(18px); animation: library-pdf-arrive 380ms var(--ease-out-expo) both; }

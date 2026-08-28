@@ -94,7 +94,7 @@ export function PdfGuideShelf({
               </div>
               <div className="library-record-meta">
                 <span>PDF · Original guide</span>
-                <small>Library material<br />In-app reader</small>
+                <small>{guide.filename}<br />In-app reader</small>
                 <b>Included in Library</b>
                 <b className="library-record-open">Read inside InterviewRunway <span aria-hidden="true">→</span></b>
               </div>

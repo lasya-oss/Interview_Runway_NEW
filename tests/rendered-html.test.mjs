@@ -372,6 +372,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
   assert.match(libraryHtml, /class="library-record library-pdf-record"/i);
   assert.match(visibleText(libraryHtml), /Original PDF/i);
+  assert.match(visibleText(libraryHtml), /sysdesign_url-shortener-walkthrough\.pdf/i);
   assert.doesNotMatch(libraryHtml, /<a[^>]+drive\.google\.com/i);
   const pdfShelf = await readFile(
     new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
