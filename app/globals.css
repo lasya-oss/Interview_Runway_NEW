@@ -5934,11 +5934,28 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .library-drive-record-list { margin-top: 0; }
 .drive-material-stage { background: linear-gradient(145deg, #193c49, #07151f); }
 .drive-material-notes blockquote { font-size: 18px; }
-.drive-material-source-link { margin-top: auto; padding-top: 25px; display: grid; gap: 7px; border-top: 1px solid rgba(31,65,78,.13); color: inherit; text-decoration: none; }
+.drive-material-source-link { margin-top: auto; padding-top: 25px; display: grid; gap: 7px; border-top: 1px solid rgba(31,65,78,.13); }
 .drive-material-source-link span { color: #a6421d; font-family: var(--font-mono); font-size: 7px; letter-spacing: .09em; text-transform: uppercase; }
 .drive-material-source-link strong { color: #344851; font-family: var(--font-display); font-size: 19px; letter-spacing: -.025em; }
 .drive-material-source-link small { color: #64767f; font-size: 10px; line-height: 1.5; }
-.drive-material-source-link:hover strong { color: #983b1b; }
+.library-material-viewer { margin-top: 30px; padding: 18px; display: flex; flex-direction: column; min-height: 390px; border: 1px solid rgba(208,225,232,.14); border-radius: 15px; background: rgba(1,10,15,.42); }
+.library-material-viewer-label { display: flex; justify-content: space-between; gap: 15px; color: #8ba1aa; font-family: var(--font-mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; }
+.library-material-viewer-label span { color: var(--afterburner); }
+.library-material-viewer h2 { margin: 12px 0 0; color: #eef4f5; font-family: var(--font-display); font-size: clamp(1.4rem, 2.5vw, 2.3rem); font-weight: 550; line-height: 1.05; letter-spacing: -.045em; }
+.library-material-state { flex: 1; min-height: 220px; padding: 28px 12px; display: grid; place-items: center; align-content: center; gap: 14px; color: #d9e5e8; text-align: center; }
+.library-material-state > span { color: var(--afterburner); font-family: var(--font-mono); font-size: 24px; letter-spacing: .18em; }
+.library-material-state p { max-width: 380px; margin: 0; color: #9eb1b8; font-size: 10px; line-height: 1.6; }
+.library-material-state button { min-height: 38px; padding: 0 16px; border: 1px solid rgba(208,225,232,.25); border-radius: 8px; color: #eef3f5; background: rgba(255,255,255,.08); font-size: 9px; font-weight: 700; cursor: pointer; }
+.library-material-state button span, .library-material-document a { color: var(--afterburner); }
+.library-material-text { flex: 1; min-height: 245px; max-height: 510px; margin: 18px 0 0; padding: 18px; overflow: auto; border: 1px solid rgba(31,65,78,.14); border-radius: 10px; color: #dce8eb; background: #020b10; font-family: var(--font-mono); font-size: 10px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.library-material-media { width: 100%; max-height: 430px; margin-top: 18px; display: block; object-fit: contain; border-radius: 10px; background: #02080c; }
+.library-material-audio, .library-material-document { flex: 1; min-height: 220px; padding: 30px 12px; display: flex; align-items: center; flex-direction: column; justify-content: center; gap: 12px; text-align: center; }
+.library-material-audio > span, .library-material-document > span { color: var(--afterburner); font-family: var(--font-mono); font-size: 26px; letter-spacing: .12em; }
+.library-material-audio strong, .library-material-document strong { color: #eef4f5; font-family: var(--font-display); font-size: 20px; }
+.library-material-audio audio { width: min(100%, 430px); margin-top: 9px; }
+.library-material-document p { max-width: 360px; margin: 0; color: #9eb1b8; font-size: 10px; line-height: 1.55; }
+.library-material-document a { margin-top: 7px; font-size: 9px; font-weight: 730; }
+.library-material-decision { max-width: 800px; }
 .library-record-meta > button.library-record-open { margin-top: 13px; padding: 0; border: 0; color: #983b1b; background: transparent; font: inherit; font-size: 9px; font-weight: 730; cursor: pointer; }
 .library-record-open span { display: inline-block; margin-left: 4px; transition: transform 180ms ease; }
 .library-record-open:focus-visible { outline: 2px solid var(--afterburner); outline-offset: 5px; }

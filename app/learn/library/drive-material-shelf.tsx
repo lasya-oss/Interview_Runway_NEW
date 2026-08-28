@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   driveMaterialCategory,
   driveMaterialKindLabel,
-  driveMaterialSlug,
+  driveMaterialHref,
   driveMaterialTitle,
   formatMaterialSize,
   type DriveMaterial,
@@ -50,8 +50,8 @@ export function DriveMaterialShelf({
                 <span>{kind} · {formatMaterialSize(material.bytes)}</span>
                 <small>InterviewRunway context record</small>
                 <b>Included in Library</b>
-                <Link href={`/learn/library/material/${driveMaterialSlug(material)}`}>
-                  Open Context <span aria-hidden="true">→</span>
+                <Link href={driveMaterialHref(material)}>
+                  Open <span aria-hidden="true">→</span>
                 </Link>
               </div>
             </article>

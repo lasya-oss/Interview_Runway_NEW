@@ -406,7 +406,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const libraryHtml = await library.text();
   assert.match(visibleText(libraryHtml), /Drive PDF guides/i);
   assert.match(visibleText(libraryHtml), /320 guides available/i);
-  assert.match(visibleText(libraryHtml), /Open Context/i);
+  assert.match(libraryHtml, /href=["'][^"']*\/learn\/library\/material\/template-weekly-prep-tracker-[^"']*["'][^>]*>\s*Open\s*</i);
   assert.match(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
   assert.match(libraryHtml, /class="library-record library-pdf-record"/i);
   assert.match(visibleText(libraryHtml), /Original PDF/i);
@@ -438,9 +438,23 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const driveMaterialHtml = await driveMaterial.text();
   assert.match(visibleText(driveMaterialHtml), /Weekly Prep Tracker/i);
   assert.match(visibleText(driveMaterialHtml), /Editable Word templates/i);
-  assert.match(visibleText(driveMaterialHtml), /Open in Drive/i);
-  assert.match(driveMaterialHtml, /drive\.google\.com\/file\/d\/1RY9eae4F8Vl2B9q87oJTMePLYzOVXjY1\/view/i);
+  assert.match(visibleText(driveMaterialHtml), /Open material/i);
+  assert.match(visibleText(driveMaterialHtml), /Preparing this material inside InterviewRunway/i);
+  assert.match(driveMaterialHtml, /class="library-material-viewer"/i);
+  assert.match(driveMaterialHtml, /data-google-drive-file-id="1RY9eae4F8Vl2B9q87oJTMePLYzOVXjY1"/i);
+  assert.doesNotMatch(visibleText(driveMaterialHtml), /Open in Drive/i);
+  assert.doesNotMatch(driveMaterialHtml, /drive\.google\.com/i);
   assert.match(driveMaterialHtml, /Original file preserved/i);
+
+  const materialViewer = await readFile(
+    new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(materialViewer, /alt=media/i);
+  assert.match(materialViewer, /library-material-text/i);
+  assert.match(materialViewer, /library-material-media/i);
+  assert.match(materialViewer, /Allow material access/i);
+  assert.doesNotMatch(materialViewer, /drive\.google\.com/i);
 
   const roadmap = await request("/learn/roadmap", {
     headers: { accept: "text/html", cookie: sessionCookie },

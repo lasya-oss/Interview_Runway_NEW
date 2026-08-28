@@ -5,13 +5,13 @@ import { MemberShell } from "@/app/components/member-shell";
 import {
   driveMaterialCategory,
   driveMaterialKindLabel,
-  driveMaterialSourceHref,
   driveMaterialTitle,
   findDriveMaterial,
   formatMaterialSize,
   DRIVE_MATERIALS,
 } from "@/app/lib/drive-materials";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { MaterialViewer } from "../../material-viewer";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +43,7 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
   const kind = driveMaterialKindLabel(material.kind);
   const title = driveMaterialTitle(material.filename);
   const number = materialNumber(material.id);
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
 
   return (
     <MemberShell profile={profile} active="library">
@@ -67,9 +68,19 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
         <div className="material-layout">
           <section className="material-stage drive-material-stage" aria-labelledby="drive-material-stage-title">
             <div className="material-stage-top"><span>Drive archive / {number}</span><b>Original file preserved</b></div>
-            <div className="material-stage-visual" aria-hidden="true"><i /><i /><i /><span /></div>
+            <div className="library-material-viewer" aria-labelledby="drive-material-stage-title">
+              <div className="library-material-viewer-label"><span>Open material</span><b>{kind}</b></div>
+              <h2 id="drive-material-stage-title">{title}</h2>
+              <MaterialViewer
+                clientId={clientId}
+                fileId={material.id}
+                filename={material.filename}
+                mimeType={material.mimeType}
+                title={title}
+              />
+            </div>
             <p>Material context</p>
-            <h2 id="drive-material-stage-title">{materialDecision(material.kind)}</h2>
+            <h2 className="library-material-decision">{materialDecision(material.kind)}</h2>
             <div className="material-stage-controls"><span>01</span><i><b /></i><span>{category}</span></div>
           </section>
 
@@ -80,11 +91,11 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
               <span>Collection</span>
               <p>{material.collection}</p>
             </div>
-            <a className="drive-material-source-link" href={driveMaterialSourceHref(material.id)} target="_blank" rel="noreferrer">
-              <span>Original source</span>
-              <strong>Open in Drive</strong>
-              <small>The source file opens in a separate tab and remains unchanged ↗</small>
-            </a>
+            <div className="drive-material-source-link">
+              <span>In-site viewer</span>
+              <strong>Open</strong>
+              <small>The original material opens inside InterviewRunway and remains unchanged.</small>
+            </div>
           </aside>
         </div>
 

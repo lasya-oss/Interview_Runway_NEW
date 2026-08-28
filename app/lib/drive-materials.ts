@@ -6331,10 +6331,6 @@ export function driveMaterialHref(material: Pick<DriveMaterial, "id" | "filename
   return "/learn/library/material/" + driveMaterialSlug(material);
 }
 
-export function driveMaterialSourceHref(id: string) {
-  return "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/view";
-}
-
 export function formatMaterialSize(bytes: number) {
   if (bytes >= 1_000_000_000) return (bytes / 1_000_000_000).toFixed(1) + " GB";
   if (bytes >= 1_000_000) return (bytes / 1_000_000).toFixed(1) + " MB";
