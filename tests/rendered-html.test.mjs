@@ -260,7 +260,9 @@ test("PDF viewer shows a record header and user-controlled fullscreen option", a
   assert.match(styles, /\.library-pdf-dialog__viewer iframe\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*border:/);
   assert.match(pdfShelf, /library-pdf-dialog__header/);
   assert.match(pdfShelf, /library-pdf-dialog__fullscreen/);
-  assert.match(pdfShelf, /surface\.requestFullscreen\(\)/);
+  assert.match(pdfShelf, /viewer\.requestFullscreen\(\)/);
+  assert.match(pdfShelf, /viewerRef/);
+  assert.match(styles, /\.library-pdf-dialog__viewer:fullscreen\s*\{[^}]*padding:\s*0;/);
   assert.doesNotMatch(pdfShelf, /document\.documentElement\.requestFullscreen\(\)/);
 });
 

@@ -18,11 +18,12 @@ export function PdfGuideShelf({
   const [activeGuide, setActiveGuide] = useState<DrivePdfGuide | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const viewerRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
 
   const closeViewer = useCallback(() => {
-    if (document.fullscreenElement === dialogRef.current) {
+    if (document.fullscreenElement === viewerRef.current) {
       void document.exitFullscreen?.().catch(() => undefined);
     }
     setActiveGuide(null);
@@ -35,7 +36,7 @@ export function PdfGuideShelf({
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const syncFullscreenState = () => {
-      setIsFullscreen(document.fullscreenElement === dialogRef.current);
+      setIsFullscreen(document.fullscreenElement === viewerRef.current);
     };
     syncFullscreenState();
     window.requestAnimationFrame(() => closeRef.current?.focus());
@@ -44,7 +45,7 @@ export function PdfGuideShelf({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        if (document.fullscreenElement === dialogRef.current) {
+        if (document.fullscreenElement === viewerRef.current) {
           void document.exitFullscreen?.().catch(() => undefined);
         } else {
           closeViewer();
@@ -79,16 +80,16 @@ export function PdfGuideShelf({
   }, [activeGuide, closeViewer]);
 
   const toggleFullscreen = useCallback(() => {
-    const surface = dialogRef.current;
-    if (!surface) return;
+    const viewer = viewerRef.current;
+    if (!viewer) return;
 
-    if (document.fullscreenElement === surface) {
+    if (document.fullscreenElement === viewer) {
       void document.exitFullscreen?.().catch(() => undefined);
       return;
     }
 
-    if (typeof surface.requestFullscreen === "function") {
-      void surface.requestFullscreen().catch(() => undefined);
+    if (typeof viewer.requestFullscreen === "function") {
+      void viewer.requestFullscreen().catch(() => undefined);
     }
   }, []);
 
@@ -168,7 +169,7 @@ export function PdfGuideShelf({
                 </button>
               </div>
             </header>
-            <div className="library-pdf-dialog__viewer">
+            <div ref={viewerRef} className="library-pdf-dialog__viewer">
               <iframe
                 key={activeGuide.id}
                 src={drivePdfPreviewHref(activeGuide.id) ?? "about:blank"}
