@@ -2,8 +2,15 @@
 
 import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
+import {
+  driveMaterialCategory,
+  driveMaterialKindLabel,
+  driveMaterialTitle,
+  type DriveMaterial,
+} from "@/app/lib/drive-materials";
 import { drivePdfCategory, drivePdfTitle, type DrivePdfGuide } from "@/app/lib/drive-pdf-guides";
 import type { DemoTier, LearningMaterial } from "@/app/lib/demo-data";
+import { DriveMaterialShelf } from "./drive-material-shelf";
 import { PdfGuideShelf } from "./pdf-guide-shelf";
 
 const TIER_ORDER: Record<DemoTier, number> = { foundation: 0, practice: 1, premium: 2 };
@@ -18,10 +25,12 @@ export function LibraryClient({
   profileId,
   materials,
   pdfGuides,
+  driveMaterials,
 }: {
   profileId: DemoTier;
   materials: readonly LearningMaterial[];
   pdfGuides: readonly DrivePdfGuide[];
+  driveMaterials: readonly DriveMaterial[];
 }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
@@ -30,7 +39,8 @@ export function LibraryClient({
   const categories = useMemo(() => ["All", ...new Set([
     ...materials.map((material) => material.category),
     ...pdfGuides.map((guide) => drivePdfCategory(guide.filename)),
-  ])], [materials, pdfGuides]);
+    ...driveMaterials.map((material) => driveMaterialCategory(material.filename)),
+  ])], [driveMaterials, materials, pdfGuides]);
 
   const results = useMemo(() => materials.filter((material) => {
     const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
@@ -50,7 +60,18 @@ export function LibraryClient({
     });
   }, [category, deferredQuery, pdfGuides, scope]);
 
-  const resultCount = results.length + pdfResults.length;
+  const driveResults = useMemo(() => {
+    if (scope === "locked") return [];
+    return driveMaterials.filter((material) => {
+      const title = driveMaterialTitle(material.filename);
+      const materialCategory = driveMaterialCategory(material.filename);
+      const kind = driveMaterialKindLabel(material.kind);
+      const haystack = `${title} ${material.filename} ${material.collection} ${materialCategory} ${kind}`.toLowerCase();
+      return (category === "All" || materialCategory === category) && (!deferredQuery || haystack.includes(deferredQuery));
+    });
+  }, [category, deferredQuery, driveMaterials, scope]);
+
+  const resultCount = results.length + pdfResults.length + driveResults.length;
 
   return (
     <div className="library-workspace">
@@ -58,10 +79,10 @@ export function LibraryClient({
         <div>
           <p className="member-kicker">Member material library</p>
           <h1>Everything has a place in the plan.</h1>
-          <p>Search the library by the interview decision it helps you make. The PDF guide shelf below opens the original material in an in-app viewer, while the learning records show the product structure around it.</p>
+          <p>Search the library by the interview decision it helps you make. Learning records, PDF guides, and the supplied Drive archive now sit in the same searchable workspace.</p>
         </div>
         <div className="library-index" aria-label="Sample catalogue summary">
-          <strong>{(materials.length + pdfGuides.length).toString().padStart(2, "0")}</strong>
+          <strong>{(materials.length + pdfGuides.length + driveMaterials.length).toString().padStart(2, "0")}</strong>
           <span>library<br />records</span>
         </div>
       </section>
@@ -88,7 +109,7 @@ export function LibraryClient({
 
       <div className="library-results-heading" aria-live="polite">
         <span>{resultCount.toString().padStart(2, "0")} records shown</span>
-        <small>Learning records and PDF guides</small>
+        <small>Learning records, PDF guides, and Drive materials</small>
       </div>
 
       {results.length ? (
@@ -115,7 +136,7 @@ export function LibraryClient({
             );
           })}
         </div>
-      ) : !pdfResults.length ? (
+      ) : !pdfResults.length && !driveResults.length ? (
         <div className="library-empty">
           <strong>No library records match those filters.</strong>
           <button type="button" onClick={() => { setQuery(""); setCategory("All"); setScope("all"); }}>Clear filters</button>
@@ -133,6 +154,13 @@ export function LibraryClient({
           </div>
           <PdfGuideShelf guides={pdfResults} startNumber={materials.length + 1} />
         </section>
+      ) : null}
+
+      {driveResults.length ? (
+        <DriveMaterialShelf
+          materials={driveResults}
+          startNumber={materials.length + pdfGuides.length + 1}
+        />
       ) : null}
     </div>
   );

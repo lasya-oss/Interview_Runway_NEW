@@ -411,6 +411,10 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(libraryHtml, /class="library-record library-pdf-record"/i);
   assert.match(visibleText(libraryHtml), /Original PDF/i);
   assert.match(visibleText(libraryHtml), /URL shortener walkthrough/i);
+  assert.match(visibleText(libraryHtml), /Drive material archive/i);
+  assert.match(visibleText(libraryHtml), /778 source records available/i);
+  assert.match(visibleText(libraryHtml), /Weekly Prep Tracker/i);
+  assert.match(libraryHtml, /href=["'][^"']*\/learn\/library\/material\/template-weekly-prep-tracker-/i);
   assert.doesNotMatch(visibleText(libraryHtml), /sysdesign_url-shortener-walkthrough\.pdf/i);
   assert.doesNotMatch(libraryHtml, /<a[^>]+drive\.google\.com/i);
   const pdfShelf = await readFile(
@@ -426,6 +430,17 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(pdfShelf, /Read inside InterviewRunway/i);
   assert.doesNotMatch(pdfShelf, /drive\.google\.com/i);
   assert.match(pdfShelf, /pdf-guides/);
+
+  const driveMaterial = await request("/learn/library/material/template-weekly-prep-tracker-docx-yzovxjy1", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(driveMaterial.status, 200);
+  const driveMaterialHtml = await driveMaterial.text();
+  assert.match(visibleText(driveMaterialHtml), /Weekly Prep Tracker/i);
+  assert.match(visibleText(driveMaterialHtml), /Editable Word templates/i);
+  assert.match(visibleText(driveMaterialHtml), /Open in Drive/i);
+  assert.match(driveMaterialHtml, /drive\.google\.com\/file\/d\/1RY9eae4F8Vl2B9q87oJTMePLYzOVXjY1\/view/i);
+  assert.match(driveMaterialHtml, /Original file preserved/i);
 
   const roadmap = await request("/learn/roadmap", {
     headers: { accept: "text/html", cookie: sessionCookie },
