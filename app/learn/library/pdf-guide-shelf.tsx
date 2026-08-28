@@ -16,12 +16,13 @@ export function PdfGuideShelf({
   startNumber: number;
 }) {
   const [activeGuide, setActiveGuide] = useState<DrivePdfGuide | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
 
   const closeViewer = useCallback(() => {
-    if (document.fullscreenElement) {
+    if (document.fullscreenElement === dialogRef.current) {
       void document.exitFullscreen?.().catch(() => undefined);
     }
     setActiveGuide(null);
@@ -33,12 +34,21 @@ export function PdfGuideShelf({
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const syncFullscreenState = () => {
+      setIsFullscreen(document.fullscreenElement === dialogRef.current);
+    };
+    syncFullscreenState();
     window.requestAnimationFrame(() => closeRef.current?.focus());
+    document.addEventListener("fullscreenchange", syncFullscreenState);
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        closeViewer();
+        if (document.fullscreenElement === dialogRef.current) {
+          void document.exitFullscreen?.().catch(() => undefined);
+        } else {
+          closeViewer();
+        }
         return;
       }
 
@@ -64,18 +74,27 @@ export function PdfGuideShelf({
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("fullscreenchange", syncFullscreenState);
     };
   }, [activeGuide, closeViewer]);
+
+  const toggleFullscreen = useCallback(() => {
+    const surface = dialogRef.current;
+    if (!surface) return;
+
+    if (document.fullscreenElement === surface) {
+      void document.exitFullscreen?.().catch(() => undefined);
+      return;
+    }
+
+    if (typeof surface.requestFullscreen === "function") {
+      void surface.requestFullscreen().catch(() => undefined);
+    }
+  }, []);
 
   const openViewer = (guide: DrivePdfGuide, trigger: HTMLButtonElement) => {
     returnFocusRef.current = trigger;
     setActiveGuide(guide);
-
-    // Enter the browser's native fullscreen mode from the row's click gesture.
-    // The viewport-sized dialog remains the fallback for browsers that reject it.
-    if (!document.fullscreenElement && typeof document.documentElement.requestFullscreen === "function") {
-      void document.documentElement.requestFullscreen().catch(() => undefined);
-    }
   };
 
   return (
@@ -86,14 +105,7 @@ export function PdfGuideShelf({
           const category = drivePdfCategory(guide.filename);
 
           return (
-            <button
-              className="library-record library-pdf-record"
-              key={guide.id}
-              type="button"
-              onClick={(event) => openViewer(guide, event.currentTarget)}
-              aria-haspopup="dialog"
-              aria-label={`Read ${title} inside InterviewRunway`}
-            >
+            <article className="library-record library-pdf-record" key={guide.id}>
               <span className="library-record-number">{String(startNumber + index).padStart(2, "0")}</span>
               <div className="library-record-copy">
                 <small>{category} · PDF guide</small>
@@ -103,11 +115,19 @@ export function PdfGuideShelf({
               </div>
               <div className="library-record-meta">
                 <span>PDF · Original guide</span>
-                <small>{guide.filename}<br />In-app reader</small>
+                <small>In-app reader</small>
                 <b>Included in Library</b>
-                <b className="library-record-open">Read inside InterviewRunway <span aria-hidden="true">→</span></b>
+                <button
+                  className="library-record-open"
+                  type="button"
+                  onClick={(event) => openViewer(guide, event.currentTarget)}
+                  aria-haspopup="dialog"
+                  aria-label={`Open ${title} context inside InterviewRunway`}
+                >
+                  Open Context <span aria-hidden="true">→</span>
+                </button>
               </div>
-            </button>
+            </article>
           );
         })}
       </div>
@@ -124,8 +144,30 @@ export function PdfGuideShelf({
             className="library-pdf-dialog__surface"
             role="dialog"
             aria-modal="true"
-            aria-label={`PDF viewer for ${drivePdfTitle(activeGuide.filename)}`}
+            aria-labelledby="library-pdf-viewer-title"
+            aria-describedby="library-pdf-viewer-description"
           >
+            <header className="library-pdf-dialog__header">
+              <div>
+                <span>{drivePdfCategory(activeGuide.filename)} · PDF GUIDE</span>
+                <h2 id="library-pdf-viewer-title">{drivePdfTitle(activeGuide.filename)}</h2>
+                <p id="library-pdf-viewer-description">Read the original guide here without leaving the InterviewRunway workspace.</p>
+              </div>
+              <div className="library-pdf-dialog__actions">
+                <button
+                  className="library-pdf-dialog__fullscreen"
+                  type="button"
+                  onClick={toggleFullscreen}
+                  aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+                  title={isFullscreen ? "Exit full screen" : "Enter full screen"}
+                >
+                  <span aria-hidden="true">⛶</span>
+                </button>
+                <button className="library-pdf-dialog__close" ref={closeRef} type="button" onClick={closeViewer} aria-label="Close PDF viewer">
+                  <span>CLOSE</span><b aria-hidden="true">×</b>
+                </button>
+              </div>
+            </header>
             <div className="library-pdf-dialog__viewer">
               <iframe
                 key={activeGuide.id}
@@ -136,9 +178,6 @@ export function PdfGuideShelf({
                 allowFullScreen
               />
             </div>
-            <button className="library-pdf-dialog__close" ref={closeRef} type="button" onClick={closeViewer} aria-label="Close PDF viewer">
-              <span>CLOSE</span><b aria-hidden="true">×</b>
-            </button>
           </div>
         </div>
       ) : null}

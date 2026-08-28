@@ -246,7 +246,7 @@ test("PDF guides are served inline from first-party assets without Drive authori
   assert.equal(await response.text(), "%PDF-test");
 });
 
-test("PDF viewer uses the full viewport on desktop and mobile", async () => {
+test("PDF viewer shows a record header and user-controlled fullscreen option", async () => {
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const pdfShelf = await readFile(
     new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
@@ -255,11 +255,13 @@ test("PDF viewer uses the full viewport on desktop and mobile", async () => {
 
   assert.match(styles, /\.library-pdf-dialog\s*\{[^}]*inset:\s*0;[^}]*padding:\s*0;/);
   assert.match(styles, /\.library-pdf-dialog__surface\s*\{[^}]*width:\s*100%;[^}]*height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
-  assert.match(styles, /\.library-pdf-dialog__viewer\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;/);
-  assert.match(styles, /\.library-pdf-dialog__viewer iframe\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
-  assert.match(pdfShelf, /document\.documentElement\.requestFullscreen\(\)/);
-  assert.doesNotMatch(pdfShelf, /library-pdf-dialog__header/);
-  assert.doesNotMatch(pdfShelf, /library-pdf-dialog__footer/);
+  assert.match(styles, /\.library-pdf-dialog__header\s*\{[^}]*display:\s*flex;[^}]*justify-content:\s*space-between;/);
+  assert.match(styles, /\.library-pdf-dialog__viewer\s*\{[^}]*min-height:\s*0;[^}]*padding:\s*14px;/);
+  assert.match(styles, /\.library-pdf-dialog__viewer iframe\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*border:/);
+  assert.match(pdfShelf, /library-pdf-dialog__header/);
+  assert.match(pdfShelf, /library-pdf-dialog__fullscreen/);
+  assert.match(pdfShelf, /surface\.requestFullscreen\(\)/);
+  assert.doesNotMatch(pdfShelf, /document\.documentElement\.requestFullscreen\(\)/);
 });
 
 const coreRoutes = [
@@ -400,11 +402,12 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const libraryHtml = await library.text();
   assert.match(visibleText(libraryHtml), /Drive PDF guides/i);
   assert.match(visibleText(libraryHtml), /320 guides available/i);
-  assert.match(visibleText(libraryHtml), /Read inside InterviewRunway/i);
+  assert.match(visibleText(libraryHtml), /Open Context/i);
   assert.match(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
   assert.match(libraryHtml, /class="library-record library-pdf-record"/i);
   assert.match(visibleText(libraryHtml), /Original PDF/i);
-  assert.match(visibleText(libraryHtml), /sysdesign_url-shortener-walkthrough\.pdf/i);
+  assert.match(visibleText(libraryHtml), /URL shortener walkthrough/i);
+  assert.doesNotMatch(visibleText(libraryHtml), /sysdesign_url-shortener-walkthrough\.pdf/i);
   assert.doesNotMatch(libraryHtml, /<a[^>]+drive\.google\.com/i);
   const pdfShelf = await readFile(
     new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
@@ -413,6 +416,10 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(pdfShelf, /aria-haspopup="dialog"/i);
   assert.match(pdfShelf, /role="dialog"/i);
   assert.match(pdfShelf, /drivePdfPreviewHref\(activeGuide\.id\)/i);
+  assert.match(pdfShelf, /<article className="library-record library-pdf-record"/i);
+  assert.match(pdfShelf, /className="library-record-open"/i);
+  assert.doesNotMatch(pdfShelf, /<button\s+className="library-record library-pdf-record"/i);
+  assert.doesNotMatch(pdfShelf, /Read inside InterviewRunway/i);
   assert.doesNotMatch(pdfShelf, /drive\.google\.com/i);
   assert.match(pdfShelf, /pdf-guides/);
 
