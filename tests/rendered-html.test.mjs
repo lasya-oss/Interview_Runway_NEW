@@ -69,11 +69,30 @@ async function request(pathname = "/", init = {}, authenticated = true) {
         },
       },
       REPLAY_ASSETS: {
-        get: async (name) => {
-          if (name !== "mock_behavioral_customer-integrity_05.mp4.part-00") return null;
+        list: async ({ prefix }) => {
+          const parts = {
+            "mock_behavioral_customer-integrity_05.mp4.part-00": testReplayChunk,
+            "mock_behavioral_customer-integrity_05.mp4.part-01": "second replay chunk",
+          };
           return {
-            body: new Blob([testReplayChunk]).stream(),
-            size: testReplayChunk.length,
+            objects: Object.entries(parts)
+              .filter(([name]) => name.startsWith(prefix))
+              .map(([key, value]) => ({ key, size: value.length })),
+          };
+        },
+        get: async (name, options = {}) => {
+          const parts = {
+            "mock_behavioral_customer-integrity_05.mp4.part-00": testReplayChunk,
+            "mock_behavioral_customer-integrity_05.mp4.part-01": "second replay chunk",
+          };
+          const value = parts[name];
+          if (!value) return null;
+          const offset = options.range?.offset ?? 0;
+          const length = options.range?.length ?? value.length - offset;
+          const body = new Blob([value.slice(offset, offset + length)]);
+          return {
+            body: body.stream(),
+            size: body.size,
             httpEtag: '"test-replay-etag"',
           };
         },
@@ -197,6 +216,18 @@ test("R2 replay assets are served without a separate Drive permission", async ()
   assert.equal(response.status, 200);
   assert.equal(await response.text(), testReplayChunk);
   assert.equal(response.headers.get("cache-control"), "public, max-age=31536000, immutable");
+});
+
+test("R2 replay videos stream as one range-capable MP4 without buffering every chunk", async () => {
+  const response = await request(
+    "/api/replay-assets/mock_behavioral_customer-integrity_05.mp4",
+    { headers: { range: "bytes=7-18" } },
+    false,
+  );
+  assert.equal(response.status, 206);
+  assert.equal(response.headers.get("content-type"), "video/mp4");
+  assert.equal(response.headers.get("content-range"), "bytes 7-18/38");
+  assert.equal(await response.text(), "replay chunk");
 });
 
 const coreRoutes = [
@@ -376,7 +407,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(replayHtml, /data-replay-part-count=["']4["']/i);
   assert.match(
     replayHtml,
-    /\/api\/replay-assets\/mock_coding_dynamic-programming_05\.mp4\.part-00/i,
+    /\/api\/replay-assets\/mock_coding_dynamic-programming_05\.mp4/i,
   );
   assert.doesNotMatch(replayHtml, /data-google-drive-file-id=/i);
   assert.doesNotMatch(replayHtml, /Allow replay access|Preparing the protected replay/i);
@@ -470,7 +501,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(customerIntegrityHtml, /data-replay-part-count=["']4["']/i);
   assert.match(
     customerIntegrityHtml,
-    /\/api\/replay-assets\/mock_behavioral_customer-integrity_05\.mp4\.part-00/i,
+    /\/api\/replay-assets\/mock_behavioral_customer-integrity_05\.mp4/i,
   );
   assert.doesNotMatch(customerIntegrityHtml, /data-google-drive-file-id=["']1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO["']/i);
   assert.doesNotMatch(customerIntegrityHtml, /Allow replay access|Preparing the protected replay/i);
@@ -490,7 +521,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(conflictResolutionHtml, /data-replay-part-count=["']4["']/i);
   assert.match(
     conflictResolutionHtml,
-    /\/api\/replay-assets\/mock_behavioral_conflict_02\.mp4\.part-00/i,
+    /\/api\/replay-assets\/mock_behavioral_conflict_02\.mp4/i,
   );
   assert.doesNotMatch(conflictResolutionHtml, /data-google-drive-file-id=["']1MTv2BG_lIO8lM3ee0DMykRd26n5G2hRq["']/i);
   assert.doesNotMatch(conflictResolutionHtml, /Allow replay access|Preparing the protected replay/i);
@@ -529,7 +560,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
     assert.equal(integratedReplay.status, 200, slug);
     const integratedHtml = await integratedReplay.text();
     assert.match(integratedHtml, new RegExp(`data-replay-part-count=["']${partCount}["']`, "i"), slug);
-    assert.ok(integratedHtml.includes(`/api/replay-assets/${filename}.part-00`), slug);
+    assert.ok(integratedHtml.includes(`/api/replay-assets/${filename}"`), slug);
+    const escapedFilename = filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    assert.doesNotMatch(integratedHtml, new RegExp(`/api/replay-assets/${escapedFilename}\\.part-00`, "i"), slug);
     assert.doesNotMatch(integratedHtml, /data-google-drive-file-id=/i, slug);
     assert.doesNotMatch(integratedHtml, /Allow replay access|Preparing the protected replay/i, slug);
     assert.doesNotMatch(integratedHtml, /<iframe[^>]+drive\.google\.com/i, slug);
