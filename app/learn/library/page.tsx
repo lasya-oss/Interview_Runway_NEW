@@ -21,6 +21,7 @@ export default async function LibraryPage() {
       <div className="member-page">
         <LibraryClient
           profileId={profile.id}
+          isLive={profile.isLive === true}
           materials={LEARNING_MATERIALS}
           pdfGuides={DRIVE_PDF_GUIDES}
           driveMaterials={DRIVE_MATERIALS}

@@ -59,17 +59,17 @@ export default async function LearnerHomePage() {
               {[72, 100, 48, 86, 34, 0, 0].map((value, index) => <span key={index}><i style={{ height: `${Math.max(8, value)}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
             </div>
             <dl className="weekly-stats">
-              <div><dt>Completed</dt><dd>{profile.id === "foundation" ? "5 / 9" : profile.id === "practice" ? "8 / 11" : "9 / 10"}</dd></div>
-              <div><dt>Focused time</dt><dd>{profile.id === "foundation" ? "2h 14m" : profile.id === "practice" ? "4h 38m" : "5h 06m"}</dd></div>
-              <div><dt>Next review</dt><dd>{profile.id === "premium" ? "Thu 18:30" : "Sunday"}</dd></div>
+              <div><dt>Completed</dt><dd>{profile.isLive ? `${profile.completedTaskIds?.length ?? 0} / 24` : profile.id === "foundation" ? "5 / 9" : profile.id === "practice" ? "8 / 11" : "9 / 10"}</dd></div>
+              <div><dt>Focused time</dt><dd>{profile.isLive ? "Starts at 0m" : profile.id === "foundation" ? "2h 14m" : profile.id === "practice" ? "4h 38m" : "5h 06m"}</dd></div>
+              <div><dt>Next review</dt><dd>{profile.isLive ? "After next study step" : profile.id === "premium" ? "Thu 18:30" : "Sunday"}</dd></div>
             </dl>
           </article>
         </section>
 
         <section className="member-section member-review-materials">
           <div className="member-section-heading">
-            <div><p className="member-kicker">Inside this demo</p><h2>Open the material—not a placeholder.</h2></div>
-            <span>Review editions · human approval pending</span>
+            <div><p className="member-kicker">{profile.isLive ? "Inside your Foundation plan" : "Inside this demo"}</p><h2>Open the material—not a placeholder.</h2></div>
+            <span>{profile.isLive ? "Included with ₹799 access" : "Review editions · human approval pending"}</span>
           </div>
           <div className="member-review-material-grid">
             {reviewMaterials.map((material) => (

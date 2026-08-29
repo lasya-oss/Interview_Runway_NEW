@@ -1,6 +1,12 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { findDemoById, type DemoProfile, type DemoTier } from "./demo-data";
+import { requireChatGPTUser } from "@/app/chatgpt-auth";
+import {
+  createFoundationProfile,
+  getLearnerProgress,
+  hasVaultAccess,
+} from "@/app/lib/paid-access";
 
 export const DEMO_SESSION_COOKIE = "ir_demo_session";
 export const DEMO_SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
@@ -56,7 +62,15 @@ export async function requireDemoProfile(
 ): Promise<DemoProfile> {
   const profile = await getDemoProfile();
   if (profile) return profile;
-  redirect(`/demo-login?return_to=${encodeURIComponent(safeReturnTo(returnTo))}`);
+
+  const user = await requireChatGPTUser(returnTo);
+  if (!(await hasVaultAccess(user.email))) {
+    redirect(
+      `/pricing?access=required&return_to=${encodeURIComponent(safeReturnTo(returnTo))}`,
+    );
+  }
+
+  return createFoundationProfile(user, await getLearnerProgress(user.email));
 }
 
 async function verifyDemoSession(

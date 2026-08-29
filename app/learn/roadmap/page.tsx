@@ -15,7 +15,9 @@ export default async function RoadmapPage() {
   const profile = await requireDemoProfile("/learn/roadmap");
   const weeks = profile.roadmapWeeks === 12 ? TWELVE_WEEK_PLAN : FOUR_WEEK_PLAN;
   const orderedTaskIds = weeks.flatMap((week) => week.tasks.map((task) => task.id));
-  const defaultCompletedCount = Math.round(orderedTaskIds.length * (profile.progress / 100));
+  const initialCompleted = profile.isLive
+    ? profile.completedTaskIds ?? []
+    : orderedTaskIds.slice(0, Math.round(orderedTaskIds.length * (profile.progress / 100)));
 
   return (
     <MemberShell profile={profile} active="roadmap">
@@ -24,7 +26,8 @@ export default async function RoadmapPage() {
           profileId={profile.id}
           currentWeek={profile.week}
           weeks={weeks}
-          initialCompleted={orderedTaskIds.slice(0, defaultCompletedCount)}
+          initialCompleted={initialCompleted}
+          persistMode={profile.isLive ? "account" : "demo"}
         />
       </div>
     </MemberShell>

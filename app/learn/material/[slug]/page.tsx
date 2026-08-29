@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
 import { canAccessMaterial, LEARNING_MATERIALS, type DemoTier } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
+import { StudyProgressButton } from "../../study-progress-button";
 
 export const dynamic = "force-dynamic";
 
@@ -137,6 +139,9 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
   };
 
   const destination = material.tier === "premium" ? "/learn/coaching" : material.tier === "practice" ? "/learn/practice" : "/learn/roadmap";
+  const linkedTask = TWELVE_WEEK_PLAN
+    .flatMap((week) => week.tasks)
+    .find((task) => task.learning.kind === "material" && task.learning.slug === material.slug);
 
   return (
     <MemberShell profile={profile} active="library">
@@ -147,24 +152,25 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
 
         <header className="material-header">
           <div>
-            <p className="member-kicker">Representative {material.format} · sample progress</p>
+            <p className="member-kicker">{profile.isLive ? `Foundation lesson · ${material.format}` : `Representative ${material.format} · sample progress`}</p>
             <h1>{material.title}</h1>
             <p>{material.description}</p>
           </div>
           <dl>
             <div><dt>Access</dt><dd>{tierLabel(material.tier)}</dd></div>
             <div><dt>Working time</dt><dd>{material.duration}</dd></div>
-            <div><dt>State</dt><dd>Demo preview</dd></div>
+            <div><dt>State</dt><dd>{profile.isLive ? "Included" : "Demo preview"}</dd></div>
           </dl>
         </header>
 
         <div className="material-layout">
           <section className="material-stage" aria-labelledby="material-stage-title">
-            <div className="material-stage-top"><span>Decision lab / {material.number}</span><b>Sample, not a published lesson</b></div>
+            <div className="material-stage-top"><span>Decision lab / {material.number}</span><b>{profile.isLive ? "Included with paid Foundation" : "Sample, not a published lesson"}</b></div>
             <div className="material-stage-visual" aria-hidden="true"><i /><i /><i /><span /></div>
             <p>Decision to make</p>
             <h2 id="material-stage-title">{detail.decision}</h2>
             <div className="material-stage-controls"><span>00:00</span><i><b /></i><span>{material.duration}</span></div>
+            {profile.isLive && linkedTask ? <StudyProgressButton taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
           </section>
 
           <aside className="material-notes">
@@ -201,7 +207,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
         </section>
 
         <footer className="material-next-step">
-          <div><p className="member-kicker">Continue the loop</p><h2>{detail.related}</h2><p>This action opens another representative demo surface; it does not record completion or invoke an AI service.</p></div>
+          <div><p className="member-kicker">Continue the loop</p><h2>{detail.related}</h2><p>{profile.isLive ? "Use the button above to record this study step, then continue through the roadmap." : "This action opens another representative demo surface; it does not record completion or invoke an AI service."}</p></div>
           <Link className="member-primary-button" href={destination}>Continue <span aria-hidden="true">↗</span></Link>
         </footer>
       </article>

@@ -23,11 +23,13 @@ function accessLabel(tier: DemoTier) {
 
 export function LibraryClient({
   profileId,
+  isLive = false,
   materials,
   pdfGuides,
   driveMaterials,
 }: {
   profileId: DemoTier;
+  isLive?: boolean;
   materials: readonly LearningMaterial[];
   pdfGuides: readonly DrivePdfGuide[];
   driveMaterials: readonly DriveMaterial[];
@@ -129,7 +131,7 @@ export function LibraryClient({
                   <span>{material.duration} · {material.level}</span>
                   <small>{material.reviewed}<br />{material.roadmap}</small>
                   <b>{unlocked ? `Included with ${accessLabel(material.tier)}` : `Requires ${accessLabel(material.tier)}`}</b>
-                  {unlocked && material.progress > 0 ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
+                  {unlocked && material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
                   <Link href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{unlocked ? "Open sample" : "Compare access"} <span aria-hidden="true">↗</span></Link>
                 </div>
               </article>

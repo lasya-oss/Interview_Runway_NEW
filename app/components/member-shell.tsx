@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { DemoProfile } from "@/app/lib/demo-data";
 import { Brand } from "./site-chrome";
-import { DemoLogoutButton } from "./member-actions";
+import { DemoLogoutButton, LiveLogoutButton } from "./member-actions";
 
 const MEMBER_NAV = [
   { key: "today", href: "/learn", label: "Today", mark: "01", access: "library" },
@@ -22,13 +22,16 @@ export function MemberShell({
   active: (typeof MEMBER_NAV)[number]["key"];
   children: ReactNode;
 }) {
+  const isLive = profile.isLive === true;
   const workspaceState = profile.id === "foundation"
     ? { window: "8–12 weeks", signal: "Baseline pending", event: "Weekly review", eventTime: "Sun · 18:00" }
     : profile.id === "practice"
       ? { window: "19 days", signal: "78 · practice", event: "Adaptive mock 08", eventTime: "Tue · 20:00" }
       : { window: "13 days", signal: "84 · coach calibrated", event: "Calibration session", eventTime: "Thu · 18:30" };
   const conversion = profile.id === "foundation"
-    ? { href: "/checkout/vault", label: "Start Vault · ₹799", event: "checkout_started" }
+    ? isLive
+      ? { href: "/learn/roadmap", label: "Continue Foundation", event: undefined }
+      : { href: "/checkout/vault", label: "Start Vault · ₹799", event: "checkout_started" }
     : profile.id === "practice"
       ? { href: "/second-seat", label: "Review Second Seat access", event: undefined }
       : { href: "/qualify", label: "Check Phase 3 eligibility", event: undefined };
@@ -60,7 +63,7 @@ export function MemberShell({
         <div className="member-profile-card">
           <span className="member-avatar">{profile.initials}</span>
           <div><strong>{profile.name}</strong><small>{profile.role}</small></div>
-          <DemoLogoutButton />
+          {isLive ? <LiveLogoutButton /> : <DemoLogoutButton />}
         </div>
       </aside>
 
@@ -73,8 +76,8 @@ export function MemberShell({
             <div><span>Timezone</span><strong>Asia / Kolkata</strong></div>
           </div>
           <div className="member-topbar-signals">
-            <span><i /> Demo workspace · sample learner data</span>
-            <span>{profile.streak}-day rhythm</span>
+            <span><i /> {isLive ? "Paid workspace · Foundation access" : "Demo workspace · sample learner data"}</span>
+            <span>{isLive ? "₹799 access active" : `${profile.streak}-day rhythm`}</span>
             <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
           </div>
         </header>
@@ -103,7 +106,7 @@ export function MemberShell({
             <li className={profile.access.coaching ? "is-on" : ""}><i /> Coach room</li>
           </ul>
         </section>
-        <p>DEMO WORKSPACE<br />NO PURCHASE REQUIRED</p>
+        <p>{isLive ? "PAID FOUNDATION QA<br />₹799 ACCESS ACTIVE" : "DEMO WORKSPACE<br />NO PURCHASE REQUIRED"}</p>
       </aside>
     </div>
   );

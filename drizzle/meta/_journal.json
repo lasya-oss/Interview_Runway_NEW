@@ -15,6 +15,13 @@
       "when": 1784525810076,
       "tag": "0001_stiff_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787986851525,
+      "tag": "0002_brown_bloodscream",
+      "breakpoints": true
     }
   ]
 }

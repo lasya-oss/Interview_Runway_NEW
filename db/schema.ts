@@ -49,6 +49,13 @@ export const entitlements = sqliteTable(
   ],
 );
 
+export const learnerProgress = sqliteTable("learner_progress", {
+  userEmail: text("user_email").primaryKey(),
+  completedTaskIds: text("completed_task_ids").notNull().default("[]"),
+  progressPercent: integer("progress_percent").notNull().default(0),
+  updatedAt: text("updated_at").notNull(),
+});
+
 export const paddleEvents = sqliteTable("paddle_events", {
   eventId: text("event_id").primaryKey(),
   eventType: text("event_type").notNull(),

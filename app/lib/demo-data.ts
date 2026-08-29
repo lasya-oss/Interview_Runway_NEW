@@ -2,11 +2,12 @@ export type DemoTier = "foundation" | "practice" | "premium";
 
 export type DemoProfile = {
   id: DemoTier;
+  isLive?: boolean;
   name: string;
   firstName: string;
   initials: string;
   email: string;
-  password: string;
+  password?: string;
   role: string;
   target: string;
   plan: string;
@@ -16,6 +17,7 @@ export type DemoProfile = {
   streak: number;
   week: number;
   roadmapWeeks: number;
+  completedTaskIds?: readonly string[];
   nextAction: string;
   nextActionMeta: string;
   focus: string;

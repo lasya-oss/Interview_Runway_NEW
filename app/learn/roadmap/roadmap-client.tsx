@@ -1,79 +1,77 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useMemo, useState } from "react";
 import type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
 
 export type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
-
-function parseCompleted(value: string, fallback: readonly string[]) {
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) return parsed;
-  } catch {
-    // Device-local demo state may be cleared or malformed; fall back safely.
-  }
-  return [...fallback];
-}
 
 export function RoadmapChecklist({
   profileId,
   currentWeek,
   weeks,
   initialCompleted,
+  persistMode = "demo",
 }: {
   profileId: string;
   currentWeek: number;
   weeks: readonly RoadmapWeek[];
   initialCompleted: readonly string[];
+  persistMode?: "demo" | "account";
 }) {
+  const isAccount = persistMode === "account";
   const storageKey = `interviewrunway-demo-roadmap:${profileId}`;
-  const eventName = `interviewrunway-roadmap-change:${profileId}`;
-  const fallbackSnapshot = useMemo(() => JSON.stringify(initialCompleted), [initialCompleted]);
-
-  const subscribe = useCallback((onChange: () => void) => {
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === storageKey) onChange();
-    };
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener(eventName, onChange);
-    return () => {
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener(eventName, onChange);
-    };
-  }, [eventName, storageKey]);
-
-  const getSnapshot = useCallback(() => {
-    try {
-      return window.localStorage.getItem(storageKey) ?? fallbackSnapshot;
-    } catch {
-      return fallbackSnapshot;
-    }
-  }, [fallbackSnapshot, storageKey]);
-
-  const snapshot = useSyncExternalStore(subscribe, getSnapshot, () => fallbackSnapshot);
-  const completed = useMemo(() => new Set(parseCompleted(snapshot, initialCompleted)), [initialCompleted, snapshot]);
+  const [completed, setCompleted] = useState<Set<string>>(() =>
+    new Set(isAccount ? initialCompleted : readDemoCompleted(storageKey, initialCompleted)),
+  );
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const allTasks = useMemo(() => weeks.flatMap((week) => week.tasks), [weeks]);
   const completedCount = allTasks.filter((task) => completed.has(task.id)).length;
   const completion = Math.round((completedCount / allTasks.length) * 100);
 
-  const persist = (next: Set<string>) => {
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify([...next]));
-    } catch {
-      // This checklist is an optional device-local demo enhancement.
+  const persist = async (next: Set<string>, previous: Set<string>) => {
+    if (!isAccount) {
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify([...next]));
+      } catch {
+        // This checklist is an optional device-local demo enhancement.
+      }
+      return;
     }
-    window.dispatchEvent(new Event(eventName));
+
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const response = await fetch("/api/learner/progress", {
+        body: JSON.stringify({ completedTaskIds: [...next] }),
+        headers: { "content-type": "application/json" },
+        method: "PUT",
+      });
+      if (!response.ok) throw new Error("Progress could not be saved");
+    } catch {
+      setCompleted(previous);
+      setSaveError("Progress could not be saved. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggle = (taskId: string) => {
+    const previous = new Set(completed);
     const next = new Set(completed);
     if (next.has(taskId)) next.delete(taskId);
     else next.add(taskId);
-    persist(next);
+    setCompleted(next);
+    void persist(next, previous);
   };
 
-  const reset = () => persist(new Set(initialCompleted));
+  const reset = () => {
+    const previous = new Set(completed);
+    const next = new Set(isAccount ? [] : initialCompleted);
+    setCompleted(next);
+    void persist(next, previous);
+  };
 
   const learningHref = (task: RoadmapTask) =>
     task.learning.kind === "material"
@@ -84,21 +82,23 @@ export function RoadmapChecklist({
     <div className="roadmap-workspace">
       <section className="roadmap-overview" aria-labelledby="roadmap-overview-title">
         <div>
-          <p className="member-kicker">Device-local demo checklist</p>
+          <p className="member-kicker">{isAccount ? "Account roadmap" : "Device-local demo checklist"}</p>
           <h1 id="roadmap-overview-title">A plan with a finish line.</h1>
-          <p>Check off sample work to see this browser-only plan respond. No learner record is created or synced.</p>
+          <p>{isAccount ? "Check off work as you study. Your Foundation progress is stored with your account and follows you across sessions." : "Check off sample work to see this browser-only plan respond. No learner record is created or synced."}</p>
         </div>
-        <div className="roadmap-completion" aria-label={`${completion}% of sample plan complete`}>
+        <div className="roadmap-completion" aria-label={`${completion}% of ${isAccount ? "your" : "sample"} plan complete`}>
           <strong>{completion}<small>%</small></strong>
-          <span>{completedCount} of {allTasks.length}<br />sample tasks</span>
+          <span>{completedCount} of {allTasks.length}<br />{isAccount ? "tracked tasks" : "sample tasks"}</span>
           <i><b style={{ width: `${completion}%` }} /></i>
         </div>
       </section>
 
       <div className="roadmap-toolbar">
         <span><i /> Current position · week {currentWeek}</span>
-        <button type="button" onClick={reset}>Reset sample progress</button>
+        <button type="button" onClick={reset} disabled={saving}>{isAccount ? "Reset progress" : "Reset sample progress"}</button>
+        {saving ? <small>Saving…</small> : null}
       </div>
+      {saveError ? <p role="alert">{saveError}</p> : null}
 
       <div className="roadmap-week-list">
         {weeks.map((week) => {
@@ -152,4 +152,18 @@ export function RoadmapChecklist({
       </div>
     </div>
   );
+}
+
+function readDemoCompleted(storageKey: string, fallback: readonly string[]) {
+  if (typeof window === "undefined") return [...fallback];
+
+  try {
+    const value = window.localStorage.getItem(storageKey);
+    if (!value) return [...fallback];
+    const parsed = JSON.parse(value) as unknown;
+    if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) return parsed;
+  } catch {
+    // Device-local demo state may be cleared or malformed; fall back safely.
+  }
+  return [...fallback];
 }
