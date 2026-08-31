@@ -63,10 +63,14 @@ export async function getLearnerProgress(email: string): Promise<LearnerProgress
     parsed = [];
   }
   const completedTaskIds = Array.isArray(parsed)
-    ? parsed.filter(
-        (taskId): taskId is string =>
-          typeof taskId === "string" && validTaskIds.has(taskId),
-      )
+    ? [
+        ...new Set(
+          parsed.filter(
+            (taskId): taskId is string =>
+              typeof taskId === "string" && validTaskIds.has(taskId),
+          ),
+        ),
+      ]
     : [];
 
   return {
@@ -116,10 +120,7 @@ export function createFoundationProfile(
   const nextTask = allTasks.find(
     (task) => !progress.completedTaskIds.includes(task.id),
   );
-  const currentWeek = Math.min(
-    12,
-    Math.max(1, Math.floor(progress.progressPercent / (100 / 12)) + 1),
-  );
+  const currentWeek = currentFoundationWeek(progress.completedTaskIds);
 
   return {
     id: "foundation" as const,
@@ -152,6 +153,15 @@ export function createFoundationProfile(
 function validFoundationTaskIds() {
   return new Set(
     TWELVE_WEEK_PLAN.flatMap((week) => week.tasks.map((task) => task.id)),
+  );
+}
+
+export function currentFoundationWeek(completedTaskIds: readonly string[]) {
+  const completed = new Set(completedTaskIds);
+  return (
+    TWELVE_WEEK_PLAN.find((week) =>
+      week.tasks.some((task) => !completed.has(task.id)),
+    )?.week ?? TWELVE_WEEK_PLAN.at(-1)?.week ?? 1
   );
 }
 

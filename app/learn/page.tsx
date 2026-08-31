@@ -15,6 +15,13 @@ export const metadata: Metadata = {
 
 export default async function LearnerHomePage() {
   const profile = await requireDemoProfile("/learn");
+  const isFreshLiveLearner = profile.isLive === true && profile.progress === 0 && (profile.completedTaskIds?.length ?? 0) === 0;
+  const todayKicker = profile.isLive
+    ? isFreshLiveLearner
+      ? `Start here · Week 1 of ${profile.roadmapWeeks}`
+      : `Week ${profile.week} of ${profile.roadmapWeeks} · Foundation path`
+    : `Friday · Week ${profile.week} of ${profile.roadmapWeeks}`;
+  const weeklyActivity = profile.isLive ? [0, 0, 0, 0, 0, 0, 0] : [72, 100, 48, 86, 34, 0, 0];
   const scoreKey = profile.id;
   const continuedMaterials = profile.id === "foundation"
     ? LEARNING_MATERIALS.filter((material) => material.tier === "foundation").slice(0, 3)
@@ -38,8 +45,8 @@ export default async function LearnerHomePage() {
       <div className="member-page member-page-vault-today member-dashboard">
         <section className="member-hero-grid">
           <div className="member-hero-copy">
-            <p className="member-kicker">Friday · Week {profile.week} of {profile.roadmapWeeks}</p>
-            <h1>Good evening, {profile.firstName}. <em>Keep the loop tight.</em></h1>
+            <p className="member-kicker">{todayKicker}</p>
+            <h1>{isFreshLiveLearner ? <>Welcome, {profile.firstName}. <em>Start with the first decision.</em></> : <>Good evening, {profile.firstName}. <em>Keep the loop tight.</em></>}</h1>
             <p>{profile.focus}</p>
           </div>
           <div className="readiness-dial" style={{ "--readiness": `${profile.progress * 3.6}deg` } as CSSProperties}>
@@ -58,9 +65,9 @@ export default async function LearnerHomePage() {
           </article>
 
           <article className="weekly-plan-panel">
-            <div className="member-panel-label"><span>This week</span><b>{profile.week === 4 ? "Final pass" : "Plan active"}</b></div>
-            <div className="week-strip" aria-label="Weekly activity">
-              {[72, 100, 48, 86, 34, 0, 0].map((value, index) => <span key={index}><i style={{ height: `${Math.max(8, value)}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
+            <div className="member-panel-label"><span>This week</span><b>{profile.isLive ? (isFreshLiveLearner ? "Start here" : "Plan active") : profile.week === 4 ? "Final pass" : "Plan active"}</b></div>
+            <div className="week-strip" aria-label={profile.isLive ? "No daily activity recorded yet" : "Weekly activity"}>
+              {weeklyActivity.map((value, index) => <span key={index}><i style={{ height: value === 0 ? "0%" : `${Math.max(8, value)}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
             </div>
             <dl className="weekly-stats">
               <div><dt>Completed</dt><dd>{profile.isLive ? `${profile.completedTaskIds?.length ?? 0} / 24` : profile.id === "foundation" ? "5 / 9" : profile.id === "practice" ? "8 / 11" : "9 / 10"}</dd></div>

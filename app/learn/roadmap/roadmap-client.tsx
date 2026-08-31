@@ -32,11 +32,9 @@ export function RoadmapChecklist({
   const completedCount = allTasks.filter((task) => completed.has(task.id)).length;
   const completion = Math.round((completedCount / allTasks.length) * 100);
   const activeWeek = useMemo(() => {
-    const suppliedCurrentWeek = weeks.find((week) => week.week === currentWeek);
-    if (suppliedCurrentWeek && suppliedCurrentWeek.tasks.some((task) => !completed.has(task.id))) {
-      return suppliedCurrentWeek.week;
-    }
-    return weeks.find((week) => week.tasks.some((task) => !completed.has(task.id)))?.week ?? currentWeek;
+    return weeks.find((week) =>
+      week.tasks.some((task) => !completed.has(task.id)),
+    )?.week ?? weeks.at(-1)?.week ?? currentWeek;
   }, [completed, currentWeek, weeks]);
 
   const persist = async (next: Set<string>, previous: Set<string>) => {
@@ -194,7 +192,7 @@ function getWeekStatus(
 ): RoadmapWeekStatus {
   if (weekCompleted === week.tasks.length) return "completed";
   if (week.week === activeWeek) return "in-progress";
-  return week.week > activeWeek ? "upcoming" : "in-progress";
+  return "upcoming";
 }
 
 function formatWeekStatus(status: RoadmapWeekStatus) {
