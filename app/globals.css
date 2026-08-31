@@ -4953,6 +4953,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .member-plan-card > a { display: inline-block; margin-top: 13px; color: #cad6db; font-size: 9px; font-weight: 700; }
 .member-plan-card-status { margin: 0; }
 .member-shell[data-member-layout="vault"] .member-profile-card { margin-top: auto; }
+.member-shell[data-member-layout="second-seat"] .member-profile-card { margin-top: auto; }
 .member-profile-card { margin-top: 12px; padding: 13px 7px 2px; display: grid; grid-template-columns: 32px 1fr; gap: 9px; border-top: 1px solid rgba(211,226,232,.1); }
 .member-avatar { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid rgba(211,226,232,.15); border-radius: 50%; color: var(--afterburner); background: rgba(255,255,255,.04); font-family: var(--font-mono); font-size: 8px; }
 .member-profile-card > div { min-width: 0; display: grid; }

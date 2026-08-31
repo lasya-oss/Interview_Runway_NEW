@@ -1084,6 +1084,12 @@ test("member demo typography has an explicit legibility floor", async () => {
   assert.match(styles, /\.member-material-card p\s*\{\s*font-size:\s*var\(--member-body\)/);
 });
 
+test("Second Seat keeps the learner profile anchored at the bottom of the sidebar", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(styles, /\.member-shell\[data-member-layout="second-seat"\] \.member-profile-card\s*\{\s*margin-top:\s*auto/);
+});
+
 test("three-layer evidence readouts use body-copy sizing", async () => {
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 
