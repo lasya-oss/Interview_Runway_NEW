@@ -15,6 +15,24 @@ import { PdfGuideShelf } from "./pdf-guide-shelf";
 
 const TIER_ORDER: Record<DemoTier, number> = { foundation: 0, practice: 1, premium: 2 };
 
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  All: "Browse the full library",
+  "System design": "Architecture choices and trade-offs",
+  "DSA patterns": "Signals, invariants, and problem solving",
+  Behavioural: "Evidence-led stories and communication",
+  "Remote career": "Remote role, offer, and work guidance",
+  Roadmaps: "Sequenced plans and checkpoints",
+  Operations: "Planning, review, and interview execution",
+  "Company research": "Company context for sharper answers",
+  "Coding mock": "Timed coding practice and replay",
+  "Behavioural mock": "Recorded behavioural practice",
+  "Recruiter mock": "Recruiter-screen scenarios",
+  "Manager mock": "Manager-led interview scenarios",
+  "Mock interview": "Practice sessions to pressure-test thinking",
+  "Production archive": "Source files from the production archive",
+  Reference: "Supporting guides and references",
+};
+
 function accessLabel(tier: DemoTier) {
   if (tier === "foundation") return "Vault";
   if (tier === "practice") return "The Second Seat";
@@ -53,7 +71,7 @@ export function LibraryClient({
   driveMaterials: readonly DriveMaterial[];
 }) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("All");
+  const [category, setCategory] = useState<string | null>(null);
   const [scope, setScope] = useState<"all" | "included" | "locked">("all");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
   const categories = useMemo(() => ["All", ...new Set([
@@ -61,12 +79,22 @@ export function LibraryClient({
     ...pdfGuides.map((guide) => drivePdfCategory(guide.filename)),
     ...driveMaterials.map((material) => driveMaterialCategory(material.filename)),
   ])], [driveMaterials, materials, pdfGuides]);
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    const add = (itemCategory: string) => counts.set(itemCategory, (counts.get(itemCategory) ?? 0) + 1);
+    materials.forEach((material) => add(material.category));
+    pdfGuides.forEach((guide) => add(drivePdfCategory(guide.filename)));
+    driveMaterials.forEach((material) => add(driveMaterialCategory(material.filename)));
+    return counts;
+  }, [driveMaterials, materials, pdfGuides]);
+
+  const totalResourceCount = materials.length + pdfGuides.length + driveMaterials.length;
 
   const results = useMemo(() => materials.filter((material) => {
     const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
     const included = unlocked && (!isLive || material.tier !== "foundation" || material.availability === "included");
     const matchesScope = scope === "all" || (scope === "included" ? included : !unlocked);
-    const matchesCategory = category === "All" || material.category === category;
+    const matchesCategory = !category || category === "All" || material.category === category;
     const haystack = `${material.title} ${material.description} ${material.category} ${material.format} ${material.tags.join(" ")}`.toLowerCase();
     return matchesScope && matchesCategory && (!deferredQuery || haystack.includes(deferredQuery));
   }), [category, deferredQuery, isLive, materials, profileId, scope]);
@@ -77,7 +105,7 @@ export function LibraryClient({
       const title = drivePdfTitle(guide.filename);
       const guideCategory = drivePdfCategory(guide.filename);
       const haystack = `${title} ${guide.filename} ${guideCategory} PDF guide`.toLowerCase();
-      return (category === "All" || guideCategory === category) && (!deferredQuery || haystack.includes(deferredQuery));
+      return (!category || category === "All" || guideCategory === category) && (!deferredQuery || haystack.includes(deferredQuery));
     });
   }, [category, deferredQuery, pdfGuides, scope]);
 
@@ -88,7 +116,7 @@ export function LibraryClient({
       const materialCategory = driveMaterialCategory(material.filename);
       const kind = driveMaterialKindLabel(material.kind);
       const haystack = `${title} ${material.filename} ${material.collection} ${materialCategory} ${kind}`.toLowerCase();
-      return (category === "All" || materialCategory === category) && (!deferredQuery || haystack.includes(deferredQuery));
+      return (!category || category === "All" || materialCategory === category) && (!deferredQuery || haystack.includes(deferredQuery));
     });
   }, [category, deferredQuery, driveMaterials, scope]);
 
@@ -103,8 +131,8 @@ export function LibraryClient({
           <p>Search the library by the interview decision it helps you make. Learning records, PDF guides, and the supplied Drive archive now sit in the same searchable workspace.</p>
         </div>
         <div className="library-index" aria-label={`${isLive ? "Vault" : "Sample"} catalogue summary`}>
-          <strong>{(materials.length + pdfGuides.length + driveMaterials.length).toString().padStart(2, "0")}</strong>
-          <span>library<br />records</span>
+          <strong>{totalResourceCount.toLocaleString("en-IN")}</strong>
+          <span>resources<br />available</span>
         </div>
       </section>
 
@@ -122,9 +150,21 @@ export function LibraryClient({
         </div>
       </section>
 
-      <div className="library-category-rail" aria-label="Material categories">
+      <div className="library-category-grid" aria-label="Material categories">
         {categories.map((item) => (
-          <button className={category === item ? "is-active" : ""} type="button" onClick={() => setCategory(item)} key={item}>{item}</button>
+          <button
+            className={`library-category-card${category === item ? " is-active" : ""}`}
+            type="button"
+            onClick={() => setCategory((current) => current === item ? null : item)}
+            aria-pressed={category === item}
+            key={item}
+          >
+            <span className="library-category-card__topline">
+              <b>{item}</b>
+              <i>{(item === "All" ? totalResourceCount : categoryCounts.get(item) ?? 0).toLocaleString("en-IN")}</i>
+            </span>
+            <small>{CATEGORY_DESCRIPTIONS[item] ?? "Resources for this interview-prep theme"}</small>
+          </button>
         ))}
       </div>
 
@@ -160,7 +200,7 @@ export function LibraryClient({
       ) : !pdfResults.length && !driveResults.length ? (
         <div className="library-empty">
           <strong>No library records match those filters.</strong>
-          <button type="button" onClick={() => { setQuery(""); setCategory("All"); setScope("all"); }}>Clear filters</button>
+          <button type="button" onClick={() => { setQuery(""); setCategory(null); setScope("all"); }}>Clear filters</button>
         </div>
       ) : null}
 
