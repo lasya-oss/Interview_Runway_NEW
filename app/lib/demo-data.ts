@@ -3,6 +3,7 @@ export type DemoTier = "foundation" | "practice" | "premium";
 export type DemoProfile = {
   id: DemoTier;
   isLive?: boolean;
+  isSecondSeatLive?: boolean;
   name: string;
   firstName: string;
   initials: string;

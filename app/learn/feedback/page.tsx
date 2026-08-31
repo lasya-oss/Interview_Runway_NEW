@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
 import { SCORE_DIMENSIONS } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { getLatestCompletedSecondSeatSession } from "@/app/lib/second-seat-store";
 import { FeedbackClient } from "./feedback-client";
 
 export const dynamic = "force-dynamic";
@@ -58,7 +60,28 @@ export default async function FeedbackPage() {
     );
   }
 
-  const dimensions = SCORE_DIMENSIONS.map((dimension, index) => ({
+  const latestSession = profile.isSecondSeatLive
+    ? await getLatestCompletedSecondSeatSession(profile.email)
+    : null;
+  const liveEvaluation = latestSession?.evaluation ?? null;
+  if (profile.isSecondSeatLive && !liveEvaluation) {
+    return (
+      <MemberShell profile={profile} active="feedback">
+        <div className="member-page">
+          <section className="feedback-empty" aria-labelledby="feedback-empty-title">
+            <p className="member-kicker">Second Seat · feedback room</p>
+            <h1 id="feedback-empty-title">Your first transcript will become the baseline.</h1>
+            <p>Complete one practice round and this page will show category scores, transcript evidence, and the smallest useful next rehearsal. Nothing is pre-populated.</p>
+            <Link className="member-primary-button" href="/learn/practice">Start a practice round <span aria-hidden="true">↗</span></Link>
+          </section>
+        </div>
+      </MemberShell>
+    );
+  }
+
+  const dimensions = liveEvaluation
+    ? liveEvaluation.dimensions
+    : SCORE_DIMENSIONS.map((dimension, index) => ({
     label: dimension.label,
     score: dimension[profile.id],
     delta: ["+6", "+4", "+2", "+9"][index],
@@ -68,17 +91,25 @@ export default async function FeedbackPage() {
       "Improving, but consistency and retry decisions still arrive after prompting.",
       "Concise explanations and clear responses to follow-up questions.",
     ][index],
-  }));
+    }));
+  const evidence = liveEvaluation
+    ? liveEvaluation.evidence.map((item, index) => ({ ...item, time: `Turn ${String(index + 1).padStart(2, "0")}` }))
+    : EVIDENCE;
+  const actions = liveEvaluation?.nextActions ?? ACTIONS;
 
   return (
     <MemberShell profile={profile} active="feedback">
       <div className="member-page">
         <FeedbackClient
-          overall={profile.id === "premium" ? 84 : 78}
+          overall={liveEvaluation?.overall ?? (profile.id === "premium" ? 84 : 78)}
           dimensions={dimensions}
-          evidence={EVIDENCE}
-          actions={ACTIONS}
+          evidence={evidence}
+          actions={actions}
           premium={profile.id === "premium"}
+          live={profile.isSecondSeatLive === true}
+          mockTitle={latestSession ? "Your latest practice round" : "Design a metrics pipeline"}
+          insightTitle={liveEvaluation?.insightTitle}
+          insightBody={liveEvaluation?.insightBody}
         />
       </div>
     </MemberShell>

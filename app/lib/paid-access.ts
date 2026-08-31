@@ -43,6 +43,24 @@ export async function hasVaultAccess(email: string): Promise<boolean> {
   return Boolean(entitlement);
 }
 
+export async function hasSecondSeatAccess(email: string): Promise<boolean> {
+  if (!(await hasVaultAccess(email))) return false;
+
+  const [entitlement] = await (await getDb())
+    .select({ id: entitlements.id })
+    .from(entitlements)
+    .where(
+      and(
+        eq(entitlements.userEmail, normalizeEmail(email)),
+        eq(entitlements.offer, "ai-prep"),
+        eq(entitlements.status, "active"),
+      ),
+    )
+    .limit(1);
+
+  return Boolean(entitlement);
+}
+
 export async function getLearnerProgress(email: string): Promise<LearnerProgress> {
   const [record] = await (await getDb())
     .select({
@@ -113,6 +131,7 @@ export async function saveLearnerProgress(
 export function createFoundationProfile(
   user: ChatGPTUser,
   progress: LearnerProgress,
+  options: { secondSeatAccess?: boolean } = {},
 ) {
   const displayName = user.fullName || user.displayName;
   const firstName = displayName.trim().split(/\s+/)[0] || user.email;
@@ -138,6 +157,7 @@ export function createFoundationProfile(
     week: currentWeek,
     roadmapWeeks: 12,
     completedTaskIds: progress.completedTaskIds,
+    isSecondSeatLive: options.secondSeatAccess === true,
     nextAction: nextTask?.title || "Review your completed Foundation roadmap",
     nextActionMeta: nextTask?.meta || "Foundation · complete",
     nextActionHref: nextTask
@@ -146,7 +166,12 @@ export function createFoundationProfile(
         : `/learn/roadmap/task/${nextTask.id}`
       : "/learn/roadmap",
     focus: "Build repeatable technical patterns before adding timed mocks.",
-    access: { library: true, practice: false, feedback: false, coaching: false },
+    access: {
+      library: true,
+      practice: options.secondSeatAccess === true,
+      feedback: options.secondSeatAccess === true,
+      coaching: false,
+    },
   };
 }
 

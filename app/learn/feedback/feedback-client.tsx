@@ -14,29 +14,37 @@ export function FeedbackClient({
   evidence,
   actions,
   premium,
+  live,
+  mockTitle,
+  insightTitle,
+  insightBody,
 }: {
   overall: number;
   dimensions: readonly Dimension[];
   evidence: readonly Evidence[];
   actions: readonly Action[];
   premium: boolean;
+  live: boolean;
+  mockTitle: string;
+  insightTitle?: string;
+  insightBody?: string;
 }) {
   const [tab, setTab] = useState<"summary" | "evidence" | "actions">("summary");
 
   useEffect(() => {
-    trackEvent("mock_score_recorded", { mock: "MOCK-07", score: overall, sample: true });
-  }, [overall]);
+    if (!live) trackEvent("mock_score_recorded", { mock: "MOCK-07", score: overall, sample: true });
+  }, [live, overall]);
 
   return (
     <div className="feedback-workspace">
       <section className="feedback-heading">
         <div>
-          <p className="member-kicker">Sample debrief · MOCK-07</p>
-          <h1>Design a metrics pipeline</h1>
-          <p>This prewritten result demonstrates how a production transcript should connect observations, scores, and the next study decision. It did not evaluate your scripted mock response.</p>
+          <p className="member-kicker">{live ? "Your debrief · account record" : "Preview debrief · MOCK-07"}</p>
+          <h1>{mockTitle}</h1>
+          <p>{live ? "This evaluation was generated from your completed transcript. Each score is a practice signal and each correction points to a concrete next rehearsal." : "This preview demonstrates how a production transcript connects observations, scores, and the next study decision. It does not evaluate preview responses."}</p>
         </div>
-        <div className="feedback-score" aria-label={`Sample overall score ${overall} out of 100`}>
-          <span>Practice signal</span><strong>{overall}</strong><small>+7 across three sample sessions</small>
+        <div className="feedback-score" aria-label={`${live ? "Your" : "Preview"} overall score ${overall} out of 100`}>
+          <span>Practice signal</span><strong>{overall}</strong><small>{live ? "Latest completed round" : "+7 across preview sessions"}</small>
         </div>
       </section>
 
@@ -59,9 +67,9 @@ export function FeedbackClient({
             ))}
           </div>
           <aside className="feedback-primary-insight">
-            <span>{premium ? "Coach-visible pattern" : "Adaptive plan change"}</span>
-            <h2>Move the consistency decision before the scale discussion.</h2>
-            <p>The architecture was credible, but three sample transcripts delayed the durability and consistency model until an interviewer prompted it. The next two design rehearsals now probe that decision first.</p>
+            <span>{premium ? "Coach-visible pattern" : live ? "Adaptive plan change" : "Preview plan change"}</span>
+            <h2>{insightTitle ?? "Move the consistency decision before the scale discussion."}</h2>
+            <p>{insightBody ?? "The architecture was credible, but the consistency model arrived after prompting. The next design rehearsal should make that decision visible earlier."}</p>
             <div><b>Not a hiring prediction</b><small>Scores illustrate practice signals, not an estimate of receiving an offer.</small></div>
           </aside>
         </section>
@@ -69,7 +77,7 @@ export function FeedbackClient({
 
       {tab === "evidence" ? (
         <section className="feedback-evidence" role="tabpanel">
-          <div className="feedback-evidence-intro"><p className="member-kicker">Traceable observations</p><h2>Every correction points back to a moment.</h2><p>These prewritten sample excerpts demonstrate the required evaluation standard.</p></div>
+          <div className="feedback-evidence-intro"><p className="member-kicker">Traceable observations</p><h2>Every correction points back to a moment.</h2><p>{live ? "Your answers are retained with this account so the next practice decision has context." : "These preview excerpts demonstrate the required evaluation standard."}</p></div>
           <div className="feedback-evidence-list">
             {evidence.map((item, index) => (
               <article key={item.time}>
@@ -87,7 +95,7 @@ export function FeedbackClient({
 
       {tab === "actions" ? (
         <section className="feedback-actions" role="tabpanel">
-          <div className="feedback-actions-heading"><p className="member-kicker">Sample plan regeneration</p><h2>Correct the gap while it is still specific.</h2><p>No real roadmap was changed. These actions demonstrate the expected handoff from feedback to preparation.</p></div>
+          <div className="feedback-actions-heading"><p className="member-kicker">{live ? "Adaptive plan" : "Preview plan regeneration"}</p><h2>Correct the gap while it is still specific.</h2><p>{live ? "The next actions are generated from the lowest evidence signal in this transcript." : "These actions demonstrate the expected handoff from feedback to preparation."}</p></div>
           <div className="feedback-action-list">
             {actions.map((action) => (
               <article key={action.number}>

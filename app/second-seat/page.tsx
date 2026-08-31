@@ -26,9 +26,9 @@ export default function SecondSeatPage() {
         title={<>Mock. Score. Adjust. <em>Repeat.</em></>}
         body="A text-first interview practice loop that responds to your answers, shows the evidence behind your score, and changes what you study next."
       >
-        <div className="lock-panel">
-          <span>PRIVATE UPGRADE · NOINDEX</span>
-          <p>The Second Seat is offered only after a verified Vault purchase. The working launch price is ₹2,499; usage limits and access duration must be final before checkout is enabled.</p>
+          <div className="lock-panel">
+          <span>PRIVATE UPGRADE · VAULT CLEARANCE REQUIRED</span>
+          <p>The Second Seat is a separate entitlement for verified Vault owners. Access is activated after the purchase is confirmed; the launch price is ₹2,499 and the included practice allowance is shown before any unlock.</p>
         </div>
         <div className="hero-actions">
           <CtaLink href="/vault">Start with the ₹799 Vault</CtaLink>
@@ -73,16 +73,16 @@ export default function SecondSeatPage() {
           <SectionHeading
             eyebrow="PRODUCT GUARDRAILS"
             title="Specific feedback without pretending technology is a hiring committee."
-            body="Scores are practice signals, not predictions of an offer. Voice mode stays out of launch so text quality, latency, and costs can be validated first."
+            body="Scores are practice signals, not predictions of an offer. Text transcripts, deletion controls, and clear practice limits keep the loop useful and accountable."
             id="guardrails-title"
           />
           <article className="content-card">
-            <h3>Before this goes live</h3>
+            <h3>What stays protected</h3>
             <ul>
-              <li>Vault ownership and authentication must be connected</li>
-              <li>Transcripts, uploads, retention, and deletion need clear controls</li>
-              <li>Model and code-sandbox credentials require server-side storage</li>
-              <li>Session limits and the final ₹ price must appear before payment</li>
+              <li>Vault ownership and the Second Seat entitlement are checked server-side</li>
+              <li>Every response belongs to the signed-in learner’s private transcript</li>
+              <li>Scores explain evidence and next practice; they never predict hiring</li>
+              <li>Human Calibration remains separately qualified and intentionally gated</li>
             </ul>
           </article>
         </div>
@@ -91,11 +91,11 @@ export default function SecondSeatPage() {
       <section className="section-pad final-cta" aria-labelledby="second-seat-preview-cta-title">
         <div className="container final-cta-inner">
           <p className="eyebrow">INSPECT THE PRACTICE PRODUCT</p>
-          <h2 id="second-seat-preview-cta-title">Enter the loop before it asks for money.</h2>
-          <p>Use the Second Seat sample learner to run the fixed mock interaction and inspect evidence-backed feedback. The checkout route is a ₹0 simulation until access duration, usage limits, and merchant details are final.</p>
+          <h2 id="second-seat-preview-cta-title">Inspect the practice room before you decide.</h2>
+          <p>Use the preview workspace to understand the round shape and evidence model. A verified Second Seat entitlement unlocks account-backed sessions, saved transcripts, structured scoring, and adaptive next actions.</p>
           <div className="section-actions">
-            <CtaLink href="/demo-login">Enter the Second Seat demo <span aria-hidden="true">↗</span></CtaLink>
-            <Link className="text-link" href="/checkout/ai-prep">Preview the ₹2,499 checkout <span aria-hidden="true">→</span></Link>
+            <CtaLink href="/demo-login">Inspect a practice preview <span aria-hidden="true">↗</span></CtaLink>
+            <Link className="text-link" href="/pricing">Review Second Seat terms <span aria-hidden="true">→</span></Link>
           </div>
         </div>
       </section>

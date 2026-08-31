@@ -1,126 +1,266 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { trackEvent } from "@/app/lib/analytics";
+import { useMemo, useState } from "react";
+import {
+  evaluateSecondSeatSession,
+  findSecondSeatMock,
+  SECOND_SEAT_MOCKS,
+  type SecondSeatEvaluation,
+} from "@/app/lib/second-seat-engine";
+import type { SecondSeatSession } from "@/app/lib/second-seat-store";
 
-const SCRIPT = [
-  {
-    label: "Frame the problem",
-    prompt: "Design a multi-channel notification service. Before naming components, which requirements would you clarify and which two would most change the architecture?",
-    probe: "The product requires email, push, and SMS. Transactional notifications should arrive within 30 seconds; marketing messages may take 15 minutes. How does that change your first design commitment?",
-    sample: "I would separate transactional and marketing workloads because their latency and failure tolerance differ. I would also clarify delivery volume, per-user preferences, ordering needs, and whether duplicate delivery is acceptable.",
-  },
-  {
-    label: "Commit to semantics",
-    prompt: "Choose the delivery guarantee for provider jobs. Explain what the user experiences when the same event is processed twice.",
-    probe: "Assume one SMS provider times out after accepting a request. You cannot know whether it sent the message. Where does idempotency live, and what do you record?",
-    sample: "I would use at-least-once processing with an idempotency key derived from notification and channel. The delivery ledger records attempts and provider references, while channel-specific policy decides whether an ambiguous timeout may be retried.",
-  },
-  {
-    label: "Operate under failure",
-    prompt: "A provider outage causes the queue to grow twenty-fold. Describe backpressure, retry bounds, prioritisation, and the signal that tells operations the system is recovering.",
-    probe: "Final follow-up: which lower-priority work would you shed first, and how would you prevent recovery traffic from causing another collapse?",
-    sample: "I would protect transactional queues, pause marketing fan-out, cap exponential retries with jitter, and move exhausted work to a dead-letter stream. Recovery would be rate-shaped against provider health and measured through queue age by priority, not queue length alone.",
-  },
-] as const;
+type PracticeState = "briefing" | "session" | "complete";
 
-export function PracticeClient({ learnerName }: { learnerName: string }) {
-  const [state, setState] = useState<"briefing" | "session" | "complete">("briefing");
-  const [step, setStep] = useState(0);
+export function PracticeClient({
+  learnerName,
+  isLive,
+  initialSession,
+  recentSessions,
+}: {
+  learnerName: string;
+  isLive: boolean;
+  initialSession: SecondSeatSession | null;
+  recentSessions: readonly SecondSeatSession[];
+}) {
+  const [selectedMockId, setSelectedMockId] = useState(
+    initialSession?.mockId ?? SECOND_SEAT_MOCKS[0].id,
+  );
+  const [sessionId, setSessionId] = useState(initialSession?.id ?? null);
+  const [state, setState] = useState<PracticeState>(
+    initialSession ? "session" : "briefing",
+  );
+  const [step, setStep] = useState(initialSession?.answers.length ?? 0);
   const [draft, setDraft] = useState("");
-  const [answers, setAnswers] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<string[]>(initialSession?.answers ?? []);
+  const [evaluation, setEvaluation] = useState<SecondSeatEvaluation | null>(
+    initialSession?.evaluation ?? null,
+  );
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const mock = findSecondSeatMock(selectedMockId) ?? SECOND_SEAT_MOCKS[0];
+  const canResume = initialSession?.id === sessionId && answers.length < mock.turns.length;
 
-  const begin = () => {
-    setAnswers([]);
-    setDraft("");
-    setStep(0);
+  const begin = async () => {
+    setError(null);
+    setSaving(true);
+    try {
+      if (isLive) {
+        const response = await fetch("/api/second-seat/sessions", {
+          body: JSON.stringify({ mockId: selectedMockId }),
+          headers: { "content-type": "application/json" },
+          method: "POST",
+        });
+        const result = (await response.json()) as {
+          session?: SecondSeatSession;
+          error?: string;
+        };
+        if (!response.ok || !result.session) {
+          throw new Error(result.error ?? "Practice session could not be started");
+        }
+        setSessionId(result.session.id);
+      } else {
+        setSessionId(`preview-${Date.now()}`);
+      }
+      setAnswers([]);
+      setDraft("");
+      setStep(0);
+      setEvaluation(null);
+      setState("session");
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Practice session could not be started",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const resumeFromBriefing = () => {
+    setError(null);
     setState("session");
   };
 
-  const submit = () => {
-    if (!draft.trim()) return;
-    const nextAnswers = [...answers, draft.trim()];
-    setAnswers(nextAnswers);
-    setDraft("");
-    if (step === SCRIPT.length - 1) {
-      setState("complete");
-      trackEvent("practice_first_session_completed", { tier: "practice", mock: "MOCK-08" });
-      trackEvent("demo_action_completed", { tier: "practice", action: "scripted_mock_completed" });
+  const submit = async () => {
+    const answer = draft.trim();
+    if (!answer || saving) return;
+    const nextAnswers = [...answers, answer];
+    setError(null);
+    setSaving(true);
+    try {
+      let nextEvaluation: SecondSeatEvaluation | null = null;
+      if (isLive) {
+        if (!sessionId) {
+          throw new Error("This practice session has expired. Start a new one.");
+        }
+        const response = await fetch(`/api/second-seat/sessions/${sessionId}`, {
+          body: JSON.stringify({ answers: nextAnswers }),
+          headers: { "content-type": "application/json" },
+          method: "PUT",
+        });
+        const result = (await response.json()) as {
+          session?: SecondSeatSession;
+          error?: string;
+        };
+        if (!response.ok || !result.session) {
+          throw new Error(result.error ?? "Your response could not be saved");
+        }
+        nextEvaluation = result.session.evaluation;
+      } else if (nextAnswers.length === mock.turns.length) {
+        nextEvaluation = evaluateSecondSeatSession(mock, nextAnswers);
+      }
+
+      setAnswers(nextAnswers);
+      setDraft("");
+      if (nextAnswers.length === mock.turns.length) {
+        setEvaluation(nextEvaluation);
+        setState("complete");
+      } else {
+        setStep(nextAnswers.length);
+      }
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Your response could not be saved",
+      );
+    } finally {
+      setSaving(false);
     }
-    else setStep((value) => value + 1);
   };
+
+  const selectedMock = useMemo(
+    () => findSecondSeatMock(selectedMockId) ?? SECOND_SEAT_MOCKS[0],
+    [selectedMockId],
+  );
 
   if (state === "briefing") {
     return (
       <div className="practice-workspace">
         <section className="practice-heading">
           <div>
-            <p className="member-kicker">Deterministic interaction preview</p>
+            <p className="member-kicker">The Second Seat · live practice room</p>
             <h1>Practise the decision, not the script.</h1>
-            <p>This sample demonstrates how a responsive system-design mock feels. It uses a fixed three-turn sequence, makes no model call, and does not store or score what you type.</p>
+            <p>
+              Choose a round, answer three interviewer turns, and receive a structured
+              practice signal tied to the transcript. Your account can resume an
+              unfinished session and keeps completed debriefs available.
+            </p>
           </div>
           <div className="practice-orbit" aria-hidden="true"><i /><i /><span /></div>
         </section>
 
-        <section className="practice-briefing" aria-labelledby="practice-briefing-title">
-          <div className="practice-briefing-main">
-            <span>MOCK-08 · SAMPLE SESSION</span>
-            <h2 id="practice-briefing-title">Design a notification service</h2>
-            <p>The interviewer will probe requirements, delivery semantics, and operation under provider failure.</p>
-            <button className="member-primary-button" type="button" onClick={begin}>Begin scripted mock <span aria-hidden="true">↗</span></button>
+        <section className="practice-track-picker" aria-labelledby="practice-track-title">
+          <div className="practice-track-picker-heading">
+            <div>
+              <span>01 · CHOOSE YOUR ROUND</span>
+              <h2 id="practice-track-title">What do you want to pressure-test?</h2>
+            </div>
+            <small>{isLive ? "Account session · responses saved as you go" : "Preview session · no account record"}</small>
           </div>
-          <dl>
-            <div><dt>Round</dt><dd>System design</dd></div>
-            <div><dt>Preview length</dt><dd>3 turns</dd></div>
-            <div><dt>Target signal</dt><dd>Trade-off clarity</dd></div>
-            <div><dt>Storage</dt><dd>None</dd></div>
-          </dl>
+          <div className="practice-track-grid">
+            {SECOND_SEAT_MOCKS.map((candidate) => (
+              <label className={`practice-track-option ${selectedMockId === candidate.id ? "is-selected" : ""}`} key={candidate.id}>
+                <input
+                  type="radio"
+                  name="practice-track"
+                  value={candidate.id}
+                  checked={selectedMockId === candidate.id}
+                  onChange={() => setSelectedMockId(candidate.id)}
+                />
+                <span>
+                  <small>{candidate.category} · ~{candidate.estimatedMinutes} min</small>
+                  <strong>{candidate.title}</strong>
+                  <p>{candidate.description}</p>
+                </span>
+                <i aria-hidden="true">↗</i>
+              </label>
+            ))}
+          </div>
+          <div className="practice-briefing-action">
+            <div><span>Round objective</span><strong>{selectedMock.objective}</strong></div>
+            <button
+              className="member-primary-button"
+              type="button"
+              onClick={canResume && initialSession?.mockId === selectedMockId ? resumeFromBriefing : begin}
+              disabled={saving}
+            >
+              {saving ? "Opening practice room…" : canResume && initialSession?.mockId === selectedMockId ? "Resume session" : "Begin practice"} <span aria-hidden="true">↗</span>
+            </button>
+          </div>
         </section>
 
-        <div className="practice-history-note"><i /><p><strong>{learnerName}</strong>, this fixed demo does not store or score your response. Production mocks require explicit transcript retention and deletion controls.</p></div>
+        {recentSessions.length > 0 ? (
+          <section className="practice-history" aria-labelledby="practice-history-title">
+            <div>
+              <p className="member-kicker">Your recent evidence</p>
+              <h2 id="practice-history-title">Completed practice stays useful.</h2>
+              <p>Open Feedback to review the latest transcript, score, and next action.</p>
+            </div>
+            <div>
+              {recentSessions.map((session) => {
+                const completedMock = findSecondSeatMock(session.mockId);
+                return (
+                  <Link href="/learn/feedback" key={session.id}>
+                    <span>{completedMock?.category ?? "Practice"}</span>
+                    <strong>{completedMock?.title ?? "Completed session"}</strong>
+                    <small>{session.evaluation?.overall ?? "—"} practice signal · {formatDate(session.completedAt)}</small>
+                    <b>Open feedback ↗</b>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
+
+        {error ? <p className="practice-inline-error" role="alert">{error}</p> : null}
+        <div className="practice-history-note"><i /><p><strong>{learnerName}</strong>, each response is saved only for your Second Seat transcript and evaluation. Scores are practice signals, never hiring predictions.</p></div>
       </div>
     );
   }
 
-  if (state === "complete") {
+  if (state === "complete" && evaluation) {
     return (
       <div className="practice-workspace practice-complete">
         <section>
-          <p className="member-kicker">Scripted preview complete</p>
-          <span className="practice-complete-mark">03 / 03</span>
-          <h1>You completed the interaction shape.</h1>
-          <p>No AI evaluation occurred. The feedback page shows a separate sample debrief so you can inspect the intended evidence and correction experience.</p>
+          <p className="member-kicker">Practice signal recorded</p>
+          <span className="practice-complete-mark">{evaluation.overall} / 100</span>
+          <h1>Your transcript has a next move.</h1>
+          <p>{evaluation.insightBody}</p>
           <div className="practice-complete-actions">
-            <Link className="member-primary-button" href="/learn/feedback">Open sample feedback <span aria-hidden="true">↗</span></Link>
-            <button type="button" onClick={begin}>Run the sample again</button>
+            <Link className="member-primary-button" href="/learn/feedback">Open your feedback <span aria-hidden="true">↗</span></Link>
+            <button type="button" onClick={() => { setState("briefing"); setEvaluation(null); }}>Run another round</button>
           </div>
         </section>
         <div className="practice-transcript-summary">
-          {SCRIPT.map((turn, index) => (
-            <article key={turn.label}><span>0{index + 1}</span><div><strong>{turn.label}</strong><p>{answers[index]}</p></div></article>
+          {answers.map((answer, index) => (
+            <article key={mock.turns[index].id}>
+              <span>0{index + 1}</span>
+              <div><strong>{mock.turns[index].label}</strong><p>{answer}</p></div>
+            </article>
           ))}
         </div>
       </div>
     );
   }
 
-  const turn = SCRIPT[step];
+  const turn = mock.turns[step];
+  if (!turn) return null;
 
   return (
     <div className="practice-session">
       <header className="practice-session-header">
-        <div><span>MOCK-08</span><strong>Notification service</strong></div>
-        <div><span>Scripted demo</span><b>{String(step + 1).padStart(2, "0")} / 03</b></div>
-        <button type="button" onClick={() => setState("briefing")}>End preview</button>
+        <div><span>{mock.category}</span><strong>{mock.title}</strong></div>
+        <div><span>{isLive ? "Account transcript" : "Preview transcript"}</span><b>{String(step + 1).padStart(2, "0")} / {String(mock.turns.length).padStart(2, "0")}</b></div>
+        <button type="button" onClick={() => setState("briefing")}>Pause session</button>
       </header>
 
       <div className="practice-session-layout">
-        <section className="practice-transcript" aria-label="Sample interview transcript">
-          <div className="practice-transcript-disclaimer">Fixed prompts · text remains in this tab · no score is produced</div>
+        <section className="practice-transcript" aria-label="Interview transcript">
+          <div className="practice-transcript-disclaimer">Follow-up probes adapt to the decision you are making · {isLive ? "saved to your account" : "preview stays in this tab"}</div>
           {answers.map((answer, index) => (
-            <div className="practice-turn-complete" key={SCRIPT[index].label}>
-              <article className="interviewer-turn"><span>Interviewer · 0{index + 1}</span><p>{SCRIPT[index].prompt}</p><small>{SCRIPT[index].probe}</small></article>
+            <div className="practice-turn-complete" key={mock.turns[index].id}>
+              <article className="interviewer-turn"><span>Interviewer · 0{index + 1}</span><p>{mock.turns[index].prompt}</p><small>{mock.turns[index].probe}</small></article>
               <article className="learner-turn"><span>You</span><p>{answer}</p></article>
             </div>
           ))}
@@ -128,17 +268,24 @@ export function PracticeClient({ learnerName }: { learnerName: string }) {
             <span>Interviewer · 0{step + 1} · {turn.label}</span>
             <h1>{turn.prompt}</h1>
             <p>{turn.probe}</p>
+            <small>Listen for: {turn.signals.slice(0, 4).join(" · ")}</small>
           </article>
         </section>
 
         <aside className="practice-response-panel">
-          <div><span>Your response</span><b>Not stored</b></div>
-          <textarea value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write the answer you would say aloud…" rows={11} />
-          <button className="practice-sample-answer" type="button" onClick={() => setDraft(turn.sample)}>Use a sample response</button>
-          <button className="member-primary-button" type="button" onClick={submit} disabled={!draft.trim()}>{step === SCRIPT.length - 1 ? "Finish preview" : "Submit and continue"} <span aria-hidden="true">↗</span></button>
-          <p>The final feedback remains prewritten demo data and does not evaluate this response.</p>
+          <div><span>Your response</span><b>{isLive ? "Saved on submit" : "Preview only"}</b></div>
+          <textarea value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write the answer you would say aloud…" rows={11} maxLength={5000} />
+          <small className="practice-response-count">{draft.length} / 5000</small>
+          <button className="member-primary-button" type="button" onClick={() => void submit()} disabled={!draft.trim() || saving}>{saving ? "Saving response…" : step === mock.turns.length - 1 ? "Finish and score" : "Submit and continue"} <span aria-hidden="true">↗</span></button>
+          <p>Your transcript is evaluated against the round rubric after the final turn. The score explains what to practise next.</p>
+          {error ? <p className="practice-inline-error" role="alert">{error}</p> : null}
         </aside>
       </div>
     </div>
   );
+}
+
+function formatDate(value: string | null) {
+  if (!value) return "Just now";
+  return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(new Date(value));
 }

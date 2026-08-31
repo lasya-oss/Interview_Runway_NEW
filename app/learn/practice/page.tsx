@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { getSecondSeatSessions } from "@/app/lib/second-seat-store";
 import { PracticeClient } from "./practice-client";
 import { PracticeReplayCollection } from "./replay-card";
 
@@ -13,6 +14,11 @@ export const metadata: Metadata = {
 
 export default async function PracticePage() {
   const profile = await requireDemoProfile("/learn/practice");
+  const sessions = profile.isSecondSeatLive
+    ? await getSecondSeatSessions(profile.email)
+    : [];
+  const activeSession = sessions.find((session) => session.status === "in_progress") ?? null;
+  const completedSessions = sessions.filter((session) => session.status === "completed").slice(0, 5);
 
   return (
     <MemberShell profile={profile} active="practice">
@@ -20,7 +26,12 @@ export default async function PracticePage() {
         {profile.access.practice ? (
           <>
             <PracticeReplayCollection />
-            <PracticeClient learnerName={profile.firstName} />
+            <PracticeClient
+              learnerName={profile.firstName}
+              isLive={profile.isSecondSeatLive === true}
+              initialSession={activeSession}
+              recentSessions={completedSessions}
+            />
           </>
         ) : (
           <LockedMemberPanel

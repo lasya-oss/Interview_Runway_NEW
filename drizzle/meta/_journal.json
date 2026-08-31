@@ -22,6 +22,13 @@
       "when": 1787986851525,
       "tag": "0002_brown_bloodscream",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788175083911,
+      "tag": "0003_lovely_scrambler",
+      "breakpoints": true
     }
   ]
 }

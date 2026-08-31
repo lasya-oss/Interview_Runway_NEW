@@ -56,6 +56,31 @@ export const learnerProgress = sqliteTable("learner_progress", {
   updatedAt: text("updated_at").notNull(),
 });
 
+export const secondSeatSessions = sqliteTable(
+  "second_seat_sessions",
+  {
+    id: text("id").primaryKey(),
+    userEmail: text("user_email").notNull(),
+    mockId: text("mock_id").notNull(),
+    status: text("status").notNull().default("in_progress"),
+    answers: text("answers").notNull().default("[]"),
+    evaluation: text("evaluation"),
+    startedAt: text("started_at").notNull(),
+    completedAt: text("completed_at"),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [
+    index("second_seat_sessions_user_updated_idx").on(
+      table.userEmail,
+      table.updatedAt,
+    ),
+    index("second_seat_sessions_user_status_idx").on(
+      table.userEmail,
+      table.status,
+    ),
+  ],
+);
+
 export const paddleEvents = sqliteTable("paddle_events", {
   eventId: text("event_id").primaryKey(),
   eventType: text("event_type").notNull(),

@@ -6,6 +6,7 @@ import {
   createFoundationProfile,
   getLearnerProgress,
   hasVaultAccess,
+  hasSecondSeatAccess,
 } from "@/app/lib/paid-access";
 
 export const DEMO_SESSION_COOKIE = "ir_demo_session";
@@ -75,7 +76,18 @@ export async function requireDemoProfile(
     }
   }
   if (user && liveAccess) {
-    return createFoundationProfile(user, await getLearnerProgress(user.email));
+    let secondSeatAccess = false;
+    try {
+      secondSeatAccess = await hasSecondSeatAccess(user.email);
+    } catch {
+      // Second Seat access is independent; a temporary lookup failure must not
+      // block the authenticated Vault workspace.
+    }
+    return createFoundationProfile(
+      user,
+      await getLearnerProgress(user.email),
+      { secondSeatAccess },
+    );
   }
   if (profile) return profile;
 
@@ -86,9 +98,16 @@ export async function requireDemoProfile(
     );
   }
 
+  let secondSeatAccess = false;
+  try {
+    secondSeatAccess = await hasSecondSeatAccess(authenticatedUser.email);
+  } catch {
+    // Keep the Foundation workspace available if the optional tier lookup is unavailable.
+  }
   return createFoundationProfile(
     authenticatedUser,
     await getLearnerProgress(authenticatedUser.email),
+    { secondSeatAccess },
   );
 }
 

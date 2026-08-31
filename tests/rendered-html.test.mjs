@@ -1159,7 +1159,7 @@ test("live Foundation access takes precedence over a seeded demo cookie", async 
   assert.match(session, /const profile = await getDemoProfile\(\);/);
   assert.match(session, /const user = await getChatGPTUser\(\);/);
   assert.match(session, /if \(user && liveAccess\)/);
-  assert.match(session, /return createFoundationProfile\(user, await getLearnerProgress\(user\.email\)\);/);
+  assert.match(session, /return createFoundationProfile\(\s*user,\s*await getLearnerProgress\(user\.email\),\s*\{ secondSeatAccess \}/s);
 });
 
 test("Foundation demo starts Today with a clean learner state", async () => {
@@ -1219,4 +1219,29 @@ test("fresh Vault learners derive Today and Roadmap state from account progress"
   assert.match(statusFunction, /if \(week\.week === activeWeek\) return "in-progress";/);
   assert.match(statusFunction, /return "upcoming";/);
   assert.doesNotMatch(statusFunction, /return "in-progress";[\s\S]*return "in-progress";/);
+});
+
+test("Second Seat practice is durable, entitlement-gated, and transcript-backed", async () => {
+  const engine = await readFile(new URL("../app/lib/second-seat-engine.ts", import.meta.url), "utf8");
+  const store = await readFile(new URL("../app/lib/second-seat-store.ts", import.meta.url), "utf8");
+  const schema = await readFile(new URL("../db/schema.ts", import.meta.url), "utf8");
+  const practice = await readFile(new URL("../app/learn/practice/practice-client.tsx", import.meta.url), "utf8");
+  const feedback = await readFile(new URL("../app/learn/feedback/page.tsx", import.meta.url), "utf8");
+  const sessionRoute = await readFile(new URL("../app/api/second-seat/sessions/[id]/route.ts", import.meta.url), "utf8");
+
+  assert.match(engine, /SECOND_SEAT_MOCKS/);
+  assert.match(engine, /evaluateSecondSeatSession/);
+  assert.match(engine, /problemFraming|technicalDepth|tradeoffClarity|communication/);
+  assert.match(store, /secondSeatSessions/);
+  assert.match(store, /evaluateSecondSeatSession\(mock, answers\)/);
+  assert.match(schema, /second_seat_sessions/);
+  assert.match(schema, /second_seat_sessions_user_updated_idx/);
+  assert.match(practice, /response is saved only for your Second Seat transcript/i);
+  assert.match(practice, /api\/second-seat\/sessions/);
+  assert.doesNotMatch(practice, /fixed three-turn sequence|No AI evaluation occurred|Use a sample response/i);
+  assert.match(feedback, /getLatestCompletedSecondSeatSession/);
+  assert.match(feedback, /feedback-empty/);
+  assert.match(sessionRoute, /hasSecondSeatAccess/);
+  assert.match(sessionRoute, /answers\.length > mock\.turns\.length/);
+  assert.match(sessionRoute, /saveSecondSeatAnswers/);
 });
