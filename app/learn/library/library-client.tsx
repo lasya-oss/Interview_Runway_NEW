@@ -125,6 +125,82 @@ export function LibraryClient({
   }, [category, deferredQuery, driveMaterials, scope]);
 
   const resultCount = results.length + pdfResults.length + driveResults.length;
+  const clearFilters = () => {
+    setQuery("");
+    setCategory(null);
+    setScope("all");
+  };
+
+  const renderResults = (showSummary: boolean) => (
+    <>
+      {showSummary ? (
+        <div className="library-results-heading" aria-live="polite">
+          <span>{category ? `${category} · ` : ""}{resultCount.toString().padStart(2, "0")} records shown</span>
+          <small>{category ? "Selected category · click another card to switch" : "All categories · no category selected"}</small>
+        </div>
+      ) : null}
+
+      {results.length ? (
+        <div className="library-record-list">
+          {results.map((material) => {
+            const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
+            const hasDirectAsset = unlocked && material.demoAsset;
+            return (
+              <article className={`library-record ${unlocked ? "is-unlocked" : "is-locked"}`} key={material.slug}>
+                <span className="library-record-number">{material.number}</span>
+                <div className="library-record-copy">
+                  <small>{material.category} · {material.format}</small>
+                  <h2>{material.title}</h2>
+                  <p>{material.description}</p>
+                  <div>{material.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+                </div>
+                <div className="library-record-meta">
+                  <span>{material.duration} · {material.level}</span>
+                  <small>{material.reviewed}<br />{material.roadmap}</small>
+                  <b>{materialAccessLabel(material, unlocked, isLive)}</b>
+                  {unlocked && material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
+                  {hasDirectAsset ? (
+                    <a href={material.demoAsset.href} target="_blank" rel="noreferrer">
+                      Open actual content <span aria-hidden="true">↗</span>
+                    </a>
+                  ) : (
+                    <Link href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : !pdfResults.length && !driveResults.length ? (
+        <div className="library-empty">
+          <strong>No library records match those filters.</strong>
+          <button type="button" onClick={clearFilters}>Clear filters</button>
+        </div>
+      ) : null}
+
+      {pdfResults.length ? (
+        <section className="library-pdf-section" aria-labelledby="library-pdf-title">
+          <div className="member-section-heading">
+            <div>
+              <p className="member-kicker">Drive PDF guides</p>
+              <h2 id="library-pdf-title">Read the material behind the roadmap.</h2>
+            </div>
+            <span>{pdfResults.length} guides available</span>
+          </div>
+          <PdfGuideShelf guides={pdfResults} startNumber={materials.length + 1} />
+        </section>
+      ) : null}
+
+      {driveResults.length ? (
+        <DriveMaterialShelf
+          materials={driveResults}
+          startNumber={materials.length + pdfGuides.length + 1}
+          googleClientId={googleClientId}
+          loginHint={loginHint}
+        />
+      ) : null}
+    </>
+  );
 
   return (
     <div className="library-workspace">
@@ -154,96 +230,51 @@ export function LibraryClient({
         </div>
       </section>
 
-      <div className="library-category-grid" aria-label="Material categories">
-        {categories.map((item) => (
-          <button
-            className={`library-category-card${category === item ? " is-active" : ""}`}
-            type="button"
-            onClick={() => setCategory((current) => current === item ? null : item)}
-            aria-pressed={category === item}
-            aria-expanded={category === item}
-            aria-controls="library-category-results"
-            key={item}
-          >
-            <span className="library-category-card__topline">
-              <b>{item}</b>
-              <i>{(item === "All" ? totalResourceCount : categoryCounts.get(item) ?? 0).toLocaleString("en-IN")}</i>
-            </span>
-            <small>{CATEGORY_DESCRIPTIONS[item] ?? "Resources for this interview-prep theme"}</small>
-          </button>
-        ))}
-      </div>
-
-      <section
-        id="library-category-results"
-        className="library-category-results"
-        aria-label={category ? `${category} category records` : "All library records"}
-      >
-        <div className="library-results-heading" aria-live="polite">
-          <span>{category ? `${category} · ` : ""}{resultCount.toString().padStart(2, "0")} records shown</span>
-          <small>{category ? "Selected category · click another card to switch" : "All categories · no category selected"}</small>
-        </div>
-
-        {results.length ? (
-          <div className="library-record-list">
-            {results.map((material) => {
-              const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
-              const hasDirectAsset = unlocked && material.demoAsset;
-              return (
-                <article className={`library-record ${unlocked ? "is-unlocked" : "is-locked"}`} key={material.slug}>
-                  <span className="library-record-number">{material.number}</span>
-                  <div className="library-record-copy">
-                    <small>{material.category} · {material.format}</small>
-                    <h2>{material.title}</h2>
-                    <p>{material.description}</p>
-                    <div>{material.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-                  </div>
-                  <div className="library-record-meta">
-                    <span>{material.duration} · {material.level}</span>
-                    <small>{material.reviewed}<br />{material.roadmap}</small>
-                    <b>{materialAccessLabel(material, unlocked, isLive)}</b>
-                    {unlocked && material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
-                    {hasDirectAsset ? (
-                      <a href={material.demoAsset.href} target="_blank" rel="noreferrer">
-                        Open actual content <span aria-hidden="true">↗</span>
-                      </a>
-                    ) : (
-                      <Link href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        ) : !pdfResults.length && !driveResults.length ? (
-          <div className="library-empty">
-            <strong>No library records match those filters.</strong>
-            <button type="button" onClick={() => { setQuery(""); setCategory(null); setScope("all"); }}>Clear filters</button>
-          </div>
-        ) : null}
-
-        {pdfResults.length ? (
-          <section className="library-pdf-section" aria-labelledby="library-pdf-title">
-            <div className="member-section-heading">
-              <div>
-                <p className="member-kicker">Drive PDF guides</p>
-                <h2 id="library-pdf-title">Read the material behind the roadmap.</h2>
-              </div>
-              <span>{pdfResults.length} guides available</span>
+      {category ? (
+        <section id="library-category-results" className="library-category-view" aria-label={`${category} category view`}>
+          <header className="library-category-view__header">
+            <button className="library-category-back" type="button" onClick={() => setCategory(null)}>
+              <span aria-hidden="true">←</span> Back to categories
+            </button>
+            <div>
+              <p className="member-kicker">Open category</p>
+              <h2>{category}</h2>
+              <p>{CATEGORY_DESCRIPTIONS[category] ?? "Resources for this interview-prep theme"}</p>
             </div>
-            <PdfGuideShelf guides={pdfResults} startNumber={materials.length + 1} />
-          </section>
-        ) : null}
+            <div className="library-category-view__count">
+              <strong>{resultCount.toLocaleString("en-IN")}</strong>
+              <span>matching<br />records</span>
+            </div>
+          </header>
+          <div className="library-category-view__records">{renderResults(false)}</div>
+        </section>
+      ) : (
+        <>
+          <div className="library-category-grid" aria-label="Material categories">
+            {categories.map((item) => (
+              <button
+                className={`library-category-card${category === item ? " is-active" : ""}`}
+                type="button"
+                onClick={() => setCategory(item)}
+                aria-pressed={category === item}
+                aria-expanded={category === item}
+                aria-controls="library-category-results"
+                key={item}
+              >
+                <span className="library-category-card__topline">
+                  <b>{item}</b>
+                  <i>{(item === "All" ? totalResourceCount : categoryCounts.get(item) ?? 0).toLocaleString("en-IN")}</i>
+                </span>
+                <small>{CATEGORY_DESCRIPTIONS[item] ?? "Resources for this interview-prep theme"}</small>
+              </button>
+            ))}
+          </div>
 
-        {driveResults.length ? (
-          <DriveMaterialShelf
-            materials={driveResults}
-            startNumber={materials.length + pdfGuides.length + 1}
-            googleClientId={googleClientId}
-            loginHint={loginHint}
-          />
-        ) : null}
-      </section>
+          <section id="library-category-results" className="library-category-results" aria-label="All library records">
+            {renderResults(true)}
+          </section>
+        </>
+      )}
     </div>
   );
 }

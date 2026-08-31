@@ -296,6 +296,10 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(libraryClient, /<strong>1000\+<\/strong>/i);
   assert.match(libraryClient, /aria-expanded=\{category === item\}/i);
   assert.match(libraryClient, /id="library-category-results"/i);
+  assert.match(libraryClient, /className="library-category-view"/i);
+  assert.match(libraryClient, /Back to categories/i);
+  assert.match(libraryClient, /onClick=\{\(\) => setCategory\(item\)\}/i);
+  assert.match(libraryClient, /library-category-view__records">\{renderResults\(false\)\}/i);
   assert.match(libraryClient, /All categories · no category selected/i);
   assert.match(libraryClient, /material\.demoAsset\.href/i);
   assert.match(libraryClient, /Open actual content/i);
