@@ -93,7 +93,7 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
             <ul>
               {task.learning.requiredResources.map((resource) => <li key={resource}>{resource}</li>)}
             </ul>
-            {profile.isLive ? <StudyProgressButton profileId={profile.id} taskId={task.id} initiallyCompleted={profile.completedTaskIds?.includes(task.id) === true} /> : null}
+            {profile.isLive ? <StudyProgressButton profileId={profile.id} roadmapWeeks={profile.roadmapWeeks} taskId={task.id} initiallyCompleted={profile.completedTaskIds?.includes(task.id) === true} /> : null}
           </section>
 
           <footer className="material-next-step">

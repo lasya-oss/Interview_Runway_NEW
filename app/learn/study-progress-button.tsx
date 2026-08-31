@@ -6,10 +6,12 @@ import { emitRoadmapProgressUpdated } from "@/app/lib/learner-progress";
 export function StudyProgressButton({
   profileId,
   taskId,
+  roadmapWeeks = 12,
   initiallyCompleted = false,
 }: {
   profileId: string;
   taskId: string;
+  roadmapWeeks?: number;
   initiallyCompleted?: boolean;
 }) {
   const [completed, setCompleted] = useState(initiallyCompleted);
@@ -20,7 +22,7 @@ export function StudyProgressButton({
     setSaving(true);
     setError(null);
     try {
-      const currentResponse = await fetch("/api/learner/progress", {
+      const currentResponse = await fetch(`/api/learner/progress?roadmapWeeks=${roadmapWeeks}`, {
         cache: "no-store",
       });
       if (!currentResponse.ok) throw new Error("Progress could not be loaded");
@@ -29,7 +31,10 @@ export function StudyProgressButton({
         ? current.completedTaskIds.filter((value): value is string => typeof value === "string")
         : [];
       const response = await fetch("/api/learner/progress", {
-        body: JSON.stringify({ completedTaskIds: [...new Set([...currentIds, taskId])] }),
+        body: JSON.stringify({
+          completedTaskIds: [...new Set([...currentIds, taskId])],
+          roadmapWeeks,
+        }),
         headers: { "content-type": "application/json" },
         method: "PUT",
       });

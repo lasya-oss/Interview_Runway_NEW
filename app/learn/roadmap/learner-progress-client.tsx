@@ -80,32 +80,42 @@ export function RoadmapProgressProvider({
     }
 
     const controller = new AbortController();
-    void fetch("/api/learner/progress", {
-      cache: "no-store",
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        return (await response.json()) as { completedTaskIds?: unknown };
+    const refreshLiveProgress = () => {
+      void fetch(`/api/learner/progress?roadmapWeeks=${roadmapWeeks}`, {
+        cache: "no-store",
+        signal: controller.signal,
       })
-      .then((value) => {
-        if (!value || controller.signal.aborted) return;
-        apply(
-          Array.isArray(value.completedTaskIds)
-            ? value.completedTaskIds.filter((taskId): taskId is string => typeof taskId === "string")
-            : [],
-        );
-      })
-      .catch(() => {
-        // The server-rendered account snapshot remains authoritative if refresh fails.
-      });
+        .then(async (response) => {
+          if (!response.ok) return null;
+          return (await response.json()) as { completedTaskIds?: unknown };
+        })
+        .then((value) => {
+          if (!value || controller.signal.aborted) return;
+          apply(
+            Array.isArray(value.completedTaskIds)
+              ? value.completedTaskIds.filter((taskId): taskId is string => typeof taskId === "string")
+              : [],
+          );
+        })
+        .catch(() => {
+          // The server-rendered account snapshot remains authoritative if refresh fails.
+        });
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") refreshLiveProgress();
+    };
+    window.addEventListener("focus", refreshLiveProgress);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    refreshLiveProgress();
 
     return () => {
       controller.abort();
       window.removeEventListener(ROADMAP_PROGRESS_EVENT, handleProgressEvent);
       window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", refreshLiveProgress);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
-  }, [isLive, profileId, storageKey, synchronized, weeks]);
+  }, [isLive, profileId, roadmapWeeks, storageKey, synchronized, weeks]);
 
   const value = useMemo(
     () => ({ ...snapshot, synchronized }),

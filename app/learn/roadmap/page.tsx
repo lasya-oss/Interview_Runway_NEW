@@ -24,6 +24,7 @@ export default async function RoadmapPage() {
       <div className="member-page">
         <RoadmapChecklist
           profileId={profile.id}
+          roadmapWeeks={profile.roadmapWeeks}
           currentWeek={profile.week}
           weeks={weeks}
           initialCompleted={initialCompleted}

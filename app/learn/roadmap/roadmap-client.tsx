@@ -15,12 +15,14 @@ type RoadmapWeekStatus = "completed" | "in-progress" | "upcoming";
 
 export function RoadmapChecklist({
   profileId,
+  roadmapWeeks,
   currentWeek,
   weeks,
   initialCompleted,
   persistMode = "demo",
 }: {
   profileId: string;
+  roadmapWeeks: number;
   currentWeek: number;
   weeks: readonly RoadmapWeek[];
   initialCompleted: readonly string[];
@@ -62,7 +64,7 @@ export function RoadmapChecklist({
     setSaveError(null);
     try {
       const response = await fetch("/api/learner/progress", {
-        body: JSON.stringify({ completedTaskIds: [...next] }),
+        body: JSON.stringify({ completedTaskIds: [...next], roadmapWeeks }),
         headers: { "content-type": "application/json" },
         method: "PUT",
       });

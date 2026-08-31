@@ -19,7 +19,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const progress = isTracked ? roadmap.progressPercent : profile.progress;
   const currentWeek = isTracked ? roadmap.currentWeek : profile.week;
   const isFreshLearner = progress === 0 && (isTracked ? roadmap.completedCount === 0 : (profile.completedTaskIds?.length ?? 0) === 0);
-  const totalPlanTasks = profile.roadmapWeeks === 12 ? 24 : 12;
+  const totalPlanTasks = roadmap.totalTaskCount;
   const todayKicker = isFreshLearner
     ? `Start here · Week 1 of ${profile.roadmapWeeks}`
     : `Week ${currentWeek} of ${profile.roadmapWeeks} · ${profile.id === "foundation" ? "Foundation" : profile.id === "practice" ? "Second Seat" : "Calibration"} path`;

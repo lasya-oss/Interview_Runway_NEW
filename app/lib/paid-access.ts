@@ -2,10 +2,11 @@ import { and, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { entitlements, learnerProgress } from "@/db/schema";
 import type { ChatGPTUser } from "@/app/chatgpt-auth";
-import { TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
-import { roadmapProgressFor } from "@/app/lib/learner-progress";
+import { ROADMAP_PLANS, TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
+import { roadmapPlanForWeeks, roadmapProgressFor } from "@/app/lib/learner-progress";
 
 const DEFAULT_DOMAIN = "vividlabsai.com";
+export type RoadmapWeeks = 4 | 12;
 
 export type LearnerProgress = {
   completedTaskIds: string[];
@@ -62,7 +63,10 @@ export async function hasSecondSeatAccess(email: string): Promise<boolean> {
   return Boolean(entitlement);
 }
 
-export async function getLearnerProgress(email: string): Promise<LearnerProgress> {
+export async function getLearnerProgress(
+  email: string,
+  roadmapWeeks: RoadmapWeeks = 12,
+): Promise<LearnerProgress> {
   const [record] = await (await getDb())
     .select({
       completedTaskIds: learnerProgress.completedTaskIds,
@@ -74,16 +78,11 @@ export async function getLearnerProgress(email: string): Promise<LearnerProgress
 
   if (!record) return { completedTaskIds: [], progressPercent: 0 };
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(record.completedTaskIds);
-  } catch {
-    parsed = [];
-  }
-  const completedTaskIds = Array.isArray(parsed)
-    ? parsed.filter((taskId): taskId is string => typeof taskId === "string")
-    : [];
-  const roadmapProgress = roadmapProgressFor(TWELVE_WEEK_PLAN, completedTaskIds);
+  const completedTaskIds = parseCompletedTaskIds(record.completedTaskIds);
+  const roadmapProgress = roadmapProgressFor(
+    roadmapPlanForWeeks(roadmapWeeks),
+    completedTaskIds,
+  );
 
   return {
     completedTaskIds: roadmapProgress.completedTaskIds,
@@ -94,30 +93,68 @@ export async function getLearnerProgress(email: string): Promise<LearnerProgress
 export async function saveLearnerProgress(
   email: string,
   completedTaskIds: readonly string[],
+  roadmapWeeks: RoadmapWeeks = 12,
 ): Promise<LearnerProgress> {
-  const roadmapProgress = roadmapProgressFor(TWELVE_WEEK_PLAN, completedTaskIds);
-  const uniqueTaskIds = roadmapProgress.completedTaskIds;
-  const progressPercent = roadmapProgress.progressPercent;
+  const db = await getDb();
+  const [record] = await db
+    .select({ completedTaskIds: learnerProgress.completedTaskIds })
+    .from(learnerProgress)
+    .where(eq(learnerProgress.userEmail, normalizeEmail(email)))
+    .limit(1);
+  const storedTaskIds = parseCompletedTaskIds(record?.completedTaskIds);
+  const selectedPlan = roadmapPlanForWeeks(roadmapWeeks);
+  const selectedTaskIds = new Set(
+    selectedPlan.flatMap((week) => week.tasks.map((task) => task.id)),
+  );
+  const allTaskIds = new Set(
+    ROADMAP_PLANS.flatMap((plan) =>
+      plan.flatMap((week) => week.tasks.map((task) => task.id)),
+    ),
+  );
+  const selectedProgress = roadmapProgressFor(selectedPlan, completedTaskIds);
+  const preservedTaskIds = storedTaskIds.filter(
+    (taskId) => allTaskIds.has(taskId) && !selectedTaskIds.has(taskId),
+  );
+  const storedTaskIdsForAllPlans = [
+    ...preservedTaskIds,
+    ...selectedProgress.completedTaskIds,
+  ];
+  const progressPercent = selectedProgress.progressPercent;
   const updatedAt = new Date().toISOString();
 
-  await (await getDb())
+  await db
     .insert(learnerProgress)
     .values({
       userEmail: normalizeEmail(email),
-      completedTaskIds: JSON.stringify(uniqueTaskIds),
+      completedTaskIds: JSON.stringify(storedTaskIdsForAllPlans),
       progressPercent,
       updatedAt,
     })
     .onConflictDoUpdate({
       target: learnerProgress.userEmail,
       set: {
-        completedTaskIds: JSON.stringify(uniqueTaskIds),
+        completedTaskIds: JSON.stringify(storedTaskIdsForAllPlans),
         progressPercent,
         updatedAt,
       },
     });
 
-  return { completedTaskIds: uniqueTaskIds, progressPercent };
+  return {
+    completedTaskIds: selectedProgress.completedTaskIds,
+    progressPercent,
+  };
+}
+
+function parseCompletedTaskIds(value: string | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed)
+      ? parsed.filter((taskId): taskId is string => typeof taskId === "string")
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 export function createFoundationProfile(
