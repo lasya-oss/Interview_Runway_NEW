@@ -717,6 +717,20 @@ test("demo sign-in issues a protected session and opens the learner product", as
   });
   assert.equal(vaultLogin.status, 200);
   const vaultCookie = (vaultLogin.headers.get("set-cookie") ?? "").split(";")[0];
+  const vaultDashboard = await request("/learn", {
+    headers: { accept: "text/html", cookie: vaultCookie },
+  });
+  assert.equal(vaultDashboard.status, 200);
+  const vaultDashboardHtml = await vaultDashboard.text();
+  const vaultDashboardText = visibleText(vaultDashboardHtml);
+  assert.match(vaultDashboardHtml, /data-member-layout=["']vault-today["']/i);
+  const statusDrawer = vaultDashboardHtml.match(/<details\b[^>]*member-ops-rail-collapsible[^>]*>/i)?.[0] ?? "";
+  assert.match(statusDrawer, /class=["'][^"']*member-ops-rail-collapsible/i);
+  assert.doesNotMatch(statusDrawer, /\bopen\b/i);
+  assert.match(vaultDashboardHtml, /<summary\b[^>]*ops-rail-toggle/i);
+  assert.match(vaultDashboardText, /Learner data\s+Sample profile/i);
+  assert.match(vaultDashboardText, /Current tasks/i);
+  assert.match(vaultDashboardText, /Rate limiting: choose the right algorithm/i);
   const lockedReplay = await request("/learn/practice/replays/coding-dynamic-programming-05", {
     headers: { accept: "text/html", cookie: vaultCookie },
   });

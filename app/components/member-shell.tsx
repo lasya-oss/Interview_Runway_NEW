@@ -13,17 +13,34 @@ const MEMBER_NAV = [
   { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "06", access: "coaching" },
 ] as const;
 
+export type MemberTask = {
+  title: string;
+  meta: string;
+  href: string;
+};
+
+type WorkspaceState = {
+  window: string;
+  signal: string;
+  event: string;
+  eventTime: string;
+};
+
 export function MemberShell({
   profile,
   active,
+  currentTasks = [],
+  totalTaskCount,
   children,
 }: {
   profile: DemoProfile;
   active: (typeof MEMBER_NAV)[number]["key"];
+  currentTasks?: readonly MemberTask[];
+  totalTaskCount?: number;
   children: ReactNode;
 }) {
   const isLive = profile.isLive === true;
-  const workspaceState = profile.id === "foundation"
+  const workspaceState: WorkspaceState = profile.id === "foundation"
     ? { window: "8–12 weeks", signal: "Baseline pending", event: "Weekly review", eventTime: "Sun · 18:00" }
     : profile.id === "practice"
       ? { window: "19 days", signal: "78 · practice", event: "Adaptive mock 08", eventTime: "Tue · 20:00" }
@@ -35,9 +52,10 @@ export function MemberShell({
     : profile.id === "practice"
       ? { href: "/second-seat", label: "Review Second Seat access", event: undefined }
       : { href: "/qualify", label: "Check Phase 3 eligibility", event: undefined };
+  const isVaultToday = active === "today" && profile.id === "foundation";
 
   return (
-    <div className="member-shell" data-member-tier={profile.id}>
+    <div className="member-shell" data-member-tier={profile.id} data-member-layout={isVaultToday ? "vault-today" : "default"}>
       <aside className="member-sidebar">
         <div className="member-sidebar-brand"><Brand /><span>Learning workspace</span></div>
 
@@ -68,47 +86,144 @@ export function MemberShell({
       </aside>
 
       <div className="member-surface">
-        <header className="member-topbar">
-          <div className="member-status-band">
-            <div><span>Target</span><strong>{profile.target}</strong></div>
-            <div><span>Current track</span><strong>{profile.roadmapWeeks}-week · W{profile.week}</strong></div>
-            <div><span>Interview window</span><strong>{workspaceState.window}</strong></div>
-            <div><span>Timezone</span><strong>Asia / Kolkata</strong></div>
-          </div>
-          <div className="member-topbar-signals">
-            <span><i /> {isLive ? "Paid workspace · Foundation access" : "Demo workspace · sample learner data"}</span>
-            <span>{isLive ? "₹799 access active" : `${profile.streak}-day rhythm`}</span>
-            <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
-          </div>
-        </header>
+        {isVaultToday ? (
+          <header className="member-topbar member-topbar-vault">
+            <div className="member-vault-header">
+              <div className="member-vault-header-title">
+                <span>Vault / Today</span>
+                <strong>Foundation workspace</strong>
+                <small>{isLive ? "Signed-in learner view" : "Preview learner view"}</small>
+              </div>
+              <div className="member-vault-header-metrics">
+                <div><span>Target</span><strong>{profile.target}</strong></div>
+                <div><span>Current track</span><strong>{profile.roadmapWeeks}-week · W{profile.week}</strong></div>
+                <div><span>Interview window</span><strong>{workspaceState.window}</strong></div>
+                <div><span>Time zone</span><strong>Asia / Kolkata</strong></div>
+                <div><span>Learner data</span><strong>{isLive ? "Account-backed" : "Sample profile"}</strong></div>
+              </div>
+              <div className="member-vault-header-actions">
+                <span className="member-account-status"><i />{isLive ? "₹799 access active" : "Demo workspace"}</span>
+                <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
+              </div>
+            </div>
+          </header>
+        ) : (
+          <header className="member-topbar">
+            <div className="member-status-band">
+              <div><span>Target</span><strong>{profile.target}</strong></div>
+              <div><span>Current track</span><strong>{profile.roadmapWeeks}-week · W{profile.week}</strong></div>
+              <div><span>Interview window</span><strong>{workspaceState.window}</strong></div>
+              <div><span>Timezone</span><strong>Asia / Kolkata</strong></div>
+            </div>
+            <div className="member-topbar-signals">
+              <span><i /> {isLive ? "Paid workspace · Foundation access" : "Demo workspace · sample learner data"}</span>
+              <span>{isLive ? "₹799 access active" : `${profile.streak}-day rhythm`}</span>
+              <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
+            </div>
+          </header>
+        )}
         <main className="member-main">{children}</main>
       </div>
 
-      <aside className="member-ops-rail" aria-label="Workspace status">
-        <div className="ops-rail-head"><span>OPS / STATUS</span><i /></div>
-        <section>
-          <span>Next event</span>
-          <strong>{workspaceState.event}</strong>
-          <small>{workspaceState.eventTime} · IST</small>
-          <Link href={profile.id === "premium" ? "/learn/coaching" : profile.id === "practice" ? "/learn/practice" : "/learn/roadmap"}>Open preparation ↗</Link>
-        </section>
-        <section>
-          <span>Current signal</span>
-          <strong>{workspaceState.signal}</strong>
-          <div className="ops-signal-trace" aria-hidden="true"><i /><i /><i /><i /><i /></div>
-          <small>{profile.id === "foundation" ? "No scored mocks yet" : "Evidence from recent sessions"}</small>
-        </section>
-        <section>
-          <span>Access stack</span>
-          <ul>
-            <li className="is-on"><i /> Vault library</li>
-            <li className={profile.access.practice ? "is-on" : ""}><i /> AI practice</li>
-            <li className={profile.access.coaching ? "is-on" : ""}><i /> Coach room</li>
-          </ul>
-        </section>
-        <p>{isLive ? "PAID FOUNDATION QA<br />₹799 ACCESS ACTIVE" : "DEMO WORKSPACE<br />NO PURCHASE REQUIRED"}</p>
-      </aside>
+      {isVaultToday ? (
+        <details className="member-ops-rail member-ops-rail-collapsible" aria-label="Workspace status">
+          <summary className="ops-rail-toggle" title="Open workspace status panel">
+            <span className="ops-rail-toggle-icon" aria-hidden="true"><i /><i /><i /></span>
+            <span className="ops-rail-toggle-copy">
+              <b>STATUS</b>
+              <strong className="ops-rail-toggle-closed">Open panel</strong>
+              <strong className="ops-rail-toggle-open">Close panel</strong>
+            </span>
+          </summary>
+          <div className="member-ops-rail-content">
+            <WorkspaceStatusContent
+              profile={profile}
+              workspaceState={workspaceState}
+              currentTasks={currentTasks}
+              totalTaskCount={totalTaskCount}
+              showCurrentTasks
+            />
+          </div>
+        </details>
+      ) : (
+        <aside className="member-ops-rail" aria-label="Workspace status">
+          <WorkspaceStatusContent profile={profile} workspaceState={workspaceState} />
+        </aside>
+      )}
     </div>
+  );
+}
+
+function WorkspaceStatusContent({
+  profile,
+  workspaceState,
+  currentTasks = [],
+  totalTaskCount,
+  showCurrentTasks = false,
+}: {
+  profile: DemoProfile;
+  workspaceState: WorkspaceState;
+  currentTasks?: readonly MemberTask[];
+  totalTaskCount?: number;
+  showCurrentTasks?: boolean;
+}) {
+  const completedTaskCount = profile.completedTaskIds?.length ?? 0;
+  const preparationHref = profile.id === "premium"
+    ? "/learn/coaching"
+    : profile.id === "practice"
+      ? "/learn/practice"
+      : "/learn/roadmap";
+
+  return (
+    <>
+      <div className="ops-rail-head"><span>OPS / STATUS</span><i /></div>
+      <section>
+        <span>Next event</span>
+        <strong>{workspaceState.event}</strong>
+        <small>{workspaceState.eventTime} · IST</small>
+        <Link href={preparationHref}>Open preparation ↗</Link>
+      </section>
+      <section>
+        <span>Current signal</span>
+        <strong>{workspaceState.signal}</strong>
+        <div className="ops-signal-trace" aria-hidden="true"><i /><i /><i /><i /><i /></div>
+        <small>{profile.id === "foundation" ? "No scored mocks yet" : "Evidence from recent sessions"}</small>
+      </section>
+      {showCurrentTasks ? (
+        <section className="ops-current-tasks">
+          <div className="ops-current-tasks-heading">
+            <span>Current tasks</span>
+            {totalTaskCount ? <small>{completedTaskCount} / {totalTaskCount} complete</small> : null}
+          </div>
+          <ol>
+            {currentTasks.length ? currentTasks.map((task, index) => (
+              <li key={task.href} className={index === 0 ? "is-current" : ""}>
+                <Link href={task.href}>
+                  <span>{index === 0 ? "Now" : `0${index + 1}`}</span>
+                  <strong>{task.title}</strong>
+                  <small>{task.meta}</small>
+                </Link>
+              </li>
+            )) : (
+              <li className="ops-current-tasks-empty">
+                <span>Done</span>
+                <strong>Foundation roadmap complete</strong>
+                <small>Revisit any checkpoint from Roadmap.</small>
+              </li>
+            )}
+          </ol>
+        </section>
+      ) : null}
+      <section>
+        <span>Access stack</span>
+        <ul>
+          <li className="is-on"><i /> Vault library</li>
+          <li className={profile.access.practice ? "is-on" : ""}><i /> AI practice</li>
+          <li className={profile.access.coaching ? "is-on" : ""}><i /> Coach room</li>
+        </ul>
+      </section>
+      <p>{profile.isLive ? "PAID FOUNDATION QA<br />₹799 ACCESS ACTIVE" : "DEMO WORKSPACE<br />NO PURCHASE REQUIRED"}</p>
+    </>
   );
 }
 

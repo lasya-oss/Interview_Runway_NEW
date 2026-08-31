@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { MemberShell } from "@/app/components/member-shell";
+import { MemberShell, type MemberTask } from "@/app/components/member-shell";
 import { DEMO_REVIEW_MATERIALS, LEARNING_MATERIALS, MOCK_HISTORY, SCORE_DIMENSIONS } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +31,33 @@ export default async function LearnerHomePage() {
   const reviewMaterials = DEMO_REVIEW_MATERIALS
     .filter((material) => material.profiles.includes(profile.id))
     .slice(0, 3);
+  const vaultTasks = TWELVE_WEEK_PLAN.flatMap((week) => week.tasks);
+  const completedTaskIds = new Set(profile.completedTaskIds ?? []);
+  const currentTasks: MemberTask[] = profile.isLive
+    ? vaultTasks
+      .filter((task) => !completedTaskIds.has(task.id))
+      .slice(0, 3)
+      .map((task) => ({
+        title: task.title,
+        meta: task.meta,
+        href: task.learning.kind === "material"
+          ? `/learn/material/${task.learning.slug}`
+          : `/learn/roadmap/task/${task.id}`,
+      }))
+    : [{
+        title: profile.nextAction,
+        meta: profile.nextActionMeta,
+        href: profile.nextActionHref ?? "/learn/roadmap",
+      }];
 
   return (
-    <MemberShell profile={profile} active="today">
-      <div className="member-page member-dashboard">
+    <MemberShell
+      profile={profile}
+      active="today"
+      currentTasks={currentTasks}
+      totalTaskCount={profile.isLive ? vaultTasks.length : undefined}
+    >
+      <div className="member-page member-page-vault-today member-dashboard">
         <section className="member-hero-grid">
           <div className="member-hero-copy">
             <p className="member-kicker">Friday · Week {profile.week} of {profile.roadmapWeeks}</p>
