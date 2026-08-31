@@ -86,6 +86,23 @@ export function MemberShell({
                 <div><span>Learner data</span><strong>{isLive ? "Account-backed" : "Sample profile"}</strong></div>
               </div>
               <div className="member-vault-header-actions">
+                <details className="member-status-drawer" aria-label="Workspace status">
+                  <summary className="member-status-drawer-toggle" title="Open workspace status panel">
+                    <span className="ops-rail-toggle-icon" aria-hidden="true"><i /><i /><i /></span>
+                    <span className="member-status-drawer-copy">
+                      <b>STATUS</b>
+                      <strong className="member-status-drawer-closed">Open</strong>
+                      <strong className="member-status-drawer-open">Close</strong>
+                    </span>
+                  </summary>
+                  <div className="member-status-drawer-content">
+                    <WorkspaceStatusContent
+                      profile={profile}
+                      workspaceState={workspaceState}
+                      showCurrentAccess
+                    />
+                  </div>
+                </details>
                 <span className="member-account-status"><i />{isLive ? "₹799 access active" : "Demo workspace"}</span>
                 <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
               </div>
@@ -108,30 +125,11 @@ export function MemberShell({
         )}
         <main className="member-main">{children}</main>
       </div>
-
-      {isVaultToday ? (
-        <details className="member-ops-rail member-ops-rail-collapsible" aria-label="Workspace status">
-          <summary className="ops-rail-toggle" title="Open workspace status panel">
-            <span className="ops-rail-toggle-icon" aria-hidden="true"><i /><i /><i /></span>
-            <span className="ops-rail-toggle-copy">
-              <b>STATUS</b>
-              <strong className="ops-rail-toggle-closed">Open panel</strong>
-              <strong className="ops-rail-toggle-open">Close panel</strong>
-            </span>
-          </summary>
-          <div className="member-ops-rail-content">
-            <WorkspaceStatusContent
-              profile={profile}
-              workspaceState={workspaceState}
-              showCurrentAccess
-            />
-          </div>
-        </details>
-      ) : (
+      {!isVaultToday ? (
         <aside className="member-ops-rail" aria-label="Workspace status">
           <WorkspaceStatusContent profile={profile} workspaceState={workspaceState} />
         </aside>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -724,10 +724,11 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const vaultDashboardHtml = await vaultDashboard.text();
   const vaultDashboardText = visibleText(vaultDashboardHtml);
   assert.match(vaultDashboardHtml, /data-member-layout=["']vault-today["']/i);
-  const statusDrawer = vaultDashboardHtml.match(/<details\b[^>]*member-ops-rail-collapsible[^>]*>/i)?.[0] ?? "";
-  assert.match(statusDrawer, /class=["'][^"']*member-ops-rail-collapsible/i);
+  const statusDrawer = vaultDashboardHtml.match(/<details\b[^>]*member-status-drawer[^>]*>/i)?.[0] ?? "";
+  assert.match(statusDrawer, /class=["'][^"']*member-status-drawer/i);
   assert.doesNotMatch(statusDrawer, /\bopen\b/i);
-  assert.match(vaultDashboardHtml, /<summary\b[^>]*ops-rail-toggle/i);
+  assert.match(vaultDashboardHtml, /<summary\b[^>]*member-status-drawer-toggle/i);
+  assert.doesNotMatch(vaultDashboardHtml, /member-ops-rail-collapsible|member-ops-rail-content/i);
   assert.match(vaultDashboardText, /Learner data\s+Sample profile/i);
   const vaultSidebar = vaultDashboardHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
   assert.doesNotMatch(vaultSidebar, /member-plan-card|Current access/i);
