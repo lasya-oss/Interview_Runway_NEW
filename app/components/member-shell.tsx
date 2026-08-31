@@ -13,12 +13,6 @@ const MEMBER_NAV = [
   { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "06", access: "coaching" },
 ] as const;
 
-export type MemberTask = {
-  title: string;
-  meta: string;
-  href: string;
-};
-
 type WorkspaceState = {
   window: string;
   signal: string;
@@ -29,14 +23,10 @@ type WorkspaceState = {
 export function MemberShell({
   profile,
   active,
-  currentTasks = [],
-  totalTaskCount,
   children,
 }: {
   profile: DemoProfile;
   active: (typeof MEMBER_NAV)[number]["key"];
-  currentTasks?: readonly MemberTask[];
-  totalTaskCount?: number;
   children: ReactNode;
 }) {
   const isLive = profile.isLive === true;
@@ -70,13 +60,7 @@ export function MemberShell({
           })}
         </nav>
 
-        <div className="member-plan-card">
-          <span>Current access</span>
-          <strong>{profile.plan}</strong>
-          <div><i style={{ width: `${profile.progress}%` }} /></div>
-          <small>{profile.progress}% plan progress · Week {profile.week}</small>
-          <Link href="/pricing">Compare access</Link>
-        </div>
+        {!isVaultToday ? <CurrentAccessCard profile={profile} /> : null}
 
         <div className="member-profile-card">
           <span className="member-avatar">{profile.initials}</span>
@@ -139,9 +123,7 @@ export function MemberShell({
             <WorkspaceStatusContent
               profile={profile}
               workspaceState={workspaceState}
-              currentTasks={currentTasks}
-              totalTaskCount={totalTaskCount}
-              showCurrentTasks
+              showCurrentAccess
             />
           </div>
         </details>
@@ -157,17 +139,12 @@ export function MemberShell({
 function WorkspaceStatusContent({
   profile,
   workspaceState,
-  currentTasks = [],
-  totalTaskCount,
-  showCurrentTasks = false,
+  showCurrentAccess = false,
 }: {
   profile: DemoProfile;
   workspaceState: WorkspaceState;
-  currentTasks?: readonly MemberTask[];
-  totalTaskCount?: number;
-  showCurrentTasks?: boolean;
+  showCurrentAccess?: boolean;
 }) {
-  const completedTaskCount = profile.completedTaskIds?.length ?? 0;
   const preparationHref = profile.id === "premium"
     ? "/learn/coaching"
     : profile.id === "practice"
@@ -189,29 +166,9 @@ function WorkspaceStatusContent({
         <div className="ops-signal-trace" aria-hidden="true"><i /><i /><i /><i /><i /></div>
         <small>{profile.id === "foundation" ? "No scored mocks yet" : "Evidence from recent sessions"}</small>
       </section>
-      {showCurrentTasks ? (
-        <section className="ops-current-tasks">
-          <div className="ops-current-tasks-heading">
-            <span>Current tasks</span>
-            {totalTaskCount ? <small>{completedTaskCount} / {totalTaskCount} complete</small> : null}
-          </div>
-          <ol>
-            {currentTasks.length ? currentTasks.map((task, index) => (
-              <li key={task.href} className={index === 0 ? "is-current" : ""}>
-                <Link href={task.href}>
-                  <span>{index === 0 ? "Now" : `0${index + 1}`}</span>
-                  <strong>{task.title}</strong>
-                  <small>{task.meta}</small>
-                </Link>
-              </li>
-            )) : (
-              <li className="ops-current-tasks-empty">
-                <span>Done</span>
-                <strong>Foundation roadmap complete</strong>
-                <small>Revisit any checkpoint from Roadmap.</small>
-              </li>
-            )}
-          </ol>
+      {showCurrentAccess ? (
+        <section className="ops-current-access">
+          <CurrentAccessCard profile={profile} inStatusPanel />
         </section>
       ) : null}
       <section>
@@ -224,6 +181,18 @@ function WorkspaceStatusContent({
       </section>
       <p>{profile.isLive ? "PAID FOUNDATION QA<br />₹799 ACCESS ACTIVE" : "DEMO WORKSPACE<br />NO PURCHASE REQUIRED"}</p>
     </>
+  );
+}
+
+function CurrentAccessCard({ profile, inStatusPanel = false }: { profile: DemoProfile; inStatusPanel?: boolean }) {
+  return (
+    <div className={`member-plan-card${inStatusPanel ? " member-plan-card-status" : ""}`}>
+      <span>Current access</span>
+      <strong>{profile.plan}</strong>
+      <div><i style={{ width: `${profile.progress}%` }} /></div>
+      <small>{profile.progress}% plan progress · Week {profile.week}</small>
+      <Link href="/pricing">Compare access</Link>
+    </div>
   );
 }
 
