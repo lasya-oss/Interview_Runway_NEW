@@ -723,7 +723,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal(vaultDashboard.status, 200);
   const vaultDashboardHtml = await vaultDashboard.text();
   const vaultDashboardText = visibleText(vaultDashboardHtml);
-  assert.match(vaultDashboardHtml, /data-member-layout=["']vault-today["']/i);
+  assert.match(vaultDashboardHtml, /data-member-layout=["']vault["']/i);
   const statusDrawer = vaultDashboardHtml.match(/<details\b[^>]*member-status-drawer[^>]*>/i)?.[0] ?? "";
   assert.match(statusDrawer, /class=["'][^"']*member-status-drawer/i);
   assert.doesNotMatch(statusDrawer, /\bopen\b/i);
@@ -735,6 +735,25 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(vaultDashboardHtml, /Current tasks/i);
   assert.match(vaultDashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
   assert.equal((vaultDashboardHtml.match(/<div\b[^>]*class=["']member-plan-card member-plan-card-status["']/gi) ?? []).length, 1);
+
+  for (const [pathname, section] of [
+    ["/learn/roadmap", "Roadmap"],
+    ["/learn/library", "Library"],
+    ["/learn/practice", "Practice"],
+    ["/learn/feedback", "Feedback"],
+    ["/learn/coaching", "Coach room"],
+  ]) {
+    const sectionResponse = await request(pathname, {
+      headers: { accept: "text/html", cookie: vaultCookie },
+    });
+    assert.equal(sectionResponse.status, 200, pathname);
+    const sectionHtml = await sectionResponse.text();
+    assert.match(sectionHtml, /data-member-layout=["']vault["']/i, pathname);
+    assert.match(sectionHtml, /class=["'][^"']*member-topbar-vault/i, pathname);
+    assert.match(sectionHtml, new RegExp(`Vault /(?:\\s*<!-- -->\\s*)?${section}`, "i"), pathname);
+    assert.doesNotMatch(sectionHtml, /member-ops-rail(?:\b|-)/i, pathname);
+  }
+
   const lockedReplay = await request("/learn/practice/replays/coding-dynamic-programming-05", {
     headers: { accept: "text/html", cookie: vaultCookie },
   });

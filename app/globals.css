@@ -4913,7 +4913,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   color-scheme: light;
 }
 
-.member-shell[data-member-layout="vault-today"] {
+.member-shell[data-member-layout="vault"] {
   grid-template-columns: 232px minmax(0, 1fr);
 }
 
@@ -4952,7 +4952,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .member-plan-card small { display: block; margin-top: 8px; color: #71858f; font-size: 7.5px; }
 .member-plan-card > a { display: inline-block; margin-top: 13px; color: #cad6db; font-size: 9px; font-weight: 700; }
 .member-plan-card-status { margin: 0; }
-.member-shell[data-member-layout="vault-today"] .member-profile-card { margin-top: auto; }
+.member-shell[data-member-layout="vault"] .member-profile-card { margin-top: auto; }
 .member-profile-card { margin-top: 12px; padding: 13px 7px 2px; display: grid; grid-template-columns: 32px 1fr; gap: 9px; border-top: 1px solid rgba(211,226,232,.1); }
 .member-avatar { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid rgba(211,226,232,.15); border-radius: 50%; color: var(--afterburner); background: rgba(255,255,255,.04); font-family: var(--font-mono); font-size: 8px; }
 .member-profile-card > div { min-width: 0; display: grid; }
@@ -5233,7 +5233,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 @media (max-width: 1250px) {
   .member-shell { grid-template-columns: 222px minmax(0, 1fr); }
   .member-shell[data-member-layout="default"] .member-ops-rail { display: none; }
-  .member-shell[data-member-layout="vault-today"] { grid-template-columns: 222px minmax(0, 1fr); }
+  .member-shell[data-member-layout="vault"] { grid-template-columns: 222px minmax(0, 1fr); }
   .member-vault-header { grid-template-columns: minmax(145px, .9fr) minmax(0, 3fr); }
   .member-vault-header-actions { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(29,62,75,.09); }
 }

@@ -13,6 +13,15 @@ const MEMBER_NAV = [
   { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "06", access: "coaching" },
 ] as const;
 
+const VAULT_SECTION_LABELS: Record<(typeof MEMBER_NAV)[number]["key"], string> = {
+  today: "Today",
+  roadmap: "Roadmap",
+  library: "Library",
+  practice: "Practice",
+  feedback: "Feedback",
+  coaching: "Coach room",
+};
+
 type WorkspaceState = {
   window: string;
   signal: string;
@@ -42,10 +51,10 @@ export function MemberShell({
     : profile.id === "practice"
       ? { href: "/second-seat", label: "Review Second Seat access", event: undefined }
       : { href: "/qualify", label: "Check Phase 3 eligibility", event: undefined };
-  const isVaultToday = active === "today" && profile.id === "foundation";
+  const isVaultWorkspace = profile.id === "foundation";
 
   return (
-    <div className="member-shell" data-member-tier={profile.id} data-member-layout={isVaultToday ? "vault-today" : "default"}>
+    <div className="member-shell" data-member-tier={profile.id} data-member-layout={isVaultWorkspace ? "vault" : "default"}>
       <aside className="member-sidebar">
         <div className="member-sidebar-brand"><Brand /><span>Learning workspace</span></div>
 
@@ -60,7 +69,7 @@ export function MemberShell({
           })}
         </nav>
 
-        {!isVaultToday ? <CurrentAccessCard profile={profile} /> : null}
+        {!isVaultWorkspace ? <CurrentAccessCard profile={profile} /> : null}
 
         <div className="member-profile-card">
           <span className="member-avatar">{profile.initials}</span>
@@ -70,11 +79,11 @@ export function MemberShell({
       </aside>
 
       <div className="member-surface">
-        {isVaultToday ? (
+        {isVaultWorkspace ? (
           <header className="member-topbar member-topbar-vault">
             <div className="member-vault-header">
               <div className="member-vault-header-title">
-                <span>Vault / Today</span>
+                <span>Vault / {VAULT_SECTION_LABELS[active]}</span>
                 <strong>Foundation workspace</strong>
                 <small>{isLive ? "Signed-in learner view" : "Preview learner view"}</small>
               </div>
@@ -125,7 +134,7 @@ export function MemberShell({
         )}
         <main className="member-main">{children}</main>
       </div>
-      {!isVaultToday ? (
+      {!isVaultWorkspace ? (
         <aside className="member-ops-rail" aria-label="Workspace status">
           <WorkspaceStatusContent profile={profile} workspaceState={workspaceState} />
         </aside>
