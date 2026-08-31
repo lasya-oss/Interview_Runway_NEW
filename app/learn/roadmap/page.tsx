@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { MemberShell } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
-import { FOUR_WEEK_PLAN, TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
+import { roadmapPlanForWeeks } from "@/app/lib/learner-progress";
 import { RoadmapChecklist } from "./roadmap-client";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default async function RoadmapPage() {
   const profile = await requireDemoProfile("/learn/roadmap");
-  const weeks = profile.roadmapWeeks === 12 ? TWELVE_WEEK_PLAN : FOUR_WEEK_PLAN;
+  const weeks = roadmapPlanForWeeks(profile.roadmapWeeks);
   const orderedTaskIds = weeks.flatMap((week) => week.tasks.map((task) => task.id));
   const initialCompleted = profile.isLive
     ? profile.completedTaskIds ?? []

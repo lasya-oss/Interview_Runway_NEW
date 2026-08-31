@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { DemoProfile } from "@/app/lib/demo-data";
+import { CurrentAccessCard } from "./current-access-card";
+import { RoadmapProgressProvider, RoadmapTrackLabel } from "@/app/learn/roadmap/learner-progress-client";
 import { Brand } from "./site-chrome";
 import { DemoLogoutButton, LiveLogoutButton } from "./member-actions";
 
@@ -61,6 +63,14 @@ export function MemberShell({
 
   return (
     <div className="member-shell" data-member-tier={profile.id} data-member-layout={isVaultWorkspace ? "vault" : isSecondSeatWorkspace ? "second-seat" : "calibration"}>
+      <RoadmapProgressProvider
+        profileId={profile.id}
+        roadmapWeeks={profile.roadmapWeeks}
+        isLive={isLive}
+        initialCompleted={profile.completedTaskIds}
+        initialProgress={profile.progress}
+        initialWeek={profile.week}
+      >
       <aside className="member-sidebar">
         <div className="member-sidebar-brand"><Brand /><span>Learning workspace</span></div>
 
@@ -75,7 +85,13 @@ export function MemberShell({
           })}
         </nav>
 
-        {!isVaultWorkspace && !isSecondSeatWorkspace ? <CurrentAccessCard profile={profile} /> : null}
+        {!isVaultWorkspace && !isSecondSeatWorkspace ? (
+          <CurrentAccessCard
+            plan={profile.plan}
+            fallbackProgress={profile.progress}
+            fallbackWeek={profile.week}
+          />
+        ) : null}
 
         <div className="member-profile-card">
           <span className="member-avatar">{profile.initials}</span>
@@ -94,7 +110,7 @@ export function MemberShell({
             </div>
             <div className="member-vault-header-metrics">
               <div><span>Target</span><strong>{profile.target}</strong></div>
-              <div><span>Current track</span><strong>{profile.roadmapWeeks}-week · W{profile.week}</strong></div>
+              <div><span>Current track</span><strong><RoadmapTrackLabel fallbackWeek={profile.week} roadmapWeeks={profile.roadmapWeeks} /></strong></div>
               <div><span>Interview window</span><strong>{workspaceState.window}</strong></div>
               <div><span>Time zone</span><strong>Asia / Kolkata</strong></div>
               <div><span>Learner data</span><strong>{isLive ? "Account-backed" : "Sample profile"}</strong></div>
@@ -124,6 +140,7 @@ export function MemberShell({
         </header>
         <main className="member-main">{children}</main>
       </div>
+      </RoadmapProgressProvider>
     </div>
   );
 }
@@ -160,7 +177,12 @@ function WorkspaceStatusContent({
       </section>
       {showCurrentAccess ? (
         <section className="ops-current-access">
-          <CurrentAccessCard profile={profile} inStatusPanel />
+          <CurrentAccessCard
+            plan={profile.plan}
+            fallbackProgress={profile.progress}
+            fallbackWeek={profile.week}
+            inStatusPanel
+          />
         </section>
       ) : null}
       <section>
@@ -173,18 +195,6 @@ function WorkspaceStatusContent({
       </section>
       <p>{profile.isLive ? "PAID FOUNDATION QA<br />₹799 ACCESS ACTIVE" : "DEMO WORKSPACE<br />NO PURCHASE REQUIRED"}</p>
     </>
-  );
-}
-
-function CurrentAccessCard({ profile, inStatusPanel = false }: { profile: DemoProfile; inStatusPanel?: boolean }) {
-  return (
-    <div className={`member-plan-card${inStatusPanel ? " member-plan-card-status" : ""}`}>
-      <span>Current access</span>
-      <strong>{profile.plan}</strong>
-      <div><i style={{ width: `${profile.progress}%` }} /></div>
-      <small>{profile.progress}% plan progress · Week {profile.week}</small>
-      <Link href="/pricing">Compare access</Link>
-    </div>
   );
 }
 

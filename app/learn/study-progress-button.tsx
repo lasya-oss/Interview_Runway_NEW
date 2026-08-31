@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { emitRoadmapProgressUpdated } from "@/app/lib/learner-progress";
 
-export function StudyProgressButton({ taskId, initiallyCompleted = false }: { taskId: string; initiallyCompleted?: boolean }) {
+export function StudyProgressButton({
+  profileId,
+  taskId,
+  initiallyCompleted = false,
+}: {
+  profileId: string;
+  taskId: string;
+  initiallyCompleted?: boolean;
+}) {
   const [completed, setCompleted] = useState(initiallyCompleted);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +34,7 @@ export function StudyProgressButton({ taskId, initiallyCompleted = false }: { ta
         method: "PUT",
       });
       if (!response.ok) throw new Error("Progress could not be saved");
+      emitRoadmapProgressUpdated(profileId, [...new Set([...currentIds, taskId])]);
       setCompleted(true);
     } catch {
       setError("Progress could not be saved. Please try again.");

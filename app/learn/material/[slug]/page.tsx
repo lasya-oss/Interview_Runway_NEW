@@ -249,7 +249,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
             <p>Decision to make</p>
             <h2 id="material-stage-title">{detail.decision}</h2>
             <div className="material-stage-controls"><span>00:00</span><i><b /></i><span>{material.duration}</span></div>
-            {profile.isLive && material.availability === "included" && linkedTask ? <StudyProgressButton taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
+            {profile.isLive && material.availability === "included" && linkedTask ? <StudyProgressButton profileId={profile.id} taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
           </section>
 
           <aside className="material-notes">

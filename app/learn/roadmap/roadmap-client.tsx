@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import {
+  emitRoadmapProgressUpdated,
+  roadmapProgressFor,
+  roadmapStorageKey,
+} from "@/app/lib/learner-progress";
 import type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
 
 export type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
@@ -22,9 +27,14 @@ export function RoadmapChecklist({
   persistMode?: "demo" | "account";
 }) {
   const isAccount = persistMode === "account";
-  const storageKey = `interviewrunway-demo-roadmap:v2:${profileId}`;
+  const storageKey = roadmapStorageKey(profileId);
   const [completed, setCompleted] = useState<Set<string>>(() =>
-    new Set(isAccount ? initialCompleted : readDemoCompleted(storageKey, initialCompleted)),
+    new Set(
+      roadmapProgressFor(
+        weeks,
+        isAccount ? initialCompleted : readDemoCompleted(storageKey, initialCompleted),
+      ).completedTaskIds,
+    ),
   );
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -41,6 +51,7 @@ export function RoadmapChecklist({
     if (!isAccount) {
       try {
         window.localStorage.setItem(storageKey, JSON.stringify([...next]));
+        emitRoadmapProgressUpdated(profileId, [...next]);
       } catch {
         // This checklist is an optional device-local demo enhancement.
       }
@@ -56,6 +67,7 @@ export function RoadmapChecklist({
         method: "PUT",
       });
       if (!response.ok) throw new Error("Progress could not be saved");
+      emitRoadmapProgressUpdated(profileId, [...next]);
     } catch {
       setCompleted(previous);
       setSaveError("Progress could not be saved. Please try again.");
@@ -75,7 +87,9 @@ export function RoadmapChecklist({
 
   const reset = () => {
     const previous = new Set(completed);
-    const next = new Set(isAccount ? [] : initialCompleted);
+    const next = new Set(
+      roadmapProgressFor(weeks, isAccount ? [] : initialCompleted).completedTaskIds,
+    );
     setCompleted(next);
     void persist(next, previous);
   };

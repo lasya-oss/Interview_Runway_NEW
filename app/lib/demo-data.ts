@@ -531,6 +531,14 @@ export function findDemoById(id: DemoTier | undefined) {
   return DEMO_PROFILES.find((profile) => profile.id === id) ?? null;
 }
 
+export type DemoProfileView = Omit<DemoProfile, "password">;
+
+export function toDemoProfileView(profile: DemoProfile): DemoProfileView {
+  const view = { ...profile };
+  Reflect.deleteProperty(view, "password");
+  return view;
+}
+
 export function canAccessMaterial(profile: DemoProfile, material: LearningMaterial) {
   const order: Record<DemoTier, number> = { foundation: 0, practice: 1, premium: 2 };
   return order[profile.id] >= order[material.tier];

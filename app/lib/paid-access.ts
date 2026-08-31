@@ -3,6 +3,7 @@ import { getDb } from "@/db";
 import { entitlements, learnerProgress } from "@/db/schema";
 import type { ChatGPTUser } from "@/app/chatgpt-auth";
 import { TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
+import { roadmapProgressFor } from "@/app/lib/learner-progress";
 
 const DEFAULT_DOMAIN = "vividlabsai.com";
 
@@ -73,7 +74,6 @@ export async function getLearnerProgress(email: string): Promise<LearnerProgress
 
   if (!record) return { completedTaskIds: [], progressPercent: 0 };
 
-  const validTaskIds = validFoundationTaskIds();
   let parsed: unknown;
   try {
     parsed = JSON.parse(record.completedTaskIds);
@@ -81,19 +81,13 @@ export async function getLearnerProgress(email: string): Promise<LearnerProgress
     parsed = [];
   }
   const completedTaskIds = Array.isArray(parsed)
-    ? [
-        ...new Set(
-          parsed.filter(
-            (taskId): taskId is string =>
-              typeof taskId === "string" && validTaskIds.has(taskId),
-          ),
-        ),
-      ]
+    ? parsed.filter((taskId): taskId is string => typeof taskId === "string")
     : [];
+  const roadmapProgress = roadmapProgressFor(TWELVE_WEEK_PLAN, completedTaskIds);
 
   return {
-    completedTaskIds,
-    progressPercent: progressFor(completedTaskIds),
+    completedTaskIds: roadmapProgress.completedTaskIds,
+    progressPercent: roadmapProgress.progressPercent,
   };
 }
 
@@ -101,11 +95,9 @@ export async function saveLearnerProgress(
   email: string,
   completedTaskIds: readonly string[],
 ): Promise<LearnerProgress> {
-  const validTaskIds = validFoundationTaskIds();
-  const uniqueTaskIds = [...new Set(completedTaskIds)].filter((taskId) =>
-    validTaskIds.has(taskId),
-  );
-  const progressPercent = progressFor(uniqueTaskIds);
+  const roadmapProgress = roadmapProgressFor(TWELVE_WEEK_PLAN, completedTaskIds);
+  const uniqueTaskIds = roadmapProgress.completedTaskIds;
+  const progressPercent = roadmapProgress.progressPercent;
   const updatedAt = new Date().toISOString();
 
   await (await getDb())
@@ -175,27 +167,8 @@ export function createFoundationProfile(
   };
 }
 
-function validFoundationTaskIds() {
-  return new Set(
-    TWELVE_WEEK_PLAN.flatMap((week) => week.tasks.map((task) => task.id)),
-  );
-}
-
 export function currentFoundationWeek(completedTaskIds: readonly string[]) {
-  const completed = new Set(completedTaskIds);
-  return (
-    TWELVE_WEEK_PLAN.find((week) =>
-      week.tasks.some((task) => !completed.has(task.id)),
-    )?.week ?? TWELVE_WEEK_PLAN.at(-1)?.week ?? 1
-  );
-}
-
-function progressFor(completedTaskIds: readonly string[]) {
-  const totalTasks = TWELVE_WEEK_PLAN.reduce(
-    (count, week) => count + week.tasks.length,
-    0,
-  );
-  return Math.round((completedTaskIds.length / totalTasks) * 100);
+  return roadmapProgressFor(TWELVE_WEEK_PLAN, completedTaskIds).currentWeek;
 }
 
 function initialsFor(value: string) {

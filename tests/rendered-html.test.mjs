@@ -1194,6 +1194,7 @@ test("live Foundation access takes precedence over a seeded demo cookie", async 
 test("Foundation demo starts Today with a clean learner state", async () => {
   const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
   const todayPage = await readFile(new URL("../app/learn/page.tsx", import.meta.url), "utf8");
+  const todayDashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
   const memberShell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
   const roadmapClient = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
 
@@ -1208,35 +1209,36 @@ test("Foundation demo starts Today with a clean learner state", async () => {
   assert.match(foundationProfile, /nextActionHref: "\/learn\/roadmap\/task\/12w-1-map"/);
   assert.doesNotMatch(foundationProfile, /progress: 18|week: 2|2h 14m/);
 
-  assert.match(todayPage, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
-  assert.match(todayPage, /isFreshLearner\s*\?\s*`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/);
-  assert.match(todayPage, /isFreshLearner \|\| profile\.isLive \? \[0, 0, 0, 0, 0, 0, 0\]/);
-  assert.match(todayPage, /const totalPlanTasks = profile\.roadmapWeeks === 12 \? 24 : 12;/);
-  assert.match(todayPage, /Build the first signal from your own work/);
+  assert.match(todayPage, /TodayDashboard/);
+  assert.match(todayDashboard, /const isFreshLearner = progress === 0/);
+  assert.match(todayDashboard, /isFreshLearner\s*\?\s*`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/);
+  assert.match(todayDashboard, /const weeklyActivity = isTracked \? \[0, 0, 0, 0, 0, 0, 0\]/);
+  assert.match(todayDashboard, /const totalPlanTasks = profile\.roadmapWeeks === 12 \? 24 : 12;/);
+  assert.match(todayDashboard, /Build the first signal from your own work/);
   assert.match(memberShell, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
   assert.match(memberShell, /event: isFreshLearner \? "First study step"/);
-  assert.match(roadmapClient, /interviewrunway-demo-roadmap:v2:\$\{profileId\}/);
+  assert.match(roadmapClient, /roadmapStorageKey\(profileId\)/);
 });
 
 test("fresh Vault learners derive Today and Roadmap state from account progress", async () => {
   const todayPage = await readFile(new URL("../app/learn/page.tsx", import.meta.url), "utf8");
+  const todayDashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
   const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
   const roadmapClient = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
 
+  assert.match(todayPage, /TodayDashboard/);
+  assert.match(todayDashboard, /const roadmap = useRoadmapProgress\(\);/);
+  assert.match(todayDashboard, /const progress = isTracked \? roadmap\.progressPercent : profile\.progress;/);
   assert.match(
-    todayPage,
-    /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/,
+    todayDashboard,
+    /const todayKicker = isFreshLearner[\s\S]*?`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/,
   );
-  assert.match(
-    todayPage,
-    /const todayKicker = profile\.isLive[\s\S]*?isFreshLearner[\s\S]*?`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/,
-  );
-  assert.match(todayPage, /const weeklyActivity = isFreshLearner \|\| profile\.isLive \? \[0, 0, 0, 0, 0, 0, 0\]/);
+  assert.match(todayDashboard, /const weeklyActivity = isTracked \? \[0, 0, 0, 0, 0, 0, 0\]/);
 
   assert.match(paidAccess, /const currentWeek = currentFoundationWeek\(progress\.completedTaskIds\);/);
   assert.match(
     paidAccess,
-    /export function currentFoundationWeek\(completedTaskIds: readonly string\[\]\)[\s\S]*?TWELVE_WEEK_PLAN\.find\(\(week\) =>[\s\S]*?week\.tasks\.some\(\(task\) => !completed\.has\(task\.id\)\)/,
+    /export function currentFoundationWeek\(completedTaskIds: readonly string\[\]\)[\s\S]*?roadmapProgressFor\(TWELVE_WEEK_PLAN, completedTaskIds\)\.currentWeek/,
   );
   assert.doesNotMatch(paidAccess, /Math\.floor\(progress\.progressPercent/);
 
@@ -1248,6 +1250,26 @@ test("fresh Vault learners derive Today and Roadmap state from account progress"
   assert.match(statusFunction, /if \(week\.week === activeWeek\) return "in-progress";/);
   assert.match(statusFunction, /return "upcoming";/);
   assert.doesNotMatch(statusFunction, /return "in-progress";[\s\S]*return "in-progress";/);
+});
+
+test("Today and Status consume the Roadmap snapshot for both learner tiers", async () => {
+  const progress = await readFile(new URL("../app/lib/learner-progress.ts", import.meta.url), "utf8");
+  const provider = await readFile(new URL("../app/learn/roadmap/learner-progress-client.tsx", import.meta.url), "utf8");
+  const dashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const accessCard = await readFile(new URL("../app/components/current-access-card.tsx", import.meta.url), "utf8");
+  const roadmap = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+  const studyButton = await readFile(new URL("../app/learn/study-progress-button.tsx", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+
+  assert.match(progress, /roadmapStorageKey\(profileId: string\)/);
+  assert.match(progress, /roadmapProgressFor\([\s\S]*?completedCount[\s\S]*?progressPercent[\s\S]*?currentWeek/);
+  assert.match(provider, /if \(!isLive\)[\s\S]*?window\.localStorage\.getItem\(storageKey\)/);
+  assert.match(provider, /fetch\("\/api\/learner\/progress",[\s\S]*?cache: "no-store"/);
+  assert.match(dashboard, /const completedLabel = isTracked[\s\S]*?roadmap\.completedCount/);
+  assert.match(accessCard, /progress\.synchronized \? progress\.progressPercent : fallbackProgress/);
+  assert.match(roadmap, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.next\]\)/);
+  assert.match(studyButton, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.new Set/);
+  assert.match(shell, /<RoadmapProgressProvider[\s\S]*?initialCompleted=\{profile\.completedTaskIds\}/);
 });
 
 test("Second Seat practice is durable, entitlement-gated, and transcript-backed", async () => {
