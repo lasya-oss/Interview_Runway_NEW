@@ -39,8 +39,9 @@ export function MemberShell({
   children: ReactNode;
 }) {
   const isLive = profile.isLive === true;
+  const isFreshLearner = profile.progress === 0 && (profile.completedTaskIds?.length ?? 0) === 0;
   const workspaceState: WorkspaceState = profile.id === "foundation"
-    ? { window: "8–12 weeks", signal: "Baseline pending", event: "Weekly review", eventTime: "Sun · 18:00" }
+    ? { window: "8–12 weeks", signal: "Baseline pending", event: isFreshLearner ? "First study step" : "Weekly review", eventTime: isFreshLearner ? "After start" : "Sun · 18:00" }
     : profile.id === "practice"
       ? { window: "19 days", signal: "78 · practice", event: "Adaptive mock 08", eventTime: "Tue · 20:00" }
       : { window: "13 days", signal: "84 · coach calibrated", event: "Calibration session", eventTime: "Thu · 18:30" };

@@ -792,6 +792,33 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(visibleText(await lockedReplay.text()), /This replay belongs to the practice layer/i);
 });
 
+test("Foundation demo Today renders the clean starting values", async () => {
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "foundation" }),
+  });
+  assert.equal(login.status, 200);
+
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+  const dashboard = await request("/learn", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(dashboard.status, 200);
+  const dashboardText = visibleText(await dashboard.text());
+  assert.match(dashboardText, /Start here · Week 1 of 12/i);
+  assert.match(dashboardText, /0 Plan complete/i);
+  assert.match(dashboardText, /Create the target-role map/i);
+  assert.match(dashboardText, /0 \/ 24/i);
+  assert.match(dashboardText, /Starts at 0m/i);
+  assert.match(dashboardText, /After next study step/i);
+  assert.doesNotMatch(dashboardText, /Friday · Week 2|18 Plan complete|5 \/ 9|2h 14m|Next review Sunday/i);
+});
+
 test("analytics contract is present on acquisition and payment surfaces", async () => {
   const homepage = await render();
   const homepageHtml = await homepage.text();
@@ -1135,6 +1162,33 @@ test("live Foundation access takes precedence over a seeded demo cookie", async 
   assert.match(session, /return createFoundationProfile\(user, await getLearnerProgress\(user\.email\)\);/);
 });
 
+test("Foundation demo starts Today with a clean learner state", async () => {
+  const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const todayPage = await readFile(new URL("../app/learn/page.tsx", import.meta.url), "utf8");
+  const memberShell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const roadmapClient = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+
+  const foundationProfile = data.slice(
+    data.indexOf('id: "foundation"'),
+    data.indexOf('id: "practice"'),
+  );
+  assert.match(foundationProfile, /progress: 0/);
+  assert.match(foundationProfile, /streak: 0/);
+  assert.match(foundationProfile, /week: 1/);
+  assert.match(foundationProfile, /completedTaskIds: \[\]/);
+  assert.match(foundationProfile, /nextActionHref: "\/learn\/roadmap\/task\/12w-1-map"/);
+  assert.doesNotMatch(foundationProfile, /progress: 18|week: 2|2h 14m/);
+
+  assert.match(todayPage, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
+  assert.match(todayPage, /isFreshLearner\s*\?\s*`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/);
+  assert.match(todayPage, /isFreshLearner \|\| profile\.isLive \? \[0, 0, 0, 0, 0, 0, 0\]/);
+  assert.match(todayPage, /isFreshLearner \|\| profile\.isLive \? `\$\{profile\.completedTaskIds\?\.length \?\? 0\} \/ 24`/);
+  assert.match(todayPage, /Build the first signal from your own work/);
+  assert.match(memberShell, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
+  assert.match(memberShell, /event: isFreshLearner \? "First study step"/);
+  assert.match(roadmapClient, /interviewrunway-demo-roadmap:v2:\$\{profileId\}/);
+});
+
 test("fresh Vault learners derive Today and Roadmap state from account progress", async () => {
   const todayPage = await readFile(new URL("../app/learn/page.tsx", import.meta.url), "utf8");
   const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
@@ -1142,13 +1196,13 @@ test("fresh Vault learners derive Today and Roadmap state from account progress"
 
   assert.match(
     todayPage,
-    /const isFreshLiveLearner = profile\.isLive === true && profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/,
+    /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/,
   );
   assert.match(
     todayPage,
-    /const todayKicker = profile\.isLive[\s\S]*?isFreshLiveLearner[\s\S]*?`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/,
+    /const todayKicker = profile\.isLive[\s\S]*?isFreshLearner[\s\S]*?`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/,
   );
-  assert.match(todayPage, /const weeklyActivity = profile\.isLive \? \[0, 0, 0, 0, 0, 0, 0\]/);
+  assert.match(todayPage, /const weeklyActivity = isFreshLearner \|\| profile\.isLive \? \[0, 0, 0, 0, 0, 0, 0\]/);
 
   assert.match(paidAccess, /const currentWeek = currentFoundationWeek\(progress\.completedTaskIds\);/);
   assert.match(

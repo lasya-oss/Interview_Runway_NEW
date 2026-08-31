@@ -15,13 +15,15 @@ export const metadata: Metadata = {
 
 export default async function LearnerHomePage() {
   const profile = await requireDemoProfile("/learn");
-  const isFreshLiveLearner = profile.isLive === true && profile.progress === 0 && (profile.completedTaskIds?.length ?? 0) === 0;
+  const isFreshLearner = profile.progress === 0 && (profile.completedTaskIds?.length ?? 0) === 0;
   const todayKicker = profile.isLive
-    ? isFreshLiveLearner
+    ? isFreshLearner
       ? `Start here · Week 1 of ${profile.roadmapWeeks}`
       : `Week ${profile.week} of ${profile.roadmapWeeks} · Foundation path`
-    : `Friday · Week ${profile.week} of ${profile.roadmapWeeks}`;
-  const weeklyActivity = profile.isLive ? [0, 0, 0, 0, 0, 0, 0] : [72, 100, 48, 86, 34, 0, 0];
+    : isFreshLearner
+      ? `Start here · Week 1 of ${profile.roadmapWeeks}`
+      : `Friday · Week ${profile.week} of ${profile.roadmapWeeks}`;
+  const weeklyActivity = isFreshLearner || profile.isLive ? [0, 0, 0, 0, 0, 0, 0] : [72, 100, 48, 86, 34, 0, 0];
   const scoreKey = profile.id;
   const continuedMaterials = profile.id === "foundation"
     ? LEARNING_MATERIALS.filter((material) => material.tier === "foundation").slice(0, 3)
@@ -46,7 +48,7 @@ export default async function LearnerHomePage() {
         <section className="member-hero-grid">
           <div className="member-hero-copy">
             <p className="member-kicker">{todayKicker}</p>
-            <h1>{isFreshLiveLearner ? <>Welcome, {profile.firstName}. <em>Start with the first decision.</em></> : <>Good evening, {profile.firstName}. <em>Keep the loop tight.</em></>}</h1>
+            <h1>{isFreshLearner ? <>Welcome, {profile.firstName}. <em>Start with the first decision.</em></> : <>Good evening, {profile.firstName}. <em>Keep the loop tight.</em></>}</h1>
             <p>{profile.focus}</p>
           </div>
           <div className="readiness-dial" style={{ "--readiness": `${profile.progress * 3.6}deg` } as CSSProperties}>
@@ -65,14 +67,14 @@ export default async function LearnerHomePage() {
           </article>
 
           <article className="weekly-plan-panel">
-            <div className="member-panel-label"><span>This week</span><b>{profile.isLive ? (isFreshLiveLearner ? "Start here" : "Plan active") : profile.week === 4 ? "Final pass" : "Plan active"}</b></div>
-            <div className="week-strip" aria-label={profile.isLive ? "No daily activity recorded yet" : "Weekly activity"}>
+            <div className="member-panel-label"><span>This week</span><b>{isFreshLearner ? "Start here" : profile.isLive ? "Plan active" : profile.week === 4 ? "Final pass" : "Plan active"}</b></div>
+            <div className="week-strip" aria-label={isFreshLearner || profile.isLive ? "No daily activity recorded yet" : "Weekly activity"}>
               {weeklyActivity.map((value, index) => <span key={index}><i style={{ height: value === 0 ? "0%" : `${Math.max(8, value)}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
             </div>
             <dl className="weekly-stats">
-              <div><dt>Completed</dt><dd>{profile.isLive ? `${profile.completedTaskIds?.length ?? 0} / 24` : profile.id === "foundation" ? "5 / 9" : profile.id === "practice" ? "8 / 11" : "9 / 10"}</dd></div>
-              <div><dt>Focused time</dt><dd>{profile.isLive ? "Starts at 0m" : profile.id === "foundation" ? "2h 14m" : profile.id === "practice" ? "4h 38m" : "5h 06m"}</dd></div>
-              <div><dt>Next review</dt><dd>{profile.isLive ? "After next study step" : profile.id === "premium" ? "Thu 18:30" : "Sunday"}</dd></div>
+              <div><dt>Completed</dt><dd>{isFreshLearner || profile.isLive ? `${profile.completedTaskIds?.length ?? 0} / 24` : profile.id === "practice" ? "8 / 11" : "9 / 10"}</dd></div>
+              <div><dt>Focused time</dt><dd>{isFreshLearner || profile.isLive ? "Starts at 0m" : profile.id === "practice" ? "4h 38m" : "5h 06m"}</dd></div>
+              <div><dt>Next review</dt><dd>{isFreshLearner || profile.isLive ? "After next study step" : "Thu 18:30"}</dd></div>
             </dl>
           </article>
         </section>
@@ -120,9 +122,9 @@ export default async function LearnerHomePage() {
               </article>
             )}
             <article className={`tier-insight tier-insight-${profile.id}`}>
-              <span>{profile.id === "foundation" ? "Foundation signal" : profile.id === "practice" ? "Adaptive plan change" : "Coach observation"}</span>
-              <h3>{profile.id === "foundation" ? "Explanation quality is ahead of trade-off depth." : profile.id === "practice" ? "Move consistency decisions to minute five." : "Your scope is senior; your story still sounds team-local."}</h3>
-              <p>{profile.id === "foundation" ? "Finish the rate-limit and caching decision guides before adding timed practice." : profile.id === "practice" ? "The next two mocks will probe consistency before scale so the choice becomes automatic." : "Thursday’s session will rebuild one project story around influence, decision cost, and measurable outcome."}</p>
+              <span>{isFreshLearner || profile.isLive ? "Foundation next signal" : profile.id === "foundation" ? "Foundation signal" : profile.id === "practice" ? "Adaptive plan change" : "Coach observation"}</span>
+              <h3>{isFreshLearner || (profile.isLive && profile.id === "foundation") ? "Build the first signal from your own work." : profile.id === "foundation" ? "Explanation quality is ahead of trade-off depth." : profile.id === "practice" ? "Move consistency decisions to minute five." : "Your scope is senior; your story still sounds team-local."}</h3>
+              <p>{isFreshLearner || (profile.isLive && profile.id === "foundation") ? "Complete the next Foundation checkpoint to turn your study work into a reviewable learning signal." : profile.id === "foundation" ? "Finish the rate-limit and caching decision guides before adding timed practice." : profile.id === "practice" ? "The next two mocks will probe consistency before scale so the choice becomes automatic." : "Thursday’s session will rebuild one project story around influence, decision cost, and measurable outcome."}</p>
             </article>
           </div>
         </section>

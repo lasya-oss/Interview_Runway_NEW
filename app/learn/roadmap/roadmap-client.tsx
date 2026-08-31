@@ -22,7 +22,7 @@ export function RoadmapChecklist({
   persistMode?: "demo" | "account";
 }) {
   const isAccount = persistMode === "account";
-  const storageKey = `interviewrunway-demo-roadmap:${profileId}`;
+  const storageKey = `interviewrunway-demo-roadmap:v2:${profileId}`;
   const [completed, setCompleted] = useState<Set<string>>(() =>
     new Set(isAccount ? initialCompleted : readDemoCompleted(storageKey, initialCompleted)),
   );

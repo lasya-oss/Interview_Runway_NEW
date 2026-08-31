@@ -13,7 +13,7 @@ import {
 const TIER_PROMISE: Record<DemoTier, { headline: string; summary: string; access: readonly string[] }> = {
   foundation: {
     headline: "Build the preparation base.",
-    summary: "Inspect the structured library, 12-week roadmap, weekly work surface, and progress model before timed practice begins.",
+    summary: "Inspect the structured library, 12-week roadmap, clean starting state, and progress model before timed practice begins.",
     access: ["Vault library + roadmap", "Real review-edition PDFs", "Foundation progress state"],
   },
   practice: {
@@ -88,7 +88,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
             <div className="demo-entry-copy">
               <div className="demo-entry-label">
                 <span>0{index + 1} / {profile.planShort}</span>
-                <small>{profile.progress}% populated progress</small>
+                <small>{profile.progress === 0 ? "0% starting progress" : `${profile.progress}% populated progress`}</small>
               </div>
               <h2>{promise.headline}</h2>
               <p>{promise.summary}</p>
