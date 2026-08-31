@@ -447,6 +447,11 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(dashboardText, /Good evening, Rohan|Every attempt leaves evidence|4h 38m|Adaptive mock 08/i);
   assert.doesNotMatch(dashboardText, /fictional learner data/i);
 
+  const secondSeatSidebar = dashboardHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+  assert.doesNotMatch(secondSeatSidebar, /member-plan-card|Current access/i);
+  assert.match(dashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
+  assert.equal((dashboardHtml.match(/<div\b[^>]*class=["'][^"']*member-plan-card member-plan-card-status["']/gi) ?? []).length, 1);
+
   const library = await request("/learn/library", {
     headers: { accept: "text/html", cookie: sessionCookie },
   });
@@ -463,6 +468,18 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(visibleText(libraryHtml), /Weekly Prep Tracker/i);
   assert.doesNotMatch(visibleText(libraryHtml), /sysdesign_url-shortener-walkthrough\.pdf/i);
   assert.doesNotMatch(libraryHtml, /<a[^>]+drive\.google\.com/i);
+
+  for (const pathname of ["/learn/roadmap", "/learn/practice", "/learn/feedback", "/learn/coaching"]) {
+    const sectionResponse = await request(pathname, {
+      headers: { accept: "text/html", cookie: sessionCookie },
+    });
+    assert.equal(sectionResponse.status, 200, pathname);
+    const sectionHtml = await sectionResponse.text();
+    const sectionSidebar = sectionHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+    assert.doesNotMatch(sectionSidebar, /member-plan-card|Current access/i, pathname);
+    assert.match(sectionHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i, pathname);
+  }
+
   const driveShelf = await readFile(
     new URL("../app/learn/library/drive-material-shelf.tsx", import.meta.url),
     "utf8",

@@ -75,7 +75,7 @@ export function MemberShell({
           })}
         </nav>
 
-        {!isVaultWorkspace ? <CurrentAccessCard profile={profile} /> : null}
+        {!isVaultWorkspace && !isSecondSeatWorkspace ? <CurrentAccessCard profile={profile} /> : null}
 
         <div className="member-profile-card">
           <span className="member-avatar">{profile.initials}</span>
