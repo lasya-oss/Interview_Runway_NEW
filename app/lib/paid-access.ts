@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { getDb } from "@/db";
 import { entitlements, learnerProgress } from "@/db/schema";
 import type { ChatGPTUser } from "@/app/chatgpt-auth";
@@ -11,6 +11,11 @@ export type RoadmapWeeks = 4 | 12;
 export type LearnerProgress = {
   completedTaskIds: string[];
   progressPercent: number;
+};
+
+export type LearnerAccess = {
+  vault: boolean;
+  secondSeat: boolean;
 };
 
 export function isConfiguredTestFoundationEmail(email: string): boolean {
@@ -61,6 +66,34 @@ export async function hasSecondSeatAccess(email: string): Promise<boolean> {
     .limit(1);
 
   return Boolean(entitlement);
+}
+
+/**
+ * Resolve the access stack for the learner shell with one entitlement lookup.
+ * The shell is rendered for every learner section, so keeping these related
+ * checks together avoids issuing the Vault query twice on each navigation.
+ */
+export async function getLearnerAccess(email: string): Promise<LearnerAccess> {
+  const normalizedEmail = normalizeEmail(email);
+  const foundationTestEmail = isConfiguredTestFoundationEmail(normalizedEmail);
+  const offers = foundationTestEmail ? ["ai-prep"] : ["vault", "ai-prep"];
+  const records = await (await getDb())
+    .select({ offer: entitlements.offer })
+    .from(entitlements)
+    .where(
+      and(
+        eq(entitlements.userEmail, normalizedEmail),
+        eq(entitlements.status, "active"),
+        inArray(entitlements.offer, offers),
+      ),
+    );
+  const secondSeat = records.some((record) => record.offer === "ai-prep");
+  const vault = foundationTestEmail || records.some((record) => record.offer === "vault");
+
+  return {
+    vault,
+    secondSeat: vault && secondSeat,
+  };
 }
 
 export async function getLearnerProgress(

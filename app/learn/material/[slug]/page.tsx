@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
+import { LockedMemberPanel } from "@/app/components/member-shell";
 import { canAccessMaterial, LEARNING_MATERIALS, type DemoTier, type LearningMaterial } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
@@ -192,15 +192,13 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
 
   if (!unlocked) {
     return (
-      <MemberShell profile={profile} active="library">
-        <div className="member-page">
-          <LockedMemberPanel
-            tier={tierLabel(material.tier)}
-            title={`${material.title} belongs to the next layer.`}
-            body={`This representative ${material.format.toLowerCase()} is visible in the demo catalogue so you can understand the product progression, but it is not included with ${profile.planShort}.`}
-          />
-        </div>
-      </MemberShell>
+      <div className="member-page">
+        <LockedMemberPanel
+          tier={tierLabel(material.tier)}
+          title={`${material.title} belongs to the next layer.`}
+          body={`This representative ${material.format.toLowerCase()} is visible in the demo catalogue so you can understand the product progression, but it is not included with ${profile.planShort}.`}
+        />
+      </div>
     );
   }
 
@@ -223,7 +221,6 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
     .find((task) => task.learning.kind === "material" && task.learning.slug === material.slug);
 
   return (
-    <MemberShell profile={profile} active="library">
       <article className="member-page material-workspace">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
           <Link href="/learn/library">Library</Link><span>/</span><span>{material.category}</span><span>/</span><strong>{material.number}</strong>
@@ -290,6 +287,5 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
           <Link className="member-primary-button" href={destination}>Continue <span aria-hidden="true">↗</span></Link>
         </footer>
       </article>
-    </MemberShell>
   );
 }

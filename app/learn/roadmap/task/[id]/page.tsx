@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
+import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { findRoadmapTask, TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
 import { StudyProgressButton } from "../../../study-progress-button";
@@ -29,23 +29,20 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
   if (!isProfileRoadmapTask) {
     const requestedTier = isVaultRoadmapTask ? "The Vault" : "The Second Seat";
     return (
-      <MemberShell profile={profile} active="roadmap">
-        <div className="member-page">
-          <LockedMemberPanel
-            tier={requestedTier}
-            title="This checkpoint is outside your current roadmap."
-            body={isVaultRoadmapTask
-              ? "The current workspace uses the 12-week Foundation roadmap. This four-week brief remains unpublished and gated until its separate content and access review is complete."
-              : "The current workspace uses the four-week practice roadmap. Foundation checkpoints remain separate from this tier and are not opened by a direct link."}
-          />
-        </div>
-      </MemberShell>
+      <div className="member-page">
+        <LockedMemberPanel
+          tier={requestedTier}
+          title="This checkpoint is outside your current roadmap."
+          body={isVaultRoadmapTask
+            ? "The current workspace uses the 12-week Foundation roadmap. This four-week brief remains unpublished and gated until its separate content and access review is complete."
+            : "The current workspace uses the four-week practice roadmap. Foundation checkpoints remain separate from this tier and are not opened by a direct link."}
+        />
+      </div>
     );
   }
 
   if (task.learning.kind === "lesson") {
     return (
-      <MemberShell profile={profile} active="roadmap">
         <article className="member-page roadmap-task-page roadmap-published-lesson">
           <nav className="material-breadcrumb" aria-label="Breadcrumb">
             <Link href="/learn/roadmap">Roadmap</Link><span>/</span><span>Foundation lesson</span><span>/</span><strong>{task.id}</strong>
@@ -101,12 +98,10 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
             <Link className="member-primary-button" href="/learn/roadmap">Back to roadmap <span aria-hidden="true">↗</span></Link>
           </footer>
         </article>
-      </MemberShell>
     );
   }
 
   return (
-    <MemberShell profile={profile} active="roadmap">
       <article className="member-page roadmap-task-page">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
           <Link href="/learn/roadmap">Roadmap</Link><span>/</span><span>Learning brief</span><span>/</span><strong>{task.id}</strong>
@@ -146,6 +141,5 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
           <Link className="member-primary-button" href="/learn/roadmap">Back to roadmap <span aria-hidden="true">↗</span></Link>
         </footer>
       </article>
-    </MemberShell>
   );
 }

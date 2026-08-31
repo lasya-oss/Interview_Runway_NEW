@@ -1,12 +1,13 @@
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { findDemoById, type DemoProfile, type DemoTier } from "./demo-data";
 import { getChatGPTUser, requireChatGPTUser } from "@/app/chatgpt-auth";
 import {
   createFoundationProfile,
+  getLearnerAccess,
   getLearnerProgress,
   hasVaultAccess,
-  hasSecondSeatAccess,
 } from "@/app/lib/paid-access";
 
 export const DEMO_SESSION_COOKIE = "ir_demo_session";
@@ -61,55 +62,74 @@ export async function getDemoProfile(): Promise<DemoProfile | null> {
 export async function requireDemoProfile(
   returnTo = "/learn",
 ): Promise<DemoProfile> {
-  const profile = await getDemoProfile();
+  const state = await resolveWorkspaceProfile();
+  const profile = state.profile;
   // An authenticated Vault owner is always represented by the live Foundation
   // profile. This prevents an older demo cookie from replacing account-backed
   // identity or progress after the user has signed in.
-  const user = await getChatGPTUser();
-  let liveAccess = false;
-  if (user) {
-    try {
-      liveAccess = await hasVaultAccess(user.email);
-    } catch {
-      // A valid demo remains usable when the optional account lookup is not
-      // available in a local preview. Live access is fail-closed below.
-    }
-  }
-  if (user && liveAccess) {
-    let secondSeatAccess = false;
-    try {
-      secondSeatAccess = await hasSecondSeatAccess(user.email);
-    } catch {
-      // Second Seat access is independent; a temporary lookup failure must not
-      // block the authenticated Vault workspace.
-    }
-    return createFoundationProfile(
-      user,
-      await getLearnerProgress(user.email),
-      { secondSeatAccess },
-    );
-  }
   if (profile) return profile;
 
-  const authenticatedUser = user ?? (await requireChatGPTUser(returnTo));
-  if (!(user ? liveAccess : await hasVaultAccess(authenticatedUser.email))) {
+  const authenticatedUser = state.user ?? (await requireChatGPTUser(returnTo));
+  if (!(state.user ? state.vaultAccess : await hasVaultAccess(authenticatedUser.email))) {
     redirect(
       `/pricing?access=required&return_to=${encodeURIComponent(safeReturnTo(returnTo))}`,
     );
   }
 
-  let secondSeatAccess = false;
-  try {
-    secondSeatAccess = await hasSecondSeatAccess(authenticatedUser.email);
-  } catch {
-    // Keep the Foundation workspace available if the optional tier lookup is unavailable.
-  }
   return createFoundationProfile(
     authenticatedUser,
     await getLearnerProgress(authenticatedUser.email),
-    { secondSeatAccess },
+    { secondSeatAccess: state.secondSeatAccess },
   );
 }
+
+type WorkspaceProfileState = {
+  profile: DemoProfile | null;
+  user: ChatGPTUser | null;
+  vaultAccess: boolean;
+  secondSeatAccess: boolean;
+};
+
+// Layout and page components both need the learner identity. React's request
+// cache makes that shared lookup one operation during a render, including when
+// their return-to paths differ.
+const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> => {
+  const [profile, user] = await Promise.all([getDemoProfile(), getChatGPTUser()]);
+  if (!user) {
+    return { profile, user: null, vaultAccess: false, secondSeatAccess: false };
+  }
+
+  let access: Awaited<ReturnType<typeof getLearnerAccess>> = {
+    vault: false,
+    secondSeat: false,
+  };
+  try {
+    access = await getLearnerAccess(user.email);
+  } catch {
+    // A valid demo remains usable when the optional account lookup is not
+    // available in a local preview. Live access remains fail-closed.
+  }
+
+  if (!access.vault) {
+    return {
+      profile,
+      user,
+      vaultAccess: false,
+      secondSeatAccess: false,
+    };
+  }
+
+  return {
+    profile: createFoundationProfile(
+      user,
+      await getLearnerProgress(user.email),
+      { secondSeatAccess: access.secondSeat },
+    ),
+    user,
+    vaultAccess: true,
+    secondSeatAccess: access.secondSeat,
+  };
+});
 
 async function verifyDemoSession(
   token: string,

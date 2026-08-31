@@ -300,7 +300,9 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(libraryClient, /Back to categories/i);
   assert.match(libraryClient, /onClick=\{\(\) => setCategory\(item\)\}/i);
   assert.match(libraryClient, /library-category-view__records">\{renderResults\(false\)\}/i);
-  assert.match(libraryClient, /All categories · no category selected/i);
+  assert.match(libraryClient, /import\("\.\/library-catalog"\)/i);
+  assert.match(libraryClient, /Choose a category to open its records/i);
+  assert.match(libraryClient, /library-catalog-loading/i);
   assert.match(libraryClient, /material\.demoAsset\.href/i);
   assert.match(libraryClient, /Open actual content/i);
   assert.match(materialViewer, /DriveReplayPlayer/i);
@@ -457,15 +459,12 @@ test("demo sign-in issues a protected session and opens the learner product", as
   });
   assert.equal(library.status, 200);
   const libraryHtml = await library.text();
-  assert.match(visibleText(libraryHtml), /Drive PDF guides/i);
-  assert.match(visibleText(libraryHtml), /320 guides available/i);
-  assert.match(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
-  assert.match(libraryHtml, /class="library-record library-pdf-record"/i);
-  assert.match(visibleText(libraryHtml), /Original PDF/i);
-  assert.match(visibleText(libraryHtml), /URL shortener walkthrough/i);
-  assert.match(visibleText(libraryHtml), /Drive material archive/i);
-  assert.match(visibleText(libraryHtml), /778 source records available/i);
-  assert.match(visibleText(libraryHtml), /Weekly Prep Tracker/i);
+  assert.match(visibleText(libraryHtml), /1000\+\s+Resources\s+Available/i);
+  assert.match(visibleText(libraryHtml), /Choose a category to open its records/i);
+  assert.match(visibleText(libraryHtml), /All\s+1,\d{3}/i);
+  assert.doesNotMatch(visibleText(libraryHtml), /Drive PDF guides/i);
+  assert.doesNotMatch(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
+  assert.doesNotMatch(libraryHtml, /class="library-record library-pdf-record"/i);
   assert.doesNotMatch(visibleText(libraryHtml), /sysdesign_url-shortener-walkthrough\.pdf/i);
   assert.doesNotMatch(libraryHtml, /<a[^>]+drive\.google\.com/i);
 
@@ -1157,13 +1156,15 @@ test("Vault roadmap destinations are complete Foundation lessons", async () => {
 test("Vault review materials do not point at legacy demo PDFs", async () => {
   const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
   const libraryPage = await readFile(new URL("../app/learn/library/page.tsx", import.meta.url), "utf8");
+  const libraryCatalog = await readFile(new URL("../app/learn/library/library-catalog.ts", import.meta.url), "utf8");
   assert.doesNotMatch(data, /\/demo-materials\/(?:roadmap_4week|dsa_sliding-window)\.(?:pdf|png)/i);
   assert.match(data, /\/pdf-guides\/roadmap_12week\.pdf/i);
   assert.match(data, /\/pdf-guides\/dsa_sliding-window\.pdf/i);
   assert.match(data, /Qualified review required/i);
-  assert.match(libraryPage, /profile\.isLive \? DRIVE_PDF_GUIDES\.filter/);
-  assert.match(libraryPage, /roadmap_4week\.pdf/);
-  assert.doesNotMatch(libraryPage, /new Set\(\["roadmap_4week\.pdf",\s*"dsa_sliding-window\.pdf"\]\)/);
+  assert.match(libraryPage, /getLibraryCategorySummary\(isLive\)/);
+  assert.match(libraryCatalog, /isLive\s*\n?\s*\? DRIVE_PDF_GUIDES\.filter/);
+  assert.match(libraryCatalog, /roadmap_4week\.pdf/);
+  assert.doesNotMatch(libraryCatalog, /new Set\(\["roadmap_4week\.pdf",\s*"dsa_sliding-window\.pdf"\]\)/);
   assert.equal(existsSync(new URL("../public/demo-materials/roadmap_4week.pdf", import.meta.url)), false);
   assert.equal(existsSync(new URL("../public/demo-materials/dsa_sliding-window.pdf", import.meta.url)), false);
 });
@@ -1185,10 +1186,11 @@ test("pending Foundation previews cannot be recorded as completed lessons", asyn
 test("live Foundation access takes precedence over a seeded demo cookie", async () => {
   const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
 
-  assert.match(session, /const profile = await getDemoProfile\(\);/);
-  assert.match(session, /const user = await getChatGPTUser\(\);/);
-  assert.match(session, /if \(user && liveAccess\)/);
-  assert.match(session, /return createFoundationProfile\(\s*user,\s*await getLearnerProgress\(user\.email\),\s*\{ secondSeatAccess \}/s);
+  assert.match(session, /const state = await resolveWorkspaceProfile\(\);/);
+  assert.match(session, /const \[profile, user\] = await Promise\.all\(\[getDemoProfile\(\), getChatGPTUser\(\)\]\);/);
+  assert.match(session, /if \(profile\) return profile;/);
+  assert.match(session, /getLearnerAccess\(user\.email\)/);
+  assert.match(session, /profile: createFoundationProfile\(\s*user,\s*await getLearnerProgress\(user\.email\),/s);
 });
 
 test("Foundation demo starts Today with a clean learner state", async () => {
@@ -1260,6 +1262,8 @@ test("Today and Status consume the Roadmap snapshot for both learner tiers", asy
   const roadmap = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
   const studyButton = await readFile(new URL("../app/learn/study-progress-button.tsx", import.meta.url), "utf8");
   const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const layout = await readFile(new URL("../app/learn/layout.tsx", import.meta.url), "utf8");
+  const loading = await readFile(new URL("../app/learn/loading.tsx", import.meta.url), "utf8");
 
   assert.match(progress, /roadmapStorageKey\(profileId: string\)/);
   assert.match(progress, /roadmapProgressFor\([\s\S]*?completedCount[\s\S]*?progressPercent[\s\S]*?currentWeek/);
@@ -1270,6 +1274,9 @@ test("Today and Status consume the Roadmap snapshot for both learner tiers", asy
   assert.match(roadmap, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.next\]\)/);
   assert.match(studyButton, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.new Set/);
   assert.match(shell, /<RoadmapProgressProvider[\s\S]*?initialCompleted=\{profile\.completedTaskIds\}/);
+  assert.match(shell, /usePathname\(\)/);
+  assert.match(layout, /<MemberShell profile=\{profile\}>\{children\}<\/MemberShell>/);
+  assert.match(loading, /aria-busy="true"/);
 });
 
 test("learner progress persistence is scoped to the selected roadmap", async () => {

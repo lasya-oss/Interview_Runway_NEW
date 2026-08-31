@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { MemberShell } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { roadmapPlanForWeeks } from "@/app/lib/learner-progress";
 import { RoadmapChecklist } from "./roadmap-client";
@@ -20,17 +19,15 @@ export default async function RoadmapPage() {
     : orderedTaskIds.slice(0, Math.round(orderedTaskIds.length * (profile.progress / 100)));
 
   return (
-    <MemberShell profile={profile} active="roadmap">
-      <div className="member-page">
-        <RoadmapChecklist
-          profileId={profile.id}
-          roadmapWeeks={profile.roadmapWeeks}
-          currentWeek={profile.week}
-          weeks={weeks}
-          initialCompleted={initialCompleted}
-          persistMode={profile.isLive ? "account" : "demo"}
-        />
-      </div>
-    </MemberShell>
+    <div className="member-page">
+      <RoadmapChecklist
+        profileId={profile.id}
+        roadmapWeeks={profile.roadmapWeeks}
+        currentWeek={profile.week}
+        weeks={weeks}
+        initialCompleted={initialCompleted}
+        persistMode={profile.isLive ? "account" : "demo"}
+      />
+    </div>
   );
 }

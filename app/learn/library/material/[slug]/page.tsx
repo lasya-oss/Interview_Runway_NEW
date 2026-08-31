@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MemberShell } from "@/app/components/member-shell";
 import {
   driveMaterialCategory,
   driveMaterialCompanionAssetHref,
@@ -40,7 +39,6 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
   const number = materialNumber(material.id);
 
   return (
-    <MemberShell profile={profile} active="library">
       <article className="member-page material-workspace drive-material-workspace">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
           <Link href="/learn/library">Library</Link><span>/</span><span>{category}</span><span>/</span><strong>{number}</strong>
@@ -89,6 +87,5 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
           </aside>
         </div>
       </article>
-    </MemberShell>
   );
 }

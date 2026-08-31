@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
+import { LockedMemberPanel } from "@/app/components/member-shell";
 import { SCORE_DIMENSIONS } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { getLatestCompletedSecondSeatSession } from "@/app/lib/second-seat-store";
@@ -48,15 +48,13 @@ export default async function FeedbackPage() {
 
   if (!profile.access.feedback) {
     return (
-      <MemberShell profile={profile} active="feedback">
-        <div className="member-page">
-          <LockedMemberPanel
-            tier="The Second Seat"
-            title="Feedback begins with interview-shaped evidence."
-            body="The Vault provides the preparation system and self-checks. The Second Seat adds stored transcripts, category-level practice signals, and corrections tied to specific moments. This demo uses prewritten sample evidence."
-          />
-        </div>
-      </MemberShell>
+      <div className="member-page">
+        <LockedMemberPanel
+          tier="The Second Seat"
+          title="Feedback begins with interview-shaped evidence."
+          body="The Vault provides the preparation system and self-checks. The Second Seat adds stored transcripts, category-level practice signals, and corrections tied to specific moments. This demo uses prewritten sample evidence."
+        />
+      </div>
     );
   }
 
@@ -66,16 +64,14 @@ export default async function FeedbackPage() {
   const liveEvaluation = latestSession?.evaluation ?? null;
   if (profile.isSecondSeatLive && !liveEvaluation) {
     return (
-      <MemberShell profile={profile} active="feedback">
-        <div className="member-page">
-          <section className="feedback-empty" aria-labelledby="feedback-empty-title">
-            <p className="member-kicker">Second Seat · feedback room</p>
-            <h1 id="feedback-empty-title">Your first transcript will become the baseline.</h1>
-            <p>Complete one practice round and this page will show category scores, transcript evidence, and the smallest useful next rehearsal. Nothing is pre-populated.</p>
-            <Link className="member-primary-button" href="/learn/practice">Start a practice round <span aria-hidden="true">↗</span></Link>
-          </section>
-        </div>
-      </MemberShell>
+      <div className="member-page">
+        <section className="feedback-empty" aria-labelledby="feedback-empty-title">
+          <p className="member-kicker">Second Seat · feedback room</p>
+          <h1 id="feedback-empty-title">Your first transcript will become the baseline.</h1>
+          <p>Complete one practice round and this page will show category scores, transcript evidence, and the smallest useful next rehearsal. Nothing is pre-populated.</p>
+          <Link className="member-primary-button" href="/learn/practice">Start a practice round <span aria-hidden="true">↗</span></Link>
+        </section>
+      </div>
     );
   }
 
@@ -98,20 +94,18 @@ export default async function FeedbackPage() {
   const actions = liveEvaluation?.nextActions ?? ACTIONS;
 
   return (
-    <MemberShell profile={profile} active="feedback">
-      <div className="member-page">
-        <FeedbackClient
-          overall={liveEvaluation?.overall ?? (profile.id === "premium" ? 84 : 78)}
-          dimensions={dimensions}
-          evidence={evidence}
-          actions={actions}
-          premium={profile.id === "premium"}
-          live={profile.isSecondSeatLive === true}
-          mockTitle={latestSession ? "Your latest practice round" : "Design a metrics pipeline"}
-          insightTitle={liveEvaluation?.insightTitle}
-          insightBody={liveEvaluation?.insightBody}
-        />
-      </div>
-    </MemberShell>
+    <div className="member-page">
+      <FeedbackClient
+        overall={liveEvaluation?.overall ?? (profile.id === "premium" ? 84 : 78)}
+        dimensions={dimensions}
+        evidence={evidence}
+        actions={actions}
+        premium={profile.id === "premium"}
+        live={profile.isSecondSeatLive === true}
+        mockTitle={latestSession ? "Your latest practice round" : "Design a metrics pipeline"}
+        insightTitle={liveEvaluation?.insightTitle}
+        insightBody={liveEvaluation?.insightBody}
+      />
+    </div>
   );
 }

@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   driveMaterialCategory,
   driveMaterialKindLabel,
   driveMaterialTitle,
-  type DriveMaterial,
 } from "@/app/lib/drive-materials";
 import { drivePdfCategory, drivePdfTitle, type DrivePdfGuide } from "@/app/lib/drive-pdf-guides";
 import type { DemoTier, LearningMaterial } from "@/app/lib/demo-data";
+import type { DriveMaterial } from "@/app/lib/drive-materials";
+import type { LibraryCategorySummary, LibraryCatalog } from "./library-catalog";
 import { DriveMaterialShelf } from "./drive-material-shelf";
 import { PdfGuideShelf } from "./pdf-guide-shelf";
 
 const TIER_ORDER: Record<DemoTier, number> = { foundation: 0, practice: 1, premium: 2 };
+const EMPTY_MATERIALS: readonly LearningMaterial[] = [];
+const EMPTY_PDF_GUIDES: readonly DrivePdfGuide[] = [];
+const EMPTY_DRIVE_MATERIALS: readonly DriveMaterial[] = [];
 
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   All: "Browse the full library",
@@ -62,37 +66,40 @@ export function LibraryClient({
   isLive = false,
   googleClientId = "",
   loginHint = null,
-  materials,
-  pdfGuides,
-  driveMaterials,
+  categorySummary,
 }: {
   profileId: DemoTier;
   isLive?: boolean;
   googleClientId?: string;
   loginHint?: string | null;
-  materials: readonly LearningMaterial[];
-  pdfGuides: readonly DrivePdfGuide[];
-  driveMaterials: readonly DriveMaterial[];
+  categorySummary: LibraryCategorySummary;
 }) {
+  const [catalog, setCatalog] = useState<LibraryCatalog | null>(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   const [scope, setScope] = useState<"all" | "included" | "locked">("all");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
-  const categories = useMemo(() => ["All", ...new Set([
-    ...materials.map((material) => material.category),
-    ...pdfGuides.map((guide) => drivePdfCategory(guide.filename)),
-    ...driveMaterials.map((material) => driveMaterialCategory(material.filename)),
-  ])], [driveMaterials, materials, pdfGuides]);
-  const categoryCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    const add = (itemCategory: string) => counts.set(itemCategory, (counts.get(itemCategory) ?? 0) + 1);
-    materials.forEach((material) => add(material.category));
-    pdfGuides.forEach((guide) => add(drivePdfCategory(guide.filename)));
-    driveMaterials.forEach((material) => add(driveMaterialCategory(material.filename)));
-    return counts;
-  }, [driveMaterials, materials, pdfGuides]);
+  const materials = catalog?.materials ?? EMPTY_MATERIALS;
+  const pdfGuides = catalog?.pdfGuides ?? EMPTY_PDF_GUIDES;
+  const driveMaterials = catalog?.driveMaterials ?? EMPTY_DRIVE_MATERIALS;
+  const categories = categorySummary.categories;
+  const totalResourceCount = categorySummary.total;
 
-  const totalResourceCount = materials.length + pdfGuides.length + driveMaterials.length;
+  useEffect(() => {
+    let mounted = true;
+    void import("./library-catalog")
+      .then(({ getLibraryCatalog }) => {
+        if (mounted) setCatalog(getLibraryCatalog(isLive));
+      })
+      .catch(() => {
+        // Category summaries remain useful if the deferred catalogue chunk fails.
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [isLive]);
+
+  const categoryCounts = categorySummary.counts;
 
   const results = useMemo(() => materials.filter((material) => {
     const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
@@ -140,7 +147,11 @@ export function LibraryClient({
         </div>
       ) : null}
 
-      {results.length ? (
+      {!catalog ? (
+        <div className="library-catalog-loading" aria-busy="true" aria-live="polite">
+          <span /> Loading records for this category…
+        </div>
+      ) : results.length ? (
         <div className="library-record-list">
           {results.map((material) => {
             const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
@@ -263,7 +274,7 @@ export function LibraryClient({
               >
                 <span className="library-category-card__topline">
                   <b>{item}</b>
-                  <i>{(item === "All" ? totalResourceCount : categoryCounts.get(item) ?? 0).toLocaleString("en-IN")}</i>
+                <i>{(item === "All" ? totalResourceCount : categoryCounts[item] ?? 0).toLocaleString("en-IN")}</i>
                 </span>
                 <small>{CATEGORY_DESCRIPTIONS[item] ?? "Resources for this interview-prep theme"}</small>
               </button>
@@ -271,7 +282,10 @@ export function LibraryClient({
           </div>
 
           <section id="library-category-results" className="library-category-results" aria-label="All library records">
-            {renderResults(true)}
+            <div className="library-category-prompt">
+              <strong>Choose a category to open its records.</strong>
+              <span>Library records stay closed until you choose a learning theme.</span>
+            </div>
           </section>
         </>
       )}

@@ -1,9 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import type { DemoProfile } from "@/app/lib/demo-data";
 import { CurrentAccessCard } from "./current-access-card";
 import { RoadmapProgressProvider, RoadmapTrackLabel } from "@/app/learn/roadmap/learner-progress-client";
-import { Brand } from "./site-chrome";
 import { DemoLogoutButton, LiveLogoutButton } from "./member-actions";
 
 const MEMBER_NAV = [
@@ -37,9 +39,11 @@ export function MemberShell({
   children,
 }: {
   profile: DemoProfile;
-  active: (typeof MEMBER_NAV)[number]["key"];
+  active?: (typeof MEMBER_NAV)[number]["key"];
   children: ReactNode;
 }) {
+  const pathname = usePathname();
+  const currentSection = sectionForPathname(pathname) ?? active ?? "today";
   const isLive = profile.isLive === true;
   const isFreshLearner = profile.progress === 0 && (profile.completedTaskIds?.length ?? 0) === 0;
   const isVaultWorkspace = profile.id === "foundation";
@@ -78,7 +82,7 @@ export function MemberShell({
           {MEMBER_NAV.map((item) => {
             const unlocked = profile.access[item.access];
             return (
-              <Link className={`${active === item.key ? "is-active" : ""} ${unlocked ? "" : "is-locked"}`} href={item.href} key={item.key}>
+              <Link className={`${currentSection === item.key ? "is-active" : ""} ${unlocked ? "" : "is-locked"}`} href={item.href} key={item.key}>
                 <span>{item.mark}</span><b>{item.label}</b>{unlocked ? null : <small>Upgrade</small>}
               </Link>
             );
@@ -104,7 +108,7 @@ export function MemberShell({
         <header className="member-topbar member-topbar-vault">
           <div className="member-vault-header">
             <div className="member-vault-header-title">
-              <span>{workspaceRoot} / {VAULT_SECTION_LABELS[active]}</span>
+              <span>{workspaceRoot} / {VAULT_SECTION_LABELS[currentSection]}</span>
               <strong>{workspaceTitle}</strong>
               <small>{workspaceSubtitle}</small>
             </div>
@@ -142,6 +146,25 @@ export function MemberShell({
       </div>
       </RoadmapProgressProvider>
     </div>
+  );
+}
+
+function sectionForPathname(pathname: string | null): (typeof MEMBER_NAV)[number]["key"] | null {
+  if (!pathname || pathname === "/learn") return "today";
+  if (pathname.startsWith("/learn/roadmap")) return "roadmap";
+  if (pathname.startsWith("/learn/library") || pathname.startsWith("/learn/material")) return "library";
+  if (pathname.startsWith("/learn/practice")) return "practice";
+  if (pathname.startsWith("/learn/feedback")) return "feedback";
+  if (pathname.startsWith("/learn/coaching")) return "coaching";
+  return null;
+}
+
+function Brand() {
+  return (
+    <Link className="brand" href="/" aria-label="InterviewRunway home">
+      <span className="brand-mark" aria-hidden="true"><i /><i /></span>
+      <span>INTERVIEW<span>RUNWAY</span></span>
+    </Link>
   );
 }
 

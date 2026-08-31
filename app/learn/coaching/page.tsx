@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
+import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 
 export const dynamic = "force-dynamic";
@@ -28,22 +28,19 @@ export default async function CoachingPage() {
 
   if (!profile.access.coaching) {
     return (
-      <MemberShell profile={profile} active="coaching">
-        <div className="member-page">
-          <LockedMemberPanel
-            tier="Human Calibration"
-            title="Human calibration is reserved for a named gap."
-            body={`${profile.planShort} can see how the private coaching room is structured, but agenda notes, session scheduling, and coach deliverables belong to the qualification-based example engagement. No coach is contacted from this demo.`}
-          >
-            <p className="member-locked-evidence">The Human Calibration sample is triggered only after repeated practice evidence shows a persistent gap.</p>
-          </LockedMemberPanel>
-        </div>
-      </MemberShell>
+      <div className="member-page">
+        <LockedMemberPanel
+          tier="Human Calibration"
+          title="Human calibration is reserved for a named gap."
+          body={`${profile.planShort} can see how the private coaching room is structured, but agenda notes, session scheduling, and coach deliverables belong to the qualification-based example engagement. No coach is contacted from this demo.`}
+        >
+          <p className="member-locked-evidence">The Human Calibration sample is triggered only after repeated practice evidence shows a persistent gap.</p>
+        </LockedMemberPanel>
+      </div>
     );
   }
 
   return (
-    <MemberShell profile={profile} active="coaching">
       <div className="member-page coaching-workspace">
         <section className="coaching-heading">
           <div>
@@ -112,6 +109,5 @@ export default async function CoachingPage() {
           <strong>Demo boundary</strong><p>No booking, rescheduling, file access, messaging, or coach contact occurs here. A production version requires verified identity, live calendar data, explicit package terms, and durable private storage.</p>
         </footer>
       </div>
-    </MemberShell>
   );
 }
