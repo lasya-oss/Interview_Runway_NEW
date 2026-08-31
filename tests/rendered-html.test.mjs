@@ -1134,3 +1134,35 @@ test("live Foundation access takes precedence over a seeded demo cookie", async 
   assert.match(session, /if \(user && liveAccess\)/);
   assert.match(session, /return createFoundationProfile\(user, await getLearnerProgress\(user\.email\)\);/);
 });
+
+test("fresh Vault learners derive Today and Roadmap state from account progress", async () => {
+  const todayPage = await readFile(new URL("../app/learn/page.tsx", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const roadmapClient = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+
+  assert.match(
+    todayPage,
+    /const isFreshLiveLearner = profile\.isLive === true && profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/,
+  );
+  assert.match(
+    todayPage,
+    /const todayKicker = profile\.isLive[\s\S]*?isFreshLiveLearner[\s\S]*?`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/,
+  );
+  assert.match(todayPage, /const weeklyActivity = profile\.isLive \? \[0, 0, 0, 0, 0, 0, 0\]/);
+
+  assert.match(paidAccess, /const currentWeek = currentFoundationWeek\(progress\.completedTaskIds\);/);
+  assert.match(
+    paidAccess,
+    /export function currentFoundationWeek\(completedTaskIds: readonly string\[\]\)[\s\S]*?TWELVE_WEEK_PLAN\.find\(\(week\) =>[\s\S]*?week\.tasks\.some\(\(task\) => !completed\.has\(task\.id\)\)/,
+  );
+  assert.doesNotMatch(paidAccess, /Math\.floor\(progress\.progressPercent/);
+
+  const statusFunction = roadmapClient.slice(
+    roadmapClient.indexOf("function getWeekStatus"),
+    roadmapClient.indexOf("function formatWeekStatus"),
+  );
+  assert.match(statusFunction, /if \(weekCompleted === week\.tasks\.length\) return "completed";/);
+  assert.match(statusFunction, /if \(week\.week === activeWeek\) return "in-progress";/);
+  assert.match(statusFunction, /return "upcoming";/);
+  assert.doesNotMatch(statusFunction, /return "in-progress";[\s\S]*return "in-progress";/);
+});
