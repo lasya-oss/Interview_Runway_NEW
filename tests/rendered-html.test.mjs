@@ -435,10 +435,16 @@ test("demo sign-in issues a protected session and opens the learner product", as
     headers: { accept: "text/html", cookie: sessionCookie },
   });
   assert.equal(dashboard.status, 200);
-  const dashboardText = visibleText(await dashboard.text());
-  assert.match(dashboardText, /Good evening, Rohan/i);
-  assert.match(dashboardText, /Every attempt leaves evidence/i);
-  assert.match(dashboardText, /Demo workspace · sample learner data/i);
+  const dashboardHtml = await dashboard.text();
+  const dashboardText = visibleText(dashboardHtml);
+  assert.match(dashboardText, /Start here · Week 1 of 4/i);
+  assert.match(dashboardText, /Choose your first practice round/i);
+  assert.match(dashboardText, /Demo workspace/i);
+  assert.match(dashboardText, /0 \/ 12/i);
+  assert.match(dashboardText, /Second Seat \/ Today/i);
+  assert.match(dashboardText, /The Second Seat workspace/i);
+  assert.doesNotMatch(dashboardHtml, /member-ops-rail(?:\b|-)/i);
+  assert.doesNotMatch(dashboardText, /Good evening, Rohan|Every attempt leaves evidence|4h 38m|Adaptive mock 08/i);
   assert.doesNotMatch(dashboardText, /fictional learner data/i);
 
   const library = await request("/learn/library", {
@@ -781,7 +787,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
     const sectionHtml = await sectionResponse.text();
     assert.match(sectionHtml, /data-member-layout=["']vault["']/i, pathname);
     assert.match(sectionHtml, /class=["'][^"']*member-topbar-vault/i, pathname);
-    assert.match(sectionHtml, new RegExp(`Vault /(?:\\s*<!-- -->\\s*)?${section}`, "i"), pathname);
+    assert.match(sectionHtml, new RegExp(`Vault(?:\\s*<!-- -->\\s*)* \/(?:\\s*<!-- -->\\s*)*${section}`, "i"), pathname);
     assert.doesNotMatch(sectionHtml, /member-ops-rail(?:\b|-)/i, pathname);
   }
 
@@ -1110,7 +1116,7 @@ test("demo chooser is not constrained by the member application shell", async ()
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 
   assert.doesNotMatch(styles, /\.member-shell\s*,\s*\.demo-login-page\s*\{/);
-  assert.match(styles, /\.member-shell\s*\{[\s\S]*grid-template-columns:\s*232px minmax\(0, 1fr\) 218px/);
+  assert.match(styles, /\.member-shell\s*\{[\s\S]*grid-template-columns:\s*232px minmax\(0, 1fr\)/);
   assert.match(styles, /\.demo-login-layout\s*\{[\s\S]*grid-template-columns:\s*minmax\(390px, \.76fr\) minmax\(0, 1\.24fr\)/);
 });
 
@@ -1182,7 +1188,7 @@ test("Foundation demo starts Today with a clean learner state", async () => {
   assert.match(todayPage, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
   assert.match(todayPage, /isFreshLearner\s*\?\s*`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/);
   assert.match(todayPage, /isFreshLearner \|\| profile\.isLive \? \[0, 0, 0, 0, 0, 0, 0\]/);
-  assert.match(todayPage, /isFreshLearner \|\| profile\.isLive \? `\$\{profile\.completedTaskIds\?\.length \?\? 0\} \/ 24`/);
+  assert.match(todayPage, /const totalPlanTasks = profile\.roadmapWeeks === 12 \? 24 : 12;/);
   assert.match(todayPage, /Build the first signal from your own work/);
   assert.match(memberShell, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
   assert.match(memberShell, /event: isFreshLearner \? "First study step"/);

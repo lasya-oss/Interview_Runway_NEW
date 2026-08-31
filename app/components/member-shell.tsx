@@ -40,10 +40,12 @@ export function MemberShell({
 }) {
   const isLive = profile.isLive === true;
   const isFreshLearner = profile.progress === 0 && (profile.completedTaskIds?.length ?? 0) === 0;
-  const workspaceState: WorkspaceState = profile.id === "foundation"
+  const isVaultWorkspace = profile.id === "foundation";
+  const isSecondSeatWorkspace = profile.id === "practice";
+  const workspaceState: WorkspaceState = isVaultWorkspace
     ? { window: "8–12 weeks", signal: "Baseline pending", event: isFreshLearner ? "First study step" : "Weekly review", eventTime: isFreshLearner ? "After start" : "Sun · 18:00" }
-    : profile.id === "practice"
-      ? { window: "19 days", signal: "78 · practice", event: "Adaptive mock 08", eventTime: "Tue · 20:00" }
+    : isSecondSeatWorkspace
+      ? { window: "19 days", signal: isFreshLearner ? "Practice baseline pending" : "78 · practice", event: isFreshLearner ? "First practice round" : "Adaptive mock 08", eventTime: isFreshLearner ? "After start" : "Tue · 20:00" }
       : { window: "13 days", signal: "84 · coach calibrated", event: "Calibration session", eventTime: "Thu · 18:30" };
   const conversion = profile.id === "foundation"
     ? isLive
@@ -52,10 +54,13 @@ export function MemberShell({
     : profile.id === "practice"
       ? { href: "/second-seat", label: "Review Second Seat access", event: undefined }
       : { href: "/qualify", label: "Check Phase 3 eligibility", event: undefined };
-  const isVaultWorkspace = profile.id === "foundation";
+  const workspaceRoot = isVaultWorkspace ? "Vault" : isSecondSeatWorkspace ? "Second Seat" : "Calibration";
+  const workspaceTitle = isVaultWorkspace ? "Foundation workspace" : isSecondSeatWorkspace ? "The Second Seat workspace" : "Human Calibration workspace";
+  const workspaceSubtitle = isLive ? "Signed-in learner view" : "Preview learner view";
+  const accessLabel = isVaultWorkspace ? (isLive ? "₹799 access active" : "Demo workspace") : isSecondSeatWorkspace ? (isLive ? "₹2,499 access active" : "Demo workspace") : (isLive ? "Calibration access active" : "Demo workspace");
 
   return (
-    <div className="member-shell" data-member-tier={profile.id} data-member-layout={isVaultWorkspace ? "vault" : "default"}>
+    <div className="member-shell" data-member-tier={profile.id} data-member-layout={isVaultWorkspace ? "vault" : isSecondSeatWorkspace ? "second-seat" : "calibration"}>
       <aside className="member-sidebar">
         <div className="member-sidebar-brand"><Brand /><span>Learning workspace</span></div>
 
@@ -80,66 +85,45 @@ export function MemberShell({
       </aside>
 
       <div className="member-surface">
-        {isVaultWorkspace ? (
-          <header className="member-topbar member-topbar-vault">
-            <div className="member-vault-header">
-              <div className="member-vault-header-title">
-                <span>Vault / {VAULT_SECTION_LABELS[active]}</span>
-                <strong>Foundation workspace</strong>
-                <small>{isLive ? "Signed-in learner view" : "Preview learner view"}</small>
-              </div>
-              <div className="member-vault-header-metrics">
-                <div><span>Target</span><strong>{profile.target}</strong></div>
-                <div><span>Current track</span><strong>{profile.roadmapWeeks}-week · W{profile.week}</strong></div>
-                <div><span>Interview window</span><strong>{workspaceState.window}</strong></div>
-                <div><span>Time zone</span><strong>Asia / Kolkata</strong></div>
-                <div><span>Learner data</span><strong>{isLive ? "Account-backed" : "Sample profile"}</strong></div>
-              </div>
-              <div className="member-vault-header-actions">
-                <details className="member-status-drawer" aria-label="Workspace status">
-                  <summary className="member-status-drawer-toggle" title="Open workspace status panel">
-                    <span className="ops-rail-toggle-icon" aria-hidden="true"><i /><i /><i /></span>
-                    <span className="member-status-drawer-copy">
-                      <b>STATUS</b>
-                      <strong className="member-status-drawer-closed">Open</strong>
-                      <strong className="member-status-drawer-open">Close</strong>
-                    </span>
-                  </summary>
-                  <div className="member-status-drawer-content">
-                    <WorkspaceStatusContent
-                      profile={profile}
-                      workspaceState={workspaceState}
-                      showCurrentAccess
-                    />
-                  </div>
-                </details>
-                <span className="member-account-status"><i />{isLive ? "₹799 access active" : "Demo workspace"}</span>
-                <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
-              </div>
+        <header className="member-topbar member-topbar-vault">
+          <div className="member-vault-header">
+            <div className="member-vault-header-title">
+              <span>{workspaceRoot} / {VAULT_SECTION_LABELS[active]}</span>
+              <strong>{workspaceTitle}</strong>
+              <small>{workspaceSubtitle}</small>
             </div>
-          </header>
-        ) : (
-          <header className="member-topbar">
-            <div className="member-status-band">
+            <div className="member-vault-header-metrics">
               <div><span>Target</span><strong>{profile.target}</strong></div>
               <div><span>Current track</span><strong>{profile.roadmapWeeks}-week · W{profile.week}</strong></div>
               <div><span>Interview window</span><strong>{workspaceState.window}</strong></div>
-              <div><span>Timezone</span><strong>Asia / Kolkata</strong></div>
+              <div><span>Time zone</span><strong>Asia / Kolkata</strong></div>
+              <div><span>Learner data</span><strong>{isLive ? "Account-backed" : "Sample profile"}</strong></div>
             </div>
-            <div className="member-topbar-signals">
-              <span><i /> {isLive ? "Paid workspace · Foundation access" : "Demo workspace · sample learner data"}</span>
-              <span>{isLive ? "₹799 access active" : `${profile.streak}-day rhythm`}</span>
+            <div className="member-vault-header-actions">
+              <details className="member-status-drawer" aria-label="Workspace status">
+                <summary className="member-status-drawer-toggle" title="Open workspace status panel">
+                  <span className="ops-rail-toggle-icon" aria-hidden="true"><i /><i /><i /></span>
+                  <span className="member-status-drawer-copy">
+                    <b>STATUS</b>
+                    <strong className="member-status-drawer-closed">Open</strong>
+                    <strong className="member-status-drawer-open">Close</strong>
+                  </span>
+                </summary>
+                <div className="member-status-drawer-content">
+                  <WorkspaceStatusContent
+                    profile={profile}
+                    workspaceState={workspaceState}
+                    showCurrentAccess
+                  />
+                </div>
+              </details>
+              <span className="member-account-status"><i />{accessLabel}</span>
               <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
             </div>
-          </header>
-        )}
+          </div>
+        </header>
         <main className="member-main">{children}</main>
       </div>
-      {!isVaultWorkspace ? (
-        <aside className="member-ops-rail" aria-label="Workspace status">
-          <WorkspaceStatusContent profile={profile} workspaceState={workspaceState} />
-        </aside>
-      ) : null}
     </div>
   );
 }
@@ -172,7 +156,7 @@ function WorkspaceStatusContent({
         <span>Current signal</span>
         <strong>{workspaceState.signal}</strong>
         <div className="ops-signal-trace" aria-hidden="true"><i /><i /><i /><i /><i /></div>
-        <small>{profile.id === "foundation" ? "No scored mocks yet" : "Evidence from recent sessions"}</small>
+        <small>{profile.id === "foundation" || workspaceState.signal.includes("pending") ? "No scored mocks yet" : "Evidence from recent sessions"}</small>
       </section>
       {showCurrentAccess ? (
         <section className="ops-current-access">

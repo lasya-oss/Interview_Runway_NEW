@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 export default async function LearnerHomePage() {
   const profile = await requireDemoProfile("/learn");
   const isFreshLearner = profile.progress === 0 && (profile.completedTaskIds?.length ?? 0) === 0;
+  const totalPlanTasks = profile.roadmapWeeks === 12 ? 24 : 12;
   const todayKicker = profile.isLive
     ? isFreshLearner
       ? `Start here · Week 1 of ${profile.roadmapWeeks}`
@@ -39,6 +40,15 @@ export default async function LearnerHomePage() {
   const reviewMaterials = DEMO_REVIEW_MATERIALS
     .filter((material) => material.profiles.includes(profile.id))
     .slice(0, 3);
+  const emptySignalTitle = profile.id === "foundation"
+    ? "Build the first signal from your own work."
+    : "Your first practice signal is waiting.";
+  const emptySignalBody = profile.id === "foundation"
+    ? "Complete the next Foundation checkpoint to turn your study work into a reviewable learning signal."
+    : "Complete one practice round to turn your own transcript into a reviewable signal. Until then, this workspace keeps readiness separate from sample data.";
+  const emptySignalLink = profile.id === "foundation" ? "/pricing" : "/learn/practice";
+  const emptySignalLinkLabel = profile.id === "foundation" ? "See how AI practice establishes it" : "Start your first practice round";
+  const signalLabel = profile.id === "foundation" ? "Foundation next signal" : "Second Seat next signal";
   return (
     <MemberShell
       profile={profile}
@@ -62,7 +72,7 @@ export default async function LearnerHomePage() {
             <div className="member-panel-label"><span>Next action</span><b>{profile.nextActionMeta}</b></div>
             <div className="next-action-visual" aria-hidden="true"><i /><i /><i /><span /></div>
             <h2>{profile.nextAction}</h2>
-            <p>{profile.id === "foundation" ? "Continue the lesson, then explain your choice aloud before viewing the worked decision tree." : profile.id === "practice" ? "The prompt adapts after each design commitment. Your previous gap is already loaded into the rubric." : "Bring two examples that show cross-team influence. The coach packet has the evidence prompts ready."}</p>
+            <p>{isFreshLearner ? "Choose one round, answer in your own words, and use the transcript to decide what to practise next." : profile.id === "foundation" ? "Continue the lesson, then explain your choice aloud before viewing the worked decision tree." : profile.id === "practice" ? "The prompt adapts after each design commitment. Your previous gap is already loaded into the rubric." : "Bring two examples that show cross-team influence. The coach packet has the evidence prompts ready."}</p>
             <Link className="member-primary-button" href={profile.nextActionHref ?? (profile.id === "premium" ? "/learn/coaching" : profile.id === "practice" ? "/learn/practice" : "/learn/material/rate-limiter")}>Continue <span aria-hidden="true">↗</span></Link>
           </article>
 
@@ -72,7 +82,7 @@ export default async function LearnerHomePage() {
               {weeklyActivity.map((value, index) => <span key={index}><i style={{ height: value === 0 ? "0%" : `${Math.max(8, value)}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
             </div>
             <dl className="weekly-stats">
-              <div><dt>Completed</dt><dd>{isFreshLearner || profile.isLive ? `${profile.completedTaskIds?.length ?? 0} / 24` : profile.id === "practice" ? "8 / 11" : "9 / 10"}</dd></div>
+              <div><dt>Completed</dt><dd>{isFreshLearner || profile.isLive ? `${profile.completedTaskIds?.length ?? 0} / ${totalPlanTasks}` : profile.id === "practice" ? "8 / 11" : "9 / 10"}</dd></div>
               <div><dt>Focused time</dt><dd>{isFreshLearner || profile.isLive ? "Starts at 0m" : profile.id === "practice" ? "4h 38m" : "5h 06m"}</dd></div>
               <div><dt>Next review</dt><dd>{isFreshLearner || profile.isLive ? "After next study step" : "Thu 18:30"}</dd></div>
             </dl>
@@ -106,13 +116,13 @@ export default async function LearnerHomePage() {
         <section className="member-section">
           <div className="member-section-heading"><div><p className="member-kicker">Skill signal</p><h2>Where the evidence points.</h2></div><Link href="/learn/feedback">Open full feedback <span>↗</span></Link></div>
           <div className="signal-grid">
-            {profile.id === "foundation" ? (
+            {profile.id === "foundation" || isFreshLearner || profile.isLive ? (
               <article className="foundation-baseline-panel">
                 <span>BASELINE / NOT ESTABLISHED</span>
                 <div className="baseline-radar" aria-hidden="true"><i /><i /><i /><b>?</b></div>
-                <h3>No synthetic readiness score.</h3>
-                <p>Your lesson completion is tracked, but readiness only appears after a scored practice session. Until then, the product keeps those concepts separate.</p>
-                <Link href="/pricing">See how AI practice establishes it ↗</Link>
+                <h3>{profile.id === "foundation" ? "No synthetic readiness score." : "No practice signal yet."}</h3>
+                <p>{profile.id === "foundation" ? "Your lesson completion is tracked, but readiness only appears after a scored practice session. Until then, the product keeps those concepts separate." : "Your practice access is ready, but readiness only appears after a scored transcript. Until then, the product keeps your starting state clean."}</p>
+                <Link href={emptySignalLink}>{emptySignalLinkLabel} ↗</Link>
               </article>
             ) : (
               <article className="signal-bars">
@@ -122,14 +132,14 @@ export default async function LearnerHomePage() {
               </article>
             )}
             <article className={`tier-insight tier-insight-${profile.id}`}>
-              <span>{isFreshLearner || profile.isLive ? "Foundation next signal" : profile.id === "foundation" ? "Foundation signal" : profile.id === "practice" ? "Adaptive plan change" : "Coach observation"}</span>
-              <h3>{isFreshLearner || (profile.isLive && profile.id === "foundation") ? "Build the first signal from your own work." : profile.id === "foundation" ? "Explanation quality is ahead of trade-off depth." : profile.id === "practice" ? "Move consistency decisions to minute five." : "Your scope is senior; your story still sounds team-local."}</h3>
-              <p>{isFreshLearner || (profile.isLive && profile.id === "foundation") ? "Complete the next Foundation checkpoint to turn your study work into a reviewable learning signal." : profile.id === "foundation" ? "Finish the rate-limit and caching decision guides before adding timed practice." : profile.id === "practice" ? "The next two mocks will probe consistency before scale so the choice becomes automatic." : "Thursday’s session will rebuild one project story around influence, decision cost, and measurable outcome."}</p>
+              <span>{isFreshLearner || profile.isLive ? signalLabel : profile.id === "foundation" ? "Foundation signal" : profile.id === "practice" ? "Adaptive plan change" : "Coach observation"}</span>
+              <h3>{isFreshLearner || profile.isLive ? emptySignalTitle : profile.id === "foundation" ? "Explanation quality is ahead of trade-off depth." : profile.id === "practice" ? "Move consistency decisions to minute five." : "Your scope is senior; your story still sounds team-local."}</h3>
+              <p>{isFreshLearner || profile.isLive ? emptySignalBody : profile.id === "foundation" ? "Finish the rate-limit and caching decision guides before adding timed practice." : profile.id === "practice" ? "The next two mocks will probe consistency before scale so the choice becomes automatic." : "Thursday’s session will rebuild one project story around influence, decision cost, and measurable outcome."}</p>
             </article>
           </div>
         </section>
 
-        {profile.access.practice ? (
+        {profile.access.practice && !profile.isLive && !isFreshLearner ? (
           <section className="member-section">
             <div className="member-section-heading"><div><p className="member-kicker">Recent practice</p><h2>Every attempt leaves evidence.</h2></div><Link href="/learn/practice">Start another mock <span>↗</span></Link></div>
             <div className="mock-history-table">

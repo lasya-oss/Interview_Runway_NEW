@@ -4907,7 +4907,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .member-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 232px minmax(0, 1fr) 218px;
+  grid-template-columns: 232px minmax(0, 1fr);
   color: var(--ink);
   background: #e7edef;
   color-scheme: light;
@@ -5232,7 +5232,6 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 @media (max-width: 1250px) {
   .member-shell { grid-template-columns: 222px minmax(0, 1fr); }
-  .member-shell[data-member-layout="default"] .member-ops-rail { display: none; }
   .member-shell[data-member-layout="vault"] { grid-template-columns: 222px minmax(0, 1fr); }
   .member-vault-header { grid-template-columns: minmax(145px, .9fr) minmax(0, 3fr); }
   .member-vault-header-actions { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(29,62,75,.09); }
