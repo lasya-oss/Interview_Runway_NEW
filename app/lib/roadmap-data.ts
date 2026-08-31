@@ -31,6 +31,8 @@ export type RoadmapWeek = {
   week: number;
   title: string;
   detail: string;
+  outcome: string;
+  estimatedMinutes: number;
   tasks: readonly RoadmapTask[];
 };
 
@@ -69,6 +71,8 @@ export const FOUR_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 1,
     title: "Establish the baseline",
     detail: "Surface the strongest patterns, the weakest explanations, and the target interview shape.",
+    outcome: "Leave with a baseline map of patterns, explanations, and ownership evidence.",
+    estimatedMinutes: 80,
     tasks: [
       task("4w-1-patterns", "Map the eight highest-frequency DSA patterns", "Pattern lab · 35 min", planned(
         "Recognise the eight recurring problem shapes and record the cue, invariant, and first move for each one.",
@@ -87,6 +91,8 @@ export const FOUR_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 2,
     title: "Make the reasoning visible",
     detail: "Move from arriving at an answer to explaining why it is the right answer under constraint.",
+    outcome: "Make the cue, invariant, trade-off, and outcome visible in timed explanations.",
+    estimatedMinutes: 82,
     tasks: [
       task("4w-2-window", "Complete the sliding-window decision lab", "DSA · 22 min", material("sliding-window")),
       task("4w-2-rate", "Defend a distributed rate-limit design", "System design · 40 min", material("rate-limiter")),
@@ -97,6 +103,8 @@ export const FOUR_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 3,
     title: "Introduce pressure",
     detail: "Use timed attempts to expose the gap between knowledge and interview execution.",
+    outcome: "Use pressure and feedback evidence to target the next correction and role-specific gap.",
+    estimatedMinutes: 90,
     tasks: [
       task("4w-3-mock", "Run the notification-service sample mock", "Adaptive practice · 35 min", material("notification-mock")),
       task("4w-3-correct", "Correct the lowest scoring dimension", "Feedback loop · 30 min", planned(
@@ -115,6 +123,8 @@ export const FOUR_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 4,
     title: "Consolidate the signal",
     detail: "Rehearse the decisions and stories most likely to determine the final loop.",
+    outcome: "Finish with a full-loop rehearsal, final resume signal check, and interview-day runbook.",
+    estimatedMinutes: 80,
     tasks: [
       task("4w-4-rehearse", "Complete one full-loop rehearsal", "Mixed mock · 45 min", planned(
         "Run technical, behavioural, and follow-up segments in sequence, then identify the one recurring signal to correct before interview day.",
@@ -132,6 +142,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 1,
     title: "Choose the target",
     detail: "Define role, level, timeline, and the evidence needed to look credible.",
+    outcome: "Leave with a target-role map, a technical baseline, and a first evidence gap to correct.",
+    estimatedMinutes: 45,
     tasks: [
       task("12w-1-map", "Create the target-role map", "Plan · 20 min", lesson(
         "Define the target role, level, interview loop, and evidence bar before selecting a preparation sequence.",
@@ -161,6 +173,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 2,
     title: "Recognise core patterns",
     detail: "Build retrieval cues before accumulating more solved problems.",
+    outcome: "Recognise common DSA shapes and explain the invariant behind a chosen approach.",
+    estimatedMinutes: 40,
     tasks: [
       task("12w-2-window", "Complete sliding-window recognition", "DSA · 22 min", material("sliding-window")),
       task("12w-2-hash", "Explain hash-map invariants aloud", "DSA · 18 min", lesson(
@@ -180,6 +194,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 3,
     title: "Traverse deliberately",
     detail: "Turn trees and graphs into repeatable decisions rather than memorised code.",
+    outcome: "Choose BFS or DFS from the prompt and defend the traversal, state, and edge cases.",
+    estimatedMinutes: 105,
     tasks: [
       task("12w-3-graph", "Compare BFS and DFS decision cues", "DSA · 30 min", material("graph-traversal")),
       task("12w-3-practice", "Solve four traversal problems", "Practice · 75 min", lesson(
@@ -199,6 +215,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 4,
     title: "Frame systems",
     detail: "Start every design with requirements, scale, and the irreversible decisions.",
+    outcome: "Open a system-design answer with explicit requirements, scale assumptions, and a defensible first bottleneck.",
+    estimatedMinutes: 55,
     tasks: [
       task("12w-4-frame", "Build the requirements frame", "System design · 25 min", lesson(
         "Open a system-design prompt by separating functional requirements, quality attributes, scale, and explicit non-goals.",
@@ -228,6 +246,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 5,
     title: "Reason about state",
     detail: "Connect caching, replication, and consistency to product consequences.",
+    outcome: "Choose cache and consistency behaviour that matches product freshness and recovery expectations.",
+    estimatedMinutes: 53,
     tasks: [
       task("12w-5-cache", "Map cache failure modes", "System design · 28 min", material("cache-consistency")),
       task("12w-5-consistency", "Defend one consistency model", "System design · 25 min", lesson(
@@ -247,6 +267,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 6,
     title: "Control flow and load",
     detail: "Make queues, backpressure, retries, and rate limits work as one system.",
+    outcome: "Diagnose load and recovery pressure with rate limits, queues, retries, and backpressure.",
+    estimatedMinutes: 65,
     tasks: [
       task("12w-6-rate", "Complete the rate-limit decision lab", "System design · 40 min", material("rate-limiter")),
       task("12w-6-queue", "Diagnose a queue backlog", "Scenario · 25 min", lesson(
@@ -266,6 +288,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 7,
     title: "Build the story bank",
     detail: "Translate ownership and impact so unfamiliar company context travels well.",
+    outcome: "Produce evidence-led ownership stories and answer follow-ups with scope, decisions, and impact.",
+    estimatedMinutes: 85,
     tasks: [
       task("12w-7-stories", "Draft six evidence-led stories", "Behavioural · 60 min", material("scope-stories")),
       task("12w-7-followups", "Answer the ownership follow-ups", "Behavioural · 25 min", material("outage-story")),
@@ -275,6 +299,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 8,
     title: "Strengthen career signal",
     detail: "Make scope legible to a remote recruiter and a US hiring manager.",
+    outcome: "Turn experience into clear, evidence-backed resume and profile signals for the target role.",
+    estimatedMinutes: 75,
     tasks: [
       task("12w-8-resume", "Apply the ATS resume pass", "Template · 45 min", material("us-ats-resume")),
       task("12w-8-linkedin", "Rewrite headline and About section", "Career signal · 30 min", lesson(
@@ -294,6 +320,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 9,
     title: "Add company context",
     detail: "Prioritise public, recurring interview patterns without memorising leaked prompts.",
+    outcome: "Translate public company signals into a focused interview-loop map and three preparation gaps.",
+    estimatedMinutes: 50,
     tasks: [
       task("12w-9-map", "Build the interview-loop map", "Role intelligence · 30 min", lesson(
         "Map public signals about a company’s interview loop to preparation themes, not leaked or copied prompts.",
@@ -323,6 +351,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 10,
     title: "Introduce timed practice",
     detail: "Test retrieval and explanation quality under an interview-shaped constraint.",
+    outcome: "Deliver coding and system-design answers inside interview-shaped time boxes, including tests and trade-offs.",
+    estimatedMinutes: 80,
     tasks: [
       task("12w-10-coding", "Run a timed coding rehearsal", "Practice · 40 min", lesson(
         "Solve and explain a coding prompt within a fixed interview window, including clarification, approach, complexity, and testing.",
@@ -352,6 +382,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 11,
     title: "Correct the persistent gap",
     detail: "Use evidence across attempts to choose the final correction, not a new syllabus.",
+    outcome: "Use comparable attempts to isolate one persistent gap and prove a targeted correction.",
+    estimatedMinutes: 60,
     tasks: [
       task("12w-11-review", "Compare the last three attempts", "Review · 25 min", lesson(
         "Compare recent attempts by the same dimensions and distinguish a persistent gap from one-off performance noise.",
@@ -381,6 +413,8 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 12,
     title: "Prepare the final loop",
     detail: "Consolidate, taper the workload, and remove uncertainty from interview day.",
+    outcome: "Enter the final loop with rehearsed signals, a practical runbook, and one clear remaining risk.",
+    estimatedMinutes: 75,
     tasks: [
       task("12w-12-loop", "Complete the full-loop rehearsal", "Rehearsal · 60 min", lesson(
         "Complete the final interview-shaped sequence and leave with a short list of rehearsed signals, not a new syllabus.",

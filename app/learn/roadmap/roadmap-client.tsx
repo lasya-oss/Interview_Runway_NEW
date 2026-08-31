@@ -6,6 +6,8 @@ import type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
 
 export type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
 
+type RoadmapWeekStatus = "completed" | "in-progress" | "upcoming";
+
 export function RoadmapChecklist({
   profileId,
   currentWeek,
@@ -29,6 +31,13 @@ export function RoadmapChecklist({
   const allTasks = useMemo(() => weeks.flatMap((week) => week.tasks), [weeks]);
   const completedCount = allTasks.filter((task) => completed.has(task.id)).length;
   const completion = Math.round((completedCount / allTasks.length) * 100);
+  const activeWeek = useMemo(() => {
+    const suppliedCurrentWeek = weeks.find((week) => week.week === currentWeek);
+    if (suppliedCurrentWeek && suppliedCurrentWeek.tasks.some((task) => !completed.has(task.id))) {
+      return suppliedCurrentWeek.week;
+    }
+    return weeks.find((week) => week.tasks.some((task) => !completed.has(task.id)))?.week ?? currentWeek;
+  }, [completed, currentWeek, weeks]);
 
   const persist = async (next: Set<string>, previous: Set<string>) => {
     if (!isAccount) {
@@ -94,7 +103,7 @@ export function RoadmapChecklist({
       </section>
 
       <div className="roadmap-toolbar">
-        <span><i /> Current position · week {currentWeek}</span>
+        <span><i /> Your position · Week {activeWeek}</span>
         <button type="button" onClick={reset} disabled={saving}>{isAccount ? "Reset progress" : "Reset sample progress"}</button>
         {saving ? <small>Saving…</small> : null}
       </div>
@@ -103,9 +112,10 @@ export function RoadmapChecklist({
       <div className="roadmap-week-list">
         {weeks.map((week) => {
           const weekCompleted = week.tasks.filter((task) => completed.has(task.id)).length;
-          const isCurrent = week.week === currentWeek;
+          const status = getWeekStatus(week, weekCompleted, activeWeek);
+          const isCurrent = status === "in-progress" && week.week === activeWeek;
           return (
-            <section className={`roadmap-week ${isCurrent ? "is-current" : ""}`} key={week.week} aria-labelledby={`roadmap-week-${week.week}`}>
+            <section className={`roadmap-week roadmap-week--${status} ${isCurrent ? "is-current" : ""}`} key={week.week} aria-labelledby={`roadmap-week-${week.week}`}>
               <div className="roadmap-week-index">
                 <span>{String(week.week).padStart(2, "0")}</span>
                 <i />
@@ -113,11 +123,30 @@ export function RoadmapChecklist({
               <div className="roadmap-week-content">
                 <div className="roadmap-week-heading">
                   <div>
-                    <p>{isCurrent ? "Current week" : week.week < currentWeek ? "Previous phase" : "Upcoming phase"}</p>
+                    <div className="roadmap-week-label-row">
+                      <p>Week {week.week}</p>
+                      <span className={`roadmap-week-status roadmap-week-status--${status}`}>
+                        <i aria-hidden="true" />
+                        {formatWeekStatus(status)}
+                      </span>
+                    </div>
                     <h2 id={`roadmap-week-${week.week}`}>{week.title}</h2>
-                    <span>{week.detail}</span>
+                    <span className="roadmap-week-description">{week.detail}</span>
                   </div>
-                  <b>{weekCompleted} / {week.tasks.length}</b>
+                  <div className="roadmap-week-progress">
+                    <b>{weekCompleted} / {week.tasks.length}</b>
+                    <span>tasks</span>
+                  </div>
+                </div>
+                <div className="roadmap-week-outcome">
+                  <div>
+                    <span>Outcome</span>
+                    <p>{week.outcome}</p>
+                  </div>
+                  <div className="roadmap-week-time">
+                    <span>Estimated time</span>
+                    <b>{formatEstimatedTime(week.estimatedMinutes)}</b>
+                  </div>
                 </div>
                 <div className="roadmap-task-list">
                   {week.tasks.map((task) => {
@@ -156,6 +185,27 @@ export function RoadmapChecklist({
       </div>
     </div>
   );
+}
+
+function getWeekStatus(
+  week: RoadmapWeek,
+  weekCompleted: number,
+  activeWeek: number,
+): RoadmapWeekStatus {
+  if (weekCompleted === week.tasks.length) return "completed";
+  if (week.week === activeWeek) return "in-progress";
+  return week.week > activeWeek ? "upcoming" : "in-progress";
+}
+
+function formatWeekStatus(status: RoadmapWeekStatus) {
+  return status === "completed" ? "Completed" : status === "in-progress" ? "In Progress" : "Upcoming";
+}
+
+function formatEstimatedTime(minutes: number) {
+  if (minutes < 60) return `~${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return remainingMinutes ? `~${hours}h ${remainingMinutes}m` : `~${hours}h`;
 }
 
 function readDemoCompleted(storageKey: string, fallback: readonly string[]) {
