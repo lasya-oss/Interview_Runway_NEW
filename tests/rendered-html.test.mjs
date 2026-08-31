@@ -279,6 +279,33 @@ test("PDF viewer shows a record header and user-controlled fullscreen option", a
   assert.doesNotMatch(driveShelf, /<div className="library-material-viewer">/);
 });
 
+test("Library categories expose filtered records and real content viewers", async () => {
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+  const materialViewer = await readFile(
+    new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
+    "utf8",
+  );
+  const driveReplayPlayer = await readFile(
+    new URL("../app/learn/practice/replays/drive-replay-player.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(libraryClient, /<strong>1000\+<\/strong>/i);
+  assert.match(libraryClient, /aria-expanded=\{category === item\}/i);
+  assert.match(libraryClient, /id="library-category-results"/i);
+  assert.match(libraryClient, /All categories · no category selected/i);
+  assert.match(libraryClient, /material\.demoAsset\.href/i);
+  assert.match(libraryClient, /Open actual content/i);
+  assert.match(materialViewer, /DriveReplayPlayer/i);
+  assert.match(materialViewer, /mediaType=\{displayKind\}/i);
+  assert.match(materialViewer, /displayKind === "video" \|\| displayKind === "audio"/i);
+  assert.match(driveReplayPlayer, /mediaType\?: "video" \| "audio"/i);
+  assert.match(driveReplayPlayer, /<audio className="library-material-audio-player"/i);
+});
+
 const coreRoutes = [
   {
     pathname: "/vault",

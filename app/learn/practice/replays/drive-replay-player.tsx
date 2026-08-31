@@ -61,11 +61,13 @@ export function DriveReplayPlayer({
   clientId,
   fileId,
   loginHint,
+  mediaType = "video",
   title,
 }: {
   clientId: string;
   fileId: string;
   loginHint: string | null;
+  mediaType?: "video" | "audio";
   title: string;
 }) {
   const [source, setSource] = useState<string | null>(null);
@@ -80,10 +82,10 @@ export function DriveReplayPlayer({
     const showPermissionPrompt = () => {
       if (!active) return;
       setState("permission");
-      setMessage("Allow one-time read access to the supplied replay so it can play inside InterviewRunway.");
+      setMessage("Allow one-time read access to the supplied material so it can play inside InterviewRunway.");
     };
 
-    const loadVideo = async (accessToken: string) => {
+    const loadMedia = async (accessToken: string) => {
       try {
         const response = await fetch(
           `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`,
@@ -123,8 +125,8 @@ export function DriveReplayPlayer({
           if (!active) return;
           if (response.access_token) {
             setState("loading");
-            setMessage("Loading the original replay…");
-            void loadVideo(response.access_token);
+            setMessage("Loading the original material…");
+            void loadMedia(response.access_token);
           } else {
             showPermissionPrompt();
           }
@@ -151,7 +153,9 @@ export function DriveReplayPlayer({
   }, [clientId, fileId, loginHint]);
 
   if (source) {
-    return <video aria-label={`${title} video`} controls playsInline src={source} />;
+    return mediaType === "audio"
+      ? <audio className="library-material-audio-player" aria-label={`${title} audio`} controls src={source} />
+      : <video className="library-material-media" aria-label={`${title} video`} controls playsInline src={source} />;
   }
 
   return (

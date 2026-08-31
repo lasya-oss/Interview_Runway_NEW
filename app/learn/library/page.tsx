@@ -24,6 +24,8 @@ export default async function LibraryPage() {
         <LibraryClient
           profileId={profile.id}
           isLive={profile.isLive === true}
+          googleClientId={process.env.GOOGLE_CLIENT_ID ?? ""}
+          loginHint={profile.email}
           materials={LEARNING_MATERIALS}
           pdfGuides={profile.isLive ? DRIVE_PDF_GUIDES.filter((guide) => !VAULT_LEGACY_PDF_FILENAMES.has(guide.filename)) : DRIVE_PDF_GUIDES}
           driveMaterials={DRIVE_MATERIALS}

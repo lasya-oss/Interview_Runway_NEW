@@ -16,9 +16,13 @@ import { MaterialViewer } from "./material-viewer";
 export function DriveMaterialShelf({
   materials,
   startNumber,
+  googleClientId = "",
+  loginHint = null,
 }: {
   materials: readonly DriveMaterial[];
   startNumber: number;
+  googleClientId?: string;
+  loginHint?: string | null;
 }) {
   const [activeMaterial, setActiveMaterial] = useState<DriveMaterial | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -201,6 +205,8 @@ export function DriveMaterialShelf({
               content={DRIVE_MATERIAL_CONTENT[activeMaterial.id]}
               assetUrl={driveMaterialPrimaryAssetHref(activeMaterial)}
               fallbackAssetUrl={driveMaterialCompanionAssetHref(activeMaterial)}
+              googleClientId={googleClientId}
+              loginHint={loginHint}
             />
           </div>
         </div>

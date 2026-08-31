@@ -60,12 +60,16 @@ function materialOpenLabel(material: LearningMaterial, unlocked: boolean, isLive
 export function LibraryClient({
   profileId,
   isLive = false,
+  googleClientId = "",
+  loginHint = null,
   materials,
   pdfGuides,
   driveMaterials,
 }: {
   profileId: DemoTier;
   isLive?: boolean;
+  googleClientId?: string;
+  loginHint?: string | null;
   materials: readonly LearningMaterial[];
   pdfGuides: readonly DrivePdfGuide[];
   driveMaterials: readonly DriveMaterial[];
@@ -130,9 +134,9 @@ export function LibraryClient({
           <h1>Everything has a place in the plan.</h1>
           <p>Search the library by the interview decision it helps you make. Learning records, PDF guides, and the supplied Drive archive now sit in the same searchable workspace.</p>
         </div>
-        <div className="library-index" aria-label={`${isLive ? "Vault" : "Sample"} catalogue summary`}>
-          <strong>{totalResourceCount.toLocaleString("en-IN")}</strong>
-          <span>resources<br />available</span>
+        <div className="library-index" aria-label={`${isLive ? "Vault" : "Sample"} catalogue summary: 1000+ Resources Available`}>
+          <strong>1000+</strong>
+          <span>Resources<br />Available</span>
         </div>
       </section>
 
@@ -157,6 +161,8 @@ export function LibraryClient({
             type="button"
             onClick={() => setCategory((current) => current === item ? null : item)}
             aria-pressed={category === item}
+            aria-expanded={category === item}
+            aria-controls="library-category-results"
             key={item}
           >
             <span className="library-category-card__topline">
@@ -168,61 +174,76 @@ export function LibraryClient({
         ))}
       </div>
 
-      <div className="library-results-heading" aria-live="polite">
-        <span>{resultCount.toString().padStart(2, "0")} records shown</span>
-        <small>Learning records, PDF guides, and Drive materials</small>
-      </div>
-
-      {results.length ? (
-        <div className="library-record-list">
-          {results.map((material) => {
-            const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
-            return (
-              <article className={`library-record ${unlocked ? "is-unlocked" : "is-locked"}`} key={material.slug}>
-                <span className="library-record-number">{material.number}</span>
-                <div className="library-record-copy">
-                  <small>{material.category} · {material.format}</small>
-                  <h2>{material.title}</h2>
-                  <p>{material.description}</p>
-                  <div>{material.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-                </div>
-                <div className="library-record-meta">
-                  <span>{material.duration} · {material.level}</span>
-                  <small>{material.reviewed}<br />{material.roadmap}</small>
-                  <b>{materialAccessLabel(material, unlocked, isLive)}</b>
-                  {unlocked && material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
-                  <Link href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
-                </div>
-              </article>
-            );
-          })}
+      <section
+        id="library-category-results"
+        className="library-category-results"
+        aria-label={category ? `${category} category records` : "All library records"}
+      >
+        <div className="library-results-heading" aria-live="polite">
+          <span>{category ? `${category} · ` : ""}{resultCount.toString().padStart(2, "0")} records shown</span>
+          <small>{category ? "Selected category · click another card to switch" : "All categories · no category selected"}</small>
         </div>
-      ) : !pdfResults.length && !driveResults.length ? (
-        <div className="library-empty">
-          <strong>No library records match those filters.</strong>
-          <button type="button" onClick={() => { setQuery(""); setCategory(null); setScope("all"); }}>Clear filters</button>
-        </div>
-      ) : null}
 
-      {pdfResults.length ? (
-        <section className="library-pdf-section" aria-labelledby="library-pdf-title">
-          <div className="member-section-heading">
-            <div>
-              <p className="member-kicker">Drive PDF guides</p>
-              <h2 id="library-pdf-title">Read the material behind the roadmap.</h2>
-            </div>
-            <span>{pdfResults.length} guides available</span>
+        {results.length ? (
+          <div className="library-record-list">
+            {results.map((material) => {
+              const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
+              const hasDirectAsset = unlocked && material.demoAsset;
+              return (
+                <article className={`library-record ${unlocked ? "is-unlocked" : "is-locked"}`} key={material.slug}>
+                  <span className="library-record-number">{material.number}</span>
+                  <div className="library-record-copy">
+                    <small>{material.category} · {material.format}</small>
+                    <h2>{material.title}</h2>
+                    <p>{material.description}</p>
+                    <div>{material.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+                  </div>
+                  <div className="library-record-meta">
+                    <span>{material.duration} · {material.level}</span>
+                    <small>{material.reviewed}<br />{material.roadmap}</small>
+                    <b>{materialAccessLabel(material, unlocked, isLive)}</b>
+                    {unlocked && material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
+                    {hasDirectAsset ? (
+                      <a href={material.demoAsset.href} target="_blank" rel="noreferrer">
+                        Open actual content <span aria-hidden="true">↗</span>
+                      </a>
+                    ) : (
+                      <Link href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
-          <PdfGuideShelf guides={pdfResults} startNumber={materials.length + 1} />
-        </section>
-      ) : null}
+        ) : !pdfResults.length && !driveResults.length ? (
+          <div className="library-empty">
+            <strong>No library records match those filters.</strong>
+            <button type="button" onClick={() => { setQuery(""); setCategory(null); setScope("all"); }}>Clear filters</button>
+          </div>
+        ) : null}
 
-      {driveResults.length ? (
-        <DriveMaterialShelf
-          materials={driveResults}
-          startNumber={materials.length + pdfGuides.length + 1}
-        />
-      ) : null}
+        {pdfResults.length ? (
+          <section className="library-pdf-section" aria-labelledby="library-pdf-title">
+            <div className="member-section-heading">
+              <div>
+                <p className="member-kicker">Drive PDF guides</p>
+                <h2 id="library-pdf-title">Read the material behind the roadmap.</h2>
+              </div>
+              <span>{pdfResults.length} guides available</span>
+            </div>
+            <PdfGuideShelf guides={pdfResults} startNumber={materials.length + 1} />
+          </section>
+        ) : null}
+
+        {driveResults.length ? (
+          <DriveMaterialShelf
+            materials={driveResults}
+            startNumber={materials.length + pdfGuides.length + 1}
+            googleClientId={googleClientId}
+            loginHint={loginHint}
+          />
+        ) : null}
+      </section>
     </div>
   );
 }

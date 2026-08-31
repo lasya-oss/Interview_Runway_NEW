@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DriveReplayPlayer } from "../practice/replays/drive-replay-player";
 
 function isTextMaterial(filename: string, mimeType: string) {
   return (
@@ -228,6 +229,8 @@ export function MaterialViewer({
   content,
   assetUrl,
   fallbackAssetUrl,
+  googleClientId = "",
+  loginHint = null,
 }: {
   fileId: string;
   filename: string;
@@ -236,18 +239,13 @@ export function MaterialViewer({
   content?: string | null;
   assetUrl?: string | null;
   fallbackAssetUrl?: string | null;
+  googleClientId?: string;
+  loginHint?: string | null;
 }) {
   const displayKind = materialDisplayKind(filename, mimeType);
-  const pdfSourceUrl = isPdfAsset(filename, mimeType)
-    ? assetUrl
-    : fallbackAssetUrl ?? (isTextMaterial(filename, mimeType) ? assetUrl : null);
 
   if (content !== null && content !== undefined) {
     return <PdfMaterialPreview fileId={fileId} filename={filename} source={content} title={title} />;
-  }
-
-  if (pdfSourceUrl && (fallbackAssetUrl || isTextMaterial(filename, mimeType) || isPdfAsset(filename, mimeType))) {
-    return <PdfMaterialPreview assetUrl={pdfSourceUrl} fileId={fileId} filename={filename} mimeType={mimeType} title={title} />;
   }
 
   if (assetUrl && displayKind === "video") {
@@ -258,10 +256,24 @@ export function MaterialViewer({
     return <audio className="library-material-audio-player" aria-label={`${title} audio`} controls preload="metadata" src={assetUrl} />;
   }
 
+  if (!assetUrl && googleClientId && (displayKind === "video" || displayKind === "audio")) {
+    return <DriveReplayPlayer clientId={googleClientId} fileId={fileId} loginHint={loginHint} mediaType={displayKind} title={title} />;
+  }
+
+  const pdfSourceUrl = isPdfAsset(filename, mimeType)
+    ? assetUrl
+    : displayKind === "video" || displayKind === "audio"
+      ? null
+      : fallbackAssetUrl ?? (isTextMaterial(filename, mimeType) ? assetUrl : null);
+
+  if (pdfSourceUrl && (fallbackAssetUrl || isTextMaterial(filename, mimeType) || isPdfAsset(filename, mimeType))) {
+    return <PdfMaterialPreview assetUrl={pdfSourceUrl} fileId={fileId} filename={filename} mimeType={mimeType} title={title} />;
+  }
+
   return (
     <div className="library-material-state" data-material-file-id={fileId} aria-live="polite">
       <span aria-hidden="true">PREVIEW</span>
-      <p>This material’s in-app PDF preview is temporarily unavailable.</p>
+      <p>{displayKind === "video" ? "Original video playback is not configured for this workspace." : displayKind === "audio" ? "Original audio playback is not configured for this workspace." : "This material’s in-app PDF preview is temporarily unavailable."}</p>
     </div>
   );
 }

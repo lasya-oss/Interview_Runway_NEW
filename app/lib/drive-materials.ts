@@ -6336,8 +6336,8 @@ export function driveMaterialAssetHref(filename: string) {
 }
 
 export function driveMaterialPrimaryAssetHref(material: Pick<DriveMaterial, "filename" | "kind">) {
-  // The source archive intentionally keeps the large media masters in Drive;
-  // use their mirrored text companions for an authorization-free preview.
+  // Large media masters stay in Drive and are loaded by the authenticated media
+  // viewer; first-party mirrors handle the smaller document and text records.
   if (material.kind === "narrated" || material.kind === "silent" || material.kind === "mock-audio") {
     return null;
   }

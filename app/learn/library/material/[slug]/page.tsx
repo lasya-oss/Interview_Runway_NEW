@@ -73,6 +73,8 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
                 content={DRIVE_MATERIAL_CONTENT[material.id]}
                 assetUrl={driveMaterialPrimaryAssetHref(material)}
                 fallbackAssetUrl={driveMaterialCompanionAssetHref(material)}
+                googleClientId={process.env.GOOGLE_CLIENT_ID ?? ""}
+                loginHint={profile.email}
               />
             </div>
             <div className="material-stage-controls"><span>01</span><i><b /></i><span>{category}</span></div>
