@@ -21,6 +21,24 @@ function accessLabel(tier: DemoTier) {
   return "Human Calibration";
 }
 
+function materialAccessLabel(material: LearningMaterial, unlocked: boolean, isLive: boolean) {
+  if (!unlocked) return `Requires ${accessLabel(material.tier)}`;
+  if (isLive && material.tier === "foundation") {
+    return material.availability === "included"
+      ? "Included with Vault"
+      : "Vault preview · review pending";
+  }
+  return `Included with ${accessLabel(material.tier)}`;
+}
+
+function materialOpenLabel(material: LearningMaterial, unlocked: boolean, isLive: boolean) {
+  if (!unlocked) return "Compare access";
+  if (isLive && material.tier === "foundation") {
+    return material.availability === "included" ? "Open lesson" : "Open preview";
+  }
+  return "Open sample";
+}
+
 export function LibraryClient({
   profileId,
   isLive = false,
@@ -46,11 +64,12 @@ export function LibraryClient({
 
   const results = useMemo(() => materials.filter((material) => {
     const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
-    const matchesScope = scope === "all" || (scope === "included" ? unlocked : !unlocked);
+    const included = unlocked && (!isLive || material.tier !== "foundation" || material.availability === "included");
+    const matchesScope = scope === "all" || (scope === "included" ? included : !unlocked);
     const matchesCategory = category === "All" || material.category === category;
     const haystack = `${material.title} ${material.description} ${material.category} ${material.format} ${material.tags.join(" ")}`.toLowerCase();
     return matchesScope && matchesCategory && (!deferredQuery || haystack.includes(deferredQuery));
-  }), [category, deferredQuery, materials, profileId, scope]);
+  }), [category, deferredQuery, isLive, materials, profileId, scope]);
 
   const pdfResults = useMemo(() => {
     if (scope === "locked") return [];
@@ -83,7 +102,7 @@ export function LibraryClient({
           <h1>Everything has a place in the plan.</h1>
           <p>Search the library by the interview decision it helps you make. Learning records, PDF guides, and the supplied Drive archive now sit in the same searchable workspace.</p>
         </div>
-        <div className="library-index" aria-label="Sample catalogue summary">
+        <div className="library-index" aria-label={`${isLive ? "Vault" : "Sample"} catalogue summary`}>
           <strong>{(materials.length + pdfGuides.length + driveMaterials.length).toString().padStart(2, "0")}</strong>
           <span>library<br />records</span>
         </div>
@@ -130,9 +149,9 @@ export function LibraryClient({
                 <div className="library-record-meta">
                   <span>{material.duration} · {material.level}</span>
                   <small>{material.reviewed}<br />{material.roadmap}</small>
-                  <b>{unlocked ? `Included with ${accessLabel(material.tier)}` : `Requires ${accessLabel(material.tier)}`}</b>
+                  <b>{materialAccessLabel(material, unlocked, isLive)}</b>
                   {unlocked && material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
-                  <Link href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{unlocked ? "Open sample" : "Compare access"} <span aria-hidden="true">↗</span></Link>
+                  <Link href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
                 </div>
               </article>
             );

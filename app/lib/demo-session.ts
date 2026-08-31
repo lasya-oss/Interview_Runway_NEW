@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { findDemoById, type DemoProfile, type DemoTier } from "./demo-data";
-import { requireChatGPTUser } from "@/app/chatgpt-auth";
+import { getChatGPTUser, requireChatGPTUser } from "@/app/chatgpt-auth";
 import {
   createFoundationProfile,
   getLearnerProgress,
@@ -61,16 +61,35 @@ export async function requireDemoProfile(
   returnTo = "/learn",
 ): Promise<DemoProfile> {
   const profile = await getDemoProfile();
+  // An authenticated Vault owner is always represented by the live Foundation
+  // profile. This prevents an older demo cookie from replacing account-backed
+  // identity or progress after the user has signed in.
+  const user = await getChatGPTUser();
+  let liveAccess = false;
+  if (user) {
+    try {
+      liveAccess = await hasVaultAccess(user.email);
+    } catch {
+      // A valid demo remains usable when the optional account lookup is not
+      // available in a local preview. Live access is fail-closed below.
+    }
+  }
+  if (user && liveAccess) {
+    return createFoundationProfile(user, await getLearnerProgress(user.email));
+  }
   if (profile) return profile;
 
-  const user = await requireChatGPTUser(returnTo);
-  if (!(await hasVaultAccess(user.email))) {
+  const authenticatedUser = user ?? (await requireChatGPTUser(returnTo));
+  if (!(user ? liveAccess : await hasVaultAccess(authenticatedUser.email))) {
     redirect(
       `/pricing?access=required&return_to=${encodeURIComponent(safeReturnTo(returnTo))}`,
     );
   }
 
-  return createFoundationProfile(user, await getLearnerProgress(user.email));
+  return createFoundationProfile(
+    authenticatedUser,
+    await getLearnerProgress(authenticatedUser.email),
+  );
 }
 
 async function verifyDemoSession(

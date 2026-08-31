@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { SignJWT } from "jose";
@@ -1016,4 +1017,52 @@ test("demo chooser is not constrained by the member application shell", async ()
   assert.doesNotMatch(styles, /\.member-shell\s*,\s*\.demo-login-page\s*\{/);
   assert.match(styles, /\.member-shell\s*\{[\s\S]*grid-template-columns:\s*232px minmax\(0, 1fr\) 218px/);
   assert.match(styles, /\.demo-login-layout\s*\{[\s\S]*grid-template-columns:\s*minmax\(390px, \.76fr\) minmax\(0, 1\.24fr\)/);
+});
+
+test("Vault roadmap destinations are complete Foundation lessons", async () => {
+  const roadmap = await readFile(new URL("../app/lib/roadmap-data.ts", import.meta.url), "utf8");
+  const vaultStart = roadmap.indexOf("export const TWELVE_WEEK_PLAN");
+  assert.notEqual(vaultStart, -1);
+
+  const vaultPlan = roadmap.slice(vaultStart);
+  assert.doesNotMatch(vaultPlan, /\bplanned\s*\(/);
+  assert.match(vaultPlan, /\blesson\s*\(/);
+  assert.doesNotMatch(vaultPlan, /queue-backlog-mock|interview-day-run-sheet/);
+});
+
+test("Vault review materials do not point at legacy demo PDFs", async () => {
+  const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const libraryPage = await readFile(new URL("../app/learn/library/page.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(data, /\/demo-materials\/(?:roadmap_4week|dsa_sliding-window)\.(?:pdf|png)/i);
+  assert.match(data, /\/pdf-guides\/roadmap_12week\.pdf/i);
+  assert.match(data, /\/pdf-guides\/dsa_sliding-window\.pdf/i);
+  assert.match(data, /Qualified review required/i);
+  assert.match(libraryPage, /profile\.isLive \? DRIVE_PDF_GUIDES\.filter/);
+  assert.match(libraryPage, /roadmap_4week\.pdf/);
+  assert.doesNotMatch(libraryPage, /new Set\(\["roadmap_4week\.pdf",\s*"dsa_sliding-window\.pdf"\]\)/);
+  assert.equal(existsSync(new URL("../public/demo-materials/roadmap_4week.pdf", import.meta.url)), false);
+  assert.equal(existsSync(new URL("../public/demo-materials/dsa_sliding-window.pdf", import.meta.url)), false);
+});
+
+test("live Foundation cannot open four-week unpublished briefs", async () => {
+  const taskPage = await readFile(new URL("../app/learn/roadmap/task/[id]/page.tsx", import.meta.url), "utf8");
+  assert.match(taskPage, /const isProfileRoadmapTask = profile\.roadmapWeeks === 12/);
+  assert.match(taskPage, /if \(!isProfileRoadmapTask\)/);
+  assert.match(taskPage, /four-week brief remains unpublished and gated/i);
+});
+
+test("pending Foundation previews cannot be recorded as completed lessons", async () => {
+  const materialPage = await readFile(new URL("../app/learn/material/[slug]/page.tsx", import.meta.url), "utf8");
+  assert.match(materialPage, /material\.availability === "included" && linkedTask/);
+  assert.match(materialPage, /remote-offer-matrix/);
+  assert.match(materialPage, /qualified review before publication/i);
+});
+
+test("live Foundation access takes precedence over a seeded demo cookie", async () => {
+  const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
+
+  assert.match(session, /const profile = await getDemoProfile\(\);/);
+  assert.match(session, /const user = await getChatGPTUser\(\);/);
+  assert.match(session, /if \(user && liveAccess\)/);
+  assert.match(session, /return createFoundationProfile\(user, await getLearnerProgress\(user\.email\)\);/);
 });

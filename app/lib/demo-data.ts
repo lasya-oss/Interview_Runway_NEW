@@ -18,6 +18,7 @@ export type DemoProfile = {
   week: number;
   roadmapWeeks: number;
   completedTaskIds?: readonly string[];
+  nextActionHref?: string;
   nextAction: string;
   nextActionMeta: string;
   focus: string;
@@ -98,27 +99,25 @@ export type DemoReviewMaterial = {
   detail: string;
   format: string;
   href: string;
-  preview: string;
+  preview?: string;
   profiles: readonly DemoTier[];
 };
 
 export const DEMO_REVIEW_MATERIALS: readonly DemoReviewMaterial[] = [
   {
-    title: "4-Week Accelerated Interview Roadmap",
+    title: "12-Week Foundation Roadmap",
     category: "Plan",
-    detail: "7-page weekly plan and checkpoint system",
-    format: "PDF · 7 pages",
-    href: "/demo-materials/roadmap_4week.pdf",
-    preview: "/demo-materials/previews/roadmap_4week.png",
+    detail: "Full Foundation sequence with checkpoints and account-backed progress",
+    format: "PDF · 15 pages",
+    href: "/pdf-guides/roadmap_12week.pdf",
     profiles: ["foundation"],
   },
   {
     title: "Sliding Window Pattern Reference",
     category: "DSA",
-    detail: "Recognition cues, invariants and practice ladder",
+    detail: "Foundation QA reference for recognition cues, invariants, and practice",
     format: "PDF · 9 pages",
-    href: "/demo-materials/dsa_sliding-window.pdf",
-    preview: "/demo-materials/previews/dsa_sliding-window.png",
+    href: "/pdf-guides/dsa_sliding-window.pdf",
     profiles: ["foundation"],
   },
   {
@@ -128,7 +127,7 @@ export const DEMO_REVIEW_MATERIALS: readonly DemoReviewMaterial[] = [
     format: "PDF · 3 pages",
     href: "/demo-materials/sysdesign_rate-limiting.pdf",
     preview: "/demo-materials/previews/sysdesign_rate-limiting.png",
-    profiles: ["foundation", "practice"],
+    profiles: ["practice"],
   },
   {
     title: "Design a Notification System",
@@ -169,7 +168,7 @@ export type LearningMaterial = {
   duration: string;
   tier: DemoTier;
   tags: readonly string[];
-  availability: "sample" | "preview";
+  availability: "included" | "sample" | "preview";
   reviewed: string;
   level: string;
   roadmap: string;
@@ -191,12 +190,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "18 min",
     tier: "foundation",
     tags: ["Caching", "Redis", "Trade-offs"],
-    availability: "sample",
-    reviewed: "Sample · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Intermediate",
     roadmap: "Week 2",
     progress: 42,
-    demoAsset: { href: "/demo-materials/sysdesign_rate-limiting.pdf", label: "Open 3-page review edition" },
+    demoAsset: { href: "/pdf-guides/sysdesign_rate-limiter-walkthrough.pdf", label: "Open the Vault review edition" },
   },
   {
     slug: "sliding-window",
@@ -208,12 +207,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "22 min",
     tier: "foundation",
     tags: ["Arrays", "Strings", "Invariants"],
-    availability: "sample",
-    reviewed: "Pilot artifact · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Foundation",
     roadmap: "Week 1",
     progress: 68,
-    demoAsset: { href: "/demo-materials/dsa_sliding-window.pdf", label: "Open 9-page review edition" },
+    demoAsset: { href: "/pdf-guides/dsa_sliding-window.pdf", label: "Open the Vault review edition" },
   },
   {
     slug: "scope-stories",
@@ -225,11 +224,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "16 min",
     tier: "foundation",
     tags: ["STAR", "Ownership", "Impact"],
-    availability: "preview",
-    reviewed: "Sample · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · lesson content",
     level: "All levels",
     roadmap: "Week 2",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/behavioral_star-template.pdf", label: "Open the Vault story template" },
   },
   {
     slug: "remote-compensation",
@@ -242,7 +242,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     tier: "foundation",
     tags: ["Contracts", "USD", "Negotiation"],
     availability: "preview",
-    reviewed: "Sample · Jul 2026",
+    reviewed: "Qualified review required",
     level: "All levels",
     roadmap: "Week 4",
     progress: 0,
@@ -291,11 +291,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "9 pages",
     tier: "foundation",
     tags: ["Caching", "Consistency", "Failure modes"],
-    availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Intermediate",
     roadmap: "Week 2",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/sysdesign_caching.pdf", label: "Open the Vault caching guide" },
   },
   {
     slug: "graph-traversal",
@@ -307,11 +308,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "24 min",
     tier: "foundation",
     tags: ["Graphs", "BFS", "State"],
-    availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Foundation",
     roadmap: "Week 1",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/dsa_bfs.pdf", label: "Open the Vault traversal guide" },
   },
   {
     slug: "binary-search-boundaries",
@@ -323,11 +325,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "12 min",
     tier: "foundation",
     tags: ["Binary search", "Invariants", "Communication"],
-    availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Foundation",
     roadmap: "Week 1",
     progress: 100,
+    demoAsset: { href: "/pdf-guides/dsa_binary-search.pdf", label: "Open the Vault boundary guide" },
   },
   {
     slug: "outage-story",
@@ -339,11 +342,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "20 min",
     tier: "foundation",
     tags: ["Incident", "Ownership", "Impact"],
-    availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · lesson content",
     level: "All levels",
     roadmap: "Week 3",
     progress: 20,
+    demoAsset: { href: "/pdf-guides/behavioral_failure-answer-lab.pdf", label: "Open the Vault ownership lab" },
   },
   {
     slug: "us-ats-resume",
@@ -355,11 +359,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "DOCX preview",
     tier: "foundation",
     tags: ["Resume", "ATS", "US roles"],
-    availability: "sample",
-    reviewed: "Pilot artifact · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built template",
     level: "All levels",
     roadmap: "Setup",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/career_ats-resume.pdf", label: "Open the Vault resume template" },
   },
   {
     slug: "remote-offer-matrix",
@@ -372,7 +377,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     tier: "foundation",
     tags: ["Offers", "Remote", "Negotiation"],
     availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    reviewed: "Qualified review required",
     level: "All levels",
     roadmap: "Week 4",
     progress: 0,

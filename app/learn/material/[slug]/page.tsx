@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
-import { canAccessMaterial, LEARNING_MATERIALS, type DemoTier } from "@/app/lib/demo-data";
+import { canAccessMaterial, LEARNING_MATERIALS, type DemoTier, type LearningMaterial } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
 import { StudyProgressButton } from "../../study-progress-button";
@@ -71,6 +71,78 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
     exercise: "Compare two fictional offers after normalising leave, insurance, payment risk, and termination terms.",
     related: "Open the remote contract checklist",
   },
+  "remote-offer-matrix": {
+    decision: "Compare a remote offer by total package, operating risk, and career signal before negotiating the headline number.",
+    chapters: [
+      { time: "00:00", title: "Separate the package", detail: "Record cash, equity, leave, insurance, equipment, notice, and payment timing as separate variables." },
+      { time: "04:00", title: "Expose uncertainty", detail: "Mark tax, currency, jurisdiction, employment classification, and termination assumptions that need qualified confirmation." },
+      { time: "09:00", title: "Compare the trade-offs", detail: "Use the same fictional inputs for each offer so the decision reflects total risk and value rather than a single salary figure." },
+      { time: "14:00", title: "Prepare the question set", detail: "Turn every unresolved term into a specific employer or qualified-adviser question before treating the offer as comparable." },
+    ],
+    principle: "This preview is educational and not an approved tax, legal, or contract decision tool; current India-specific terms require qualified review before publication.",
+    exercise: "Complete the matrix for two fictional offers, highlight every unresolved India-specific term, and write the questions needed before negotiation.",
+    related: "Return to the Foundation roadmap",
+  },
+  "cache-consistency": {
+    decision: "Choose cache freshness and invalidation from the product promise, then make stale reads and recovery explicit.",
+    chapters: [
+      { time: "00:00", title: "Name the freshness contract", detail: "Decide what may be stale, for how long, and which user action requires a fresh read." },
+      { time: "03:00", title: "Compare write paths", detail: "Contrast cache-aside, write-through, and event-driven invalidation against the read and failure pattern." },
+      { time: "06:10", title: "Handle failure", detail: "Explain stampedes, hot keys, stale-if-error behaviour, and what happens when the cache or invalidation stream is unavailable." },
+      { time: "08:00", title: "Close with evidence", detail: "Choose hit rate, freshness age, invalidation lag, and origin pressure as signals for the design." },
+    ],
+    principle: "A cache is correct when its freshness behaviour matches the product promise, not when its hit rate is high.",
+    exercise: "Choose a cache strategy for a user-profile read path and explain the stale-read, invalidation, and origin-failure behaviour.",
+    related: "Complete the rate-limit decision lab",
+  },
+  "graph-traversal": {
+    decision: "Choose BFS or DFS from the question the graph asks, then keep traversal state separate from the answer being built.",
+    chapters: [
+      { time: "00:00", title: "Read the graph cue", detail: "Separate layers and shortest unweighted distance from reachability, components, dependencies, and path exploration." },
+      { time: "06:00", title: "State the invariant", detail: "Say what visited, parent, distance, or indegree means after each node is processed." },
+      { time: "13:30", title: "Trace the boundary", detail: "Dry-run an isolated node, a cycle, a duplicate edge, and a target found at the first or last layer." },
+      { time: "20:00", title: "Explain the bound", detail: "Account for each vertex and edge once, then identify the memory needed for the frontier and recorded state." },
+    ],
+    principle: "The traversal is only half the solution; the state you carry determines whether the result answers the prompt.",
+    exercise: "Classify four graph prompts as BFS or DFS and write the invariant for one prompt before describing its implementation.",
+    related: "Explain hash-map invariants aloud",
+  },
+  "binary-search-boundaries": {
+    decision: "Use binary search only when a monotonic predicate lets each comparison permanently discard one side of the search space.",
+    chapters: [
+      { time: "00:00", title: "Find the predicate", detail: "Rewrite the prompt as a yes/no question whose answer changes at one boundary." },
+      { time: "03:00", title: "Choose the interval", detail: "Declare inclusive or exclusive ends and what left, right, and mid each represent." },
+      { time: "07:00", title: "Preserve the invariant", detail: "After every move, keep the desired boundary inside the remaining interval and avoid overflow in midpoint calculation." },
+      { time: "10:00", title: "Verify the answer", detail: "Check the returned boundary against its neighbour and handle empty, one-item, and all-false inputs explicitly." },
+    ],
+    principle: "Binary search is a proof about a monotonic boundary; the loop is merely the shortest way to find it.",
+    exercise: "State the predicate and interval invariant for the first index whose value is at least a target, including empty and missing-target cases.",
+    related: "Compare BFS and DFS decision cues",
+  },
+  "outage-story": {
+    decision: "Turn an outage into evidence of ownership by connecting the trigger, your decision, communication, prevention, and measured change.",
+    chapters: [
+      { time: "00:00", title: "Set the operating context", detail: "Describe the users, service, and impact without inflating the incident or hiding the constraint." },
+      { time: "05:00", title: "Own the decision", detail: "Separate what you observed, what you chose, what alternatives you rejected, and who needed alignment." },
+      { time: "11:00", title: "Show the recovery", detail: "Explain mitigation, communication cadence, rollback or repair, and the signal used to declare recovery." },
+      { time: "16:00", title: "Prove the learning", detail: "Close with a durable change and the metric, behaviour, or follow-up that shows the system improved." },
+    ],
+    principle: "A strong incident story is not a hero narrative; it is a clear record of decisions, trade-offs, and changed operating behaviour.",
+    exercise: "Draft a 90-second outage story with context, your decision, communication, recovery, and one measurable prevention outcome.",
+    related: "Apply the ATS resume pass",
+  },
+  "us-ats-resume": {
+    decision: "Make the resume legible to a US recruiter by pairing technical context with a specific action, scope, and measurable consequence.",
+    chapters: [
+      { time: "00:00", title: "Lead with the target", detail: "Choose a role-aligned summary and put the strongest relevant technical surface where it can be assessed quickly." },
+      { time: "04:00", title: "Rewrite the bullet", detail: "Use action, system or product context, scale or constraint, decision, and result; remove responsibility-only phrasing." },
+      { time: "10:00", title: "Translate the scope", detail: "Replace local title shorthand with plain language while preserving team size, ownership boundary, and technical depth." },
+      { time: "14:00", title: "Run the evidence check", detail: "Verify that every quantified claim, tool, and leadership statement can survive an interviewer follow-up." },
+    ],
+    principle: "An ATS-friendly resume is not keyword stuffing; it is a compact evidence index for the conversation that follows.",
+    exercise: "Rewrite one bullet in the template and annotate the action, constraint, scope, decision, result, and evidence source.",
+    related: "Rewrite headline and About section",
+  },
   "notification-mock": {
     decision: "Commit to delivery semantics, retry bounds, and user preference handling before optimising throughput.",
     chapters: [
@@ -101,6 +173,13 @@ function tierLabel(tier: DemoTier) {
   if (tier === "practice") return "The Second Seat";
   if (tier === "premium") return "Human Calibration";
   return "The Vault";
+}
+
+function materialState(profileIsLive: boolean, materialAvailability: LearningMaterial["availability"]) {
+  if (!profileIsLive) return "Demo preview";
+  return materialAvailability === "included"
+    ? "Included in Vault QA"
+    : "Preview · review pending";
 }
 
 export default async function MaterialPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -152,25 +231,25 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
 
         <header className="material-header">
           <div>
-            <p className="member-kicker">{profile.isLive ? `Foundation lesson · ${material.format}` : `Representative ${material.format} · sample progress`}</p>
+            <p className="member-kicker">{profile.isLive ? material.availability === "included" ? `Foundation lesson · ${material.format}` : `Foundation preview · ${material.format}` : `Representative ${material.format} · sample progress`}</p>
             <h1>{material.title}</h1>
             <p>{material.description}</p>
           </div>
           <dl>
             <div><dt>Access</dt><dd>{tierLabel(material.tier)}</dd></div>
             <div><dt>Working time</dt><dd>{material.duration}</dd></div>
-            <div><dt>State</dt><dd>{profile.isLive ? "Included" : "Demo preview"}</dd></div>
+            <div><dt>State</dt><dd>{materialState(profile.isLive === true, material.availability)}</dd></div>
           </dl>
         </header>
 
         <div className="material-layout">
           <section className="material-stage" aria-labelledby="material-stage-title">
-            <div className="material-stage-top"><span>Decision lab / {material.number}</span><b>{profile.isLive ? "Included with paid Foundation" : "Sample, not a published lesson"}</b></div>
+            <div className="material-stage-top"><span>Decision lab / {material.number}</span><b>{profile.isLive ? material.availability === "included" ? "Included with paid Foundation" : "Vault preview · review pending" : "Sample, not a published lesson"}</b></div>
             <div className="material-stage-visual" aria-hidden="true"><i /><i /><i /><span /></div>
             <p>Decision to make</p>
             <h2 id="material-stage-title">{detail.decision}</h2>
             <div className="material-stage-controls"><span>00:00</span><i><b /></i><span>{material.duration}</span></div>
-            {profile.isLive && linkedTask ? <StudyProgressButton taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
+            {profile.isLive && material.availability === "included" && linkedTask ? <StudyProgressButton taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
           </section>
 
           <aside className="material-notes">
@@ -182,9 +261,9 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
             </div>
             {material.demoAsset ? (
               <a className="material-review-link" href={material.demoAsset.href} target="_blank" rel="noreferrer">
-                <span>Built sample material</span>
+                    <span>{profile.isLive ? "Vault QA supporting material" : "Built sample material"}</span>
                 <strong>{material.demoAsset.label}</strong>
-                <small>Human editorial review pending ↗</small>
+                    <small>{profile.isLive ? "Open the first-party QA reference ↗" : "Human editorial review pending ↗"}</small>
               </a>
             ) : null}
           </aside>
@@ -193,7 +272,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
         <section className="material-chapters" aria-labelledby="material-chapters-title">
           <div className="member-section-heading">
             <div><p className="member-kicker">Lesson structure</p><h2 id="material-chapters-title">Move through the decision.</h2></div>
-            <span>{detail.chapters.length} sample segments</span>
+            <span>{detail.chapters.length} {profile.isLive ? "lesson segments" : "sample segments"}</span>
           </div>
           <div>
             {detail.chapters.map((chapter, index) => (

@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const VAULT_LEGACY_PDF_FILENAMES = new Set(["roadmap_4week.pdf"]);
+
 export default async function LibraryPage() {
   const profile = await requireDemoProfile("/learn/library");
 
@@ -23,7 +25,7 @@ export default async function LibraryPage() {
           profileId={profile.id}
           isLive={profile.isLive === true}
           materials={LEARNING_MATERIALS}
-          pdfGuides={DRIVE_PDF_GUIDES}
+          pdfGuides={profile.isLive ? DRIVE_PDF_GUIDES.filter((guide) => !VAULT_LEGACY_PDF_FILENAMES.has(guide.filename)) : DRIVE_PDF_GUIDES}
           driveMaterials={DRIVE_MATERIALS}
         />
       </div>

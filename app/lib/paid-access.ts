@@ -139,6 +139,11 @@ export function createFoundationProfile(
     completedTaskIds: progress.completedTaskIds,
     nextAction: nextTask?.title || "Review your completed Foundation roadmap",
     nextActionMeta: nextTask?.meta || "Foundation · complete",
+    nextActionHref: nextTask
+      ? nextTask.learning.kind === "material"
+        ? `/learn/material/${nextTask.learning.slug}`
+        : `/learn/roadmap/task/${nextTask.id}`
+      : "/learn/roadmap",
     focus: "Build repeatable technical patterns before adding timed mocks.",
     access: { library: true, practice: false, feedback: false, coaching: false },
   };

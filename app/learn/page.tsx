@@ -27,7 +27,9 @@ export default async function LearnerHomePage() {
           ...LEARNING_MATERIALS.filter((material) => material.tier === "premium"),
           ...LEARNING_MATERIALS.filter((material) => material.tier === "practice"),
         ].slice(0, 4);
-  const reviewMaterials = DEMO_REVIEW_MATERIALS.filter((material) => material.profiles.includes(profile.id)).slice(0, 3);
+  const reviewMaterials = DEMO_REVIEW_MATERIALS
+    .filter((material) => material.profiles.includes(profile.id))
+    .slice(0, 3);
 
   return (
     <MemberShell profile={profile} active="today">
@@ -50,7 +52,7 @@ export default async function LearnerHomePage() {
             <div className="next-action-visual" aria-hidden="true"><i /><i /><i /><span /></div>
             <h2>{profile.nextAction}</h2>
             <p>{profile.id === "foundation" ? "Continue the lesson, then explain your choice aloud before viewing the worked decision tree." : profile.id === "practice" ? "The prompt adapts after each design commitment. Your previous gap is already loaded into the rubric." : "Bring two examples that show cross-team influence. The coach packet has the evidence prompts ready."}</p>
-            <Link className="member-primary-button" href={profile.id === "premium" ? "/learn/coaching" : profile.id === "practice" ? "/learn/practice" : "/learn/material/rate-limiter"}>Continue <span aria-hidden="true">↗</span></Link>
+            <Link className="member-primary-button" href={profile.nextActionHref ?? (profile.id === "premium" ? "/learn/coaching" : profile.id === "practice" ? "/learn/practice" : "/learn/material/rate-limiter")}>Continue <span aria-hidden="true">↗</span></Link>
           </article>
 
           <article className="weekly-plan-panel">
@@ -75,9 +77,16 @@ export default async function LearnerHomePage() {
             {reviewMaterials.map((material) => (
               <a href={material.href} target="_blank" rel="noreferrer" key={material.href}>
                 <span className="member-review-cover">
-                  <Image src={material.preview} alt={`${material.title} cover`} width={993} height={1403} sizes="180px" />
+                  {material.preview ? (
+                    <Image src={material.preview} alt={`${material.title} cover`} width={993} height={1403} sizes="180px" />
+                  ) : (
+                    <span className="member-review-cover-fallback" aria-label={`${material.title} Vault QA asset`}>
+                      <strong>{material.category}</strong>
+                      <b>VAULT<br />ASSET</b>
+                    </span>
+                  )}
                 </span>
-                <span className="member-review-copy"><small>{material.category} · {material.format}</small><strong>{material.title}</strong><p>{material.detail}</p><b>Open review edition ↗</b></span>
+                <span className="member-review-copy"><small>{material.category} · {material.format}</small><strong>{material.title}</strong><p>{material.detail}</p><b>{profile.isLive ? "Open Vault QA material" : "Open review edition"} ↗</b></span>
               </a>
             ))}
           </div>

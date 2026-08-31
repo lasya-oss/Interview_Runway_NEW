@@ -68,13 +68,20 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
         return (
           <article className={`demo-entry-card demo-entry-card-${profile.id}`} key={profile.id}>
             <div className="demo-entry-cover">
-              <Image
-                src={cover.preview}
-                alt={`${cover.title} review-edition cover`}
-                width={993}
-                height={1403}
-                sizes="(max-width: 900px) 32vw, 180px"
-              />
+              {cover.preview ? (
+                <Image
+                  src={cover.preview}
+                  alt={`${cover.title} review-edition cover`}
+                  width={993}
+                  height={1403}
+                  sizes="(max-width: 900px) 32vw, 180px"
+                />
+              ) : (
+                <div className="demo-entry-cover-fallback" aria-label={`${cover.title} Vault QA asset`}>
+                  <strong>{cover.category}</strong>
+                  <span>APPROVED<br />VAULT ASSET</span>
+                </div>
+              )}
               <span>REVIEW<br />EDITION</span>
             </div>
 
@@ -116,7 +123,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
       })}
 
       {message ? <p className="demo-login-error" role="alert">{message}</p> : null}
-      <p className="demo-login-note">Sample workspace data · Review-edition materials remain marked pending final human editorial review.</p>
+      <p className="demo-login-note">Sample workspace data · Foundation cards use QA references; higher-tier demo materials remain marked pending final human editorial review.</p>
     </div>
   );
 }

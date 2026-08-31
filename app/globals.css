@@ -5268,6 +5268,9 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   object-position: 16% top;
   filter: saturate(.88) contrast(1.03);
 }
+.demo-entry-cover-fallback { height: 100%; padding: 18px; display: flex; justify-content: space-between; flex-direction: column; color: #f5f8f9; background: linear-gradient(145deg, #173c4a, #07151e 72%); }
+.demo-entry-cover-fallback strong { max-width: 90px; color: #ff9b6d; font-family: var(--font-mono); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
+.demo-entry-cover-fallback span { color: #aebfc5; font-family: var(--font-mono); font-size: 7px; letter-spacing: .1em; line-height: 1.45; }
 
 .demo-entry-cover > span {
   position: absolute;
@@ -5511,6 +5514,9 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .member-review-material-grid > a:hover { transform: translateY(-4px); border-color: rgba(255,107,44,.45); }
 .member-review-cover { min-width: 0; overflow: hidden; background: #091620; }
 .member-review-cover img { width: 100%; height: 100%; object-fit: cover; object-position: 15% top; }
+.member-review-cover-fallback { height: 100%; padding: 17px 12px; display: flex; justify-content: space-between; flex-direction: column; color: #e5eef0; background: linear-gradient(155deg, #1a4654, #07161e 74%); }
+.member-review-cover-fallback strong { color: #ff9b6d; font-family: var(--font-mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; }
+.member-review-cover-fallback b { color: #c0d2d7; font-family: var(--font-mono); font-size: 8px; font-weight: 500; letter-spacing: .1em; line-height: 1.35; }
 .member-review-copy { min-width: 0; padding: 21px 18px; display: flex; flex-direction: column; }
 .member-review-copy small { color: #9f411f; font-family: var(--font-mono); font-size: 7px; text-transform: uppercase; }
 .member-review-copy strong { margin-top: 18px; font-family: var(--font-display); font-size: 19px; line-height: 1.07; letter-spacing: -.04em; }
@@ -5879,8 +5885,19 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .roadmap-task-header dt { color: #7b8d95; }
 .roadmap-task-header dd { margin: 0; color: #344851; text-align: right; }
 .roadmap-task-status { margin-top: 58px; padding: 35px; border: 1px solid rgba(255,107,44,.28); border-radius: 19px; background: linear-gradient(145deg, rgba(255,255,255,.7), rgba(255,107,44,.055)); }
+.roadmap-task-status-published { border-color: rgba(44,155,107,.28); background: linear-gradient(145deg, rgba(255,255,255,.72), rgba(44,155,107,.055)); }
 .roadmap-task-status h2 { max-width: 760px; margin: 11px 0 0; font-family: var(--font-display); font-size: 31px; font-weight: 570; letter-spacing: -.04em; }
 .roadmap-task-status p:last-child { max-width: 760px; margin: 15px 0 0; color: #64767f; font-size: 11px; line-height: 1.6; }
+.roadmap-lesson-sections { margin-top: 70px; }
+.roadmap-lesson-sections > div:last-child { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.roadmap-lesson-sections article { min-height: 180px; padding: 22px; border: 1px solid rgba(31,65,78,.14); border-radius: 15px; background: rgba(255,255,255,.52); }
+.roadmap-lesson-sections article > span { color: #9a3e1e; font-family: var(--font-mono); font-size: 8px; }
+.roadmap-lesson-sections article h3 { margin: 34px 0 0; font-size: 14px; }
+.roadmap-lesson-sections article p { margin: 9px 0 0; color: #64767f; font-size: 10px; line-height: 1.6; }
+.roadmap-lesson-checkpoint { padding: 30px; border: 1px solid rgba(31,65,78,.14); border-radius: 19px; background: rgba(255,255,255,.52); }
+.roadmap-lesson-checkpoint > p { max-width: 760px; margin: 25px 0 0; color: #526770; font-size: 13px; line-height: 1.65; }
+.roadmap-lesson-checkpoint > ul { margin-top: 28px; }
+.roadmap-lesson-checkpoint > div:last-child { margin-top: 28px; }
 .roadmap-task-resources { margin-top: 70px; }
 .roadmap-task-resources > ul { margin: 30px 0 0; padding: 0; list-style: none; border-top: 1px solid rgba(31,65,78,.14); }
 .roadmap-task-resources li { position: relative; padding: 19px 0 19px 25px; border-bottom: 1px solid rgba(31,65,78,.14); color: #526770; font-size: 11px; }
@@ -6323,6 +6340,9 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .material-next-step { align-items: flex-start; flex-direction: column; padding: 25px; }
   .roadmap-task-header { grid-template-columns: 1fr; gap: 28px; }
   .roadmap-task-status { margin-top: 40px; padding: 25px; }
+  .roadmap-lesson-sections { margin-top: 40px; }
+  .roadmap-lesson-sections > div:last-child { grid-template-columns: 1fr; }
+  .roadmap-lesson-checkpoint { padding: 25px; }
   .practice-briefing-main { min-height: 480px; padding: 28px; }
   .practice-replay-player { padding: 20px; }
   .practice-replay-player-top { align-items: flex-start; flex-direction: column; gap: 8px; }

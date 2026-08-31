@@ -122,7 +122,11 @@ export function RoadmapChecklist({
                 <div className="roadmap-task-list">
                   {week.tasks.map((task) => {
                     const isComplete = completed.has(task.id);
-                    const contentLabel = task.learning.kind === "material" ? "Open learning content" : "View learning brief";
+                    const contentLabel = task.learning.kind === "material"
+                      ? "Open learning content"
+                      : task.learning.kind === "lesson"
+                        ? "Open Foundation lesson"
+                        : "View learning brief";
                     return (
                       <div className={`roadmap-task-row ${isComplete ? "is-complete" : ""}`} key={task.id}>
                         <label className="roadmap-task-check">
