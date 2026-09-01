@@ -4,6 +4,7 @@ import { LockedMemberPanel } from "@/app/components/member-shell";
 import { SCORE_DIMENSIONS } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { getLatestCompletedSecondSeatSession } from "@/app/lib/second-seat-store";
+import { findSecondSeatMock } from "@/app/lib/second-seat-engine";
 import { FeedbackClient } from "./feedback-client";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 const EVIDENCE = [
   {
     time: "06:14",
+    dimensionKeys: ["problemFraming"],
     signal: "Problem framing · positive",
     excerpt: "I would keep ingestion independent from query serving because their traffic and failure profiles are different.",
     observation: "The answer separated write and read concerns before choosing storage, which kept the architecture coherent.",
@@ -23,6 +25,7 @@ const EVIDENCE = [
   },
   {
     time: "14:52",
+    dimensionKeys: ["tradeoffClarity"],
     signal: "Trade-off clarity · gap",
     excerpt: "We can add replicas for availability and scale the database as traffic grows.",
     observation: "Replication was named without choosing a consistency model or explaining what readers may observe after failover.",
@@ -30,6 +33,7 @@ const EVIDENCE = [
   },
   {
     time: "27:08",
+    dimensionKeys: ["technicalDepth", "tradeoffClarity"],
     signal: "Operations · gap",
     excerpt: "If consumers fall behind, I would add more workers and monitor the queue length.",
     observation: "The recovery direction was sound, but queue length alone hid whether older events were breaching the product SLO.",
@@ -38,9 +42,9 @@ const EVIDENCE = [
 ] as const;
 
 const ACTIONS = [
-  { number: "01", title: "Defend the consistency model", body: "Re-answer the same architecture opening with staleness and failover behaviour stated in the first five minutes.", meta: "15 min · verbal rehearsal", href: "/learn/material/rate-limiter" },
-  { number: "02", title: "Diagnose backlog with the right signal", body: "Write the operating response for queue age, retry amplification, and priority shedding during a 20× spike.", meta: "20 min · scenario", href: "/learn/material/notification-mock" },
-  { number: "03", title: "Repeat under a new prompt", body: "Run the notification-service sample and apply the same decision order without reusing the architecture.", meta: "35 min · scripted mock", href: "/learn/practice" },
+  { number: "01", title: "Defend the consistency model", body: "Re-answer the same architecture opening with staleness and failover behaviour stated in the first five minutes.", meta: "15 min · verbal rehearsal", href: "/learn/material/rate-limiter", why: "A design can sound scalable while remaining ambiguous about what readers observe after failure. Naming the model makes the trade-off reviewable." },
+  { number: "02", title: "Diagnose backlog with the right signal", body: "Write the operating response for queue age, retry amplification, and priority shedding during a 20× spike.", meta: "20 min · scenario", href: "/learn/material/notification-mock", why: "Queue length alone does not show whether older, higher-priority work is breaching the product promise." },
+  { number: "03", title: "Repeat under a new prompt", body: "Run the notification-service sample and apply the same decision order without reusing the architecture.", meta: "35 min · scripted mock", href: "/learn/practice", why: "A changed prompt tests whether the correction transferred into a repeatable interview habit." },
 ] as const;
 
 export default async function FeedbackPage() {
@@ -78,6 +82,7 @@ export default async function FeedbackPage() {
   const dimensions = liveEvaluation
     ? liveEvaluation.dimensions
     : SCORE_DIMENSIONS.map((dimension, index) => ({
+    key: ["problemFraming", "technicalDepth", "tradeoffClarity", "communication"][index],
     label: dimension.label,
     score: dimension[profile.id],
     delta: ["+6", "+4", "+2", "+9"][index],
@@ -89,7 +94,11 @@ export default async function FeedbackPage() {
     ][index],
     }));
   const evidence = liveEvaluation
-    ? liveEvaluation.evidence.map((item, index) => ({ ...item, time: `Turn ${String(index + 1).padStart(2, "0")}` }))
+    ? liveEvaluation.evidence.map((item, index) => ({
+      ...item,
+      time: `Turn ${String(index + 1).padStart(2, "0")}`,
+      dimensionKeys: findSecondSeatMock(latestSession?.mockId ?? "")?.turns.find((turn) => turn.label === item.turn)?.dimensions ?? [],
+    }))
     : EVIDENCE;
   const actions = liveEvaluation?.nextActions ?? ACTIONS;
 
@@ -102,6 +111,7 @@ export default async function FeedbackPage() {
         actions={actions}
         premium={profile.id === "premium"}
         live={profile.isSecondSeatLive === true}
+        secondSeat={profile.id === "practice" || profile.isSecondSeatLive === true}
         mockTitle={latestSession ? "Your latest practice round" : "Design a metrics pipeline"}
         insightTitle={liveEvaluation?.insightTitle}
         insightBody={liveEvaluation?.insightBody}
