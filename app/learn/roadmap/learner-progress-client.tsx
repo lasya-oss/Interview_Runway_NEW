@@ -28,6 +28,7 @@ export function RoadmapProgressProvider({
   roadmapWeeks,
   isLive,
   initialCompleted,
+  initialCompletionActivity,
   initialProgress,
   initialWeek,
   children,
@@ -36,6 +37,7 @@ export function RoadmapProgressProvider({
   roadmapWeeks: number;
   isLive: boolean;
   initialCompleted?: readonly string[];
+  initialCompletionActivity?: Readonly<Record<string, string>>;
   initialProgress: number;
   initialWeek: number;
   children: ReactNode;
@@ -45,9 +47,9 @@ export function RoadmapProgressProvider({
   const initialSnapshot = useMemo(
     () =>
       synchronized
-        ? roadmapProgressFor(weeks, initialCompleted ?? [])
+        ? roadmapProgressFor(weeks, initialCompleted ?? [], initialCompletionActivity)
         : createStaticSnapshot(weeks, initialProgress, initialWeek),
-    [initialCompleted, initialProgress, initialWeek, synchronized, weeks],
+    [initialCompleted, initialCompletionActivity, initialProgress, initialWeek, synchronized, weeks],
   );
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const storageKey = roadmapStorageKey(profileId);
@@ -55,13 +57,16 @@ export function RoadmapProgressProvider({
   useEffect(() => {
     if (!synchronized) return;
 
-    const apply = (completedTaskIds: readonly string[]) => {
-      setSnapshot(roadmapProgressFor(weeks, completedTaskIds));
+    const apply = (
+      completedTaskIds: readonly string[],
+      completionActivity: Readonly<Record<string, string>> = {},
+    ) => {
+      setSnapshot(roadmapProgressFor(weeks, completedTaskIds, completionActivity));
     };
     const handleProgressEvent = (event: Event) => {
       const detail = (event as CustomEvent<RoadmapProgressEventDetail>).detail;
       if (!detail || detail.profileId !== profileId) return;
-      apply(detail.completedTaskIds);
+      apply(detail.completedTaskIds, detail.completionActivity);
     };
     const handleStorage = (event: StorageEvent) => {
       if (event.key !== storageKey) return;
@@ -87,7 +92,10 @@ export function RoadmapProgressProvider({
       })
         .then(async (response) => {
           if (!response.ok) return null;
-          return (await response.json()) as { completedTaskIds?: unknown };
+          return (await response.json()) as {
+            completedTaskIds?: unknown;
+            completionActivity?: unknown;
+          };
         })
         .then((value) => {
           if (!value || controller.signal.aborted) return;
@@ -95,6 +103,7 @@ export function RoadmapProgressProvider({
             Array.isArray(value.completedTaskIds)
               ? value.completedTaskIds.filter((taskId): taskId is string => typeof taskId === "string")
               : [],
+            readCompletionActivity(value.completionActivity),
           );
         })
         .catch(() => {
@@ -151,12 +160,23 @@ function createStaticSnapshot(
   const totalTaskCount = weeks.reduce((count, week) => count + week.tasks.length, 0);
   return {
     completedTaskIds: [],
+    completionActivity: {},
+    weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
     completedCount: Math.round((totalTaskCount * progressPercent) / 100),
     totalTaskCount,
     progressPercent,
     currentWeek,
     nextTask: null,
   };
+}
+
+function readCompletionActivity(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      ([taskId, date]) => typeof taskId === "string" && typeof date === "string",
+    ),
+  );
 }
 
 function readStoredTaskIds(value: string | null): string[] {

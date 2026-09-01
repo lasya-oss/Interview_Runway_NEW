@@ -72,6 +72,7 @@ export function MemberShell({
         roadmapWeeks={profile.roadmapWeeks}
         isLive={isLive}
         initialCompleted={profile.completedTaskIds}
+        initialCompletionActivity={profile.completionActivity}
         initialProgress={profile.progress}
         initialWeek={profile.week}
       >

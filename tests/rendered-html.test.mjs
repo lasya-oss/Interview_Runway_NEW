@@ -1295,7 +1295,7 @@ test("Foundation demo starts Today with a clean learner state", async () => {
   assert.match(todayPage, /TodayDashboard/);
   assert.match(todayDashboard, /const isFreshLearner = progress === 0/);
   assert.match(todayDashboard, /isFreshLearner\s*\?\s*`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/);
-  assert.match(todayDashboard, /const weeklyActivity = isTracked \? \[0, 0, 0, 0, 0, 0, 0\]/);
+  assert.match(todayDashboard, /const weeklyActivity = isTracked[\s\S]*?roadmap\.weeklyActivity/);
   assert.match(todayDashboard, /const totalPlanTasks = roadmap\.totalTaskCount;/);
   assert.match(todayDashboard, /Build the first signal from your own work/);
   assert.match(memberShell, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
@@ -1316,7 +1316,7 @@ test("fresh Vault learners derive Today and Roadmap state from account progress"
     todayDashboard,
     /const todayKicker = isFreshLearner[\s\S]*?`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/,
   );
-  assert.match(todayDashboard, /const weeklyActivity = isTracked \? \[0, 0, 0, 0, 0, 0, 0\]/);
+  assert.match(todayDashboard, /const weeklyActivity = isTracked[\s\S]*?roadmap\.weeklyActivity/);
 
   assert.match(paidAccess, /const currentWeek = currentFoundationWeek\(progress\.completedTaskIds\);/);
   assert.match(
@@ -1351,9 +1351,11 @@ test("Today and Status consume the Roadmap snapshot for both learner tiers", asy
   assert.match(provider, /if \(!isLive\)[\s\S]*?window\.localStorage\.getItem\(storageKey\)/);
   assert.match(provider, /fetch\(`\/api\/learner\/progress\?roadmapWeeks=\$\{roadmapWeeks\}`,[\s\S]*?cache: "no-store"/);
   assert.match(dashboard, /const completedLabel = isTracked[\s\S]*?roadmap\.completedCount/);
+  assert.match(dashboard, /const weeklyActivity = isTracked[\s\S]*?roadmap\.weeklyActivity/);
+  assert.match(dashboard, /data-activity-count=\{value\}/);
   assert.match(accessCard, /progress\.synchronized \? progress\.progressPercent : fallbackProgress/);
   assert.match(roadmap, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.next\]\)/);
-  assert.match(studyButton, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.new Set/);
+  assert.match(studyButton, /emitRoadmapProgressUpdated\(\s*profileId,/);
   assert.match(shell, /<RoadmapProgressProvider[\s\S]*?initialCompleted=\{profile\.completedTaskIds\}/);
   assert.match(shell, /usePathname\(\)/);
   assert.match(layout, /<MemberShell profile=\{profile\}>\{children\}<\/MemberShell>/);
@@ -1378,6 +1380,30 @@ test("learner progress persistence is scoped to the selected roadmap", async () 
   assert.match(roadmap, /completedTaskIds: \[\.\.\.next\], roadmapWeeks/);
   assert.match(studyButton, /learner\/progress\?roadmapWeeks=\$\{roadmapWeeks\}/);
   assert.match(studyButton, /completedTaskIds: \[\.\.\.new Set\(\[\.\.\.currentIds, taskId\]\)\],/);
+});
+
+test("Vault weekly activity is persisted from dated roadmap completions", async () => {
+  const schema = await readFile(new URL("../db/schema.ts", import.meta.url), "utf8");
+  const migration = await readFile(new URL("../drizzle/0004_true_kang.sql", import.meta.url), "utf8");
+  const progress = await readFile(new URL("../app/lib/learner-progress.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const provider = await readFile(new URL("../app/learn/roadmap/learner-progress-client.tsx", import.meta.url), "utf8");
+  const roadmap = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+  const studyButton = await readFile(new URL("../app/learn/study-progress-button.tsx", import.meta.url), "utf8");
+
+  assert.match(schema, /completionActivity: text\("completion_activity"\)/);
+  assert.match(migration, /ADD `completion_activity` text DEFAULT '\{\}' NOT NULL/);
+  assert.match(paidAccess, /completionActivity: learnerProgress\.completionActivity/);
+  assert.match(paidAccess, /dateKeyForTimeZone\(new Date\(\)\)/);
+  assert.match(paidAccess, /roadmapWeeks === 12 && !storedTaskIds\.includes\(taskId\)/);
+  assert.match(paidAccess, /completionActivity: JSON\.stringify\(nextCompletionActivity\)/);
+  assert.match(progress, /export function weeklyActivityCounts\(/);
+  assert.match(progress, /LEARNER_TIME_ZONE = "Asia\/Kolkata"/);
+  assert.match(progress, /weeklyActivity: weeklyActivityCounts\(normalizedCompletionActivity\)/);
+  assert.match(provider, /initialCompletionActivity/);
+  assert.match(provider, /readCompletionActivity\(value\.completionActivity\)/);
+  assert.match(roadmap, /readCompletionActivity\(saved\.completionActivity\)/);
+  assert.match(studyButton, /readCompletionActivity\(saved\.completionActivity\)/);
 });
 
 test("Second Seat practice is durable, entitlement-gated, and transcript-backed", async () => {

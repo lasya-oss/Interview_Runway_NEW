@@ -39,7 +39,17 @@ export function StudyProgressButton({
         method: "PUT",
       });
       if (!response.ok) throw new Error("Progress could not be saved");
-      emitRoadmapProgressUpdated(profileId, [...new Set([...currentIds, taskId])]);
+      const saved = (await response.json()) as {
+        completedTaskIds?: unknown;
+        completionActivity?: unknown;
+      };
+      emitRoadmapProgressUpdated(
+        profileId,
+        Array.isArray(saved.completedTaskIds)
+          ? saved.completedTaskIds.filter((value): value is string => typeof value === "string")
+          : [...new Set([...currentIds, taskId])],
+        readCompletionActivity(saved.completionActivity),
+      );
       setCompleted(true);
     } catch {
       setError("Progress could not be saved. Please try again.");
@@ -56,5 +66,14 @@ export function StudyProgressButton({
       </button>
       {error ? <p role="alert">{error}</p> : null}
     </div>
+  );
+}
+
+function readCompletionActivity(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      ([taskId, date]) => typeof taskId === "string" && typeof date === "string",
+    ),
   );
 }

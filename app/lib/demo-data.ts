@@ -19,6 +19,7 @@ export type DemoProfile = {
   week: number;
   roadmapWeeks: number;
   completedTaskIds?: readonly string[];
+  completionActivity?: Readonly<Record<string, string>>;
   nextActionHref?: string;
   nextAction: string;
   nextActionMeta: string;

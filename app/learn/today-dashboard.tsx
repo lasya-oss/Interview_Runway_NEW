@@ -23,7 +23,11 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const todayKicker = isFreshLearner
     ? `Start here · Week 1 of ${profile.roadmapWeeks}`
     : `Week ${currentWeek} of ${profile.roadmapWeeks} · ${profile.id === "foundation" ? "Foundation" : profile.id === "practice" ? "Second Seat" : "Calibration"} path`;
-  const weeklyActivity = isTracked ? [0, 0, 0, 0, 0, 0, 0] : [72, 100, 48, 86, 34, 0, 0];
+  const weeklyActivity = isTracked
+    ? profile.id === "foundation" ? roadmap.weeklyActivity : [0, 0, 0, 0, 0, 0, 0]
+    : [72, 100, 48, 86, 34, 0, 0];
+  const maxWeeklyActivity = Math.max(...weeklyActivity, 0);
+  const weeklyActivityTotal = weeklyActivity.reduce((total, value) => total + value, 0);
   const scoreKey = profile.id;
   const continuedMaterials = profile.id === "foundation"
     ? LEARNING_MATERIALS.filter((material) => material.tier === "foundation").slice(0, 3)
@@ -89,8 +93,8 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
 
         <article className="weekly-plan-panel">
           <div className="member-panel-label"><span>This week</span><b>{isFreshLearner ? "Start here" : profile.isLive || isTracked ? "Plan active" : profile.week === 4 ? "Final pass" : "Plan active"}</b></div>
-          <div className="week-strip" aria-label={isTracked ? "No daily activity recorded yet" : "Weekly activity"}>
-            {weeklyActivity.map((value, index) => <span key={index}><i style={{ height: value === 0 ? "0%" : `${Math.max(8, value)}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
+          <div className="week-strip" aria-label={isTracked ? weeklyActivityTotal ? `${weeklyActivityTotal} roadmap task${weeklyActivityTotal === 1 ? "" : "s"} completed this week` : "No roadmap activity recorded yet" : "Weekly activity"}>
+            {weeklyActivity.map((value, index) => <span key={index} title={value ? `${value} task${value === 1 ? "" : "s"} completed` : "No tasks completed"}><i data-activity-count={value} style={{ height: value === 0 ? "0%" : `${Math.max(8, Math.round((value / maxWeeklyActivity) * 100))}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
           </div>
           <dl className="weekly-stats">
             <div><dt>Completed</dt><dd>{completedLabel}</dd></div>

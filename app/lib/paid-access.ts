@@ -3,13 +3,19 @@ import { getDb } from "@/db";
 import { entitlements, learnerProgress } from "@/db/schema";
 import type { ChatGPTUser } from "@/app/chatgpt-auth";
 import { ROADMAP_PLANS, TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
-import { roadmapPlanForWeeks, roadmapProgressFor } from "@/app/lib/learner-progress";
+import {
+  dateKeyForTimeZone,
+  roadmapPlanForWeeks,
+  roadmapProgressFor,
+  type CompletionActivity,
+} from "@/app/lib/learner-progress";
 
 const DEFAULT_DOMAIN = "vividlabsai.com";
 export type RoadmapWeeks = 4 | 12;
 
 export type LearnerProgress = {
   completedTaskIds: string[];
+  completionActivity: CompletionActivity;
   progressPercent: number;
 };
 
@@ -103,22 +109,26 @@ export async function getLearnerProgress(
   const [record] = await (await getDb())
     .select({
       completedTaskIds: learnerProgress.completedTaskIds,
+      completionActivity: learnerProgress.completionActivity,
       progressPercent: learnerProgress.progressPercent,
     })
     .from(learnerProgress)
     .where(eq(learnerProgress.userEmail, normalizeEmail(email)))
     .limit(1);
 
-  if (!record) return { completedTaskIds: [], progressPercent: 0 };
+  if (!record) return { completedTaskIds: [], completionActivity: {}, progressPercent: 0 };
 
   const completedTaskIds = parseCompletedTaskIds(record.completedTaskIds);
+  const completionActivity = parseCompletionActivity(record.completionActivity);
   const roadmapProgress = roadmapProgressFor(
     roadmapPlanForWeeks(roadmapWeeks),
     completedTaskIds,
+    completionActivity,
   );
 
   return {
     completedTaskIds: roadmapProgress.completedTaskIds,
+    completionActivity: roadmapProgress.completionActivity,
     progressPercent: roadmapProgress.progressPercent,
   };
 }
@@ -130,11 +140,15 @@ export async function saveLearnerProgress(
 ): Promise<LearnerProgress> {
   const db = await getDb();
   const [record] = await db
-    .select({ completedTaskIds: learnerProgress.completedTaskIds })
+    .select({
+      completedTaskIds: learnerProgress.completedTaskIds,
+      completionActivity: learnerProgress.completionActivity,
+    })
     .from(learnerProgress)
     .where(eq(learnerProgress.userEmail, normalizeEmail(email)))
     .limit(1);
   const storedTaskIds = parseCompletedTaskIds(record?.completedTaskIds);
+  const storedCompletionActivity = parseCompletionActivity(record?.completionActivity);
   const selectedPlan = roadmapPlanForWeeks(roadmapWeeks);
   const selectedTaskIds = new Set(
     selectedPlan.flatMap((week) => week.tasks.map((task) => task.id)),
@@ -152,6 +166,19 @@ export async function saveLearnerProgress(
     ...preservedTaskIds,
     ...selectedProgress.completedTaskIds,
   ];
+  const nextCompletionActivity: CompletionActivity = {};
+  for (const taskId of preservedTaskIds) {
+    const date = storedCompletionActivity[taskId];
+    if (date) nextCompletionActivity[taskId] = date;
+  }
+  for (const taskId of selectedProgress.completedTaskIds) {
+    const date = storedCompletionActivity[taskId];
+    if (date) {
+      nextCompletionActivity[taskId] = date;
+    } else if (roadmapWeeks === 12 && !storedTaskIds.includes(taskId)) {
+      nextCompletionActivity[taskId] = dateKeyForTimeZone(new Date());
+    }
+  }
   const progressPercent = selectedProgress.progressPercent;
   const updatedAt = new Date().toISOString();
 
@@ -160,6 +187,7 @@ export async function saveLearnerProgress(
     .values({
       userEmail: normalizeEmail(email),
       completedTaskIds: JSON.stringify(storedTaskIdsForAllPlans),
+      completionActivity: JSON.stringify(nextCompletionActivity),
       progressPercent,
       updatedAt,
     })
@@ -167,6 +195,7 @@ export async function saveLearnerProgress(
       target: learnerProgress.userEmail,
       set: {
         completedTaskIds: JSON.stringify(storedTaskIdsForAllPlans),
+        completionActivity: JSON.stringify(nextCompletionActivity),
         progressPercent,
         updatedAt,
       },
@@ -174,6 +203,11 @@ export async function saveLearnerProgress(
 
   return {
     completedTaskIds: selectedProgress.completedTaskIds,
+    completionActivity: roadmapProgressFor(
+      selectedPlan,
+      selectedProgress.completedTaskIds,
+      nextCompletionActivity,
+    ).completionActivity,
     progressPercent,
   };
 }
@@ -187,6 +221,21 @@ function parseCompletedTaskIds(value: string | undefined): string[] {
       : [];
   } catch {
     return [];
+  }
+}
+
+function parseCompletionActivity(value: string | undefined): CompletionActivity {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return Object.fromEntries(
+      Object.entries(parsed).filter(
+        ([taskId, date]) => typeof taskId === "string" && typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date),
+      ),
+    );
+  } catch {
+    return {};
   }
 }
 
@@ -219,6 +268,7 @@ export function createFoundationProfile(
     week: currentWeek,
     roadmapWeeks: 12,
     completedTaskIds: progress.completedTaskIds,
+    completionActivity: progress.completionActivity,
     isSecondSeatLive: options.secondSeatAccess === true,
     nextAction: nextTask?.title || "Review your completed Foundation roadmap",
     nextActionMeta: nextTask?.meta || "Foundation · complete",

@@ -69,7 +69,17 @@ export function RoadmapChecklist({
         method: "PUT",
       });
       if (!response.ok) throw new Error("Progress could not be saved");
-      emitRoadmapProgressUpdated(profileId, [...next]);
+      const saved = (await response.json()) as {
+        completedTaskIds?: unknown;
+        completionActivity?: unknown;
+      };
+      emitRoadmapProgressUpdated(
+        profileId,
+        Array.isArray(saved.completedTaskIds)
+          ? saved.completedTaskIds.filter((taskId): taskId is string => typeof taskId === "string")
+          : [...next],
+        readCompletionActivity(saved.completionActivity),
+      );
     } catch {
       setCompleted(previous);
       setSaveError("Progress could not be saved. Please try again.");
@@ -198,6 +208,15 @@ export function RoadmapChecklist({
         })}
       </div>
     </div>
+  );
+}
+
+function readCompletionActivity(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      ([taskId, date]) => typeof taskId === "string" && typeof date === "string",
+    ),
   );
 }
 
