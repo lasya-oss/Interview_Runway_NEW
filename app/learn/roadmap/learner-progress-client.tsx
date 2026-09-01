@@ -63,15 +63,20 @@ export function RoadmapProgressProvider({
 
     const apply = (
       completedTaskIds: readonly string[],
-      completionActivity: Readonly<Record<string, string>> = {},
+      completionActivity?: Readonly<Record<string, string>>,
       focusedSeconds?: number,
     ) => {
-      setSnapshot((previous) => roadmapProgressFor(
-        weeks,
-        completedTaskIds,
-        completionActivity,
-        focusedSeconds ?? previous.focusedSeconds,
-      ));
+      setSnapshot((previous) => {
+        const effectiveCompletionActivity = completionActivity === undefined || Object.keys(completionActivity).length === 0
+          ? previousActivityForCompletedTasks(previous, completedTaskIds)
+          : { ...previous.completionActivity, ...completionActivity };
+        return roadmapProgressFor(
+          weeks,
+          completedTaskIds,
+          effectiveCompletionActivity,
+          focusedSeconds ?? previous.focusedSeconds,
+        );
+      });
     };
     const handleProgressEvent = (event: Event) => {
       const detail = (event as CustomEvent<RoadmapProgressEventDetail>).detail;
@@ -85,7 +90,7 @@ export function RoadmapProgressProvider({
     };
     const handleStorage = (event: StorageEvent) => {
       if (event.key !== storageKey) return;
-      apply(readStoredTaskIds(event.newValue));
+      apply(readStoredTaskIds(event.newValue), {});
     };
 
     window.addEventListener(ROADMAP_PROGRESS_EVENT, handleProgressEvent);
@@ -121,7 +126,9 @@ export function RoadmapProgressProvider({
             Array.isArray(value.completedTaskIds)
               ? value.completedTaskIds.filter((taskId): taskId is string => typeof taskId === "string")
               : [],
-            readCompletionActivity(value.completionActivity),
+            Object.prototype.hasOwnProperty.call(value, "completionActivity")
+              ? readCompletionActivity(value.completionActivity)
+              : undefined,
             typeof value.focusedSeconds === "number" ? value.focusedSeconds : undefined,
           );
         })
@@ -197,6 +204,16 @@ function readCompletionActivity(value: unknown): Record<string, string> {
     Object.entries(value).filter(
       ([taskId, date]) => typeof taskId === "string" && typeof date === "string",
     ),
+  );
+}
+
+function previousActivityForCompletedTasks(
+  snapshot: RoadmapProgressSnapshot,
+  completedTaskIds: readonly string[],
+) {
+  const completed = new Set(completedTaskIds);
+  return Object.fromEntries(
+    Object.entries(snapshot.completionActivity).filter(([taskId]) => completed.has(taskId)),
   );
 }
 

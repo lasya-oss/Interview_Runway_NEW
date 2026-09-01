@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import type { DemoProfile } from "@/app/lib/demo-data";
 import { CurrentAccessCard } from "./current-access-card";
 import { RoadmapProgressProvider, RoadmapTrackLabel } from "@/app/learn/roadmap/learner-progress-client";
+import { FocusTimeTracker } from "@/app/learn/focus-time-tracker";
 import { DemoLogoutButton, LiveLogoutButton } from "./member-actions";
 
 const MEMBER_NAV = [
@@ -77,6 +78,7 @@ export function MemberShell({
         initialProgress={profile.progress}
         initialWeek={profile.week}
       >
+      {isLive && isVaultWorkspace ? <FocusTimeTracker profileId={profile.id} /> : null}
       <aside className="member-sidebar">
         <div className="member-sidebar-brand"><Brand /><span>Learning workspace</span></div>
 

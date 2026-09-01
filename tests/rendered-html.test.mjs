@@ -918,7 +918,7 @@ test("Foundation demo Today renders the clean starting values", async () => {
   assert.match(dashboardText, /Create the target-role map/i);
   assert.match(dashboardText, /0 \/ 24/i);
   assert.match(dashboardText, /Starts at 0m/i);
-  assert.match(dashboardText, /After next study step/i);
+  assert.match(dashboardText, /After first study step/i);
   assert.doesNotMatch(dashboardText, /Friday · Week 2|18 Plan complete|5 \/ 9|2h 14m|Next review Sunday/i);
 });
 
@@ -1394,6 +1394,7 @@ test("Vault weekly activity is persisted from dated roadmap completions", async 
   const focusRoute = await readFile(new URL("../app/api/learner/focus/route.ts", import.meta.url), "utf8");
   const focusTracker = await readFile(new URL("../app/learn/focus-time-tracker.tsx", import.meta.url), "utf8");
   const dashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
 
   assert.match(schema, /completionActivity: text\("completion_activity"\)/);
   assert.match(schema, /focusedSeconds: integer\("focused_seconds"\)/);
@@ -1417,13 +1418,15 @@ test("Vault weekly activity is persisted from dated roadmap completions", async 
   assert.match(focusTracker, /FLUSH_INTERVAL_MS = 30_000/);
   assert.match(focusTracker, /visibilityState/);
   assert.match(dashboard, /formatFocusedTime\(roadmap\.focusedSeconds\)/);
-  assert.match(dashboard, /After: \$\{roadmap\.nextTask\.title\}/);
+  assert.match(dashboard, /roadmap\.nextTask \? "After next study step"/);
+  assert.match(dashboard, /week-strip-status/);
   assert.match(progress, /LEARNER_TIME_ZONE = "Asia\/Kolkata"/);
   assert.match(progress, /weeklyActivity: weeklyActivityCounts\(normalizedCompletionActivity\)/);
   assert.match(provider, /initialCompletionActivity/);
   assert.match(provider, /readCompletionActivity\(value\.completionActivity\)/);
   assert.match(roadmap, /readCompletionActivity\(saved\.completionActivity\)/);
   assert.match(studyButton, /readCompletionActivity\(saved\.completionActivity\)/);
+  assert.match(shell, /FocusTimeTracker profileId=\{profile\.id\}/);
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   assert.match(styles, /\.week-strip i \{ display: block;/);
 });

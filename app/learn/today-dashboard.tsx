@@ -64,15 +64,16 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
     ? `${roadmap.completedCount} / ${totalPlanTasks}`
     : profile.id === "practice" ? "8 / 11" : "9 / 10";
   const focusedTimeLabel = isTracked
-    ? isFreshLearner ? "Starts at 0m" : roadmap.focusedSeconds > 0 ? formatFocusedTime(roadmap.focusedSeconds) : "Not recorded"
+    ? isFreshLearner ? "Starts at 0m" : roadmap.focusedSeconds > 0 ? formatFocusedTime(roadmap.focusedSeconds) : "Not tracked yet"
     : profile.id === "practice" ? "4h 38m" : "5h 06m";
   const nextReviewLabel = isTracked
     ? isFreshLearner
-      ? "After next study step"
-      : roadmap.nextTask
-        ? `After: ${roadmap.nextTask.title}`
-        : "Roadmap complete"
+      ? "After first study step"
+      : roadmap.nextTask ? "After next study step" : "Roadmap complete"
     : "Thu 18:30";
+  const weeklyActivityStatus = weeklyActivityTotal
+    ? `${weeklyActivityTotal} roadmap task${weeklyActivityTotal === 1 ? "" : "s"} completed this week`
+    : "No roadmap completions recorded this week";
 
   return (
     <div className="member-page member-page-vault-today member-dashboard">
@@ -99,9 +100,10 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
 
         <article className="weekly-plan-panel">
           <div className="member-panel-label"><span>This week</span><b>{isFreshLearner ? "Start here" : profile.isLive || isTracked ? "Plan active" : profile.week === 4 ? "Final pass" : "Plan active"}</b></div>
-          <div className="week-strip" aria-label={isTracked ? weeklyActivityTotal ? `${weeklyActivityTotal} roadmap task${weeklyActivityTotal === 1 ? "" : "s"} completed this week` : "No roadmap activity recorded yet" : "Weekly activity"}>
-            {weeklyActivity.map((value, index) => <span key={index} title={value ? `${value} task${value === 1 ? "" : "s"} completed` : "No tasks completed"}><i data-activity-count={value} style={{ height: value === 0 ? "0%" : `${Math.max(8, Math.round((value / maxWeeklyActivity) * 100))}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
+          <div className="week-strip" aria-label={isTracked ? weeklyActivityStatus : "Weekly activity"}>
+            {weeklyActivity.map((value, index) => <span className={value ? "has-activity" : ""} key={index} title={value ? `${value} task${value === 1 ? "" : "s"} completed` : "No tasks completed"}><i data-activity-count={value} style={{ height: value === 0 ? "0%" : `${Math.max(8, Math.round((value / maxWeeklyActivity) * 100))}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
           </div>
+          {isTracked ? <p className="week-strip-status" aria-live="polite">{weeklyActivityStatus}</p> : null}
           <dl className="weekly-stats">
             <div><dt>Completed</dt><dd>{completedLabel}</dd></div>
             <div><dt>Focused time</dt><dd>{focusedTimeLabel}</dd></div>

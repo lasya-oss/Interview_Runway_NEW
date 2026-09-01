@@ -132,13 +132,16 @@ export async function getLearnerProgress(
   );
   if (hasNewCompletionActivity(storedCompletionActivity, completionActivity)) {
     // Legacy rows predate per-task activity. Keep the repair idempotent and
-    // conditional so a concurrent completion cannot be overwritten.
+    // conditional so a concurrent completion cannot be overwritten. The row
+    // timestamp is part of the compare-and-set guard because focus updates
+    // may otherwise leave the activity JSON unchanged while the row changes.
     await db
       .update(learnerProgress)
       .set({ completionActivity: JSON.stringify(completionActivity) })
       .where(
         and(
           eq(learnerProgress.userEmail, normalizeEmail(email)),
+          eq(learnerProgress.updatedAt, record.updatedAt),
           eq(learnerProgress.completionActivity, record.completionActivity),
         ),
       );
