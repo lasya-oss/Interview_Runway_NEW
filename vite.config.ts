@@ -36,6 +36,7 @@ const localBindingConfig = {
     AUTH_SESSION_SECRET: process.env.AUTH_SESSION_SECRET ?? "",
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? "",
     TEST_FOUNDATION_EMAILS: process.env.TEST_FOUNDATION_EMAILS ?? "",
+    TEST_SECOND_SEAT_EMAILS: process.env.TEST_SECOND_SEAT_EMAILS ?? "",
   },
 };
 
