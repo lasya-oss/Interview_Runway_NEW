@@ -1454,8 +1454,14 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(practice, /aria-expanded=\{selected\}/);
   assert.match(practice, /practice-round-context-\$\{candidate\.id\}/);
   assert.match(practice, /candidate\.turns\[0\]\.prompt/);
+  assert.match(practice, /feedbackHref\(session\.id, isLive\)/);
+  assert.match(practice, /feedbackHref\(sessionId, isLive\)/);
   assert.doesNotMatch(practice, /fixed three-turn sequence|No AI evaluation occurred|Use a sample response/i);
   assert.match(feedback, /getLatestCompletedSecondSeatSession/);
+  assert.match(feedback, /getSecondSeatSession/);
+  assert.match(feedback, /requestedSessionId/);
+  assert.match(feedback, /selectedSession\?\.status === "completed"/);
+  assert.match(feedback, /findSecondSeatMock\(feedbackSession\.mockId\)/);
   assert.match(feedback, /feedback-empty/);
   assert.match(sessionRoute, /hasSecondSeatAccess/);
   assert.match(sessionRoute, /answers\.length > mock\.turns\.length/);

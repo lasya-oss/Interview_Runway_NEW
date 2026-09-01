@@ -226,7 +226,7 @@ export function PracticeClient({
               {recentSessions.map((session) => {
                 const completedMock = findSecondSeatMock(session.mockId);
                 return (
-                  <Link href="/learn/feedback" key={session.id}>
+                  <Link href={feedbackHref(session.id, isLive)} key={session.id}>
                     <span>{completedMock?.category ?? "Practice"}</span>
                     <strong>{completedMock?.title ?? "Completed session"}</strong>
                     <small>{session.evaluation?.overall ?? "—"} practice signal · {formatDate(session.completedAt)}</small>
@@ -253,7 +253,7 @@ export function PracticeClient({
           <h1>Your transcript has a next move.</h1>
           <p>{evaluation.insightBody}</p>
           <div className="practice-complete-actions">
-            <Link className="member-primary-button" href="/learn/feedback">Open your feedback <span aria-hidden="true">↗</span></Link>
+            <Link className="member-primary-button" href={feedbackHref(sessionId, isLive)}>Open your feedback <span aria-hidden="true">↗</span></Link>
             <button type="button" onClick={() => { setState("briefing"); setEvaluation(null); }}>Run another round</button>
           </div>
         </section>
@@ -313,4 +313,10 @@ export function PracticeClient({
 function formatDate(value: string | null) {
   if (!value) return "Just now";
   return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(new Date(value));
+}
+
+function feedbackHref(sessionId: string | null, live: boolean) {
+  return live && sessionId
+    ? `/learn/feedback?sessionId=${encodeURIComponent(sessionId)}`
+    : "/learn/feedback";
 }

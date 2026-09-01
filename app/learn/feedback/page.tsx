@@ -3,7 +3,10 @@ import Link from "next/link";
 import { LockedMemberPanel } from "@/app/components/member-shell";
 import { SCORE_DIMENSIONS } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
-import { getLatestCompletedSecondSeatSession } from "@/app/lib/second-seat-store";
+import {
+  getLatestCompletedSecondSeatSession,
+  getSecondSeatSession,
+} from "@/app/lib/second-seat-store";
 import { findSecondSeatMock } from "@/app/lib/second-seat-engine";
 import { FeedbackClient } from "./feedback-client";
 
@@ -47,7 +50,11 @@ const ACTIONS = [
   { number: "03", title: "Repeat under a new prompt", body: "Run the notification-service sample and apply the same decision order without reusing the architecture.", meta: "35 min · scripted mock", href: "/learn/practice", why: "A changed prompt tests whether the correction transferred into a repeatable interview habit." },
 ] as const;
 
-export default async function FeedbackPage() {
+export default async function FeedbackPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sessionId?: string | string[] }>;
+}) {
   const profile = await requireDemoProfile("/learn/feedback");
 
   if (!profile.access.feedback) {
@@ -62,17 +69,26 @@ export default async function FeedbackPage() {
     );
   }
 
-  const latestSession = profile.isSecondSeatLive
-    ? await getLatestCompletedSecondSeatSession(profile.email)
+  const { sessionId: requestedSessionIdValue } = await searchParams;
+  const requestedSessionId = typeof requestedSessionIdValue === "string"
+    ? requestedSessionIdValue.trim()
+    : "";
+  const selectedSession = profile.isSecondSeatLive
+    ? requestedSessionId
+      ? await getSecondSeatSession(profile.email, requestedSessionId)
+      : await getLatestCompletedSecondSeatSession(profile.email)
     : null;
-  const liveEvaluation = latestSession?.evaluation ?? null;
+  const feedbackSession = selectedSession?.status === "completed" && selectedSession.evaluation
+    ? selectedSession
+    : null;
+  const liveEvaluation = feedbackSession?.evaluation ?? null;
   if (profile.isSecondSeatLive && !liveEvaluation) {
     return (
       <div className="member-page">
         <section className="feedback-empty" aria-labelledby="feedback-empty-title">
           <p className="member-kicker">Second Seat · feedback room</p>
-          <h1 id="feedback-empty-title">Your first transcript will become the baseline.</h1>
-          <p>Complete one practice round and this page will show category scores, transcript evidence, and the smallest useful next rehearsal. Nothing is pre-populated.</p>
+          <h1 id="feedback-empty-title">{requestedSessionId ? "That practice attempt is not ready for feedback." : "Your first transcript will become the baseline."}</h1>
+          <p>{requestedSessionId ? "Feedback is available only for a completed practice attempt owned by your account. Complete the round before opening its debrief; no other attempt was substituted." : "Complete one practice round and this page will show category scores, transcript evidence, and the smallest useful next rehearsal. Nothing is pre-populated."}</p>
           <Link className="member-primary-button" href="/learn/practice">Start a practice round <span aria-hidden="true">↗</span></Link>
         </section>
       </div>
@@ -97,7 +113,7 @@ export default async function FeedbackPage() {
     ? liveEvaluation.evidence.map((item, index) => ({
       ...item,
       time: `Turn ${String(index + 1).padStart(2, "0")}`,
-      dimensionKeys: findSecondSeatMock(latestSession?.mockId ?? "")?.turns.find((turn) => turn.label === item.turn)?.dimensions ?? [],
+      dimensionKeys: findSecondSeatMock(feedbackSession?.mockId ?? "")?.turns.find((turn) => turn.label === item.turn)?.dimensions ?? [],
     }))
     : EVIDENCE;
   const actions = liveEvaluation?.nextActions ?? ACTIONS;
@@ -112,7 +128,7 @@ export default async function FeedbackPage() {
         premium={profile.id === "premium"}
         live={profile.isSecondSeatLive === true}
         secondSeat={profile.id === "practice" || profile.isSecondSeatLive === true}
-        mockTitle={latestSession ? "Your latest practice round" : "Design a metrics pipeline"}
+        mockTitle={feedbackSession ? findSecondSeatMock(feedbackSession.mockId)?.title ?? "Your practice round" : "Design a metrics pipeline"}
         insightTitle={liveEvaluation?.insightTitle}
         insightBody={liveEvaluation?.insightBody}
       />
