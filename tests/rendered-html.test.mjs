@@ -1396,6 +1396,9 @@ test("Vault weekly activity is persisted from dated roadmap completions", async 
   assert.match(paidAccess, /completionActivity: learnerProgress\.completionActivity/);
   assert.match(paidAccess, /updatedAt: learnerProgress\.updatedAt/);
   assert.match(paidAccess, /repairLegacyCompletionActivity\(/);
+  assert.match(paidAccess, /hasNewCompletionActivity\(/);
+  assert.match(paidAccess, /completionActivity: JSON\.stringify\(completionActivity\)/);
+  assert.match(paidAccess, /completedTaskIds\.length !== 1/);
   assert.match(paidAccess, /dateKeyForTimeZone\(new Date\(\)\)/);
   assert.match(paidAccess, /roadmapWeeks === 12 && !storedTaskIds\.includes\(taskId\)/);
   assert.match(paidAccess, /completionActivity: JSON\.stringify\(nextCompletionActivity\)/);
@@ -1406,6 +1409,8 @@ test("Vault weekly activity is persisted from dated roadmap completions", async 
   assert.match(provider, /readCompletionActivity\(value\.completionActivity\)/);
   assert.match(roadmap, /readCompletionActivity\(saved\.completionActivity\)/);
   assert.match(studyButton, /readCompletionActivity\(saved\.completionActivity\)/);
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /\.week-strip i \{ display: block;/);
 });
 
 test("Second Seat practice is durable, entitlement-gated, and transcript-backed", async () => {

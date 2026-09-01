@@ -5199,7 +5199,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .weekly-plan-panel { display: flex; flex-direction: column; }
 .week-strip { height: 150px; margin-top: 34px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; align-items: end; }
 .week-strip > span { height: 100%; display: flex; align-items: center; flex-direction: column; justify-content: flex-end; gap: 7px; }
-.week-strip i { width: 100%; max-width: 15px; border-radius: 6px 6px 1px 1px; background: #8ea1aa; }
+.week-strip i { display: block; width: 100%; max-width: 15px; border-radius: 6px 6px 1px 1px; background: #8ea1aa; }
 .week-strip span:nth-child(2) i, .week-strip span:nth-child(4) i { background: var(--afterburner); }
 .week-strip b { color: #71848d; font-family: var(--font-mono); font-size: 6px; }
 .weekly-stats { margin: auto 0 0; padding-top: 20px; display: grid; gap: 8px; border-top: 1px solid rgba(30,63,76,.11); }

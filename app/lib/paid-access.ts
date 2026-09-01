@@ -106,7 +106,8 @@ export async function getLearnerProgress(
   email: string,
   roadmapWeeks: RoadmapWeeks = 12,
 ): Promise<LearnerProgress> {
-  const [record] = await (await getDb())
+  const db = await getDb();
+  const [record] = await db
     .select({
       completedTaskIds: learnerProgress.completedTaskIds,
       completionActivity: learnerProgress.completionActivity,
@@ -120,12 +121,26 @@ export async function getLearnerProgress(
   if (!record) return { completedTaskIds: [], completionActivity: {}, progressPercent: 0 };
 
   const completedTaskIds = parseCompletedTaskIds(record.completedTaskIds);
+  const storedCompletionActivity = parseCompletionActivity(record.completionActivity);
   const completionActivity = repairLegacyCompletionActivity(
     completedTaskIds,
-    parseCompletionActivity(record.completionActivity),
+    storedCompletionActivity,
     record.updatedAt,
     roadmapWeeks,
   );
+  if (hasNewCompletionActivity(storedCompletionActivity, completionActivity)) {
+    // Legacy rows predate per-task activity. Keep the repair idempotent and
+    // conditional so a concurrent completion cannot be overwritten.
+    await db
+      .update(learnerProgress)
+      .set({ completionActivity: JSON.stringify(completionActivity) })
+      .where(
+        and(
+          eq(learnerProgress.userEmail, normalizeEmail(email)),
+          eq(learnerProgress.completionActivity, record.completionActivity),
+        ),
+      );
+  }
   const roadmapProgress = roadmapProgressFor(
     roadmapPlanForWeeks(roadmapWeeks),
     completedTaskIds,
@@ -257,7 +272,12 @@ function repairLegacyCompletionActivity(
   updatedAt: string | undefined,
   roadmapWeeks: RoadmapWeeks,
 ): CompletionActivity {
-  if (roadmapWeeks !== 12 || !updatedAt) return completionActivity;
+  // A row-level updated_at can stand in for a task date only when there is
+  // exactly one legacy task. With multiple tasks it cannot identify their
+  // individual completion dates without inventing history.
+  if (roadmapWeeks !== 12 || completedTaskIds.length !== 1 || !updatedAt) {
+    return completionActivity;
+  }
 
   const savedDate = new Date(updatedAt);
   if (Number.isNaN(savedDate.getTime())) return completionActivity;
@@ -268,14 +288,20 @@ function repairLegacyCompletionActivity(
   const fallbackDate = dateKeyForTimeZone(savedDate);
   const repaired = { ...completionActivity };
 
-  // The activity column was added after some Foundation completions already
-  // existed. Use the progress row's saved date once for those legacy entries;
-  // new transitions are still timestamped at the moment they are saved below.
   for (const taskId of completedTaskIds) {
     if (vaultTaskIds.has(taskId) && !repaired[taskId]) repaired[taskId] = fallbackDate;
   }
 
   return repaired;
+}
+
+function hasNewCompletionActivity(
+  storedCompletionActivity: CompletionActivity,
+  repairedCompletionActivity: CompletionActivity,
+) {
+  return Object.entries(repairedCompletionActivity).some(
+    ([taskId, date]) => storedCompletionActivity[taskId] !== date,
+  );
 }
 
 export function createFoundationProfile(
