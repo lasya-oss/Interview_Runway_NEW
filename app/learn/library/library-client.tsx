@@ -12,6 +12,7 @@ import type { DemoTier, LearningMaterial } from "@/app/lib/demo-data";
 import type { DriveMaterial } from "@/app/lib/drive-materials";
 import type { LibraryCategorySummary, LibraryCatalog } from "./library-catalog";
 import { DriveMaterialShelf } from "./drive-material-shelf";
+import { VaultStartHere } from "./library-start-here";
 import { PdfGuideShelf } from "./pdf-guide-shelf";
 
 const TIER_ORDER: Record<DemoTier, number> = { foundation: 0, practice: 1, premium: 2 };
@@ -240,6 +241,8 @@ export function LibraryClient({
           ))}
         </div>
       </section>
+
+      {profileId === "foundation" ? <VaultStartHere catalog={catalog} isLive={isLive} /> : null}
 
       {category ? (
         <section id="library-category-results" className="library-category-view" aria-label={`${category} category view`}>
