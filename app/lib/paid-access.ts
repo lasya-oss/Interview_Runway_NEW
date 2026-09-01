@@ -110,6 +110,7 @@ export async function getLearnerProgress(
     .select({
       completedTaskIds: learnerProgress.completedTaskIds,
       completionActivity: learnerProgress.completionActivity,
+      updatedAt: learnerProgress.updatedAt,
       progressPercent: learnerProgress.progressPercent,
     })
     .from(learnerProgress)
@@ -119,7 +120,12 @@ export async function getLearnerProgress(
   if (!record) return { completedTaskIds: [], completionActivity: {}, progressPercent: 0 };
 
   const completedTaskIds = parseCompletedTaskIds(record.completedTaskIds);
-  const completionActivity = parseCompletionActivity(record.completionActivity);
+  const completionActivity = repairLegacyCompletionActivity(
+    completedTaskIds,
+    parseCompletionActivity(record.completionActivity),
+    record.updatedAt,
+    roadmapWeeks,
+  );
   const roadmapProgress = roadmapProgressFor(
     roadmapPlanForWeeks(roadmapWeeks),
     completedTaskIds,
@@ -143,12 +149,18 @@ export async function saveLearnerProgress(
     .select({
       completedTaskIds: learnerProgress.completedTaskIds,
       completionActivity: learnerProgress.completionActivity,
+      updatedAt: learnerProgress.updatedAt,
     })
     .from(learnerProgress)
     .where(eq(learnerProgress.userEmail, normalizeEmail(email)))
     .limit(1);
   const storedTaskIds = parseCompletedTaskIds(record?.completedTaskIds);
-  const storedCompletionActivity = parseCompletionActivity(record?.completionActivity);
+  const storedCompletionActivity = repairLegacyCompletionActivity(
+    storedTaskIds,
+    parseCompletionActivity(record?.completionActivity),
+    record?.updatedAt,
+    roadmapWeeks,
+  );
   const selectedPlan = roadmapPlanForWeeks(roadmapWeeks);
   const selectedTaskIds = new Set(
     selectedPlan.flatMap((week) => week.tasks.map((task) => task.id)),
@@ -237,6 +249,33 @@ function parseCompletionActivity(value: string | undefined): CompletionActivity 
   } catch {
     return {};
   }
+}
+
+function repairLegacyCompletionActivity(
+  completedTaskIds: readonly string[],
+  completionActivity: CompletionActivity,
+  updatedAt: string | undefined,
+  roadmapWeeks: RoadmapWeeks,
+): CompletionActivity {
+  if (roadmapWeeks !== 12 || !updatedAt) return completionActivity;
+
+  const savedDate = new Date(updatedAt);
+  if (Number.isNaN(savedDate.getTime())) return completionActivity;
+
+  const vaultTaskIds = new Set(
+    TWELVE_WEEK_PLAN.flatMap((week) => week.tasks.map((task) => task.id)),
+  );
+  const fallbackDate = dateKeyForTimeZone(savedDate);
+  const repaired = { ...completionActivity };
+
+  // The activity column was added after some Foundation completions already
+  // existed. Use the progress row's saved date once for those legacy entries;
+  // new transitions are still timestamped at the moment they are saved below.
+  for (const taskId of completedTaskIds) {
+    if (vaultTaskIds.has(taskId) && !repaired[taskId]) repaired[taskId] = fallbackDate;
+  }
+
+  return repaired;
 }
 
 export function createFoundationProfile(

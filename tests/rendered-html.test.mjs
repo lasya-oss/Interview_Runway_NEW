@@ -1394,6 +1394,8 @@ test("Vault weekly activity is persisted from dated roadmap completions", async 
   assert.match(schema, /completionActivity: text\("completion_activity"\)/);
   assert.match(migration, /ADD `completion_activity` text DEFAULT '\{\}' NOT NULL/);
   assert.match(paidAccess, /completionActivity: learnerProgress\.completionActivity/);
+  assert.match(paidAccess, /updatedAt: learnerProgress\.updatedAt/);
+  assert.match(paidAccess, /repairLegacyCompletionActivity\(/);
   assert.match(paidAccess, /dateKeyForTimeZone\(new Date\(\)\)/);
   assert.match(paidAccess, /roadmapWeeks === 12 && !storedTaskIds\.includes\(taskId\)/);
   assert.match(paidAccess, /completionActivity: JSON\.stringify\(nextCompletionActivity\)/);
