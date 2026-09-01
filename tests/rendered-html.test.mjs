@@ -284,6 +284,10 @@ test("Library categories expose filtered records and real content viewers", asyn
     new URL("../app/learn/library/library-client.tsx", import.meta.url),
     "utf8",
   );
+  const libraryStartHere = await readFile(
+    new URL("../app/learn/library/library-start-here.tsx", import.meta.url),
+    "utf8",
+  );
   const materialViewer = await readFile(
     new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
     "utf8",
@@ -303,6 +307,13 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(libraryClient, /import\("\.\/library-catalog"\)/i);
   assert.match(libraryClient, /Choose a category to open its records/i);
   assert.match(libraryClient, /library-catalog-loading/i);
+  assert.match(libraryStartHere, /Not sure where to start\? Build your preparation from the right foundation\./i);
+  assert.match(libraryStartHere, /<span>Choose your focus<\/span>/i);
+  assert.match(libraryStartHere, /record\.domain === domain/i);
+  assert.match(libraryStartHere, /normalizedFilename\.startsWith\("dsa_"\)/i);
+  assert.match(libraryStartHere, /normalizedFilename\.startsWith\("sysdesign_"\)/i);
+  assert.doesNotMatch(libraryStartHere, /VAULT_START_HERE_ROLES|StartHereRole|setRole/i);
+  assert.doesNotMatch(libraryStartHere, /Select a role or domain/i);
   assert.match(libraryClient, /material\.demoAsset\.href/i);
   assert.match(libraryClient, /Open actual content/i);
   assert.match(materialViewer, /DriveReplayPlayer/i);

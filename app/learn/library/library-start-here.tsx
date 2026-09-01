@@ -18,29 +18,6 @@ import {
 import type { LearningMaterial } from "@/app/lib/demo-data";
 import type { LibraryCatalog } from "./library-catalog";
 
-export const VAULT_START_HERE_ROLES = [
-  {
-    id: "backend",
-    label: "Backend engineer",
-    detail: "APIs, data, services, and reliable delivery",
-  },
-  {
-    id: "platform",
-    label: "Platform / infrastructure engineer",
-    detail: "Distributed systems, scale, and operations",
-  },
-  {
-    id: "product",
-    label: "Frontend / full-stack engineer",
-    detail: "Product delivery, coding, and system fluency",
-  },
-  {
-    id: "leadership",
-    label: "Engineering lead / manager",
-    detail: "Influence, execution, and people-facing signals",
-  },
-] as const;
-
 export const VAULT_START_HERE_DOMAINS = [
   {
     id: "coding",
@@ -79,12 +56,9 @@ export const VAULT_START_HERE_DOMAINS = [
   },
 ] as const;
 
-type StartHereRole = (typeof VAULT_START_HERE_ROLES)[number]["id"];
 type StartHereDomain = (typeof VAULT_START_HERE_DOMAINS)[number]["id"];
 type StartHereLevel = "basics" | "intermediate" | "advanced";
 
-const ALL_ROLES: readonly StartHereRole[] = ["backend", "platform", "product", "leadership"];
-const ENGINEERING_ROLES: readonly StartHereRole[] = ["backend", "platform", "product"];
 const LEVELS: readonly { id: StartHereLevel; label: string; detail: string }[] = [
   { id: "basics", label: "Basics", detail: "Start with the core idea and vocabulary." },
   { id: "intermediate", label: "Intermediate", detail: "Build fluency through decisions and practice." },
@@ -98,28 +72,27 @@ type StartHereRecord = {
   category: string;
   format: string;
   level: StartHereLevel;
-  roles: readonly StartHereRole[];
-  domains: readonly StartHereDomain[];
+  domain: StartHereDomain;
   href: string;
   action: string;
   external?: boolean;
 };
 
-function domainsForCategory(category: string, filename = ""): readonly StartHereDomain[] {
-  const value = `${category} ${filename}`.toLowerCase();
-  if (/dsa|coding|algorithm|binary|bfs|dfs|pointer|graph|heap|trie|backtrack/.test(value)) return ["coding"];
-  if (/system[- ]design|sysdesign|architecture|api[- ]gateway|database|cach|queue|storage|observability|consistency/.test(value)) return ["system-design"];
-  if (/behavio|story|star|ownership|leadership|influence|manager|communication/.test(value)) return ["behavioural"];
-  if (/career|resume|linkedin|recruiter|outreach|referral|portfolio|cover[- ]letter|title[- ]translation|ats[- ]resume/.test(value)) return ["career"];
-  if (/remote|compensation|contract|tax|payment|timezone|relocation|visa|negotiation/.test(value)) return ["remote"];
-  if (/company|employer/.test(value)) return ["company"];
-  if (/roadmap|operations|planning|weekly[- ]prep|interview[- ]day|interview[- ]availability|debrief|run[- ]sheet|mock|practice|tracker/.test(value)) return ["execution"];
-  return [];
-}
+function domainForLibraryRecord(category: string, filename = ""): StartHereDomain | null {
+  const normalizedCategory = category.toLowerCase();
+  const normalizedFilename = filename.toLowerCase();
 
-function rolesForDomains(domains: readonly StartHereDomain[]): readonly StartHereRole[] {
-  if (domains.includes("coding")) return ENGINEERING_ROLES;
-  return ALL_ROLES;
+  // These are intentionally canonical signals from the catalog, not loose
+  // keyword matches. A record is surfaced only when its source category or
+  // filename family directly identifies the preparation focus.
+  if (normalizedCategory === "dsa patterns" || normalizedFilename.startsWith("dsa_")) return "coding";
+  if (normalizedCategory === "system design" || normalizedFilename.startsWith("sysdesign_") || normalizedFilename.startsWith("template_system-design-")) return "system-design";
+  if (normalizedCategory === "behavioural" || normalizedFilename.startsWith("behavioral_") || normalizedFilename.startsWith("template_behavioral-")) return "behavioural";
+  if (normalizedCategory === "remote career" || normalizedFilename.startsWith("remote_") || normalizedFilename.startsWith("template_negotiation-")) return "remote";
+  if (normalizedCategory === "career signal" || normalizedFilename.startsWith("career_") || /template_(?:us-ats-resume|title-translation-guide|remote-cover-letter|outreach-|linkedin-)/.test(normalizedFilename)) return "career";
+  if (normalizedCategory === "company research" || normalizedFilename.startsWith("company_")) return "company";
+  if (normalizedCategory === "roadmaps" || normalizedCategory === "operations" || /template_(?:weekly-prep-tracker|recruiter-screen-notes|interview-availability)/.test(normalizedFilename)) return "execution";
+  return null;
 }
 
 function levelFromLearningMaterial(material: LearningMaterial): StartHereLevel {
@@ -142,8 +115,8 @@ function levelFromFilename(filename: string, source: "pdf" | "narrated" | "templ
 }
 
 function recordFromLearningMaterial(material: LearningMaterial): StartHereRecord | null {
-  const domains = domainsForCategory(material.category, `${material.title} ${material.tags.join(" ")}`);
-  if (!domains.length) return null;
+  const domain = domainForLibraryRecord(material.category);
+  if (!domain) return null;
   const hasDirectAsset = Boolean(material.demoAsset);
   return {
     id: `lesson-${material.slug}`,
@@ -152,8 +125,7 @@ function recordFromLearningMaterial(material: LearningMaterial): StartHereRecord
     category: material.category,
     format: material.format,
     level: levelFromLearningMaterial(material),
-    roles: rolesForDomains(domains),
-    domains,
+    domain,
     href: hasDirectAsset ? material.demoAsset!.href : `/learn/material/${material.slug}`,
     action: hasDirectAsset ? "Open actual content" : "Open lesson",
     external: hasDirectAsset,
@@ -162,8 +134,8 @@ function recordFromLearningMaterial(material: LearningMaterial): StartHereRecord
 
 function recordFromPdfGuide(guide: DrivePdfGuide): StartHereRecord | null {
   const category = drivePdfCategory(guide.filename);
-  const domains = domainsForCategory(category, guide.filename);
-  if (!domains.length) return null;
+  const domain = domainForLibraryRecord(category, guide.filename);
+  if (!domain) return null;
   return {
     id: `pdf-${guide.id}`,
     title: drivePdfTitle(guide.filename),
@@ -171,8 +143,7 @@ function recordFromPdfGuide(guide: DrivePdfGuide): StartHereRecord | null {
     category,
     format: "PDF guide",
     level: levelFromFilename(guide.filename, "pdf"),
-    roles: rolesForDomains(domains),
-    domains,
+    domain,
     href: drivePdfPreviewHref(guide.id) ?? "#",
     action: "Open guide",
     external: true,
@@ -181,8 +152,8 @@ function recordFromPdfGuide(guide: DrivePdfGuide): StartHereRecord | null {
 
 function recordFromDriveMaterial(material: DriveMaterial): StartHereRecord | null {
   const category = driveMaterialCategory(material.filename);
-  const domains = domainsForCategory(category, material.filename);
-  if (!domains.length) return null;
+  const domain = domainForLibraryRecord(category, material.filename);
+  if (!domain) return null;
   const kind = driveMaterialKindLabel(material.kind);
   return {
     id: `drive-${material.id}`,
@@ -191,8 +162,7 @@ function recordFromDriveMaterial(material: DriveMaterial): StartHereRecord | nul
     category,
     format: kind,
     level: levelFromFilename(material.filename, material.kind === "template" ? "template" : "narrated"),
-    roles: rolesForDomains(domains),
-    domains,
+    domain,
     href: driveMaterialHref({ id: material.id, filename: material.filename }),
     action: material.kind === "template" ? "Open template" : "Open explainer",
   };
@@ -224,10 +194,6 @@ function buildStartHereRecords(catalog: LibraryCatalog, isLive: boolean): readon
   return records;
 }
 
-function matchesRecord(record: StartHereRecord, role: StartHereRole | "", domain: StartHereDomain | "") {
-  return (!role || record.roles.includes(role)) && (!domain || record.domains.includes(domain));
-}
-
 export function VaultStartHere({
   catalog,
   isLive,
@@ -236,17 +202,15 @@ export function VaultStartHere({
   isLive: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [role, setRole] = useState<StartHereRole | "">("");
   const [domain, setDomain] = useState<StartHereDomain | "">("");
   const allRecords = useMemo(() => (catalog ? buildStartHereRecords(catalog, isLive) : []), [catalog, isLive]);
   const matchingRecords = useMemo(
-    () => allRecords.filter((record) => matchesRecord(record, role, domain)),
-    [allRecords, domain, role],
+    () => allRecords.filter((record) => !domain || record.domain === domain),
+    [allRecords, domain],
   );
-  const hasSelection = Boolean(role || domain);
+  const hasSelection = Boolean(domain);
 
   const clearSelection = () => {
-    setRole("");
     setDomain("");
   };
 
@@ -256,7 +220,7 @@ export function VaultStartHere({
         <div>
           <p className="member-kicker">A guided first step</p>
           <h2 id="library-start-here-title">New to interview preparation?</h2>
-          <p>Not sure where to start? Begin with the right foundation.</p>
+          <p>Not sure where to start? Build your preparation from the right foundation.</p>
         </div>
         <button
           className="library-start-here__toggle"
@@ -272,26 +236,18 @@ export function VaultStartHere({
       {open ? (
         <div id="library-start-here-panel" className="library-start-here__panel">
           <div className="library-start-here__copy">
-            <p className="member-kicker">Choose your starting point</p>
-            <p>These fixed paths are based on the Vault’s existing lessons, guides, explainers, and templates. Choose either selector, or use both to narrow the route.</p>
+            <p className="member-kicker">Choose your focus</p>
+            <p>These fixed paths are based on the Vault’s existing lesson, guide, explainer, and template metadata. Each focus shows only directly relevant primary material.</p>
           </div>
 
           <div className="library-start-here__filters" aria-label="Start here filters">
             <label>
-              <span>Role</span>
-              <select value={role} onChange={(event) => setRole(event.target.value as StartHereRole | "")}>
-                <option value="">Any role</option>
-                {VAULT_START_HERE_ROLES.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}
-              </select>
-              <small>{role ? VAULT_START_HERE_ROLES.find((item) => item.id === role)?.detail : "Choose the closest role family."}</small>
-            </label>
-            <label>
-              <span>Domain</span>
+              <span>Choose your focus</span>
               <select value={domain} onChange={(event) => setDomain(event.target.value as StartHereDomain | "")}>
-                <option value="">Any domain</option>
+                <option value="">Select a focus</option>
                 {VAULT_START_HERE_DOMAINS.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}
               </select>
-              <small>{domain ? VAULT_START_HERE_DOMAINS.find((item) => item.id === domain)?.detail : "Choose the decision you want to practise."}</small>
+              <small>{domain ? VAULT_START_HERE_DOMAINS.find((item) => item.id === domain)?.detail : "Choose the interview decision you want to practise."}</small>
             </label>
             {hasSelection ? <button className="library-start-here__clear" type="button" onClick={clearSelection}>Clear selection</button> : null}
           </div>
@@ -299,7 +255,7 @@ export function VaultStartHere({
           {!catalog ? (
             <div className="library-start-here__loading" aria-busy="true">Loading the Vault starting paths…</div>
           ) : !hasSelection ? (
-            <div className="library-start-here__prompt">Select a role or domain to see the matching Library content.</div>
+            <div className="library-start-here__prompt">Select a focus to see the directly relevant Library content.</div>
           ) : (
             <div className="library-start-here__results" aria-live="polite">
               <div className="library-start-here__summary">

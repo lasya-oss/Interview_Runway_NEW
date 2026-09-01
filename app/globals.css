@@ -6100,7 +6100,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .library-start-here__copy { max-width: 720px; }
 .library-start-here__copy .member-kicker { margin: 0; }
 .library-start-here__copy p:last-child { margin: 9px 0 0; color: #63757e; font-size: 11px; line-height: 1.6; }
-.library-start-here__filters { margin-top: 20px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+.library-start-here__filters { max-width: 720px; margin-top: 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
 .library-start-here__filters label { display: grid; gap: 7px; color: #748790; font-family: var(--font-mono); font-size: 7px; letter-spacing: .09em; text-transform: uppercase; }
 .library-start-here__filters select { min-height: 46px; padding: 0 12px; border: 1px solid rgba(31,65,78,.16); border-radius: 10px; color: #17323e; background: rgba(255,255,255,.75); font: inherit; font-family: var(--font-body); font-size: 11px; letter-spacing: 0; text-transform: none; cursor: pointer; }
 .library-start-here__filters select:focus { border-color: var(--afterburner); outline: 0; box-shadow: 0 0 0 3px rgba(255,107,44,.07); }
