@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   driveMaterialCategory,
   driveMaterialKindLabel,
@@ -204,6 +204,8 @@ export function VaultStartHere({
 }) {
   const [open, setOpen] = useState(false);
   const [domain, setDomain] = useState<StartHereDomain | "">("");
+  const [selectedLevel, setSelectedLevel] = useState<StartHereLevel | "">("");
+  const learningPathRef = useRef<HTMLDivElement>(null);
   const allRecords = useMemo(() => (catalog ? buildStartHereRecords(catalog, isLive) : []), [catalog, isLive]);
   const matchingRecords = useMemo(
     () => allRecords.filter((record) => !domain || record.domain === domain),
@@ -211,8 +213,21 @@ export function VaultStartHere({
   );
   const hasSelection = Boolean(domain);
 
+  useEffect(() => {
+    if (!domain || !catalog) return;
+    const frame = window.requestAnimationFrame(() => {
+      learningPathRef.current?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start",
+      });
+      learningPathRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [catalog, domain]);
+
   const clearSelection = () => {
     setDomain("");
+    setSelectedLevel("");
   };
 
   return (
@@ -244,7 +259,13 @@ export function VaultStartHere({
           <div className="library-start-here__filters" aria-label="Start here filters">
             <label>
               <span>Choose your focus</span>
-              <select value={domain} onChange={(event) => setDomain(event.target.value as StartHereDomain | "")}>
+              <select
+                value={domain}
+                onChange={(event) => {
+                  setDomain(event.target.value as StartHereDomain | "");
+                  setSelectedLevel("");
+                }}
+              >
                 <option value="">Select a focus</option>
                 {VAULT_START_HERE_DOMAINS.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}
               </select>
@@ -258,21 +279,56 @@ export function VaultStartHere({
           ) : !hasSelection ? (
             <div className="library-start-here__prompt">Select a focus to see the directly relevant Library content.</div>
           ) : (
-            <div className="library-start-here__results" aria-live="polite">
+            <div
+              ref={learningPathRef}
+              className="library-start-here__results"
+              aria-live="polite"
+              tabIndex={-1}
+            >
               <div className="library-start-here__summary">
                 <strong>{matchingRecords.length.toLocaleString("en-IN")}</strong>
-                <span>{matchingRecords.length === 1 ? "matching item" : "matching items"}</span>
+                <span>{matchingRecords.length === 1 ? "directly relevant record" : "directly relevant records"}</span>
               </div>
-              {LEVELS.map((level) => {
-                const records = matchingRecords.filter((record) => record.level === level.id);
+              <div className="library-start-here__levels" aria-label={`${matchingRecords.length.toLocaleString("en-IN")} records by learning level`}>
+                {LEVELS.map((level) => {
+                  const count = matchingRecords.filter((record) => record.level === level.id).length;
+                  const selected = selectedLevel === level.id;
+                  return (
+                    <button
+                      className={`library-start-here__level-card${selected ? " is-selected" : ""}`}
+                      type="button"
+                      aria-expanded={selected}
+                      aria-label={`${level.label}: ${count} ${count === 1 ? "record" : "records"}. ${selected ? "Selected" : "Show level"}`}
+                      onClick={() => setSelectedLevel(level.id)}
+                      key={level.id}
+                    >
+                      <span className="library-start-here__level-card-label">{level.label}</span>
+                      <span className="library-start-here__level-card-count">
+                        <strong>{count.toLocaleString("en-IN")}</strong>
+                        <small>{count === 1 ? "record" : "records"}</small>
+                      </span>
+                      <p>{level.detail}</p>
+                      <span className="library-start-here__level-card-action">{selected ? "Selected level" : "View level"} <b aria-hidden="true">↗</b></span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedLevel ? (() => {
+                const level = LEVELS.find((item) => item.id === selectedLevel)!;
+                const records = matchingRecords.filter((record) => record.level === selectedLevel);
                 return (
-                  <section className="library-start-here__level" aria-labelledby={`library-start-here-${level.id}`} key={level.id}>
+                  <section
+                    className="library-start-here__selected-level"
+                    aria-labelledby={`library-start-here-${selectedLevel}`}
+                    id={`library-start-here-${selectedLevel}-records`}
+                  >
                     <header>
                       <div>
                         <p className="member-kicker">{level.detail}</p>
-                        <h3 id={`library-start-here-${level.id}`}>{level.label}</h3>
+                        <h3 id={`library-start-here-${selectedLevel}`}>{level.label}</h3>
                       </div>
-                      <span>{records.length.toLocaleString("en-IN")} {records.length === 1 ? "item" : "items"}</span>
+                      <span>{records.length.toLocaleString("en-IN")} {records.length === 1 ? "record" : "records"}</span>
                     </header>
                     {records.length ? (
                       <div className="library-start-here__resource-grid">
@@ -292,7 +348,9 @@ export function VaultStartHere({
                     )}
                   </section>
                 );
-              })}
+              })() : (
+                <p className="library-start-here__prompt">Choose a level to open only its relevant Vault records.</p>
+              )}
             </div>
           )}
         </div>

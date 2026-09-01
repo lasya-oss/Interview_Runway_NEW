@@ -374,6 +374,11 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(libraryStartHere, /record\.domain === domain/i);
   assert.match(libraryStartHere, /normalizedFilename\.startsWith\("dsa_"\)/i);
   assert.match(libraryStartHere, /normalizedFilename\.startsWith\("sysdesign_"\)/i);
+  assert.match(libraryStartHere, /selectedLevel/);
+  assert.match(libraryStartHere, /className="library-start-here__level-card/);
+  assert.match(libraryStartHere, /onClick=\{\(\) => setSelectedLevel\(level\.id\)\}/i);
+  assert.match(libraryStartHere, /matchingRecords\.filter\(\(record\) => record\.level === selectedLevel\)/i);
+  assert.match(libraryStartHere, /scrollIntoView/);
   assert.doesNotMatch(libraryStartHere, /VAULT_START_HERE_ROLES|StartHereRole|setRole/i);
   assert.doesNotMatch(libraryStartHere, /Select a role or domain/i);
   assert.match(libraryClient, /material\.demoAsset\.href/i);
