@@ -3,9 +3,13 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
+  dateKeyForTimeZone,
   emitRoadmapProgressUpdated,
+  parseStoredRoadmapProgress,
   roadmapProgressFor,
   roadmapStorageKey,
+  serializeStoredRoadmapProgress,
+  type CompletionActivity,
 } from "@/app/lib/learner-progress";
 import type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
 
@@ -30,14 +34,18 @@ export function RoadmapChecklist({
 }) {
   const isAccount = persistMode === "account";
   const storageKey = roadmapStorageKey(profileId);
+  const [initialProgress] = useState(() => {
+    const stored = isAccount ? null : readDemoProgress(storageKey, initialCompleted);
+    return roadmapProgressFor(
+      weeks,
+      stored?.completedTaskIds ?? initialCompleted,
+      stored?.completionActivity,
+    );
+  });
   const [completed, setCompleted] = useState<Set<string>>(() =>
-    new Set(
-      roadmapProgressFor(
-        weeks,
-        isAccount ? initialCompleted : readDemoCompleted(storageKey, initialCompleted),
-      ).completedTaskIds,
-    ),
+    new Set(initialProgress.completedTaskIds),
   );
+  const [completionActivity, setCompletionActivity] = useState<CompletionActivity>(initialProgress.completionActivity);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const allTasks = useMemo(() => weeks.flatMap((week) => week.tasks), [weeks]);
@@ -49,11 +57,19 @@ export function RoadmapChecklist({
     )?.week ?? weeks.at(-1)?.week ?? currentWeek;
   }, [completed, currentWeek, weeks]);
 
-  const persist = async (next: Set<string>, previous: Set<string>) => {
+  const persist = async (
+    next: Set<string>,
+    nextCompletionActivity: CompletionActivity,
+    previous: Set<string>,
+    previousCompletionActivity: CompletionActivity,
+  ) => {
     if (!isAccount) {
       try {
-        window.localStorage.setItem(storageKey, JSON.stringify([...next]));
-        emitRoadmapProgressUpdated(profileId, [...next]);
+        window.localStorage.setItem(
+          storageKey,
+          serializeStoredRoadmapProgress([...next], nextCompletionActivity),
+        );
+        emitRoadmapProgressUpdated(profileId, [...next], nextCompletionActivity);
       } catch {
         // This checklist is an optional device-local demo enhancement.
       }
@@ -82,6 +98,7 @@ export function RoadmapChecklist({
       );
     } catch {
       setCompleted(previous);
+      setCompletionActivity(previousCompletionActivity);
       setSaveError("Progress could not be saved. Please try again.");
     } finally {
       setSaving(false);
@@ -91,10 +108,18 @@ export function RoadmapChecklist({
   const toggle = (taskId: string) => {
     const previous = new Set(completed);
     const next = new Set(completed);
+    const nextCompletionActivity = { ...completionActivity };
     if (next.has(taskId)) next.delete(taskId);
-    else next.add(taskId);
+    else {
+      next.add(taskId);
+      if (!nextCompletionActivity[taskId]) {
+        nextCompletionActivity[taskId] = dateKeyForTimeZone(new Date());
+      }
+    }
+    if (!next.has(taskId)) delete nextCompletionActivity[taskId];
     setCompleted(next);
-    void persist(next, previous);
+    setCompletionActivity(nextCompletionActivity);
+    void persist(next, nextCompletionActivity, previous, completionActivity);
   };
 
   const reset = () => {
@@ -102,8 +127,10 @@ export function RoadmapChecklist({
     const next = new Set(
       roadmapProgressFor(weeks, isAccount ? [] : initialCompleted).completedTaskIds,
     );
+    const nextCompletionActivity: CompletionActivity = {};
     setCompleted(next);
-    void persist(next, previous);
+    setCompletionActivity(nextCompletionActivity);
+    void persist(next, nextCompletionActivity, previous, completionActivity);
   };
 
   const learningHref = (task: RoadmapTask) =>
@@ -241,16 +268,15 @@ function formatEstimatedTime(minutes: number) {
   return remainingMinutes ? `~${hours}h ${remainingMinutes}m` : `~${hours}h`;
 }
 
-function readDemoCompleted(storageKey: string, fallback: readonly string[]) {
-  if (typeof window === "undefined") return [...fallback];
+function readDemoProgress(storageKey: string, fallback: readonly string[]) {
+  if (typeof window === "undefined") return { completedTaskIds: [...fallback], completionActivity: {} };
 
   try {
     const value = window.localStorage.getItem(storageKey);
-    if (!value) return [...fallback];
-    const parsed = JSON.parse(value) as unknown;
-    if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) return parsed;
+    if (!value) return { completedTaskIds: [...fallback], completionActivity: {} };
+    return parseStoredRoadmapProgress(value);
   } catch {
     // Device-local demo state may be cleared or malformed; fall back safely.
   }
-  return [...fallback];
+  return { completedTaskIds: [...fallback], completionActivity: {} };
 }

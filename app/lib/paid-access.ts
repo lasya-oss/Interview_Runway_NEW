@@ -233,7 +233,7 @@ export async function saveLearnerProgress(
     const date = storedCompletionActivity[taskId];
     if (date) {
       nextCompletionActivity[taskId] = date;
-    } else if (roadmapWeeks === 12 && !storedTaskIds.includes(taskId)) {
+    } else if (!storedTaskIds.includes(taskId)) {
       nextCompletionActivity[taskId] = dateKeyForTimeZone(new Date());
     }
   }

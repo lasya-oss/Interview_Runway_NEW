@@ -1354,7 +1354,7 @@ test("Today and Status consume the Roadmap snapshot for both learner tiers", asy
   assert.match(dashboard, /const weeklyActivity = isTracked[\s\S]*?roadmap\.weeklyActivity/);
   assert.match(dashboard, /data-activity-count=\{value\}/);
   assert.match(accessCard, /progress\.synchronized \? progress\.progressPercent : fallbackProgress/);
-  assert.match(roadmap, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.next\]\)/);
+  assert.match(roadmap, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.next\], nextCompletionActivity\)/);
   assert.match(studyButton, /emitRoadmapProgressUpdated\(\s*profileId,/);
   assert.match(shell, /<RoadmapProgressProvider[\s\S]*?initialCompleted=\{profile\.completedTaskIds\}/);
   assert.match(shell, /usePathname\(\)/);
@@ -1382,7 +1382,7 @@ test("learner progress persistence is scoped to the selected roadmap", async () 
   assert.match(studyButton, /completedTaskIds: \[\.\.\.new Set\(\[\.\.\.currentIds, taskId\]\)\],/);
 });
 
-test("Vault weekly activity is persisted from dated roadmap completions", async () => {
+test("learner weekly activity is persisted from dated roadmap completions", async () => {
   const schema = await readFile(new URL("../db/schema.ts", import.meta.url), "utf8");
   const migration = await readFile(new URL("../drizzle/0004_true_kang.sql", import.meta.url), "utf8");
   const focusMigration = await readFile(new URL("../drizzle/0005_perpetual_human_cannonball.sql", import.meta.url), "utf8");
@@ -1407,9 +1407,11 @@ test("Vault weekly activity is persisted from dated roadmap completions", async 
   assert.match(paidAccess, /completionActivity: JSON\.stringify\(completionActivity\)/);
   assert.match(paidAccess, /completedTaskIds\.length !== 1/);
   assert.match(paidAccess, /dateKeyForTimeZone\(new Date\(\)\)/);
-  assert.match(paidAccess, /roadmapWeeks === 12 && !storedTaskIds\.includes\(taskId\)/);
+  assert.match(paidAccess, /else if \(!storedTaskIds\.includes\(taskId\)\)/);
+  assert.match(paidAccess, /roadmapPlanForWeeks\(roadmapWeeks\)/);
   assert.match(paidAccess, /completionActivity: JSON\.stringify\(nextCompletionActivity\)/);
   assert.match(progress, /export function weeklyActivityCounts\(/);
+  assert.match(progress, /parseStoredRoadmapProgress\(/);
   assert.match(progress, /LEARNER_ACTIVITY_EVENT/);
   assert.match(paidAccess, /export async function recordFocusedTime\(/);
   assert.match(paidAccess, /focusedSeconds: sql`\$\{learnerProgress\.focusedSeconds\} \+ \$\{seconds\}`/);
@@ -1424,6 +1426,7 @@ test("Vault weekly activity is persisted from dated roadmap completions", async 
   assert.match(progress, /weeklyActivity: weeklyActivityCounts\(normalizedCompletionActivity\)/);
   assert.match(provider, /initialCompletionActivity/);
   assert.match(provider, /readCompletionActivity\(value\.completionActivity\)/);
+  assert.match(roadmap, /serializeStoredRoadmapProgress\(\[\.\.\.next\], nextCompletionActivity\)/);
   assert.match(roadmap, /readCompletionActivity\(saved\.completionActivity\)/);
   assert.match(studyButton, /readCompletionActivity\(saved\.completionActivity\)/);
   assert.match(shell, /FocusTimeTracker profileId=\{profile\.id\}/);

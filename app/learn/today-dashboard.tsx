@@ -23,9 +23,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const todayKicker = isFreshLearner
     ? `Start here · Week 1 of ${profile.roadmapWeeks}`
     : `Week ${currentWeek} of ${profile.roadmapWeeks} · ${profile.id === "foundation" ? "Foundation" : profile.id === "practice" ? "Second Seat" : "Calibration"} path`;
-  const weeklyActivity = isTracked
-    ? profile.id === "foundation" ? roadmap.weeklyActivity : [0, 0, 0, 0, 0, 0, 0]
-    : [72, 100, 48, 86, 34, 0, 0];
+  const weeklyActivity = isTracked ? roadmap.weeklyActivity : [72, 100, 48, 86, 34, 0, 0];
   const maxWeeklyActivity = Math.max(...weeklyActivity, 0);
   const weeklyActivityTotal = weeklyActivity.reduce((total, value) => total + value, 0);
   const scoreKey = profile.id;

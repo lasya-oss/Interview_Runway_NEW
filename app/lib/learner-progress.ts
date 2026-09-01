@@ -19,6 +19,11 @@ export type RoadmapProgressSnapshot = {
 
 export type CompletionActivity = Record<string, string>;
 
+export type StoredRoadmapProgress = {
+  completedTaskIds: string[];
+  completionActivity: CompletionActivity;
+};
+
 export const LEARNER_TIME_ZONE = "Asia/Kolkata";
 
 export function roadmapPlanForWeeks(roadmapWeeks: number): readonly RoadmapWeek[] {
@@ -27,6 +32,50 @@ export function roadmapPlanForWeeks(roadmapWeeks: number): readonly RoadmapWeek[
 
 export function roadmapStorageKey(profileId: string) {
   return `interviewrunway-demo-roadmap:v2:${profileId}`;
+}
+
+export function parseStoredRoadmapProgress(value: string | null): StoredRoadmapProgress {
+  if (!value) return { completedTaskIds: [], completionActivity: {} };
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (Array.isArray(parsed)) {
+      return {
+        completedTaskIds: parsed.filter((taskId): taskId is string => typeof taskId === "string"),
+        completionActivity: {},
+      };
+    }
+    if (!parsed || typeof parsed !== "object") {
+      return { completedTaskIds: [], completionActivity: {} };
+    }
+
+    const candidate = parsed as {
+      completedTaskIds?: unknown;
+      completionActivity?: unknown;
+    };
+    const completionActivity = candidate.completionActivity && typeof candidate.completionActivity === "object" && !Array.isArray(candidate.completionActivity)
+      ? Object.fromEntries(
+          Object.entries(candidate.completionActivity).filter(
+            ([taskId, date]) => typeof taskId === "string" && isDateKey(date),
+          ),
+        )
+      : {};
+    return {
+      completedTaskIds: Array.isArray(candidate.completedTaskIds)
+        ? candidate.completedTaskIds.filter((taskId): taskId is string => typeof taskId === "string")
+        : [],
+      completionActivity,
+    };
+  } catch {
+    return { completedTaskIds: [], completionActivity: {} };
+  }
+}
+
+export function serializeStoredRoadmapProgress(
+  completedTaskIds: readonly string[],
+  completionActivity: Readonly<Record<string, string>> = {},
+) {
+  return JSON.stringify({ completedTaskIds, completionActivity });
 }
 
 export function roadmapProgressFor(

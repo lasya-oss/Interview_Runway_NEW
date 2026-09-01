@@ -12,6 +12,7 @@ import {
   LEARNER_ACTIVITY_EVENT,
   ROADMAP_PROGRESS_EVENT,
   type LearnerActivityEventDetail,
+  parseStoredRoadmapProgress,
   roadmapPlanForWeeks,
   roadmapProgressFor,
   roadmapStorageKey,
@@ -67,9 +68,10 @@ export function RoadmapProgressProvider({
       focusedSeconds?: number,
     ) => {
       setSnapshot((previous) => {
-        const effectiveCompletionActivity = completionActivity === undefined || Object.keys(completionActivity).length === 0
-          ? previousActivityForCompletedTasks(previous, completedTaskIds)
-          : { ...previous.completionActivity, ...completionActivity };
+        const effectiveCompletionActivity = {
+          ...previousActivityForCompletedTasks(previous, completedTaskIds),
+          ...(completionActivity ?? {}),
+        };
         return roadmapProgressFor(
           weeks,
           completedTaskIds,
@@ -90,7 +92,8 @@ export function RoadmapProgressProvider({
     };
     const handleStorage = (event: StorageEvent) => {
       if (event.key !== storageKey) return;
-      apply(readStoredTaskIds(event.newValue), {});
+      const stored = parseStoredRoadmapProgress(event.newValue);
+      apply(stored.completedTaskIds, stored.completionActivity);
     };
 
     window.addEventListener(ROADMAP_PROGRESS_EVENT, handleProgressEvent);
@@ -98,7 +101,8 @@ export function RoadmapProgressProvider({
     window.addEventListener("storage", handleStorage);
 
     if (!isLive) {
-      apply(readStoredTaskIds(window.localStorage.getItem(storageKey)));
+      const stored = parseStoredRoadmapProgress(window.localStorage.getItem(storageKey));
+      apply(stored.completedTaskIds, stored.completionActivity);
       return () => {
         window.removeEventListener(ROADMAP_PROGRESS_EVENT, handleProgressEvent);
         window.removeEventListener(LEARNER_ACTIVITY_EVENT, handleActivity);
@@ -215,16 +219,4 @@ function previousActivityForCompletedTasks(
   return Object.fromEntries(
     Object.entries(snapshot.completionActivity).filter(([taskId]) => completed.has(taskId)),
   );
-}
-
-function readStoredTaskIds(value: string | null): string[] {
-  if (!value) return [];
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    return Array.isArray(parsed)
-      ? parsed.filter((taskId): taskId is string => typeof taskId === "string")
-      : [];
-  } catch {
-    return [];
-  }
 }
