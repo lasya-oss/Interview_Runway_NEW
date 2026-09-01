@@ -168,23 +168,36 @@ export function PracticeClient({
             <small>{isLive ? "Account session · responses saved as you go" : "Preview session · no account record"}</small>
           </div>
           <div className="practice-track-grid" role="group" aria-labelledby="practice-track-title">
-            {SECOND_SEAT_MOCKS.map((candidate) => (
-              <button
-                aria-controls="practice-round-context"
-                aria-pressed={selectedMockId === candidate.id}
-                className={`practice-track-option ${selectedMockId === candidate.id ? "is-selected" : ""}`}
-                key={candidate.id}
-                onClick={() => selectMock(candidate.id)}
-                type="button"
-              >
-                <span>
-                  <small>{candidate.category} · ~{candidate.estimatedMinutes} min</small>
-                  <strong>{candidate.title}</strong>
-                  <span className="practice-track-description">{candidate.description}</span>
-                </span>
-                <i aria-hidden="true">↗</i>
-              </button>
-            ))}
+            {SECOND_SEAT_MOCKS.map((candidate) => {
+              const selected = selectedMockId === candidate.id;
+              const contextId = `practice-round-context-${candidate.id}`;
+              return (
+                <div className={`practice-track-option-shell${selected ? " is-open" : ""}`} key={candidate.id}>
+                  <button
+                    aria-controls={contextId}
+                    aria-expanded={selected}
+                    aria-pressed={selected}
+                    className={`practice-track-option ${selected ? "is-selected" : ""}`}
+                    onClick={() => selectMock(candidate.id)}
+                    type="button"
+                  >
+                    <span>
+                      <small>{candidate.category} · ~{candidate.estimatedMinutes} min</small>
+                      <strong>{candidate.title}</strong>
+                      <span className="practice-track-description">{candidate.description}</span>
+                    </span>
+                    <i aria-hidden="true">↗</i>
+                  </button>
+                  {selected ? (
+                    <div className="practice-track-context" id={contextId} aria-live="polite">
+                      <span>Round context</span>
+                      <strong>{candidate.objective}</strong>
+                      <p><b>Opening question</b>{candidate.turns[0].prompt}</p>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
           <div className="practice-briefing-action" id="practice-round-context" aria-live="polite">
             <div>

@@ -1451,6 +1451,9 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(schema, /second_seat_sessions_user_updated_idx/);
   assert.match(practice, /response is saved only for your Second Seat transcript/i);
   assert.match(practice, /api\/second-seat\/sessions/);
+  assert.match(practice, /aria-expanded=\{selected\}/);
+  assert.match(practice, /practice-round-context-\$\{candidate\.id\}/);
+  assert.match(practice, /candidate\.turns\[0\]\.prompt/);
   assert.doesNotMatch(practice, /fixed three-turn sequence|No AI evaluation occurred|Use a sample response/i);
   assert.match(feedback, /getLatestCompletedSecondSeatSession/);
   assert.match(feedback, /feedback-empty/);

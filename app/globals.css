@@ -6346,15 +6346,22 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .practice-track-picker-heading h2 { max-width: 650px; margin: 11px 0 0; font-family: var(--font-display); font-size: clamp(2rem, 3.7vw, 3.8rem); font-weight: 570; line-height: 1; letter-spacing: -.055em; }
 .practice-track-picker-heading > small { max-width: 230px; color: #72858d; font-family: var(--font-mono); font-size: 8px; line-height: 1.45; text-align: right; }
 .practice-track-grid { margin-top: 26px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.practice-track-option-shell { min-width: 0; display: flex; flex-direction: column; }
 .practice-track-option { width: 100%; min-height: 190px; margin: 0; padding: 20px; position: relative; display: flex; gap: 14px; align-items: flex-start; border: 1px solid rgba(31,65,78,.13); border-radius: 13px; color: #314a54; background: rgba(255,255,255,.45); font: inherit; text-align: left; cursor: pointer; transition: border-color .2s ease, background .2s ease, transform .2s ease; }
 .practice-track-option:hover { transform: translateY(-2px); border-color: rgba(255,107,44,.38); }
 .practice-track-option.is-selected { border-color: rgba(255,107,44,.65); background: rgba(255,107,44,.055); box-shadow: inset 0 0 0 1px rgba(255,107,44,.14); }
 .practice-track-option:focus-visible { outline: 2px solid var(--afterburner); outline-offset: 3px; }
+.practice-track-option-shell.is-open .practice-track-option { border-radius: 13px 13px 0 0; }
 .practice-track-option > span { display: flex; flex-direction: column; }
 .practice-track-option > span > small { color: #a6421d; font-family: var(--font-mono); font-size: 7px; text-transform: uppercase; }
 .practice-track-option strong { margin-top: 19px; font-family: var(--font-display); font-size: 19px; font-weight: 600; line-height: 1.08; letter-spacing: -.035em; }
 .practice-track-option .practice-track-description { display: block; margin: 10px 0 0; color: #6a7c84; font-size: 9.5px; line-height: 1.55; }
 .practice-track-option > i { margin-left: auto; color: #a6421d; font-family: var(--font-mono); font-size: 11px; font-style: normal; }
+.practice-track-context { margin-top: -1px; padding: 16px 18px 18px; border: 1px solid rgba(255,107,44,.34); border-top: 0; border-radius: 0 0 13px 13px; background: rgba(255,250,247,.78); }
+.practice-track-context > span { color: #a6421d; font-family: var(--font-mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; }
+.practice-track-context > strong { display: block; margin-top: 8px; color: #405862; font-size: 10px; font-weight: 650; line-height: 1.45; }
+.practice-track-context p { margin: 12px 0 0; color: #6a7c84; font-size: 9px; line-height: 1.55; }
+.practice-track-context p b { display: block; margin-bottom: 4px; color: #405862; font-family: var(--font-mono); font-size: 7px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; }
 .practice-briefing-action { margin-top: 13px; padding: 19px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid rgba(31,65,78,.12); background: rgba(244,248,248,.5); }
 .practice-briefing-action > div { max-width: 650px; display: grid; gap: 8px; }
 .practice-briefing-action > div > strong { color: #556b74; font-size: 11px; font-weight: 550; line-height: 1.5; }
