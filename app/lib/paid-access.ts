@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { entitlements, learnerProgress } from "@/db/schema";
 import type { ChatGPTUser } from "@/app/chatgpt-auth";
@@ -16,6 +16,7 @@ export type RoadmapWeeks = 4 | 12;
 export type LearnerProgress = {
   completedTaskIds: string[];
   completionActivity: CompletionActivity;
+  focusedSeconds: number;
   progressPercent: number;
 };
 
@@ -111,6 +112,7 @@ export async function getLearnerProgress(
     .select({
       completedTaskIds: learnerProgress.completedTaskIds,
       completionActivity: learnerProgress.completionActivity,
+      focusedSeconds: learnerProgress.focusedSeconds,
       updatedAt: learnerProgress.updatedAt,
       progressPercent: learnerProgress.progressPercent,
     })
@@ -118,7 +120,7 @@ export async function getLearnerProgress(
     .where(eq(learnerProgress.userEmail, normalizeEmail(email)))
     .limit(1);
 
-  if (!record) return { completedTaskIds: [], completionActivity: {}, progressPercent: 0 };
+  if (!record) return { completedTaskIds: [], completionActivity: {}, focusedSeconds: 0, progressPercent: 0 };
 
   const completedTaskIds = parseCompletedTaskIds(record.completedTaskIds);
   const storedCompletionActivity = parseCompletionActivity(record.completionActivity);
@@ -150,8 +152,33 @@ export async function getLearnerProgress(
   return {
     completedTaskIds: roadmapProgress.completedTaskIds,
     completionActivity: roadmapProgress.completionActivity,
+    focusedSeconds: record.focusedSeconds,
     progressPercent: roadmapProgress.progressPercent,
   };
+}
+
+export async function recordFocusedTime(
+  email: string,
+  seconds: number,
+): Promise<LearnerProgress> {
+  const db = await getDb();
+  const normalizedEmail = normalizeEmail(email);
+  const now = new Date().toISOString();
+  await db
+    .insert(learnerProgress)
+    .values({
+      userEmail: normalizedEmail,
+      focusedSeconds: seconds,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: learnerProgress.userEmail,
+      set: {
+        focusedSeconds: sql`${learnerProgress.focusedSeconds} + ${seconds}`,
+      },
+    });
+
+  return getLearnerProgress(normalizedEmail);
 }
 
 export async function saveLearnerProgress(
@@ -164,6 +191,7 @@ export async function saveLearnerProgress(
     .select({
       completedTaskIds: learnerProgress.completedTaskIds,
       completionActivity: learnerProgress.completionActivity,
+      focusedSeconds: learnerProgress.focusedSeconds,
       updatedAt: learnerProgress.updatedAt,
     })
     .from(learnerProgress)
@@ -235,6 +263,7 @@ export async function saveLearnerProgress(
       selectedProgress.completedTaskIds,
       nextCompletionActivity,
     ).completionActivity,
+    focusedSeconds: record?.focusedSeconds ?? 0,
     progressPercent,
   };
 }
@@ -334,6 +363,7 @@ export function createFoundationProfile(
     roadmapWeeks: 12,
     completedTaskIds: progress.completedTaskIds,
     completionActivity: progress.completionActivity,
+    focusedSeconds: progress.focusedSeconds,
     isSecondSeatLive: options.secondSeatAccess === true,
     nextAction: nextTask?.title || "Review your completed Foundation roadmap",
     nextActionMeta: nextTask?.meta || "Foundation · complete",

@@ -14,6 +14,7 @@ import {
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { DRIVE_MATERIAL_CONTENT } from "@/app/lib/drive-material-content";
 import { MaterialViewer } from "../../material-viewer";
+import { FocusTimeTracker } from "../../../focus-time-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,7 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
               />
             </div>
             <div className="material-stage-controls"><span>01</span><i><b /></i><span>{category}</span></div>
+            {profile.isLive && profile.id === "foundation" ? <FocusTimeTracker profileId={profile.id} /> : null}
           </section>
 
           <aside className="material-notes drive-material-notes">

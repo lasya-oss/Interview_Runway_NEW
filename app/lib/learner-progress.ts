@@ -9,6 +9,7 @@ export type RoadmapProgressSnapshot = {
   completedTaskIds: string[];
   completionActivity: CompletionActivity;
   weeklyActivity: number[];
+  focusedSeconds: number;
   completedCount: number;
   totalTaskCount: number;
   progressPercent: number;
@@ -32,6 +33,7 @@ export function roadmapProgressFor(
   weeks: readonly RoadmapWeek[],
   completedTaskIds: readonly string[],
   completionActivity: Readonly<Record<string, string>> = {},
+  focusedSeconds = 0,
 ): RoadmapProgressSnapshot {
   const tasks = weeks.flatMap((week) => week.tasks);
   const validTaskIds = new Set(tasks.map((task) => task.id));
@@ -61,6 +63,7 @@ export function roadmapProgressFor(
     completedTaskIds: completedTaskIdsInOrder,
     completionActivity: normalizedCompletionActivity,
     weeklyActivity: weeklyActivityCounts(normalizedCompletionActivity),
+    focusedSeconds: normalizeFocusedSeconds(focusedSeconds),
     completedCount: completedTaskIdsInOrder.length,
     totalTaskCount: tasks.length,
     progressPercent: tasks.length
@@ -69,6 +72,10 @@ export function roadmapProgressFor(
     currentWeek,
     nextTask,
   };
+}
+
+function normalizeFocusedSeconds(value: number) {
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }
 
 export function weeklyActivityCounts(
@@ -126,6 +133,22 @@ export type RoadmapProgressEventDetail = {
   completedTaskIds: readonly string[];
   completionActivity?: Readonly<Record<string, string>>;
 };
+
+export const LEARNER_ACTIVITY_EVENT = "interviewrunway:learner-activity-updated";
+
+export type LearnerActivityEventDetail = {
+  profileId: string;
+  focusedSeconds: number;
+};
+
+export function emitLearnerActivityUpdated(profileId: string, focusedSeconds: number) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent<LearnerActivityEventDetail>(LEARNER_ACTIVITY_EVENT, {
+      detail: { profileId, focusedSeconds: normalizeFocusedSeconds(focusedSeconds) },
+    }),
+  );
+}
 
 export function emitRoadmapProgressUpdated(
   profileId: string,

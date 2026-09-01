@@ -5,6 +5,7 @@ import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { findRoadmapTask, TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
 import { StudyProgressButton } from "../../../study-progress-button";
+import { FocusTimeTracker } from "../../../focus-time-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +92,7 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
               {task.learning.requiredResources.map((resource) => <li key={resource}>{resource}</li>)}
             </ul>
             {profile.isLive ? <StudyProgressButton profileId={profile.id} roadmapWeeks={profile.roadmapWeeks} taskId={task.id} initiallyCompleted={profile.completedTaskIds?.includes(task.id) === true} /> : null}
+            {profile.isLive && profile.id === "foundation" ? <FocusTimeTracker profileId={profile.id} /> : null}
           </section>
 
           <footer className="material-next-step">

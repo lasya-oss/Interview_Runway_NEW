@@ -64,9 +64,15 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
     ? `${roadmap.completedCount} / ${totalPlanTasks}`
     : profile.id === "practice" ? "8 / 11" : "9 / 10";
   const focusedTimeLabel = isTracked
-    ? isFreshLearner ? "Starts at 0m" : "Not recorded"
+    ? isFreshLearner ? "Starts at 0m" : roadmap.focusedSeconds > 0 ? formatFocusedTime(roadmap.focusedSeconds) : "Not recorded"
     : profile.id === "practice" ? "4h 38m" : "5h 06m";
-  const nextReviewLabel = isTracked ? "After next study step" : "Thu 18:30";
+  const nextReviewLabel = isTracked
+    ? isFreshLearner
+      ? "After next study step"
+      : roadmap.nextTask
+        ? `After: ${roadmap.nextTask.title}`
+        : "Roadmap complete"
+    : "Thu 18:30";
 
   return (
     <div className="member-page member-page-vault-today member-dashboard">
@@ -153,6 +159,15 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
       </section>
     </div>
   );
+}
+
+function formatFocusedTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 1) return "<1m";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return remainingMinutes ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
 }
 
 function ReviewMaterials({

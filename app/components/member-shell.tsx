@@ -73,6 +73,7 @@ export function MemberShell({
         isLive={isLive}
         initialCompleted={profile.completedTaskIds}
         initialCompletionActivity={profile.completionActivity}
+        initialFocusedSeconds={profile.focusedSeconds}
         initialProgress={profile.progress}
         initialWeek={profile.week}
       >

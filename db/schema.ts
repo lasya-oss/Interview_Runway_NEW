@@ -53,6 +53,7 @@ export const learnerProgress = sqliteTable("learner_progress", {
   userEmail: text("user_email").primaryKey(),
   completedTaskIds: text("completed_task_ids").notNull().default("[]"),
   completionActivity: text("completion_activity").notNull().default("{}"),
+  focusedSeconds: integer("focused_seconds").notNull().default(0),
   progressPercent: integer("progress_percent").notNull().default(0),
   updatedAt: text("updated_at").notNull(),
 });

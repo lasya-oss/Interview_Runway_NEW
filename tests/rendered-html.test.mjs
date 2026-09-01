@@ -1385,14 +1385,20 @@ test("learner progress persistence is scoped to the selected roadmap", async () 
 test("Vault weekly activity is persisted from dated roadmap completions", async () => {
   const schema = await readFile(new URL("../db/schema.ts", import.meta.url), "utf8");
   const migration = await readFile(new URL("../drizzle/0004_true_kang.sql", import.meta.url), "utf8");
+  const focusMigration = await readFile(new URL("../drizzle/0005_perpetual_human_cannonball.sql", import.meta.url), "utf8");
   const progress = await readFile(new URL("../app/lib/learner-progress.ts", import.meta.url), "utf8");
   const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
   const provider = await readFile(new URL("../app/learn/roadmap/learner-progress-client.tsx", import.meta.url), "utf8");
   const roadmap = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
   const studyButton = await readFile(new URL("../app/learn/study-progress-button.tsx", import.meta.url), "utf8");
+  const focusRoute = await readFile(new URL("../app/api/learner/focus/route.ts", import.meta.url), "utf8");
+  const focusTracker = await readFile(new URL("../app/learn/focus-time-tracker.tsx", import.meta.url), "utf8");
+  const dashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
 
   assert.match(schema, /completionActivity: text\("completion_activity"\)/);
+  assert.match(schema, /focusedSeconds: integer\("focused_seconds"\)/);
   assert.match(migration, /ADD `completion_activity` text DEFAULT '\{\}' NOT NULL/);
+  assert.match(focusMigration, /ADD `focused_seconds` integer DEFAULT 0 NOT NULL/);
   assert.match(paidAccess, /completionActivity: learnerProgress\.completionActivity/);
   assert.match(paidAccess, /updatedAt: learnerProgress\.updatedAt/);
   assert.match(paidAccess, /repairLegacyCompletionActivity\(/);
@@ -1403,6 +1409,15 @@ test("Vault weekly activity is persisted from dated roadmap completions", async 
   assert.match(paidAccess, /roadmapWeeks === 12 && !storedTaskIds\.includes\(taskId\)/);
   assert.match(paidAccess, /completionActivity: JSON\.stringify\(nextCompletionActivity\)/);
   assert.match(progress, /export function weeklyActivityCounts\(/);
+  assert.match(progress, /LEARNER_ACTIVITY_EVENT/);
+  assert.match(paidAccess, /export async function recordFocusedTime\(/);
+  assert.match(paidAccess, /focusedSeconds: sql`\$\{learnerProgress\.focusedSeconds\} \+ \$\{seconds\}`/);
+  assert.match(focusRoute, /hasVaultAccess\(user\.email\)/);
+  assert.match(focusRoute, /body\.seconds < 1 \|\| body\.seconds > 300/);
+  assert.match(focusTracker, /FLUSH_INTERVAL_MS = 30_000/);
+  assert.match(focusTracker, /visibilityState/);
+  assert.match(dashboard, /formatFocusedTime\(roadmap\.focusedSeconds\)/);
+  assert.match(dashboard, /After: \$\{roadmap\.nextTask\.title\}/);
   assert.match(progress, /LEARNER_TIME_ZONE = "Asia\/Kolkata"/);
   assert.match(progress, /weeklyActivity: weeklyActivityCounts\(normalizedCompletionActivity\)/);
   assert.match(provider, /initialCompletionActivity/);

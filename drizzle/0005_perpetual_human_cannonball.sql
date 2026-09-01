@@ -1,0 +1,1 @@
+ALTER TABLE `learner_progress` ADD `focused_seconds` integer DEFAULT 0 NOT NULL;

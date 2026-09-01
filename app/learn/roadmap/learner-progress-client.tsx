@@ -9,7 +9,9 @@ import {
   type ReactNode,
 } from "react";
 import {
+  LEARNER_ACTIVITY_EVENT,
   ROADMAP_PROGRESS_EVENT,
+  type LearnerActivityEventDetail,
   roadmapPlanForWeeks,
   roadmapProgressFor,
   roadmapStorageKey,
@@ -29,6 +31,7 @@ export function RoadmapProgressProvider({
   isLive,
   initialCompleted,
   initialCompletionActivity,
+  initialFocusedSeconds,
   initialProgress,
   initialWeek,
   children,
@@ -38,6 +41,7 @@ export function RoadmapProgressProvider({
   isLive: boolean;
   initialCompleted?: readonly string[];
   initialCompletionActivity?: Readonly<Record<string, string>>;
+  initialFocusedSeconds?: number;
   initialProgress: number;
   initialWeek: number;
   children: ReactNode;
@@ -47,9 +51,9 @@ export function RoadmapProgressProvider({
   const initialSnapshot = useMemo(
     () =>
       synchronized
-        ? roadmapProgressFor(weeks, initialCompleted ?? [], initialCompletionActivity)
+        ? roadmapProgressFor(weeks, initialCompleted ?? [], initialCompletionActivity, initialFocusedSeconds)
         : createStaticSnapshot(weeks, initialProgress, initialWeek),
-    [initialCompleted, initialCompletionActivity, initialProgress, initialWeek, synchronized, weeks],
+    [initialCompleted, initialCompletionActivity, initialFocusedSeconds, initialProgress, initialWeek, synchronized, weeks],
   );
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const storageKey = roadmapStorageKey(profileId);
@@ -60,13 +64,24 @@ export function RoadmapProgressProvider({
     const apply = (
       completedTaskIds: readonly string[],
       completionActivity: Readonly<Record<string, string>> = {},
+      focusedSeconds?: number,
     ) => {
-      setSnapshot(roadmapProgressFor(weeks, completedTaskIds, completionActivity));
+      setSnapshot((previous) => roadmapProgressFor(
+        weeks,
+        completedTaskIds,
+        completionActivity,
+        focusedSeconds ?? previous.focusedSeconds,
+      ));
     };
     const handleProgressEvent = (event: Event) => {
       const detail = (event as CustomEvent<RoadmapProgressEventDetail>).detail;
       if (!detail || detail.profileId !== profileId) return;
       apply(detail.completedTaskIds, detail.completionActivity);
+    };
+    const handleActivity = (event: Event) => {
+      const detail = (event as CustomEvent<LearnerActivityEventDetail>).detail;
+      if (!detail || detail.profileId !== profileId) return;
+      setSnapshot((previous) => ({ ...previous, focusedSeconds: detail.focusedSeconds }));
     };
     const handleStorage = (event: StorageEvent) => {
       if (event.key !== storageKey) return;
@@ -74,12 +89,14 @@ export function RoadmapProgressProvider({
     };
 
     window.addEventListener(ROADMAP_PROGRESS_EVENT, handleProgressEvent);
+    window.addEventListener(LEARNER_ACTIVITY_EVENT, handleActivity);
     window.addEventListener("storage", handleStorage);
 
     if (!isLive) {
       apply(readStoredTaskIds(window.localStorage.getItem(storageKey)));
       return () => {
         window.removeEventListener(ROADMAP_PROGRESS_EVENT, handleProgressEvent);
+        window.removeEventListener(LEARNER_ACTIVITY_EVENT, handleActivity);
         window.removeEventListener("storage", handleStorage);
       };
     }
@@ -95,6 +112,7 @@ export function RoadmapProgressProvider({
           return (await response.json()) as {
             completedTaskIds?: unknown;
             completionActivity?: unknown;
+            focusedSeconds?: unknown;
           };
         })
         .then((value) => {
@@ -104,6 +122,7 @@ export function RoadmapProgressProvider({
               ? value.completedTaskIds.filter((taskId): taskId is string => typeof taskId === "string")
               : [],
             readCompletionActivity(value.completionActivity),
+            typeof value.focusedSeconds === "number" ? value.focusedSeconds : undefined,
           );
         })
         .catch(() => {
@@ -120,6 +139,7 @@ export function RoadmapProgressProvider({
     return () => {
       controller.abort();
       window.removeEventListener(ROADMAP_PROGRESS_EVENT, handleProgressEvent);
+      window.removeEventListener(LEARNER_ACTIVITY_EVENT, handleActivity);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("focus", refreshLiveProgress);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
@@ -162,6 +182,7 @@ function createStaticSnapshot(
     completedTaskIds: [],
     completionActivity: {},
     weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
+    focusedSeconds: 0,
     completedCount: Math.round((totalTaskCount * progressPercent) / 100),
     totalTaskCount,
     progressPercent,

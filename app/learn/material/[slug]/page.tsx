@@ -6,6 +6,7 @@ import { canAccessMaterial, LEARNING_MATERIALS, type DemoTier, type LearningMate
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
 import { StudyProgressButton } from "../../study-progress-button";
+import { FocusTimeTracker } from "../../focus-time-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -247,6 +248,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
             <h2 id="material-stage-title">{detail.decision}</h2>
             <div className="material-stage-controls"><span>00:00</span><i><b /></i><span>{material.duration}</span></div>
             {profile.isLive && material.availability === "included" && linkedTask ? <StudyProgressButton profileId={profile.id} taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
+            {profile.isLive && profile.id === "foundation" && material.availability === "included" ? <FocusTimeTracker profileId={profile.id} /> : null}
           </section>
 
           <aside className="material-notes">
