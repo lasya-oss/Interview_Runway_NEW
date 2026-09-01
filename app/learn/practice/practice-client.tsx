@@ -180,7 +180,7 @@ export function PracticeClient({
                 <span>
                   <small>{candidate.category} · ~{candidate.estimatedMinutes} min</small>
                   <strong>{candidate.title}</strong>
-                  <p>{candidate.description}</p>
+                  <span className="practice-track-description">{candidate.description}</span>
                 </span>
                 <i aria-hidden="true">↗</i>
               </button>

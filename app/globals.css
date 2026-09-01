@@ -6353,7 +6353,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .practice-track-option > span { display: flex; flex-direction: column; }
 .practice-track-option > span > small { color: #a6421d; font-family: var(--font-mono); font-size: 7px; text-transform: uppercase; }
 .practice-track-option strong { margin-top: 19px; font-family: var(--font-display); font-size: 19px; font-weight: 600; line-height: 1.08; letter-spacing: -.035em; }
-.practice-track-option p { margin: 10px 0 0; color: #6a7c84; font-size: 9.5px; line-height: 1.55; }
+.practice-track-option .practice-track-description { display: block; margin: 10px 0 0; color: #6a7c84; font-size: 9.5px; line-height: 1.55; }
 .practice-track-option > i { margin-left: auto; color: #a6421d; font-family: var(--font-mono); font-size: 11px; font-style: normal; }
 .practice-briefing-action { margin-top: 13px; padding: 19px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid rgba(31,65,78,.12); background: rgba(244,248,248,.5); }
 .practice-briefing-action > div { max-width: 650px; display: grid; gap: 8px; }
