@@ -65,7 +65,21 @@ async function request(pathname = "/", init = {}, authenticated = true) {
     {
       ASSETS: {
         fetch: async (assetRequest) => {
-          if (new URL(assetRequest.url).pathname === "/pdf-guides/sysdesign_url-shortener-walkthrough.pdf") {
+          const assetPath = new URL(assetRequest.url).pathname;
+          if (assetPath.startsWith("/drive-materials/")) {
+            const filename = decodeURIComponent(assetPath.slice("/drive-materials/".length));
+            if (!filename.includes("/")) {
+              try {
+                const body = await readFile(new URL(`../public/drive-materials/${filename}`, import.meta.url));
+                return new Response(body, {
+                  headers: { "content-type": filename.endsWith(".txt") ? "text/plain" : "text/markdown" },
+                });
+              } catch {
+                // Fall through to the normal missing-asset response.
+              }
+            }
+          }
+          if (assetPath === "/pdf-guides/sysdesign_url-shortener-walkthrough.pdf") {
             return new Response("%PDF-test", {
               headers: { "content-type": "application/octet-stream", "content-length": "9" },
             });
@@ -245,6 +259,54 @@ test("PDF guides are served inline from first-party assets without Drive authori
   assert.equal(response.headers.get("content-type"), "application/pdf");
   assert.equal(response.headers.get("content-disposition"), "inline");
   assert.equal(await response.text(), "%PDF-test");
+});
+
+test("Vault template and explainer actions open first-party inline PDF previews", async () => {
+  const libraryStartHere = await readFile(
+    new URL("../app/learn/library/library-start-here.tsx", import.meta.url),
+    "utf8",
+  );
+  const previewRoute = await readFile(
+    new URL("../app/api/learn/library/material-preview/[slug]/route.ts", import.meta.url),
+    "utf8",
+  );
+  const materialViewer = await readFile(
+    new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(libraryStartHere, /driveMaterialPreviewHref\(material\)/i);
+  assert.match(libraryStartHere, /target=\{record\.external \? "_blank"/i);
+  assert.match(previewRoute, /Content-Type.*application\/pdf/i);
+  assert.match(previewRoute, /Content-Disposition.*inline/i);
+  assert.match(previewRoute, /readFirstPartyText/i);
+  assert.match(materialViewer, /createTextPdf/i);
+
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "foundation" }),
+  });
+  assert.equal(login.status, 200);
+  const demoSessionCookie = login.headers.get("set-cookie")?.split(";")[0] ?? "";
+  assert.match(demoSessionCookie, /^ir_demo_session=/i);
+
+  for (const slug of [
+    "template-weekly-prep-tracker-docx-yzovxjy1",
+    "dsa-binary-search-01-mp4-k8sh5_uz",
+  ]) {
+    const response = await request(`/api/learn/library/material-preview/${slug}`, {
+      headers: { accept: "application/pdf", cookie: demoSessionCookie },
+    });
+    assert.equal(response.status, 200, slug);
+    assert.equal(response.headers.get("content-type"), "application/pdf", slug);
+    assert.match(response.headers.get("content-disposition") ?? "", /^inline;/i, slug);
+    assert.equal((await response.text()).slice(0, 8), "%PDF-1.4", slug);
+  }
 });
 
 test("PDF viewer shows a record header and user-controlled fullscreen option", async () => {

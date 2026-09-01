@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   driveMaterialCategory,
-  driveMaterialHref,
   driveMaterialKindLabel,
+  driveMaterialPreviewHref,
   driveMaterialTitle,
   type DriveMaterial,
 } from "@/app/lib/drive-materials";
@@ -163,7 +163,7 @@ function recordFromDriveMaterial(material: DriveMaterial): StartHereRecord | nul
     format: kind,
     level: levelFromFilename(material.filename, material.kind === "template" ? "template" : "narrated"),
     domain,
-    href: driveMaterialHref({ id: material.id, filename: material.filename }),
+    href: driveMaterialPreviewHref(material),
     action: material.kind === "template" ? "Open template" : "Open explainer",
     external: true,
   };

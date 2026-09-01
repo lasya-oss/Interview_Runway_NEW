@@ -6331,6 +6331,10 @@ export function driveMaterialHref(material: Pick<DriveMaterial, "id" | "filename
   return "/learn/library/material/" + driveMaterialSlug(material);
 }
 
+export function driveMaterialPreviewHref(material: Pick<DriveMaterial, "id" | "filename">) {
+  return "/api/learn/library/material-preview/" + driveMaterialSlug(material);
+}
+
 export function driveMaterialAssetHref(filename: string) {
   return "/drive-materials/" + encodeURIComponent(filename);
 }
