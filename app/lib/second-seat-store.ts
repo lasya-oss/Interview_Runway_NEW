@@ -118,12 +118,14 @@ export async function saveSecondSeatAnswers(
 function toSession(
   record: typeof secondSeatSessions.$inferSelect | typeof secondSeatSessions.$inferInsert,
 ): SecondSeatSession {
+  const answers = parseAnswers(record.answers ?? "[]");
+  const evaluation = evaluationFromAnswers(record, answers);
   return {
     id: record.id,
     mockId: record.mockId,
     status: record.status === "completed" ? "completed" : "in_progress",
-    answers: parseAnswers(record.answers ?? "[]"),
-    evaluation: parseEvaluation(record.evaluation),
+    answers,
+    evaluation,
     startedAt: record.startedAt,
     completedAt: record.completedAt ?? null,
     updatedAt: record.updatedAt,
@@ -141,14 +143,18 @@ function parseAnswers(value: string) {
   }
 }
 
-function parseEvaluation(value: string | null | undefined) {
-  if (!value) return null;
-  try {
-    const parsed = JSON.parse(value) as SecondSeatEvaluation;
-    return parsed && typeof parsed.overall === "number" ? parsed : null;
-  } catch {
-    return null;
-  }
+function evaluationFromAnswers(
+  record: typeof secondSeatSessions.$inferSelect | typeof secondSeatSessions.$inferInsert,
+  answers: readonly string[],
+): SecondSeatEvaluation | null {
+  if (record.status !== "completed") return null;
+  const mock = findSecondSeatMock(record.mockId);
+  if (!mock || answers.length !== mock.turns.length) return null;
+
+  // The transcript is the source of truth on reads. Recompute the deterministic
+  // evaluation from the persisted answers so stale or missing JSON cannot make a
+  // completed attempt display another attempt's feedback.
+  return evaluateSecondSeatSession(mock, answers);
 }
 
 function normalizeEmail(value: string) {

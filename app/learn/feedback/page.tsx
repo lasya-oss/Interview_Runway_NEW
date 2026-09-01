@@ -73,6 +73,7 @@ export default async function FeedbackPage({
   const requestedSessionId = typeof requestedSessionIdValue === "string"
     ? requestedSessionIdValue.trim()
     : "";
+  const isLiveLearner = profile.isLive === true;
   const selectedSession = profile.isSecondSeatLive
     ? requestedSessionId
       ? await getSecondSeatSession(profile.email, requestedSessionId)
@@ -82,7 +83,7 @@ export default async function FeedbackPage({
     ? selectedSession
     : null;
   const liveEvaluation = feedbackSession?.evaluation ?? null;
-  if (profile.isSecondSeatLive && !liveEvaluation) {
+  if (isLiveLearner && !liveEvaluation) {
     return (
       <div className="member-page">
         <section className="feedback-empty" aria-labelledby="feedback-empty-title">
@@ -97,7 +98,9 @@ export default async function FeedbackPage({
 
   const dimensions = liveEvaluation
     ? liveEvaluation.dimensions
-    : SCORE_DIMENSIONS.map((dimension, index) => ({
+    : isLiveLearner
+      ? []
+      : SCORE_DIMENSIONS.map((dimension, index) => ({
     key: ["problemFraming", "technicalDepth", "tradeoffClarity", "communication"][index],
     label: dimension.label,
     score: dimension[profile.id],
@@ -108,7 +111,7 @@ export default async function FeedbackPage({
       "Improving, but consistency and retry decisions still arrive after prompting.",
       "Concise explanations and clear responses to follow-up questions.",
     ][index],
-    }));
+      }));
   const evidence = liveEvaluation
     ? liveEvaluation.evidence.map((item, index) => ({
       ...item,
@@ -128,7 +131,7 @@ export default async function FeedbackPage({
         premium={profile.id === "premium"}
         live={profile.isSecondSeatLive === true}
         secondSeat={profile.id === "practice" || profile.isSecondSeatLive === true}
-        mockTitle={feedbackSession ? findSecondSeatMock(feedbackSession.mockId)?.title ?? "Your practice round" : "Design a metrics pipeline"}
+        mockTitle={feedbackSession ? findSecondSeatMock(feedbackSession.mockId)?.title ?? "Your practice round" : isLiveLearner ? "Your practice round" : "Design a metrics pipeline"}
         insightTitle={liveEvaluation?.insightTitle}
         insightBody={liveEvaluation?.insightBody}
       />

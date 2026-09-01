@@ -1447,6 +1447,7 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(engine, /problemFraming|technicalDepth|tradeoffClarity|communication/);
   assert.match(store, /secondSeatSessions/);
   assert.match(store, /evaluateSecondSeatSession\(mock, answers\)/);
+  assert.match(store, /The transcript is the source of truth on reads/);
   assert.match(schema, /second_seat_sessions/);
   assert.match(schema, /second_seat_sessions_user_updated_idx/);
   assert.match(practice, /response is saved only for your Second Seat transcript/i);
@@ -1463,6 +1464,8 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(feedback, /selectedSession\?\.status === "completed"/);
   assert.match(feedback, /findSecondSeatMock\(feedbackSession\.mockId\)/);
   assert.match(feedback, /feedback-empty/);
+  assert.match(feedback, /const isLiveLearner = profile\.isLive === true/);
+  assert.match(feedback, /if \(isLiveLearner && !liveEvaluation\)/);
   assert.match(sessionRoute, /hasSecondSeatAccess/);
   assert.match(sessionRoute, /answers\.length > mock\.turns\.length/);
   assert.match(sessionRoute, /saveSecondSeatAnswers/);
