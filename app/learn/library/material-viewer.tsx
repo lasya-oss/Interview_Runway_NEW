@@ -256,18 +256,29 @@ export function MaterialViewer({
     return <audio className="library-material-audio-player" aria-label={`${title} audio`} controls preload="metadata" src={assetUrl} />;
   }
 
-  if (!assetUrl && googleClientId && (displayKind === "video" || displayKind === "audio")) {
-    return <DriveReplayPlayer clientId={googleClientId} fileId={fileId} loginHint={loginHint} mediaType={displayKind} title={title} />;
-  }
-
   const pdfSourceUrl = isPdfAsset(filename, mimeType)
     ? assetUrl
     : displayKind === "video" || displayKind === "audio"
       ? null
       : fallbackAssetUrl ?? (isTextMaterial(filename, mimeType) ? assetUrl : null);
 
+  // Narrated explainers have a first-party transcript companion even though
+  // their original MP4 masters remain in Drive. Prefer that companion so the
+  // Library always opens usable context without a Drive OAuth prompt.
+  const companionPdfUrl = fallbackAssetUrl && (displayKind === "video" || displayKind === "audio")
+    ? fallbackAssetUrl
+    : null;
+
+  if (companionPdfUrl) {
+    return <PdfMaterialPreview assetUrl={companionPdfUrl} fileId={fileId} filename={filename.replace(/\.mp4$/i, ".md")} mimeType="text/markdown" title={title} />;
+  }
+
   if (pdfSourceUrl && (fallbackAssetUrl || isTextMaterial(filename, mimeType) || isPdfAsset(filename, mimeType))) {
     return <PdfMaterialPreview assetUrl={pdfSourceUrl} fileId={fileId} filename={filename} mimeType={mimeType} title={title} />;
+  }
+
+  if (!assetUrl && googleClientId && (displayKind === "video" || displayKind === "audio")) {
+    return <DriveReplayPlayer clientId={googleClientId} fileId={fileId} loginHint={loginHint} mediaType={displayKind} title={title} />;
   }
 
   return (

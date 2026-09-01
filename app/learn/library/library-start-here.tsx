@@ -165,6 +165,7 @@ function recordFromDriveMaterial(material: DriveMaterial): StartHereRecord | nul
     domain,
     href: driveMaterialHref({ id: material.id, filename: material.filename }),
     action: material.kind === "template" ? "Open template" : "Open explainer",
+    external: true,
   };
 }
 

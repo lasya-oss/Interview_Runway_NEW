@@ -319,6 +319,9 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(materialViewer, /DriveReplayPlayer/i);
   assert.match(materialViewer, /mediaType=\{displayKind\}/i);
   assert.match(materialViewer, /displayKind === "video" \|\| displayKind === "audio"/i);
+  assert.match(materialViewer, /companionPdfUrl/i);
+  assert.match(materialViewer, /Prefer that companion/i);
+  assert.match(libraryStartHere, /action: material\.kind === "template" \? "Open template" : "Open explainer",\s*external: true,/i);
   assert.match(driveReplayPlayer, /mediaType\?: "video" \| "audio"/i);
   assert.match(driveReplayPlayer, /<audio className="library-material-audio-player"/i);
 });
