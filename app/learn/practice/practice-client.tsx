@@ -23,8 +23,8 @@ export function PracticeClient({
   initialSession: SecondSeatSession | null;
   recentSessions: readonly SecondSeatSession[];
 }) {
-  const [selectedMockId, setSelectedMockId] = useState(
-    initialSession?.mockId ?? SECOND_SEAT_MOCKS[0].id,
+  const [selectedMockId, setSelectedMockId] = useState<string | null>(
+    initialSession?.mockId ?? null,
   );
   const [sessionId, setSessionId] = useState(initialSession?.id ?? null);
   const [state, setState] = useState<PracticeState>(
@@ -38,10 +38,19 @@ export function PracticeClient({
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const mock = findSecondSeatMock(selectedMockId) ?? SECOND_SEAT_MOCKS[0];
+  const mock = (selectedMockId ? findSecondSeatMock(selectedMockId) : null) ?? SECOND_SEAT_MOCKS[0];
   const canResume = initialSession?.id === sessionId && answers.length < mock.turns.length;
 
+  const selectMock = (mockId: string) => {
+    setError(null);
+    setSelectedMockId(mockId);
+  };
+
   const begin = async () => {
+    if (!selectedMockId) {
+      setError("Choose a practice round before opening the practice room.");
+      return;
+    }
     setError(null);
     setSaving(true);
     try {
@@ -130,7 +139,7 @@ export function PracticeClient({
   };
 
   const selectedMock = useMemo(
-    () => findSecondSeatMock(selectedMockId) ?? SECOND_SEAT_MOCKS[0],
+    () => (selectedMockId ? findSecondSeatMock(selectedMockId) : null),
     [selectedMockId],
   );
 
@@ -158,34 +167,37 @@ export function PracticeClient({
             </div>
             <small>{isLive ? "Account session · responses saved as you go" : "Preview session · no account record"}</small>
           </div>
-          <div className="practice-track-grid">
+          <div className="practice-track-grid" role="group" aria-labelledby="practice-track-title">
             {SECOND_SEAT_MOCKS.map((candidate) => (
-              <label className={`practice-track-option ${selectedMockId === candidate.id ? "is-selected" : ""}`} key={candidate.id}>
-                <input
-                  type="radio"
-                  name="practice-track"
-                  value={candidate.id}
-                  checked={selectedMockId === candidate.id}
-                  onChange={() => setSelectedMockId(candidate.id)}
-                />
+              <button
+                aria-controls="practice-round-context"
+                aria-pressed={selectedMockId === candidate.id}
+                className={`practice-track-option ${selectedMockId === candidate.id ? "is-selected" : ""}`}
+                key={candidate.id}
+                onClick={() => selectMock(candidate.id)}
+                type="button"
+              >
                 <span>
                   <small>{candidate.category} · ~{candidate.estimatedMinutes} min</small>
                   <strong>{candidate.title}</strong>
                   <p>{candidate.description}</p>
                 </span>
                 <i aria-hidden="true">↗</i>
-              </label>
+              </button>
             ))}
           </div>
-          <div className="practice-briefing-action">
-            <div><span>Round objective</span><strong>{selectedMock.objective}</strong></div>
+          <div className="practice-briefing-action" id="practice-round-context" aria-live="polite">
+            <div>
+              <span>{selectedMock ? "Round objective" : "Choose a round"}</span>
+              <strong>{selectedMock?.objective ?? "Select one of the three rounds to see its objective and open the practice room."}</strong>
+            </div>
             <button
               className="member-primary-button"
               type="button"
-              onClick={canResume && initialSession?.mockId === selectedMockId ? resumeFromBriefing : begin}
-              disabled={saving}
+              onClick={selectedMock && canResume && initialSession?.mockId === selectedMockId ? resumeFromBriefing : begin}
+              disabled={saving || !selectedMock}
             >
-              {saving ? "Opening practice room…" : canResume && initialSession?.mockId === selectedMockId ? "Resume session" : "Begin practice"} <span aria-hidden="true">↗</span>
+              {saving ? "Opening practice room…" : !selectedMock ? "Choose a round" : canResume && initialSession?.mockId === selectedMockId ? "Resume session" : "Begin practice"} <span aria-hidden="true">↗</span>
             </button>
           </div>
         </section>

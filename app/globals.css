@@ -6346,10 +6346,10 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .practice-track-picker-heading h2 { max-width: 650px; margin: 11px 0 0; font-family: var(--font-display); font-size: clamp(2rem, 3.7vw, 3.8rem); font-weight: 570; line-height: 1; letter-spacing: -.055em; }
 .practice-track-picker-heading > small { max-width: 230px; color: #72858d; font-family: var(--font-mono); font-size: 8px; line-height: 1.45; text-align: right; }
 .practice-track-grid { margin-top: 26px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
-.practice-track-option { min-height: 190px; padding: 20px; position: relative; display: flex; gap: 14px; align-items: flex-start; border: 1px solid rgba(31,65,78,.13); border-radius: 13px; color: #314a54; background: rgba(255,255,255,.45); cursor: pointer; transition: border-color .2s ease, background .2s ease, transform .2s ease; }
+.practice-track-option { width: 100%; min-height: 190px; margin: 0; padding: 20px; position: relative; display: flex; gap: 14px; align-items: flex-start; border: 1px solid rgba(31,65,78,.13); border-radius: 13px; color: #314a54; background: rgba(255,255,255,.45); font: inherit; text-align: left; cursor: pointer; transition: border-color .2s ease, background .2s ease, transform .2s ease; }
 .practice-track-option:hover { transform: translateY(-2px); border-color: rgba(255,107,44,.38); }
 .practice-track-option.is-selected { border-color: rgba(255,107,44,.65); background: rgba(255,107,44,.055); box-shadow: inset 0 0 0 1px rgba(255,107,44,.14); }
-.practice-track-option input { position: absolute; opacity: 0; pointer-events: none; }
+.practice-track-option:focus-visible { outline: 2px solid var(--afterburner); outline-offset: 3px; }
 .practice-track-option > span { display: flex; flex-direction: column; }
 .practice-track-option > span > small { color: #a6421d; font-family: var(--font-mono); font-size: 7px; text-transform: uppercase; }
 .practice-track-option strong { margin-top: 19px; font-family: var(--font-display); font-size: 19px; font-weight: 600; line-height: 1.08; letter-spacing: -.035em; }
