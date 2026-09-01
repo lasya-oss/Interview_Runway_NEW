@@ -27,20 +27,28 @@ export type LearnerAccess = {
 
 export function isConfiguredTestFoundationEmail(email: string): boolean {
   const normalizedEmail = normalizeEmail(email);
-  const domain =
-    process.env.AUTH_ALLOWED_DOMAIN?.trim().toLowerCase() || DEFAULT_DOMAIN;
-  if (!normalizedEmail.endsWith(`@${domain}`)) return false;
+  if (!isAllowedTestEmailDomain(normalizedEmail)) return false;
+  return configuredTestEmails("TEST_FOUNDATION_EMAILS").includes(normalizedEmail);
+}
 
-  const configuredEmails = (process.env.TEST_FOUNDATION_EMAILS ?? "")
-    .split(/[\s,]+/)
-    .map(normalizeEmail)
-    .filter(Boolean);
-
-  return configuredEmails.includes(normalizedEmail);
+/**
+ * Explicit, server-only allowlist for paid-flow QA. It grants the real Second
+ * Seat path to the named authenticated account; it does not create sessions,
+ * answers, scores, or feedback records.
+ */
+export function isConfiguredTestSecondSeatEmail(email: string): boolean {
+  const normalizedEmail = normalizeEmail(email);
+  if (!isAllowedTestEmailDomain(normalizedEmail)) return false;
+  return configuredTestEmails("TEST_SECOND_SEAT_EMAILS").includes(normalizedEmail);
 }
 
 export async function hasVaultAccess(email: string): Promise<boolean> {
-  if (isConfiguredTestFoundationEmail(email)) return true;
+  if (
+    isConfiguredTestFoundationEmail(email) ||
+    isConfiguredTestSecondSeatEmail(email)
+  ) {
+    return true;
+  }
 
   const [entitlement] = await (await getDb())
     .select({ id: entitlements.id })
@@ -58,6 +66,7 @@ export async function hasVaultAccess(email: string): Promise<boolean> {
 }
 
 export async function hasSecondSeatAccess(email: string): Promise<boolean> {
+  if (isConfiguredTestSecondSeatEmail(email)) return true;
   if (!(await hasVaultAccess(email))) return false;
 
   const [entitlement] = await (await getDb())
@@ -83,6 +92,10 @@ export async function hasSecondSeatAccess(email: string): Promise<boolean> {
 export async function getLearnerAccess(email: string): Promise<LearnerAccess> {
   const normalizedEmail = normalizeEmail(email);
   const foundationTestEmail = isConfiguredTestFoundationEmail(normalizedEmail);
+  const secondSeatTestEmail = isConfiguredTestSecondSeatEmail(normalizedEmail);
+  if (secondSeatTestEmail) {
+    return { vault: true, secondSeat: true };
+  }
   const offers = foundationTestEmail ? ["ai-prep"] : ["vault", "ai-prep"];
   const records = await (await getDb())
     .select({ offer: entitlements.offer })
@@ -101,6 +114,19 @@ export async function getLearnerAccess(email: string): Promise<LearnerAccess> {
     vault,
     secondSeat: vault && secondSeat,
   };
+}
+
+function configuredTestEmails(key: "TEST_FOUNDATION_EMAILS" | "TEST_SECOND_SEAT_EMAILS") {
+  return (process.env[key] ?? "")
+    .split(/[\s,]+/)
+    .map(normalizeEmail)
+    .filter(Boolean);
+}
+
+function isAllowedTestEmailDomain(email: string) {
+  const domain =
+    process.env.AUTH_ALLOWED_DOMAIN?.trim().toLowerCase() || DEFAULT_DOMAIN;
+  return email.endsWith(`@${domain}`);
 }
 
 export async function getLearnerProgress(

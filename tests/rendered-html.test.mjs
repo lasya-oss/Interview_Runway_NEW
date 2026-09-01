@@ -1437,6 +1437,7 @@ test("learner weekly activity is persisted from dated roadmap completions", asyn
 test("Second Seat practice is durable, entitlement-gated, and transcript-backed", async () => {
   const engine = await readFile(new URL("../app/lib/second-seat-engine.ts", import.meta.url), "utf8");
   const store = await readFile(new URL("../app/lib/second-seat-store.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
   const schema = await readFile(new URL("../db/schema.ts", import.meta.url), "utf8");
   const practice = await readFile(new URL("../app/learn/practice/practice-client.tsx", import.meta.url), "utf8");
   const feedback = await readFile(new URL("../app/learn/feedback/page.tsx", import.meta.url), "utf8");
@@ -1445,6 +1446,9 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(engine, /SECOND_SEAT_MOCKS/);
   assert.match(engine, /evaluateSecondSeatSession/);
   assert.match(engine, /problemFraming|technicalDepth|tradeoffClarity|communication/);
+  assert.match(paidAccess, /isConfiguredTestSecondSeatEmail/);
+  assert.match(paidAccess, /TEST_SECOND_SEAT_EMAILS/);
+  assert.match(paidAccess, /return \{ vault: true, secondSeat: true \}/);
   assert.match(store, /secondSeatSessions/);
   assert.match(store, /evaluateSecondSeatSession\(mock, answers\)/);
   assert.match(store, /The transcript is the source of truth on reads/);
