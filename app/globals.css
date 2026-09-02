@@ -5148,18 +5148,22 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   align-items: center;
   justify-content: space-between;
   gap: 28px;
-  border: 0;
+  border: 1px solid #17323e;
   border-radius: 10px;
   color: #fff;
-  background: #112b37;
+  background: linear-gradient(135deg, #17323e, #112b37);
   box-shadow: 0 14px 32px rgba(27,58,72,.14);
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 740;
   cursor: pointer;
-  transition: transform 180ms var(--ease-out-expo), background 180ms ease;
+  text-decoration: none;
+  transition: transform 180ms var(--ease-out-expo), border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
 }
 
-.member-primary-button:hover { transform: translateY(-2px); background: #173b49; }
+.member-primary-button:hover,
+.member-primary-button:focus-visible { transform: translateY(-2px); border-color: #214b5c; background: linear-gradient(135deg, #214b5c, #173b49); box-shadow: 0 17px 34px rgba(17,43,55,.2); outline: none; }
+.member-primary-button:focus-visible { outline: 2px solid var(--afterburner); outline-offset: 3px; }
 .member-primary-button span { color: var(--afterburner); }
 .member-primary-button:disabled { cursor: not-allowed; opacity: .46; transform: none; }
 .member-panel-label { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
@@ -10710,21 +10714,27 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .member-section-action,
 .library-record-action-button,
 .feedback-action-button,
-.library-start-here__resource-action {
-  min-height: 34px;
-  padding: 0 12px;
+.library-start-here__resource-action,
+.member-card-action,
+.practice-history-record__action,
+.roadmap-task-library-button {
+  min-height: 42px;
+  width: max-content;
+  padding: 0 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  border: 1px solid rgba(255,107,44,.45);
-  border-radius: 999px;
-  color: #8f3919;
-  background: rgba(255,247,242,.82);
-  box-shadow: 0 4px 13px rgba(62,42,31,.06);
-  font-size: 9px;
+  gap: 8px;
+  border: 1px solid #17323e;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(135deg, #17323e, #112b37);
+  box-shadow: 0 9px 20px rgba(17,43,55,.13);
+  font-family: var(--font-body);
+  font-size: 10px;
   font-weight: 730;
   line-height: 1.1;
+  cursor: pointer;
   text-decoration: none;
   transition: transform 160ms var(--ease-out-expo), border-color 160ms ease, color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
@@ -10738,22 +10748,33 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .feedback-action-button:hover,
 .feedback-action-button:focus-visible,
 .library-start-here__resource-action:hover,
-.library-start-here__resource-action:focus-visible {
-  border-color: var(--afterburner);
-  color: #7b2c12;
-  background: #fff;
-  box-shadow: 0 7px 18px rgba(62,42,31,.1);
+.library-start-here__resource-action:focus-visible,
+.member-card-action:hover,
+.member-card-action:focus-visible,
+.practice-history-record__action:hover,
+.practice-history-record__action:focus-visible,
+.roadmap-task-library-button:hover,
+.roadmap-task-learning:focus-visible .roadmap-task-library-button {
+  border-color: #214b5c;
+  color: #fff;
+  background: linear-gradient(135deg, #214b5c, #173b49);
+  box-shadow: 0 12px 24px rgba(17,43,55,.18);
   outline: none;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .member-action-button span,
 .member-section-action span,
 .library-record-action-button span,
 .feedback-action-button span,
-.library-start-here__resource-action span { color: var(--afterburner); }
+.library-start-here__resource-action span,
+.member-card-action span,
+.practice-history-record__action span,
+.roadmap-task-library-button span { color: var(--afterburner); }
 
-.member-action-button--quiet { box-shadow: none; background: rgba(255,255,255,.55); }
+.member-action-button--quiet { color: #17323e; border-color: rgba(31,65,78,.25); background: #e9eff1; box-shadow: none; }
+.member-action-button--quiet:hover,
+.member-action-button--quiet:focus-visible { color: #fff; border-color: #214b5c; background: linear-gradient(135deg, #214b5c, #173b49); box-shadow: 0 8px 18px rgba(17,43,55,.14); }
 .member-action-button--dark { color: #ffd0b9; background: rgba(34,20,18,.24); border-color: rgba(255,231,220,.34); }
 .member-action-button--dark:hover,
 .member-action-button--dark:focus-visible { color: #fff; background: rgba(255,107,44,.24); border-color: rgba(255,175,133,.86); }
@@ -10780,9 +10801,9 @@ html[data-second-seat-film="open"] .home-aero-stage {
 
 .member-header-action-button span { color: var(--afterburner); }
 .member-status-drawer-content section > a.member-action-button { margin-top: 17px; font-size: 9px; }
-.member-plan-card > a.member-action-button { display: inline-flex; margin-top: 13px; color: #ffd0b9; font-size: 8px; box-shadow: none; }
-.coaching-identity a.member-action-button { margin-top: auto; color: #ffd0b9; }
-.practice-replay-next-actions > a.member-action-button { color: #8f3919; font-size: 8px; }
+.member-plan-card > a.member-action-button { display: inline-flex; margin-top: 13px; font-size: 8px; }
+.coaching-identity a.member-action-button { margin-top: auto; }
+.practice-replay-next-actions > a.member-action-button { font-size: 8px; }
 
 .member-secondary-button,
 .roadmap-toolbar__reset {
@@ -10817,23 +10838,7 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .roadmap-toolbar__reset:disabled { cursor: not-allowed; opacity: .5; transform: none; }
 .roadmap-toolbar button.roadmap-toolbar__reset { padding: 0 13px; font-size: 9px; }
 
-.member-card-action {
-  min-height: 29px;
-  width: max-content;
-  padding: 0 9px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border: 1px solid rgba(255,107,44,.38);
-  border-radius: 999px;
-  color: #963918;
-  background: rgba(255,247,242,.8);
-  font-size: 8px;
-  font-weight: 730;
-}
-
-.member-card-action span { color: var(--afterburner); }
-.member-review-copy b.member-card-action { color: #963918; font-size: 8px; }
+.member-review-copy b.member-card-action { font-size: 8px; }
 
 .library-start-here__resource a.library-start-here__resource-action {
   margin-top: auto;
@@ -10842,42 +10847,36 @@ html[data-second-seat-film="open"] .home-aero-stage {
   font-size: 8px;
 }
 
-.library-record-meta > a.library-record-action-button { margin-top: 13px; font-size: 8px; }
+.library-record-meta > a.library-record-action-button { margin-top: 13px; color: #fff; font-size: 8px; }
 .library-record-meta > button.library-record-open {
-  min-height: 34px;
-  padding: 0 12px;
-  border: 1px solid rgba(255,107,44,.45);
-  border-radius: 999px;
-  color: #8f3919;
-  background: rgba(255,247,242,.82);
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid #17323e;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(135deg, #17323e, #112b37);
+  box-shadow: 0 9px 20px rgba(17,43,55,.13);
+  font-family: var(--font-body);
   font-size: 8px;
+  font-weight: 730;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out-expo), border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
 .library-record-meta > button.library-record-open:hover,
 .library-record-meta > button.library-record-open:focus-visible {
-  border-color: var(--afterburner);
-  color: #7b2c12;
-  background: #fff;
-  outline: none;
-  transform: translateY(-1px);
+  border-color: #214b5c;
+  color: #fff;
+  background: linear-gradient(135deg, #214b5c, #173b49);
+  box-shadow: 0 12px 24px rgba(17,43,55,.18);
+  outline: 2px solid var(--afterburner);
+  outline-offset: 3px;
+  transform: translateY(-2px);
 }
 
 .practice-history a > b.practice-history-record__action {
-  min-height: 30px;
-  padding: 0 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  border: 1px solid rgba(255,107,44,.38);
-  border-radius: 999px;
-  background: rgba(255,247,242,.8);
   font-size: 8px;
 }
-
-.practice-history a:hover > b.practice-history-record__action,
-.practice-history a:focus-visible > b.practice-history-record__action { border-color: var(--afterburner); background: #fff; }
-.practice-history-record__action span { color: var(--afterburner); }
 
 .practice-session-header button.practice-session-header__pause {
   min-height: 32px;
@@ -10891,7 +10890,7 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .practice-session-header button.practice-session-header__pause:hover,
 .practice-session-header button.practice-session-header__pause:focus-visible { border-color: rgba(255,107,44,.7); color: #fff; outline: none; }
 .practice-complete-actions > button.member-secondary-button { border: 1px solid rgba(31,65,78,.2); color: #566d76; background: rgba(255,255,255,.58); }
-.feedback-action-list a.feedback-action-button { align-self: start; margin-top: 25px; color: #8f3919; font-size: 8px; }
+.feedback-action-list a.feedback-action-button { align-self: start; margin-top: 25px; color: #fff; font-size: 8px; }
 .feedback-workspace--second-seat .feedback-action-list article > a.feedback-action-button { margin-top: 28px; }
 
 .material-breadcrumb a.material-breadcrumb__link {
@@ -10911,22 +10910,23 @@ html[data-second-seat-film="open"] .home-aero-stage {
 
 .material-review-link small.material-review-link__action {
   width: max-content;
-  min-height: 30px;
-  padding: 0 10px;
+  min-height: 42px;
+  padding: 0 14px;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  border: 1px solid rgba(255,107,44,.38);
-  border-radius: 999px;
-  color: #8f3919;
-  background: rgba(255,255,255,.68);
+  gap: 8px;
+  border: 1px solid #17323e;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(135deg, #17323e, #112b37);
+  box-shadow: 0 9px 20px rgba(17,43,55,.13);
   font-family: var(--font-body);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 730;
 }
 
 .material-review-link:hover small.material-review-link__action,
-.material-review-link:focus-visible small.material-review-link__action { border-color: var(--afterburner); background: #fff; }
+.material-review-link:focus-visible small.material-review-link__action { border-color: #214b5c; color: #fff; background: linear-gradient(135deg, #214b5c, #173b49); box-shadow: 0 12px 24px rgba(17,43,55,.18); }
 .material-review-link__action span { color: var(--afterburner); }
 
 @media (max-width: 720px) {
