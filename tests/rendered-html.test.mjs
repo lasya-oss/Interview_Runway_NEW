@@ -432,7 +432,7 @@ test("curated Library count is consistent for Vault and Second Seat", async () =
     assert.equal(library.status, 200, tier);
     const html = await library.text();
     const text = visibleText(html);
-    const expectedLibraryCount = tier === "foundation" ? "89" : "100+";
+    const expectedLibraryCount = "100+";
     assert.match(text, new RegExp(`${expectedLibraryCount.replace("+", "\\+")}\\s+Resources\\s+Available`, "i"), tier);
     assert.match(text, new RegExp(`All\\s+${expectedLibraryCount.replace("+", "\\+")}`, "i"), tier);
     assert.doesNotMatch(text, /1000\+|Company Evidence|Vault Production Workspace/i, tier);
@@ -1382,7 +1382,8 @@ test("Vault review materials do not point at legacy demo PDFs", async () => {
   assert.match(data, /Qualified review required/i);
   assert.match(libraryPage, /getLibraryCategorySummary\(isLive, profile\.id\)/);
   assert.match(libraryCatalog, /isLive\s*\n?\s*\? DRIVE_PDF_GUIDES\.filter/);
-  assert.match(libraryCatalog, /profileId === "foundation"\s*\n?\s*\? \[\]/);
+  assert.match(libraryCatalog, /driveMaterials:\s*DRIVE_MATERIALS\.filter/);
+  assert.doesNotMatch(libraryCatalog, /profileId === "foundation"\s*\n?\s*\? \[\]/);
   assert.match(libraryCatalog, /SECOND_SEAT_DEMO_SHELL_SLUGS/);
   assert.match(libraryCatalog, /roadmap_4week\.pdf/);
   assert.doesNotMatch(libraryCatalog, /new Set\(\["roadmap_4week\.pdf",\s*"dsa_sliding-window\.pdf"\]\)/);

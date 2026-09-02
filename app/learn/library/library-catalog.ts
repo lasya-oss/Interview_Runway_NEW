@@ -33,12 +33,10 @@ export function getLibraryCatalog(isLive: boolean, profileId: DemoTier): Library
     pdfGuides: isLive
       ? DRIVE_PDF_GUIDES.filter((guide) => ACTIVE_PDF_FILENAME_SET.has(guide.filename) && !VAULT_LEGACY_PDF_FILENAMES.has(guide.filename))
       : DRIVE_PDF_GUIDES.filter((guide) => ACTIVE_PDF_FILENAME_SET.has(guide.filename)),
-    // The complete Drive archive remains in its source manifests and detail
-    // routes. Vault's primary Library intentionally keeps it out of the
-    // curated learner view; other workspaces retain their existing access.
-    driveMaterials: profileId === "foundation"
-      ? []
-      : DRIVE_MATERIALS.filter((material) => ACTIVE_DRIVE_RECORD_KEY_SET.has(`${material.kind}:${material.filename}`)),
+    // Keep the same curated, high-value supporting records visible in both
+    // learner plans. The complete source archive remains available for
+    // restoration, while low-value records stay outside the active catalog.
+    driveMaterials: DRIVE_MATERIALS.filter((material) => ACTIVE_DRIVE_RECORD_KEY_SET.has(`${material.kind}:${material.filename}`)),
   };
 }
 
