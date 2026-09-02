@@ -526,6 +526,12 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(dashboardText, /0 \/ 12/i);
   assert.match(dashboardText, /Second Seat \/ Today/i);
   assert.match(dashboardText, /The Second Seat workspace/i);
+  const secondSeatWeekStrip = dashboardHtml.match(/<ol\b[^>]*class=["'][^"']*week-strip[^"']*["'][^>]*>[\s\S]*?<\/ol>/i)?.[0] ?? "";
+  assert.equal((secondSeatWeekStrip.match(/class=["']week-progress-item week-progress-item--/g) ?? []).length, 4);
+  assert.match(visibleText(secondSeatWeekStrip), /W\s*1[\s\S]*W\s*4/i);
+  assert.doesNotMatch(visibleText(secondSeatWeekStrip), /W\s*5/i);
+  assert.equal((secondSeatWeekStrip.match(/week-progress-item--in-progress/g) ?? []).length, 1);
+  assert.equal((secondSeatWeekStrip.match(/week-progress-item--upcoming/g) ?? []).length, 3);
   assert.doesNotMatch(dashboardHtml, /member-ops-rail(?:\b|-)/i);
   assert.doesNotMatch(dashboardText, /Good evening, Rohan|Every attempt leaves evidence|4h 38m|Adaptive mock 08/i);
   assert.doesNotMatch(dashboardText, /fictional learner data/i);
@@ -864,6 +870,12 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(vaultDashboardHtml, /<summary\b[^>]*member-status-drawer-toggle/i);
   assert.doesNotMatch(vaultDashboardHtml, /member-ops-rail-collapsible|member-ops-rail-content/i);
   assert.match(vaultDashboardText, /Learner data\s+Sample profile/i);
+  const vaultWeekStrip = vaultDashboardHtml.match(/<ol\b[^>]*class=["'][^"']*week-strip[^"']*["'][^>]*>[\s\S]*?<\/ol>/i)?.[0] ?? "";
+  assert.equal((vaultWeekStrip.match(/class=["']week-progress-item week-progress-item--/g) ?? []).length, 12);
+  assert.match(visibleText(vaultWeekStrip), /W\s*1[\s\S]*W\s*12/i);
+  assert.doesNotMatch(visibleText(vaultWeekStrip), /W\s*13/i);
+  assert.equal((vaultWeekStrip.match(/week-progress-item--in-progress/g) ?? []).length, 1);
+  assert.equal((vaultWeekStrip.match(/week-progress-item--upcoming/g) ?? []).length, 11);
   const vaultSidebar = vaultDashboardHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
   assert.doesNotMatch(vaultSidebar, /member-plan-card|Current access/i);
   assert.doesNotMatch(vaultDashboardHtml, /Current tasks/i);
@@ -1309,7 +1321,7 @@ test("Foundation demo starts Today with a clean learner state", async () => {
   assert.match(todayPage, /TodayDashboard/);
   assert.match(todayDashboard, /const isFreshLearner = progress === 0/);
   assert.match(todayDashboard, /isFreshLearner\s*\?\s*`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/);
-  assert.match(todayDashboard, /const weeklyActivity = isTracked[\s\S]*?roadmap\.weeklyActivity/);
+  assert.match(todayDashboard, /const weekProgress = roadmap\.weekProgress/);
   assert.match(todayDashboard, /const totalPlanTasks = roadmap\.totalTaskCount;/);
   assert.match(todayDashboard, /Build the first signal from your own work/);
   assert.match(memberShell, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
@@ -1330,7 +1342,7 @@ test("fresh Vault learners derive Today and Roadmap state from account progress"
     todayDashboard,
     /const todayKicker = isFreshLearner[\s\S]*?`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/,
   );
-  assert.match(todayDashboard, /const weeklyActivity = isTracked[\s\S]*?roadmap\.weeklyActivity/);
+  assert.match(todayDashboard, /const weekProgress = roadmap\.weekProgress/);
 
   assert.match(paidAccess, /const currentWeek = roadmapProgressFor\(selectedPlan, progress\.completedTaskIds\)\.currentWeek;/);
   assert.match(
@@ -1365,8 +1377,8 @@ test("Today and Status consume the Roadmap snapshot for both learner tiers", asy
   assert.match(provider, /if \(!isLive\)[\s\S]*?window\.localStorage\.getItem\(storageKey\)/);
   assert.match(provider, /fetch\(`\/api\/learner\/progress\?roadmapWeeks=\$\{roadmapWeeks\}`,[\s\S]*?cache: "no-store"/);
   assert.match(dashboard, /const completedLabel = isTracked[\s\S]*?roadmap\.completedCount/);
-  assert.match(dashboard, /const weeklyActivity = isTracked[\s\S]*?roadmap\.weeklyActivity/);
-  assert.match(dashboard, /data-activity-count=\{value\}/);
+  assert.match(dashboard, /const weekProgress = roadmap\.weekProgress/);
+  assert.match(dashboard, /week-progress-item--\$\{week\.status\}/);
   assert.match(accessCard, /progress\.synchronized \? progress\.progressPercent : fallbackProgress/);
   assert.match(roadmap, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.next\], nextCompletionActivity\)/);
   assert.match(studyButton, /emitRoadmapProgressUpdated\(\s*profileId,/);
@@ -1445,7 +1457,7 @@ test("learner weekly activity is persisted from dated roadmap completions", asyn
   assert.match(studyButton, /readCompletionActivity\(saved\.completionActivity\)/);
   assert.match(shell, /FocusTimeTracker profileId=\{profile\.id\}/);
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  assert.match(styles, /\.week-strip i \{ display: block;/);
+  assert.match(styles, /\.week-progress-track i \{ position: absolute;/);
 });
 
 test("Second Seat practice is durable, entitlement-gated, and transcript-backed", async () => {

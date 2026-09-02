@@ -9,6 +9,7 @@ export type RoadmapProgressSnapshot = {
   completedTaskIds: string[];
   completionActivity: CompletionActivity;
   weeklyActivity: number[];
+  weekProgress: RoadmapWeekProgress[];
   focusedSeconds: number;
   completedCount: number;
   totalTaskCount: number;
@@ -18,6 +19,16 @@ export type RoadmapProgressSnapshot = {
 };
 
 export type CompletionActivity = Record<string, string>;
+
+export type RoadmapWeekStatus = "completed" | "in-progress" | "upcoming";
+
+export type RoadmapWeekProgress = {
+  week: number;
+  completedTaskCount: number;
+  totalTaskCount: number;
+  progressPercent: number;
+  status: RoadmapWeekStatus;
+};
 
 export type StoredRoadmapProgress = {
   completedTaskIds: string[];
@@ -107,11 +118,13 @@ export function roadmapProgressFor(
     weeks.find((week) => week.tasks.some((task) => !completed.has(task.id)))?.week ??
     weeks.at(-1)?.week ??
     1;
+  const weekProgress = roadmapWeekProgressFor(weeks, completed, currentWeek);
 
   return {
     completedTaskIds: completedTaskIdsInOrder,
     completionActivity: normalizedCompletionActivity,
     weeklyActivity: weeklyActivityCounts(normalizedCompletionActivity),
+    weekProgress,
     focusedSeconds: normalizeFocusedSeconds(focusedSeconds),
     completedCount: completedTaskIdsInOrder.length,
     totalTaskCount: tasks.length,
@@ -121,6 +134,34 @@ export function roadmapProgressFor(
     currentWeek,
     nextTask,
   };
+}
+
+export function roadmapWeekProgressFor(
+  weeks: readonly RoadmapWeek[],
+  completedTaskIds: ReadonlySet<string> | readonly string[],
+  currentWeek: number,
+): RoadmapWeekProgress[] {
+  const completed = completedTaskIds instanceof Set
+    ? completedTaskIds
+    : new Set(completedTaskIds);
+
+  return weeks.map((week) => {
+    const completedTaskCount = week.tasks.filter((task) => completed.has(task.id)).length;
+    const totalTaskCount = week.tasks.length;
+    return {
+      week: week.week,
+      completedTaskCount,
+      totalTaskCount,
+      progressPercent: totalTaskCount
+        ? Math.round((completedTaskCount / totalTaskCount) * 100)
+        : 0,
+      status: completedTaskCount === totalTaskCount
+        ? "completed"
+        : week.week === currentWeek
+          ? "in-progress"
+          : "upcoming",
+    };
+  });
 }
 
 function normalizeFocusedSeconds(value: number) {

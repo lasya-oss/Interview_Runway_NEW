@@ -20,12 +20,18 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const currentWeek = isTracked ? roadmap.currentWeek : profile.week;
   const isFreshLearner = progress === 0 && (isTracked ? roadmap.completedCount === 0 : (profile.completedTaskIds?.length ?? 0) === 0);
   const totalPlanTasks = roadmap.totalTaskCount;
+  const weekProgress = roadmap.weekProgress;
+  const completedWeeks = weekProgress.filter((week) => week.status === "completed").length;
+  const activeWeek = weekProgress.find((week) => week.status === "in-progress") ?? weekProgress.at(-1);
   const todayKicker = isFreshLearner
     ? `Start here · Week 1 of ${profile.roadmapWeeks}`
     : `Week ${currentWeek} of ${profile.roadmapWeeks} · ${profile.id === "foundation" ? "Foundation" : profile.id === "practice" ? "Second Seat" : "Calibration"} path`;
-  const weeklyActivity = isTracked ? roadmap.weeklyActivity : [72, 100, 48, 86, 34, 0, 0];
-  const maxWeeklyActivity = Math.max(...weeklyActivity, 0);
-  const weeklyActivityTotal = weeklyActivity.reduce((total, value) => total + value, 0);
+  const planStatus = activeWeek?.status === "completed" ? "Plan complete" : activeWeek ? `Week ${activeWeek.week} active` : "Plan active";
+  const weeklyProgressStatus = activeWeek?.status === "completed"
+    ? `${completedWeeks} of ${profile.roadmapWeeks} weeks complete`
+    : activeWeek
+      ? `${completedWeeks} of ${profile.roadmapWeeks} weeks complete · W${activeWeek.week} active · ${activeWeek.progressPercent}% this week`
+      : "Plan progress not available";
   const scoreKey = profile.id;
   const continuedMaterials = profile.id === "foundation"
     ? LEARNING_MATERIALS.filter((material) => material.tier === "foundation").slice(0, 3)
@@ -69,9 +75,6 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
       ? "After first study step"
       : roadmap.nextTask ? "After next study step" : "Roadmap complete"
     : "Thu 18:30";
-  const weeklyActivityStatus = weeklyActivityTotal
-    ? `${weeklyActivityTotal} roadmap task${weeklyActivityTotal === 1 ? "" : "s"} completed this week`
-    : "No roadmap completions recorded this week";
 
   return (
     <div className="member-page member-page-vault-today member-dashboard">
@@ -97,11 +100,20 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
         </article>
 
         <article className="weekly-plan-panel">
-          <div className="member-panel-label"><span>This week</span><b>{isFreshLearner ? "Start here" : profile.isLive || isTracked ? "Plan active" : profile.week === 4 ? "Final pass" : "Plan active"}</b></div>
-          <div className="week-strip" aria-label={isTracked ? weeklyActivityStatus : "Weekly activity"}>
-            {weeklyActivity.map((value, index) => <span className={value ? "has-activity" : ""} key={index} title={value ? `${value} task${value === 1 ? "" : "s"} completed` : "No tasks completed"}><i data-activity-count={value} style={{ height: value === 0 ? "0%" : `${Math.max(8, Math.round((value / maxWeeklyActivity) * 100))}%` }} /><b>{"MTWTFSS"[index]}</b></span>)}
-          </div>
-          {isTracked ? <p className="week-strip-status" aria-live="polite">{weeklyActivityStatus}</p> : null}
+          <div className="member-panel-label"><span>Plan activity</span><b>{isFreshLearner ? "Start here" : planStatus}</b></div>
+          <ol className={`week-strip week-strip--${profile.roadmapWeeks}`} aria-label={`Plan progress across ${profile.roadmapWeeks} weeks`}>
+            {weekProgress.map((week) => (
+              <li
+                className={`week-progress-item week-progress-item--${week.status}`}
+                key={week.week}
+                title={`Week ${week.week}: ${formatWeekStatus(week.status)} · ${week.completedTaskCount} of ${week.totalTaskCount} tasks · ${week.progressPercent}% complete`}
+              >
+                <span className="week-progress-track" aria-hidden="true"><i style={{ height: `${week.progressPercent}%` }} /></span>
+                <b>W{week.week}</b>
+              </li>
+            ))}
+          </ol>
+          <p className="week-strip-status" aria-live="polite">{weeklyProgressStatus}</p>
           <dl className="weekly-stats">
             <div><dt>Completed</dt><dd>{completedLabel}</dd></div>
             <div><dt>Focused time</dt><dd>{focusedTimeLabel}</dd></div>
@@ -159,6 +171,10 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
       </section>
     </div>
   );
+}
+
+function formatWeekStatus(status: "completed" | "in-progress" | "upcoming") {
+  return status === "completed" ? "Completed" : status === "in-progress" ? "Current week" : "Upcoming";
 }
 
 function formatFocusedTime(seconds: number) {

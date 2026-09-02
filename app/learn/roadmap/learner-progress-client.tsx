@@ -14,6 +14,7 @@ import {
   type LearnerActivityEventDetail,
   parseStoredRoadmapProgress,
   roadmapPlanForWeeks,
+  roadmapWeekProgressFor,
   roadmapProgressFor,
   roadmapStorageKey,
   type RoadmapProgressEventDetail,
@@ -189,12 +190,18 @@ function createStaticSnapshot(
   currentWeek: number,
 ): RoadmapProgressSnapshot {
   const totalTaskCount = weeks.reduce((count, week) => count + week.tasks.length, 0);
+  const completedTaskCount = Math.round((totalTaskCount * progressPercent) / 100);
+  const completedTaskIds = weeks
+    .flatMap((week) => week.tasks)
+    .slice(0, completedTaskCount)
+    .map((task) => task.id);
   return {
     completedTaskIds: [],
     completionActivity: {},
     weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
+    weekProgress: roadmapWeekProgressFor(weeks, completedTaskIds, currentWeek),
     focusedSeconds: 0,
-    completedCount: Math.round((totalTaskCount * progressPercent) / 100),
+    completedCount: completedTaskCount,
     totalTaskCount,
     progressPercent,
     currentWeek,
