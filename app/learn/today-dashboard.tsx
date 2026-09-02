@@ -26,7 +26,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const activeWeek = weekProgress.find((week) => week.status === "in-progress") ?? weekProgress.at(-1);
   const todayKicker = isFreshLearner
     ? `Start here · Week 1 of ${profile.roadmapWeeks}`
-    : `Week ${currentWeek} of ${profile.roadmapWeeks} · ${profile.id === "foundation" ? "Foundation" : profile.id === "practice" ? "Second Seat" : "Calibration"} path`;
+    : `Week ${currentWeek} of ${profile.roadmapWeeks} · ${profile.id === "foundation" ? "Foundation" : profile.id === "practice" ? "Second Seat" : "Calibration"} plan`;
   const planStatus = activeWeek?.status === "completed" ? "Plan complete" : activeWeek ? `Week ${activeWeek.week} active` : "Plan active";
   const weeklyProgressStatus = activeWeek?.status === "completed"
     ? `${completedWeeks} of ${profile.roadmapWeeks} weeks complete`
@@ -49,14 +49,14 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
     .filter((material) => material.profiles.includes(profile.id))
     .slice(0, 3);
   const emptySignalTitle = profile.id === "foundation"
-    ? "Build the first signal from your own work."
-    : "Your first practice signal is waiting.";
+    ? "Build your first readiness score from your own work."
+    : "Your first practice score is waiting.";
   const emptySignalBody = profile.id === "foundation"
-    ? "Complete the next Foundation checkpoint to turn your study work into a reviewable learning signal."
-    : "Complete one practice round to turn your own transcript into a reviewable signal. Until then, this workspace keeps readiness separate from sample data.";
+    ? "Complete the next Foundation step to turn your study work into a result you can review."
+    : "Complete one practice round to create a score you can review. Until then, this workspace keeps readiness separate from sample data.";
   const emptySignalLink = profile.id === "foundation" ? "/pricing" : "/learn/practice";
-  const emptySignalLinkLabel = profile.id === "foundation" ? "See how AI practice establishes it" : "Start your first practice round";
-  const signalLabel = profile.id === "foundation" ? "Foundation next signal" : "Second Seat next signal";
+  const emptySignalLinkLabel = profile.id === "foundation" ? "See how AI practice builds your score" : "Start your first practice round";
+  const signalLabel = profile.id === "foundation" ? "Foundation progress" : "Second Seat progress";
   const nextTask = isTracked && !isFreshLearner ? roadmap.nextTask : null;
   const nextAction = nextTask?.title ?? profile.nextAction;
   const nextActionMeta = nextTask?.meta ?? profile.nextActionMeta;
@@ -83,11 +83,11 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
       <section className="member-hero-grid">
         <div className="member-hero-copy">
           <p className="member-kicker">{todayKicker}</p>
-          <h1>{isFreshLearner ? <>Welcome, {profile.firstName}. <em>Start with the first decision.</em></> : <>Keep going, {profile.firstName}. <em>Keep the loop tight.</em></>}</h1>
+          <h1>{isFreshLearner ? <>Welcome, {profile.firstName}. <em>Start with the first decision.</em></> : <>Keep going, {profile.firstName}. <em>Keep your preparation focused.</em></>}</h1>
           <p>{profile.focus}</p>
         </div>
         <div className="readiness-dial" style={{ "--readiness": `${progress * 3.6}deg` } as CSSProperties}>
-          <div><strong>{progress}</strong><span>{profile.id === "foundation" ? <>Plan<br />complete</> : <>Readiness<br />signal</>}</span></div>
+          <div><strong>{progress}</strong><span>{profile.id === "foundation" ? <>Plan<br />complete</> : <>Readiness<br />score</>}</span></div>
           <i /><i /><i />
         </div>
       </section>
@@ -102,7 +102,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
         </article>
 
         <article className="weekly-plan-panel">
-          <div className="member-panel-label"><span>Plan activity</span><b>{isFreshLearner ? "Start here" : planStatus}</b></div>
+          <div className="member-panel-label"><span>Plan progress</span><b>{isFreshLearner ? "Start here" : planStatus}</b></div>
           <ol className={`week-strip week-strip--${profile.roadmapWeeks}`} aria-label={`Plan progress across ${profile.roadmapWeeks} weeks`}>
             {weekProgress.map((week) => (
               <li
@@ -127,14 +127,14 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
       <ReviewMaterials profile={profile} materials={reviewMaterials} />
 
       <section className="member-section">
-        <div className="member-section-heading"><div><p className="member-kicker">Skill signal</p><h2>Where the evidence points.</h2></div><Link href="/learn/feedback">Open full feedback <span>↗</span></Link></div>
+        <div className="member-section-heading"><div><p className="member-kicker">Skill progress</p><h2>Your progress and next focus.</h2></div><Link href="/learn/feedback">Open full feedback <span>↗</span></Link></div>
         <div className="signal-grid">
           {profile.id === "foundation" || isFreshLearner || profile.isLive ? (
             <article className="foundation-baseline-panel">
-              <span>BASELINE / NOT ESTABLISHED</span>
+              <span>STARTING SCORE / NOT SET</span>
               <div className="baseline-radar" aria-hidden="true"><i /><i /><i /><b>?</b></div>
-              <h3>{profile.id === "foundation" ? "No synthetic readiness score." : "No practice signal yet."}</h3>
-              <p>{profile.id === "foundation" ? "Your lesson completion is tracked, but readiness only appears after a scored practice session. Until then, the product keeps those concepts separate." : "Your practice access is ready, but readiness only appears after a scored transcript. Until then, the product keeps your starting state clean."}</p>
+              <h3>{profile.id === "foundation" ? "No readiness score yet." : "No practice score yet."}</h3>
+              <p>{profile.id === "foundation" ? "Your lesson completion is tracked, but a readiness score appears only after a scored practice session. Until then, the product keeps those concepts separate." : "Your practice access is ready, but a readiness score appears only after a scored transcript. Until then, the product keeps your starting state clean."}</p>
               <Link href={emptySignalLink}>{emptySignalLinkLabel} ↗</Link>
             </article>
           ) : (
@@ -145,7 +145,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
             </article>
           )}
           <article className={`tier-insight tier-insight-${profile.id}`}>
-            <span>{isFreshLearner || profile.isLive ? signalLabel : profile.id === "foundation" ? "Foundation signal" : profile.id === "practice" ? "Adaptive plan change" : "Coach observation"}</span>
+            <span>{isFreshLearner || profile.isLive ? signalLabel : profile.id === "foundation" ? "Foundation progress" : profile.id === "practice" ? "Adaptive plan update" : "Coach observation"}</span>
             <h3>{isFreshLearner || profile.isLive ? emptySignalTitle : profile.id === "foundation" ? "Explanation quality is ahead of trade-off depth." : profile.id === "practice" ? "Move consistency decisions to minute five." : "Your scope is senior; your story still sounds team-local."}</h3>
             <p>{isFreshLearner || profile.isLive ? emptySignalBody : profile.id === "foundation" ? "Finish the rate-limit and caching decision guides before adding timed practice." : profile.id === "practice" ? "The next two mocks will probe consistency before scale so the choice becomes automatic." : "Thursday’s session will rebuild one project story around influence, decision cost, and measurable outcome."}</p>
           </article>
@@ -202,7 +202,7 @@ function describeNextAction(
         ? isLearnerPlan
           ? `${materialDescription} Use it to practise the decision cues this roadmap step is building, then carry one clear explanation into your next interview-style response.`
           : materialDescription
-        : "Open the matching Library material to build the next interview signal.";
+        : "Open the matching Library material to build the next interview skill.";
     }
     return isLearnerPlan
       ? `${nextTask.learning.objective} Finish by capturing one concrete takeaway you can reuse in the next practice step.`
@@ -214,14 +214,14 @@ function describeNextAction(
       ? "Define your target role, interview loop, and evidence bar so the rest of the Foundation plan stays focused. This gives every later study step a clear target and evidence to build on."
       : profile.id === "practice"
         ? "Choose an interview-shaped round, then use the transcript and rubric to identify the first correction worth practising. The result gives your next correction a clear starting point instead of a generic score."
-        : "Bring two examples that show cross-team influence so the coach can calibrate your scope and decision signal.";
+        : "Bring two examples that show cross-team influence so the coach can calibrate your scope and decision evidence.";
   }
 
   return profile.id === "foundation"
     ? "Continue the lesson, then explain the decision aloud so the reasoning is ready for interview pressure. Capture the reasoning in your own words so it is ready for the next roadmap step."
     : profile.id === "practice"
       ? "Use the next practice round to turn the previous gap into a repeatable interview decision. Focus on one observable improvement so the next review shows what actually changed."
-      : "Bring two examples that show cross-team influence so the coach can calibrate your scope and decision signal.";
+      : "Bring two examples that show cross-team influence so the coach can calibrate your scope and decision evidence.";
 }
 
 function ReviewMaterials({
@@ -250,13 +250,13 @@ function ReviewMaterials({
               {material.preview ? (
                 <Image src={material.preview} alt={`${material.title} cover`} width={993} height={1403} sizes="180px" />
               ) : (
-                <span className="member-review-cover-fallback" aria-label={`${material.title} Vault QA asset`}>
+                <span className="member-review-cover-fallback" aria-label={`${material.title} supporting material`}>
                   <strong>{material.category}</strong>
                   <b>VAULT<br />ASSET</b>
                 </span>
               )}
             </span>
-            <span className="member-review-copy"><small>{material.category} · {material.format}</small><strong>{material.title}</strong><p>{material.detail}</p><b>{profile.isLive ? "Open Vault QA material" : "Open review edition"} ↗</b></span>
+            <span className="member-review-copy"><small>{material.category} · {material.format}</small><strong>{material.title}</strong><p>{material.detail}</p><b>{profile.isLive ? `Open ${planLabel} material` : "Open review edition"} ↗</b></span>
           </a>
         ))}
       </div>

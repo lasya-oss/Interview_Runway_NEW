@@ -11,7 +11,7 @@ type Action = { number: string; title: string; body: string; meta: string; href:
 
 const TABS: readonly { key: FeedbackTab; number: string; label: string; description: string }[] = [
   { key: "summary", number: "01", label: "Summary", description: "Scores + pattern" },
-  { key: "evidence", number: "02", label: "Transcript evidence", description: "Moments + signals" },
+  { key: "evidence", number: "02", label: "Transcript evidence", description: "Moments + scores" },
   { key: "actions", number: "03", label: "Plan changes", description: "What · why · next" },
 ];
 
@@ -72,12 +72,12 @@ export function FeedbackClient({
     <div className="feedback-workspace">
       <section className="feedback-heading">
         <div>
-          <p className="member-kicker">{live ? "Your debrief · account record" : "Preview debrief · MOCK-07"}</p>
+          <p className="member-kicker">{live ? "Your debrief · account history" : "Preview debrief · MOCK-07"}</p>
           <h1>{mockTitle}</h1>
-          <p>{live ? "This evaluation was generated from your completed transcript. Each score is a practice signal and each correction points to a concrete next rehearsal." : "This preview demonstrates how a production transcript connects observations, scores, and the next study decision. It does not evaluate preview responses."}</p>
+          <p>{live ? "This evaluation was generated from your completed transcript. Each score shows practice performance and each correction points to a concrete next rehearsal." : "This preview demonstrates how a production transcript connects observations, scores, and the next study decision. It does not evaluate preview responses."}</p>
         </div>
         <div className="feedback-score" aria-label={`${live ? "Your" : "Preview"} overall score ${overall} out of 100`}>
-          <span>Practice signal</span><strong>{overall}</strong><small>{live ? "Latest completed round" : "+7 across preview sessions"}</small>
+          <span>Practice score</span><strong>{overall}</strong><small>{live ? "Latest completed round" : "+7 across preview sessions"}</small>
         </div>
       </section>
 
@@ -103,7 +103,7 @@ export function FeedbackClient({
             <span>{premium ? "Coach-visible pattern" : live ? "Adaptive plan change" : "Preview plan change"}</span>
             <h2>{insightTitle ?? "Move the consistency decision before the scale discussion."}</h2>
             <p>{insightBody ?? "The architecture was credible, but the consistency model arrived after prompting. The next design rehearsal should make that decision visible earlier."}</p>
-            <div><b>Not a hiring prediction</b><small>Scores illustrate practice signals, not an estimate of receiving an offer.</small></div>
+            <div><b>Not a hiring prediction</b><small>Scores show practice performance, not an estimate of receiving an offer.</small></div>
           </aside>
         </section>
       ) : null}
@@ -128,7 +128,7 @@ export function FeedbackClient({
 
       {tab === "actions" ? (
         <section className="feedback-actions" role="tabpanel">
-          <div className="feedback-actions-heading"><p className="member-kicker">{live ? "Adaptive plan" : "Preview plan regeneration"}</p><h2>Correct the gap while it is still specific.</h2><p>{live ? "The next actions are generated from the lowest evidence signal in this transcript." : "These actions demonstrate the expected handoff from feedback to preparation."}</p></div>
+          <div className="feedback-actions-heading"><p className="member-kicker">{live ? "Adaptive plan" : "Preview plan regeneration"}</p><h2>Correct the gap while it is still specific.</h2><p>{live ? "The next actions are generated from the lowest evidence score in this transcript." : "These actions demonstrate the expected handoff from feedback to preparation."}</p></div>
           <div className="feedback-action-list">
             {actions.map((action) => (
               <article key={action.number}>
@@ -186,10 +186,10 @@ function SecondSeatFeedbackExperience({
         <div>
           <p className="member-kicker">{live ? "Second Seat · account debrief" : "Second Seat · preview debrief"}</p>
           <h1>{mockTitle}</h1>
-          <p>{live ? "This evaluation is grounded in your completed transcript. Follow each signal from the moment it appeared to the next rehearsal it changes." : "This preview shows how the Second Seat connects transcript moments to practice signals and a focused next rehearsal."}</p>
+          <p>{live ? "This evaluation is grounded in your completed transcript. Follow each score from the moment it appeared to the next rehearsal it changes." : "This preview shows how the Second Seat connects transcript moments to practice scores and a focused next rehearsal."}</p>
         </div>
-        <div className="feedback-score" aria-label={`${live ? "Your" : "Preview"} practice signal ${overall} out of 100`}>
-          <span>Practice signal</span>
+        <div className="feedback-score" aria-label={`${live ? "Your" : "Preview"} practice score ${overall} out of 100`}>
+          <span>Practice score</span>
           <strong>{overall}<small>/100</small></strong>
           <small>{live ? "Latest completed round" : "Preview round"}</small>
         </div>
@@ -200,7 +200,7 @@ function SecondSeatFeedbackExperience({
       {tab === "summary" ? (
         <section id="feedback-panel-summary" className="feedback-summary" role="tabpanel" aria-labelledby="feedback-tab-summary" tabIndex={0}>
           <div className="feedback-dimensions" aria-label="Feedback dimension scores">
-            <div className="feedback-dimensions-heading"><div><p className="member-kicker">Dimension signals</p><p>Scores are out of 100 and reflect what this transcript made visible.</p></div><span>0–100 scale</span></div>
+            <div className="feedback-dimensions-heading"><div><p className="member-kicker">Score dimensions</p><p>Scores are out of 100 and reflect what this transcript made visible.</p></div><span>0–100 scale</span></div>
             {dimensions.map((dimension) => (
               <article
                 id={`feedback-dimension-${dimension.key}`}
@@ -220,14 +220,14 @@ function SecondSeatFeedbackExperience({
             <span>Adaptive plan change</span>
             <h2>{insightTitle ?? "Make the next decision easy to follow."}</h2>
             <p>{insightBody ?? "The next rehearsal should preserve the strongest decision order while making the unresolved trade-off observable earlier."}</p>
-            <div><b>Next focus</b><small>{lowestDimension ? `${lowestDimension.label} · ${lowestDimension.score}/100 · ${scoreBand(lowestDimension.score)}` : "The opening decision"}</small><b>How to read it</b><small>The signal is evidence from this round, not a readiness score or hiring prediction.</small></div>
+            <div><b>Next focus</b><small>{lowestDimension ? `${lowestDimension.label} · ${lowestDimension.score}/100 · ${scoreBand(lowestDimension.score)}` : "The opening decision"}</small><b>How to read it</b><small>This score is evidence from this round, not a readiness score or hiring prediction.</small></div>
           </aside>
         </section>
       ) : null}
 
       {tab === "evidence" ? (
         <section id="feedback-panel-evidence" className="feedback-evidence" role="tabpanel" aria-labelledby="feedback-tab-evidence" tabIndex={0}>
-          <div className="feedback-evidence-intro"><p className="member-kicker">Traceable observations</p><h2>Every correction points back to a moment.</h2><p>{live ? "Your transcript observations are linked to the dimensions they can improve. Select a signal to return to its score." : "Each preview excerpt is connected to the practice signal it is meant to sharpen."}</p></div>
+          <div className="feedback-evidence-intro"><p className="member-kicker">Traceable observations</p><h2>Every correction points back to a moment.</h2><p>{live ? "Your transcript observations are linked to the dimensions they can improve. Select a score to return to its summary." : "Each preview excerpt is connected to the practice score it is meant to improve."}</p></div>
           <div className="feedback-evidence-list">
             {evidence.map((item, index) => {
               const linkedDimensions = item.dimensionKeys
@@ -260,7 +260,7 @@ function SecondSeatFeedbackExperience({
 
       {tab === "actions" ? (
         <section id="feedback-panel-actions" className="feedback-actions" role="tabpanel" aria-labelledby="feedback-tab-actions" tabIndex={0}>
-          <div className="feedback-actions-heading"><p className="member-kicker">{live ? "Adaptive plan" : "Preview plan regeneration"}</p><h2>Correct the gap while it is still specific.</h2><p>{live ? "The plan turns the lowest signal into a concrete rehearsal, then checks whether the correction transfers." : "The plan makes the handoff from feedback to preparation explicit."}</p></div>
+          <div className="feedback-actions-heading"><p className="member-kicker">{live ? "Adaptive plan" : "Preview plan regeneration"}</p><h2>Correct the gap while it is still specific.</h2><p>{live ? "The plan turns the lowest score into a concrete rehearsal, then checks whether the correction transfers." : "The plan makes the handoff from feedback to preparation explicit."}</p></div>
           <div className="feedback-action-list">
             {actions.map((action, index) => {
               const details = actionDetails(action, index, dimensions, live);
@@ -320,7 +320,7 @@ function actionDetails(action: Action, index: number, dimensions: readonly Dimen
   return {
     what: action.what ?? action.title,
     why: action.why ?? (index === 0 && lowestDimension
-      ? `${lowestDimension.label} is the lowest signal in this round at ${lowestDimension.score}/100, so it is the clearest place to test a correction.`
+      ? `${lowestDimension.label} is the lowest score in this round at ${lowestDimension.score}/100, so it is the clearest place to test a correction.`
       : live
         ? "This step turns one transcript observation into evidence you can test on the next attempt."
         : "A focused correction is easier to repeat and review than a broad request to improve."),

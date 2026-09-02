@@ -152,7 +152,7 @@ export function PracticeClient({
             <h1>Practise the decision, not the script.</h1>
             <p>
               Choose a round, answer three interviewer turns, and receive a structured
-              practice signal tied to the transcript. Your account can resume an
+              practice score tied to the transcript. Your account can resume an
               unfinished session and keeps completed debriefs available.
             </p>
           </div>
@@ -163,9 +163,9 @@ export function PracticeClient({
           <div className="practice-track-picker-heading">
             <div>
               <span>01 · CHOOSE YOUR ROUND</span>
-              <h2 id="practice-track-title">What do you want to pressure-test?</h2>
+              <h2 id="practice-track-title">What do you want to practise?</h2>
             </div>
-            <small>{isLive ? "Account session · responses saved as you go" : "Preview session · no account record"}</small>
+            <small>{isLive ? "Account session · responses saved as you go" : "Preview session · no account history"}</small>
           </div>
           <div className="practice-track-grid" role="group" aria-labelledby="practice-track-title">
             {SECOND_SEAT_MOCKS.map((candidate) => {
@@ -190,7 +190,7 @@ export function PracticeClient({
                   </button>
                   {selected ? (
                     <div className="practice-track-context" id={contextId} aria-live="polite">
-                      <span>Round context</span>
+                      <span>About this round</span>
                       <strong>{candidate.objective}</strong>
                       <p><b>Opening question</b>{candidate.turns[0].prompt}</p>
                     </div>
@@ -229,7 +229,7 @@ export function PracticeClient({
                   <Link href={feedbackHref(session.id, isLive)} key={session.id}>
                     <span>{completedMock?.category ?? "Practice"}</span>
                     <strong>{completedMock?.title ?? "Completed session"}</strong>
-                    <small>{session.evaluation?.overall ?? "—"} practice signal · {formatDate(session.completedAt)}</small>
+                    <small>{session.evaluation?.overall ?? "—"} practice score · {formatDate(session.completedAt)}</small>
                     <b>Open feedback ↗</b>
                   </Link>
                 );
@@ -239,7 +239,7 @@ export function PracticeClient({
         ) : null}
 
         {error ? <p className="practice-inline-error" role="alert">{error}</p> : null}
-        <div className="practice-history-note"><i /><p><strong>{learnerName}</strong>, each response is saved only for your Second Seat transcript and evaluation. Scores are practice signals, never hiring predictions.</p></div>
+        <div className="practice-history-note"><i /><p><strong>{learnerName}</strong>, each response is saved only for your Second Seat transcript and evaluation. Scores show practice performance, never hiring predictions.</p></div>
       </div>
     );
   }
@@ -248,7 +248,7 @@ export function PracticeClient({
     return (
       <div className="practice-workspace practice-complete">
         <section>
-          <p className="member-kicker">Practice signal recorded</p>
+          <p className="member-kicker">Practice score saved</p>
           <span className="practice-complete-mark">{evaluation.overall} / 100</span>
           <h1>Your transcript has a next move.</h1>
           <p>{evaluation.insightBody}</p>

@@ -95,8 +95,8 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
         <footer className="practice-replay-next-step">
           <div>
             <p className="member-kicker">Connected practice</p>
-            <h2>Use the replay to sharpen the {replay.category.toLowerCase()} signal.</h2>
-            <p>{linkedRoadmapTask ? `This replay supplements “${linkedRoadmapTask.title}”; it does not replace the task’s learning brief or mark it complete.` : "This replay is a practice supplement and does not mark a roadmap task complete."}</p>
+            <h2>Use the replay to improve your {replay.category.toLowerCase()} skills.</h2>
+            <p>{linkedRoadmapTask ? `This replay supplements “${linkedRoadmapTask.title}”; it does not replace the task’s learning material or mark it complete.` : "This replay is a practice supplement and does not mark a roadmap task complete."}</p>
           </div>
           <div className="practice-replay-next-actions">
             {linkedRoadmapHref ? <Link className="member-primary-button" href={linkedRoadmapHref}>{linkedRoadmapLabel} <span aria-hidden="true">↗</span></Link> : null}

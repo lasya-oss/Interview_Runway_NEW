@@ -76,10 +76,10 @@ const START_HERE_COPY: Record<StartHerePlan, {
     title: "New to interview preparation?",
     intro: "Not sure where to start? Build your preparation from the right foundation.",
     panelEyebrow: "Choose your focus",
-    panelDescription: "These fixed paths are based on the Vault’s existing lesson, guide, explainer, and template metadata. Each focus shows only directly relevant primary material.",
+    panelDescription: "These guided paths group the Vault’s existing lessons, guides, explainers, and templates. Each focus shows only material directly related to it.",
     loading: "Loading the Vault starting paths…",
-    selectionPrompt: "Select a focus to see the directly relevant Library content.",
-    levelPrompt: "Choose a level to open only its relevant Vault records.",
+    selectionPrompt: "Select a focus to see the directly relevant Library materials.",
+    levelPrompt: "Choose a level to view only its relevant Vault materials.",
     empty: "No matching Vault material at this level.",
   },
   "second-seat": {
@@ -87,10 +87,10 @@ const START_HERE_COPY: Record<StartHerePlan, {
     title: "New to interview preparation?",
     intro: "Not sure where to start? Build your next practice round from the right foundation.",
     panelEyebrow: "Choose your practice focus",
-    panelDescription: "These fixed paths combine the Vault foundation with the Second Seat’s existing practice material. Each focus shows directly relevant content for your next round.",
+    panelDescription: "These guided paths combine the Vault foundation with the Second Seat’s existing practice material. Each focus shows material directly related to your next round.",
     loading: "Loading the Second Seat starting paths…",
-    selectionPrompt: "Select a focus to see the directly relevant Second Seat content.",
-    levelPrompt: "Choose a level to open only its relevant Second Seat records.",
+    selectionPrompt: "Select a focus to see the directly relevant Second Seat materials.",
+    levelPrompt: "Choose a level to view only its relevant Second Seat materials.",
     empty: "No matching Second Seat material at this level.",
   },
 };
@@ -126,7 +126,7 @@ function domainForLibraryRecord(category: string, filename = "", context = ""): 
   if (normalizedCategory === "system design" || normalizedFilename.startsWith("sysdesign_") || normalizedFilename.startsWith("template_system-design-")) return "system-design";
   if (normalizedCategory === "behavioural" || normalizedFilename.startsWith("behavioral_") || normalizedFilename.startsWith("template_behavioral-")) return "behavioural";
   if (normalizedCategory === "remote career" || normalizedFilename.startsWith("remote_") || normalizedFilename.startsWith("template_negotiation-")) return "remote";
-  if (normalizedCategory === "career signal" || normalizedFilename.startsWith("career_") || /template_(?:us-ats-resume|title-translation-guide|remote-cover-letter|outreach-|linkedin-)/.test(normalizedFilename)) return "career";
+  if (normalizedCategory === "career profile" || normalizedFilename.startsWith("career_") || /template_(?:us-ats-resume|title-translation-guide|remote-cover-letter|outreach-|linkedin-)/.test(normalizedFilename)) return "career";
   if (normalizedCategory === "company research" || normalizedFilename.startsWith("company_")) return "company";
   if (normalizedCategory === "roadmaps" || normalizedCategory === "operations" || /template_(?:weekly-prep-tracker|recruiter-screen-notes|interview-availability)/.test(normalizedFilename)) return "execution";
   if (normalizedCategory === "ai practice") {
@@ -333,9 +333,9 @@ export function VaultStartHere({
             >
               <div className="library-start-here__summary">
                 <strong>{matchingRecords.length.toLocaleString("en-IN")}</strong>
-                <span>{matchingRecords.length === 1 ? "directly relevant record" : "directly relevant records"}</span>
+                <span>{matchingRecords.length === 1 ? "directly relevant material" : "directly relevant materials"}</span>
               </div>
-              <div className="library-start-here__levels" aria-label={`${matchingRecords.length.toLocaleString("en-IN")} records by learning level`}>
+              <div className="library-start-here__levels" aria-label={`${matchingRecords.length.toLocaleString("en-IN")} materials by learning level`}>
                 {LEVELS.map((level) => {
                   const count = matchingRecords.filter((record) => record.level === level.id).length;
                   const selected = selectedLevel === level.id;
@@ -344,14 +344,14 @@ export function VaultStartHere({
                       className={`library-start-here__level-card${selected ? " is-selected" : ""}`}
                       type="button"
                       aria-expanded={selected}
-                      aria-label={`${level.label}: ${count} ${count === 1 ? "record" : "records"}. ${selected ? "Selected" : "Show level"}`}
+                      aria-label={`${level.label}: ${count} ${count === 1 ? "material" : "materials"}. ${selected ? "Selected" : "Show level"}`}
                       onClick={() => setSelectedLevel(level.id)}
                       key={level.id}
                     >
                       <span className="library-start-here__level-card-label">{level.label}</span>
                       <span className="library-start-here__level-card-count">
                         <strong>{count.toLocaleString("en-IN")}</strong>
-                        <small>{count === 1 ? "record" : "records"}</small>
+                        <small>{count === 1 ? "material" : "materials"}</small>
                       </span>
                       <p>{level.detail}</p>
                       <span className="library-start-here__level-card-action">{selected ? "Selected level" : "View level"} <b aria-hidden="true">↗</b></span>
@@ -374,7 +374,7 @@ export function VaultStartHere({
                         <p className="member-kicker">{level.detail}</p>
                         <h3 id={`library-start-here-${selectedLevel}`}>{level.label}</h3>
                       </div>
-                      <span>{records.length.toLocaleString("en-IN")} {records.length === 1 ? "record" : "records"}</span>
+                      <span>{records.length.toLocaleString("en-IN")} {records.length === 1 ? "material" : "materials"}</span>
                     </header>
                     {records.length ? (
                       <div className="library-start-here__resource-grid">

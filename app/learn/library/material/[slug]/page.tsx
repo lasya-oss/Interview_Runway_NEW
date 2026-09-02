@@ -51,7 +51,7 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
             <p>Original material from the supplied Drive folder, catalogued and discoverable inside the InterviewRunway workspace.</p>
           </div>
           <dl>
-            <div><dt>Record</dt><dd>{number}</dd></div>
+            <div><dt>Material</dt><dd>{number}</dd></div>
             <div><dt>Format</dt><dd>{kind}</dd></div>
             <div><dt>Size</dt><dd>{formatMaterialSize(material.bytes)}</dd></div>
           </dl>
@@ -79,7 +79,7 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
           </section>
 
           <aside className="material-notes drive-material-notes">
-            <p className="member-kicker">Source record</p>
+            <p className="member-kicker">Source material</p>
             <div>
               <span>Collection</span>
               <p>{material.collection}</p>

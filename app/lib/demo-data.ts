@@ -113,7 +113,7 @@ export const DEMO_REVIEW_MATERIALS: readonly DemoReviewMaterial[] = [
   {
     title: "12-Week Foundation Roadmap",
     category: "Plan",
-    detail: "Full Foundation sequence with checkpoints and account-backed progress",
+    detail: "Full Foundation sequence with learning steps and account-backed progress",
     format: "PDF · 15 pages",
     href: "/pdf-guides/roadmap_12week.pdf",
     profiles: ["foundation"],
@@ -137,7 +137,7 @@ export const DEMO_REVIEW_MATERIALS: readonly DemoReviewMaterial[] = [
   },
   {
     title: "Design a Notification System",
-    category: "Second Seat brief",
+    category: "Second Seat guide",
     detail: "Requirements-to-architecture walkthrough used by a mock",
     format: "PDF · 3 pages",
     href: "/demo-materials/sysdesign_notification-system-walkthrough.pdf",
@@ -207,7 +207,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     slug: "sliding-window",
     number: "02",
     category: "DSA patterns",
-    title: "Recognise the sliding-window signal",
+    title: "Recognise the sliding-window pattern",
     description: "Move from problem wording to invariant, boundary choice, and complexity explanation.",
     format: "Pattern lab",
     duration: "22 min",
@@ -268,7 +268,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Intermediate",
     roadmap: "Practice loop",
     progress: 0,
-    demoAsset: { href: "/demo-materials/sysdesign_notification-system-walkthrough.pdf", label: "Open 3-page mock brief" },
+    demoAsset: { href: "/demo-materials/sysdesign_notification-system-walkthrough.pdf", label: "Open 3-page mock guide" },
   },
   {
     slug: "staff-scope-calibration",
@@ -358,7 +358,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
   {
     slug: "us-ats-resume",
     number: "11",
-    category: "Career signal",
+    category: "Career profile",
     title: "US ATS engineering resume",
     description: "An editable structure for impact-first bullets, technical context, and internationally legible scope.",
     format: "Editable template",
@@ -377,7 +377,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     number: "12",
     category: "Remote career",
     title: "Compare remote offers as systems",
-    description: "Model cash, benefits, time zones, tax uncertainty, currency risk, and career signal in one view.",
+    description: "Model cash, benefits, time zones, tax uncertainty, currency risk, and career value in one view.",
     format: "Decision template",
     duration: "18 min",
     tier: "foundation",
@@ -423,8 +423,8 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
   {
     slug: "resume-signal-lab",
     number: "15",
-    category: "Career signal",
-    title: "Resume signal lab",
+    category: "Career profile",
+    title: "Resume profile lab",
     description: "Compare bullet revisions against a deterministic role-alignment rubric and save stronger evidence.",
     format: "Guided lab",
     duration: "25 min",
@@ -472,9 +472,9 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     slug: "target-company-brief",
     number: "18",
     category: "Coach room",
-    title: "Target-company calibration brief",
-    description: "An example private brief connecting the role loop, likely evidence bar, rehearsals, and open risks.",
-    format: "Private brief",
+    title: "Target-company preparation guide",
+    description: "An example private guide connecting the role loop, likely evidence bar, rehearsals, and open risks.",
+    format: "Private guide",
     duration: "Coach prepared",
     tier: "premium",
     tags: ["Company", "Calibration", "Plan"],
@@ -503,7 +503,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
 ] as const;
 
 export const ROADMAP_WEEKS = [
-  { week: 1, title: "Recognise the patterns", detail: "Core DSA signals, answer structure, and baseline system trade-offs.", tasks: 8 },
+  { week: 1, title: "Recognise the patterns", detail: "Core DSA patterns, answer structure, and starting system trade-offs.", tasks: 8 },
   { week: 2, title: "Build reliable explanations", detail: "Rate limits, caching, queues, behavioural scope, and verbal walkthroughs.", tasks: 10 },
   { week: 3, title: "Introduce interview pressure", detail: "Timed problem solving, design prompts, and story retrieval under constraint.", tasks: 9 },
   { week: 4, title: "Correct and consolidate", detail: "Review the recurring gaps, rehearse target-company patterns, and plan the next loop.", tasks: 7 },

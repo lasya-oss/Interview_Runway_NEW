@@ -139,8 +139,8 @@ export function RoadmapChecklist({
       <section className="roadmap-overview" aria-labelledby="roadmap-overview-title">
         <div>
           <p className="member-kicker">{isAccount ? "Account roadmap" : "Device-local demo checklist"}</p>
-          <h1 id="roadmap-overview-title">A plan with a finish line.</h1>
-          <p>{isAccount ? `Check off work as you study. Your ${planLabel} progress is stored with your account and follows you across sessions.` : "Check off sample work to see this browser-only plan respond. No learner record is created or synced."}</p>
+          <h1 id="roadmap-overview-title">Your learning plan.</h1>
+          <p>{isAccount ? `Check off work as you study. Your ${planLabel} progress is stored with your account and follows you across sessions.` : "Check off sample work to see this browser-only plan respond. No progress is saved or synced."}</p>
         </div>
         <div className="roadmap-completion" aria-label={`${completion}% of ${isAccount ? "your" : "sample"} plan complete`}>
           <strong>{completion}<small>%</small></strong>
@@ -150,7 +150,7 @@ export function RoadmapChecklist({
       </section>
 
       <div className="roadmap-toolbar">
-        <span><i /> Your position · Week {activeWeek}</span>
+        <span><i /> Current week · Week {activeWeek}</span>
         <button type="button" onClick={reset} disabled={saving}>{isAccount ? "Reset progress" : "Reset sample progress"}</button>
         {saving ? <small>Saving…</small> : null}
       </div>
@@ -224,7 +224,7 @@ export function RoadmapChecklist({
                         ) : (
                           <div className="roadmap-task-learning roadmap-task-learning--unmatched">
                             {taskCopy}
-                            <span className="roadmap-task-link-label roadmap-task-link-label--unavailable">No exact Library match</span>
+                            <span className="roadmap-task-link-label roadmap-task-link-label--unavailable">No matching material</span>
                           </div>
                         )}
                       </div>

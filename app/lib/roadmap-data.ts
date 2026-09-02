@@ -71,9 +71,9 @@ const task = (id: string, title: string, meta: string, learning: RoadmapTaskCont
 export const FOUR_WEEK_PLAN: readonly RoadmapWeek[] = [
   {
     week: 1,
-    title: "Establish the baseline",
+    title: "Find your starting point",
     detail: "Surface the strongest patterns, the weakest explanations, and the target interview shape.",
-    outcome: "Leave with a baseline map of patterns, explanations, and ownership evidence.",
+    outcome: "Leave with a starting map of patterns, explanations, and ownership evidence.",
     estimatedMinutes: 80,
     tasks: [
       task("4w-1-patterns", "Map the eight highest-frequency DSA patterns", "Pattern lab · 35 min", planned(
@@ -81,10 +81,10 @@ export const FOUR_WEEK_PLAN: readonly RoadmapWeek[] = [
         "Pattern map and guided practice set",
         ["Eight pattern reference notes", "Representative problem set", "Answer-explanation rubric"],
       )),
-      task("4w-1-design", "Record a five-minute system-design baseline", "Self review · 15 min", planned(
+      task("4w-1-design", "Record a five-minute starting answer", "Self review · 15 min", planned(
         "Give a timed design opening that states requirements, scale assumptions, a first architecture, and one trade-off.",
-        "Recorded baseline prompt and self-review guide",
-        ["System-design prompt", "Baseline scoring rubric", "Recording or written response"],
+        "Recorded starting answer prompt and self-review guide",
+        ["System-design prompt", "Starting-point scoring rubric", "Recording or written response"],
       )),
       task("4w-1-stories", "Draft three ownership stories", "Behavioural · 30 min", material("scope-stories")),
     ],
@@ -110,30 +110,30 @@ export const FOUR_WEEK_PLAN: readonly RoadmapWeek[] = [
     tasks: [
       task("4w-3-mock", "Run the notification-service sample mock", "Adaptive practice · 35 min", material("notification-mock")),
       task("4w-3-correct", "Correct the lowest scoring dimension", "Feedback loop · 30 min", planned(
-        "Use evidence from a scored attempt to select one correction, practise it, and define the signal that would show improvement.",
+        "Use evidence from a scored attempt to select one correction, practise it, and define the measure that would show improvement.",
         "Scored feedback loop and re-test worksheet",
         ["Completed attempt", "Dimension-level rubric", "Correction exercise", "Re-test prompt"],
       )),
       task("4w-3-company", "Build a target-company interview map", "Role intelligence · 25 min", planned(
         "Turn a target role into a map of likely loop stages, evidence expectations, and the gaps that deserve practice time.",
-        "Target-company research brief",
+        "Target-company research guide",
         ["Public role description", "Interview-loop research", "Evidence-gap worksheet"],
       )),
     ],
   },
   {
     week: 4,
-    title: "Consolidate the signal",
+    title: "Bring your preparation together",
     detail: "Rehearse the decisions and stories most likely to determine the final loop.",
-    outcome: "Finish with a full-loop rehearsal, final resume signal check, and interview-day runbook.",
+    outcome: "Finish with a full-loop rehearsal, final resume profile check, and interview-day runbook.",
     estimatedMinutes: 80,
     tasks: [
       task("4w-4-rehearse", "Complete one full-loop rehearsal", "Mixed mock · 45 min", planned(
-        "Run technical, behavioural, and follow-up segments in sequence, then identify the one recurring signal to correct before interview day.",
+        "Run technical, behavioural, and follow-up segments in sequence, then identify the one recurring gap to correct before interview day.",
         "Full-loop rehearsal and evidence summary",
         ["Technical prompt", "Behavioural prompt", "Follow-up questions", "Scoring and review sheet"],
       )),
-      task("4w-4-resume", "Apply the final resume signal check", "Career signal · 20 min", material("us-ats-resume")),
+      task("4w-4-resume", "Apply the final resume profile check", "Career profile · 20 min", material("us-ats-resume")),
       task("4w-4-runbook", "Prepare the interview-day runbook", "Checklist · 15 min", material("interview-day-run-sheet")),
     ],
   },
@@ -159,15 +159,15 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
         ["Target role description", "Level expectations", "Interview-loop outline"],
       )),
       task("12w-1-base", "Capture a technical baseline", "Self review · 25 min", lesson(
-        "Record the current technical explanation baseline across coding, system design, and trade-off communication.",
-        "Technical baseline prompt set",
+        "Record your current technical starting point across coding, system design, and trade-off communication.",
+        "Technical starting-point prompt set",
         [
           { title: "Use the same starting conditions", detail: "Pick one coding prompt and one system-design prompt. Give each a fixed time limit and record the assumptions you make before solving." },
           { title: "Score observable behaviour", detail: "Check clarification, state or requirements, decision order, complexity, failure cases, and explanation quality. Do not convert this first pass into a vague readiness score." },
           { title: "Select one correction", detail: "Choose the earliest missing decision that affected the answer. The next study task should make that decision visible and repeatable." },
         ],
         "Record two baseline responses, mark the first point where the explanation became unclear, and write one correction that a reviewer could observe next time.",
-        ["Coding prompt", "System-design prompt", "Baseline rubric"],
+        ["Coding prompt", "System-design prompt", "Starting-point rubric"],
       )),
     ],
   },
@@ -281,7 +281,7 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
           { title: "Bound recovery", detail: "Stop retry amplification with idempotency, backoff, attempt limits, and dead letters. Protect transactional work before allowing optional fan-out to consume capacity." },
           { title: "Scale against evidence", detail: "Add workers only when the bottleneck is parallelisable and downstream capacity is available. Watch oldest-event age and recovery rate while the queue drains." },
         ],
-        "Write the first five minutes of response to a 20× queue spike: name three signals, one protection action, one retry change, and the condition for adding capacity.",
+        "Write the first five minutes of response to a 20× queue spike: name three metrics, one protection action, one retry change, and the condition for adding capacity.",
         ["Queue metrics", "Retry policy", "Priority and SLO notes"],
       )),
     ],
@@ -299,17 +299,17 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
   },
   {
     week: 8,
-    title: "Strengthen career signal",
+    title: "Strengthen your career profile",
     detail: "Make scope legible to a remote recruiter and a US hiring manager.",
-    outcome: "Turn experience into clear, evidence-backed resume and profile signals for the target role.",
+    outcome: "Turn experience into clear, evidence-backed resume and profile evidence for the target role.",
     estimatedMinutes: 75,
     tasks: [
       task("12w-8-resume", "Apply the ATS resume pass", "Template · 45 min", material("us-ats-resume")),
-      task("12w-8-linkedin", "Rewrite headline and About section", "Career signal · 30 min", lesson(
+      task("12w-8-linkedin", "Rewrite headline and About section", "Career profile · 30 min", lesson(
         "Align headline and About copy to the target role without making claims the evidence cannot support.",
-        "Career-signal writing guide",
+        "Career profile writing guide",
         [
-          { title: "Lead with the target", detail: "Use the target role, technical surface, and level signal in the headline. Avoid generic tool lists that do not reveal the decisions you make." },
+          { title: "Lead with the target", detail: "Use the target role, technical surface, and level in the headline. Avoid generic tool lists that do not reveal the decisions you make." },
           { title: "Turn work into evidence", detail: "In the About section, connect context, ownership, scale, and outcome. Keep claims proportional to what the resume, projects, or references can support." },
           { title: "Remove translation burden", detail: "Replace local title or product shorthand with plain language a US recruiter can assess without guessing at your scope." },
         ],
@@ -322,18 +322,18 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 9,
     title: "Add company context",
     detail: "Prioritise public, recurring interview patterns without memorising leaked prompts.",
-    outcome: "Translate public company signals into a focused interview-loop map and three preparation gaps.",
+    outcome: "Translate public company evidence into a focused interview-loop map and three preparation gaps.",
     estimatedMinutes: 50,
     tasks: [
       task("12w-9-map", "Build the interview-loop map", "Role intelligence · 30 min", lesson(
-        "Map public signals about a company’s interview loop to preparation themes, not leaked or copied prompts.",
-        "Company interview-loop research brief",
+        "Map public evidence about a company’s interview loop to preparation themes, not leaked or copied prompts.",
+        "Company interview-loop research guide",
         [
           { title: "Use public evidence", detail: "Start with the role description, official material, candidate-reported patterns, and current public signals. Record source date and confidence instead of treating anecdotes as fact." },
-          { title: "Map stages to signals", detail: "For each stage, name the likely capability, the evidence you can prepare, and the uncertainty that still needs verification." },
+          { title: "Map stages to capabilities", detail: "For each stage, name the likely capability, the evidence you can prepare, and the uncertainty that still needs verification." },
           { title: "Keep it ethical and useful", detail: "Prepare themes and decision patterns, never leaked questions or copied answers. The map should make practice more targeted without pretending to predict the loop." },
         ],
-        "Build a four-row loop map for one target company with stage, public evidence, likely signal, preparation action, and confidence level.",
+        "Build a four-row loop map for one target company with stage, public evidence, likely capability, preparation action, and confidence level.",
         ["Public interview information", "Role description", "Preparation-theme matrix"],
       )),
       task("12w-9-gaps", "Select three company-specific gaps", "Plan · 20 min", lesson(
@@ -341,7 +341,7 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
         "Gap-prioritisation worksheet",
         [
           { title: "Separate general from contextual gaps", detail: "A general gap appears across roles; a contextual gap matters because this company, level, or loop expects a different kind of evidence." },
-          { title: "Rank by consequence", detail: "Prioritise gaps by likelihood, interview impact, and correction effort. Do not create a new syllabus for every uncertain signal." },
+          { title: "Rank by consequence", detail: "Prioritise gaps by likelihood, interview impact, and correction effort. Do not create a new syllabus for every uncertain detail." },
           { title: "Assign a proof action", detail: "Each selected gap gets one material, rehearsal, story, or question to answer and a visible completion condition." },
         ],
         "Select three gaps from the loop map, rank them by consequence, and assign each one action plus the evidence that will show the gap has narrowed.",
@@ -396,18 +396,18 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
           { title: "Choose the smallest correction", detail: "Select the one behaviour that would improve multiple attempts. Define the next test before adding more content." },
         ],
         "Place three attempts beside the same rubric, quote one repeated weak moment, one stable strength, and the correction that should be tested next.",
-        ["Three scored attempts", "Shared rubric", "Signal-change worksheet"],
+        ["Three scored attempts", "Shared rubric", "Evidence-change worksheet"],
       )),
-      task("12w-11-correct", "Repeat the lowest-signal scenario", "Practice · 35 min", lesson(
-        "Repeat the scenario that exposed the weakest signal, applying one deliberate correction and checking the result against the same rubric.",
+      task("12w-11-correct", "Repeat the lowest-score scenario", "Practice · 35 min", lesson(
+        "Repeat the scenario that exposed the weakest area, applying one deliberate correction and checking the result against the same rubric.",
         "Targeted re-test scenario",
         [
           { title: "Change one variable", detail: "Keep the prompt shape and rubric stable so a stronger result can be attributed to the correction rather than a new task." },
           { title: "Front-load the correction", detail: "Place the intended behaviour where the old gap appeared: state the consistency model, quantify the bottleneck, or make ownership explicit." },
           { title: "Check for transfer", detail: "After the retest, use a nearby prompt to see whether the behaviour generalises without becoming a memorised script." },
         ],
-        "Repeat the lowest-signal scenario, mark the moment where the correction was applied, and test the same decision on one adjacent prompt.",
-        ["Lowest-signal attempt", "Correction instruction", "Same scoring rubric"],
+        "Repeat the lowest-score scenario, mark the moment where the correction was applied, and test the same decision on one adjacent prompt.",
+        ["Lowest-score attempt", "Correction instruction", "Same scoring rubric"],
       )),
     ],
   },
@@ -415,18 +415,18 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
     week: 12,
     title: "Prepare the final loop",
     detail: "Consolidate, taper the workload, and remove uncertainty from interview day.",
-    outcome: "Enter the final loop with rehearsed signals, a practical runbook, and one clear remaining risk.",
+    outcome: "Enter the final loop with rehearsed skills, a practical runbook, and one clear remaining risk.",
     estimatedMinutes: 75,
     tasks: [
       task("12w-12-loop", "Complete the full-loop rehearsal", "Rehearsal · 60 min", lesson(
-        "Complete the final interview-shaped sequence and leave with a short list of rehearsed signals, not a new syllabus.",
+        "Complete the final interview-shaped sequence and leave with a short list of rehearsed skills, not a new syllabus.",
         "Final full-loop rehearsal",
         [
           { title: "Assemble the loop", detail: "Choose one coding, one design, one behavioural, and one follow-up segment that reflect the target role and the corrected gap." },
           { title: "Protect the transitions", detail: "Practise resetting between segments: restate the new contract, ask the next clarification, and carry forward only evidence that remains relevant." },
           { title: "Taper with evidence", detail: "End with three strengths, one remaining risk, and the exact sentence or decision you will rehearse once more before interview day." },
         ],
-        "Run the complete sequence under interview timing, then write a three-line final brief: strongest signal, remaining risk, and the next action before the loop.",
+        "Run the complete sequence under interview timing, then write a three-line final summary: strongest skill, remaining risk, and the next action before the loop.",
         ["Final loop outline", "Selected prompts", "Evidence summary"],
       )),
       task("12w-12-runbook", "Finish the interview-day runbook", "Checklist · 15 min", lesson(

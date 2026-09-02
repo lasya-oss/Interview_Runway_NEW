@@ -21,19 +21,19 @@ const EMPTY_PDF_GUIDES: readonly DrivePdfGuide[] = [];
 const EMPTY_DRIVE_MATERIALS: readonly DriveMaterial[] = [];
 
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  All: "Browse the full library",
+  All: "Browse all materials",
   "System design": "Architecture choices and trade-offs",
-  "DSA patterns": "Signals, invariants, and problem solving",
+  "DSA patterns": "Patterns, invariants, and problem solving",
   Behavioural: "Evidence-led stories and communication",
   "Remote career": "Remote role, offer, and work guidance",
-  Roadmaps: "Sequenced plans and checkpoints",
-  Operations: "Planning, review, and interview execution",
+  Roadmaps: "Step-by-step plans and tasks",
+  Operations: "Interview planning, review, and execution",
   "Company research": "Company context for sharper answers",
   "Coding mock": "Timed coding practice and replay",
-  "Behavioural mock": "Recorded behavioural practice",
+  "Behavioural mock": "Behavioural practice sessions",
   "Recruiter mock": "Recruiter-screen scenarios",
   "Manager mock": "Manager-led interview scenarios",
-  "Mock interview": "Practice sessions to pressure-test thinking",
+  "Mock interview": "Practice sessions to test your thinking",
   "Production archive": "Source files from the production archive",
   Reference: "Supporting guides and references",
 };
@@ -151,14 +151,14 @@ export function LibraryClient({
     <>
       {showSummary ? (
         <div className="library-results-heading" aria-live="polite">
-          <span>{category ? `${category} · ` : ""}{resultCount.toString().padStart(2, "0")} records shown</span>
+          <span>{category ? `${category} · ` : ""}{resultCount.toString().padStart(2, "0")} materials shown</span>
           <small>{category ? "Selected category · click another card to switch" : "All categories · no category selected"}</small>
         </div>
       ) : null}
 
       {!catalog ? (
         <div className="library-catalog-loading" aria-busy="true" aria-live="polite">
-          <span /> Loading records for this category…
+          <span /> Loading materials for this category…
         </div>
       ) : results.length ? (
         <div className="library-record-list">
@@ -193,7 +193,7 @@ export function LibraryClient({
         </div>
       ) : !pdfResults.length && !driveResults.length ? (
         <div className="library-empty">
-          <strong>No library records match those filters.</strong>
+          <strong>No library materials match those filters.</strong>
           <button type="button" onClick={clearFilters}>Clear filters</button>
         </div>
       ) : null}
@@ -228,7 +228,7 @@ export function LibraryClient({
         <div>
           <p className="member-kicker">Member material library</p>
           <h1>Everything has a place in the plan.</h1>
-          <p>Search the library by the interview decision it helps you make. Learning records, PDF guides, and the supplied Drive archive now sit in the same searchable workspace.</p>
+          <p>Search the library by the interview decision it helps you make. Learning materials, PDF guides, and the supplied Drive archive now sit in the same searchable workspace.</p>
         </div>
         <div className="library-index" aria-label={`${isLive ? "Vault" : "Sample"} catalogue summary: 1000+ Resources Available`}>
           <strong>1000+</strong>
@@ -252,7 +252,7 @@ export function LibraryClient({
               }}
               key={value}
             >
-              {value === "all" ? "All records" : value === "included" ? "Included" : "Higher tiers"}
+              {value === "all" ? "All materials" : value === "included" ? "Included" : "Higher plans"}
             </button>
           ))}
         </div>
@@ -279,7 +279,7 @@ export function LibraryClient({
             </div>
             <div className="library-category-view__count">
               <strong>{resultCount.toLocaleString("en-IN")}</strong>
-              <span>matching<br />records</span>
+              <span>matching<br />materials</span>
             </div>
           </header>
           <div className="library-category-view__records">{renderResults(false)}</div>
@@ -306,10 +306,10 @@ export function LibraryClient({
             ))}
           </div>
 
-          <section id="library-category-results" className="library-category-results" aria-label="All library records">
+          <section id="library-category-results" className="library-category-results" aria-label="All library materials">
             <div className="library-category-prompt">
-              <strong>Choose a category to open its records.</strong>
-              <span>Library records stay closed until you choose a learning theme.</span>
+              <strong>Choose a category to view its materials.</strong>
+              <span>Library materials stay hidden until you choose a learning theme.</span>
             </div>
           </section>
         </>

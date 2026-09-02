@@ -117,7 +117,7 @@ export function DriveMaterialShelf({
           <p className="member-kicker">Drive material archive</p>
           <h2 id="library-drive-material-title">Every supporting file, in its proper place.</h2>
         </div>
-        <span>{materials.length} source records available</span>
+        <span>{materials.length} source files available</span>
       </div>
       <p className="library-drive-material-intro">
         Templates, explainers, transcripts, captions, storyboards, mock audio, scripts, and evidence packs from the supplied course folder.

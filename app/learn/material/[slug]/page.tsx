@@ -38,7 +38,7 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
   "sliding-window": {
     decision: "Recognise when a contiguous range can be updated incrementally instead of recomputed.",
     chapters: [
-      { time: "00:00", title: "Read for the signal", detail: "Spot contiguous ranges, repeated recalculation, and a condition that changes at the boundary." },
+      { time: "00:00", title: "Read for the key idea", detail: "Spot contiguous ranges, repeated recalculation, and a condition that changes at the boundary." },
       { time: "05:10", title: "Name the invariant", detail: "State what remains true before moving either pointer." },
       { time: "11:25", title: "Choose fixed or variable", detail: "Separate known-width aggregation from constraint-driven expansion and contraction." },
       { time: "17:40", title: "Explain complexity", detail: "Show why each element enters and leaves the window at most once." },
@@ -72,7 +72,7 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
     related: "Open the remote contract checklist",
   },
   "remote-offer-matrix": {
-    decision: "Compare a remote offer by total package, operating risk, and career signal before negotiating the headline number.",
+    decision: "Compare a remote offer by total package, operating risk, and career value before negotiating the headline number.",
     chapters: [
       { time: "00:00", title: "Separate the package", detail: "Record cash, equity, leave, insurance, equipment, notice, and payment timing as separate variables." },
       { time: "04:00", title: "Expose uncertainty", detail: "Mark tax, currency, jurisdiction, employment classification, and termination assumptions that need qualified confirmation." },
@@ -89,7 +89,7 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
       { time: "00:00", title: "Name the freshness contract", detail: "Decide what may be stale, for how long, and which user action requires a fresh read." },
       { time: "03:00", title: "Compare write paths", detail: "Contrast cache-aside, write-through, and event-driven invalidation against the read and failure pattern." },
       { time: "06:10", title: "Handle failure", detail: "Explain stampedes, hot keys, stale-if-error behaviour, and what happens when the cache or invalidation stream is unavailable." },
-      { time: "08:00", title: "Close with evidence", detail: "Choose hit rate, freshness age, invalidation lag, and origin pressure as signals for the design." },
+      { time: "08:00", title: "Close with evidence", detail: "Choose hit rate, freshness age, invalidation lag, and origin pressure as metrics for the design." },
     ],
     principle: "A cache is correct when its freshness behaviour matches the product promise, not when its hit rate is high.",
     exercise: "Choose a cache strategy for a user-profile read path and explain the stale-read, invalidation, and origin-failure behaviour.",
@@ -101,7 +101,7 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
       { time: "00:00", title: "Read the graph cue", detail: "Separate layers and shortest unweighted distance from reachability, components, dependencies, and path exploration." },
       { time: "06:00", title: "State the invariant", detail: "Say what visited, parent, distance, or indegree means after each node is processed." },
       { time: "13:30", title: "Trace the boundary", detail: "Dry-run an isolated node, a cycle, a duplicate edge, and a target found at the first or last layer." },
-      { time: "20:00", title: "Explain the bound", detail: "Account for each vertex and edge once, then identify the memory needed for the frontier and recorded state." },
+      { time: "20:00", title: "Explain the bound", detail: "Account for each vertex and edge once, then identify the memory needed for the frontier and saved state." },
     ],
     principle: "The traversal is only half the solution; the state you carry determines whether the result answers the prompt.",
     exercise: "Classify four graph prompts as BFS or DFS and write the invariant for one prompt before describing its implementation.",
@@ -124,10 +124,10 @@ const MATERIAL_DETAILS: Record<string, MaterialDetail> = {
     chapters: [
       { time: "00:00", title: "Set the operating context", detail: "Describe the users, service, and impact without inflating the incident or hiding the constraint." },
       { time: "05:00", title: "Own the decision", detail: "Separate what you observed, what you chose, what alternatives you rejected, and who needed alignment." },
-      { time: "11:00", title: "Show the recovery", detail: "Explain mitigation, communication cadence, rollback or repair, and the signal used to declare recovery." },
+      { time: "11:00", title: "Show the recovery", detail: "Explain mitigation, communication cadence, rollback or repair, and the metric used to declare recovery." },
       { time: "16:00", title: "Prove the learning", detail: "Close with a durable change and the metric, behaviour, or follow-up that shows the system improved." },
     ],
-    principle: "A strong incident story is not a hero narrative; it is a clear record of decisions, trade-offs, and changed operating behaviour.",
+    principle: "A strong incident story is not a hero narrative; it is a clear explanation of decisions, trade-offs, and changed operating behaviour.",
     exercise: "Draft a 90-second outage story with context, your decision, communication, recovery, and one measurable prevention outcome.",
     related: "Apply the ATS resume pass",
   },
@@ -211,10 +211,10 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
   const detail: MaterialDetail = MATERIAL_DETAILS[slug] ?? {
     decision: material.description,
     chapters: [
-      { time: "00:00", title: "Recognise the signal", detail: `Locate the interview cue that makes ${material.tags[0] ?? "this pattern"} relevant.` },
+      { time: "00:00", title: "Recognise the key idea", detail: `Locate the interview cue that makes ${material.tags[0] ?? "this pattern"} relevant.` },
       { time: "05:00", title: "Name the decision", detail: "Separate the constraint, choice, and consequence before reaching for a memorised answer." },
       { time: "10:00", title: "Test the failure case", detail: "Explain what changes when scale, ambiguity, or an operational failure enters the prompt." },
-      { time: "15:00", title: "Rehearse the explanation", detail: "Close with one explicit trade-off and the signal you would monitor next." },
+      { time: "15:00", title: "Rehearse the explanation", detail: "Close with one explicit trade-off and the metric you would monitor next." },
     ],
     principle: `The sample workbench is organised around ${material.tags.join(", ").toLowerCase()} so the material remains connected to an interview decision, not an isolated file.`,
     exercise: `Explain the central decision in “${material.title}” in under two minutes, then name the assumption most likely to change your answer.`,
@@ -300,7 +300,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
         </section>
 
         <footer className="material-next-step">
-          <div><p className="member-kicker">Continue the loop</p><h2>{detail.related}</h2><p>{profile.isLive ? "Use the button above to record this study step, then continue through the roadmap." : "This action opens another representative demo surface; it does not record completion or invoke an AI service."}</p></div>
+          <div><p className="member-kicker">Continue learning</p><h2>{detail.related}</h2><p>{profile.isLive ? "Use the button above to mark this study step complete, then continue through the roadmap." : "This action opens another representative demo surface; it does not mark completion or invoke an AI service."}</p></div>
           <Link className="member-primary-button" href={destination}>Continue <span aria-hidden="true">↗</span></Link>
         </footer>
       </article>

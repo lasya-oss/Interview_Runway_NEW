@@ -6,7 +6,7 @@ import { TodayDashboard } from "./today-dashboard";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Today | Learner workspace",
+  title: "Dashboard | Learner workspace",
   robots: { index: false, follow: false },
 };
 

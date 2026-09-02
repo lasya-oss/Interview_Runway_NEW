@@ -10,7 +10,7 @@ import { FocusTimeTracker } from "@/app/learn/focus-time-tracker";
 import { DemoLogoutButton, LiveLogoutButton } from "./member-actions";
 
 const MEMBER_NAV = [
-  { key: "today", href: "/learn", label: "Today", mark: "01", access: "library" },
+  { key: "today", href: "/learn", label: "Dashboard", mark: "01", access: "library" },
   { key: "roadmap", href: "/learn/roadmap", label: "Roadmap", mark: "02", access: "library" },
   { key: "library", href: "/learn/library", label: "Library", mark: "03", access: "library" },
   { key: "practice", href: "/learn/practice", label: "Practice", mark: "04", access: "practice" },
@@ -19,7 +19,7 @@ const MEMBER_NAV = [
 ] as const;
 
 const VAULT_SECTION_LABELS: Record<(typeof MEMBER_NAV)[number]["key"], string> = {
-  today: "Today",
+  today: "Dashboard",
   roadmap: "Roadmap",
   library: "Library",
   practice: "Practice",
@@ -51,10 +51,10 @@ export function MemberShell({
   const isSecondSeatWorkspace = profile.id === "practice";
   const showDashboardLabel = isVaultWorkspace || isSecondSeatWorkspace;
   const workspaceState: WorkspaceState = isVaultWorkspace
-    ? { window: "8–12 weeks", signal: "Baseline pending", event: isFreshLearner ? "First study step" : "Weekly review", eventTime: isFreshLearner ? "After start" : "Sun · 18:00" }
+    ? { window: "8–12 weeks", signal: "Starting score pending", event: isFreshLearner ? "First study step" : "Weekly review", eventTime: isFreshLearner ? "After start" : "Sun · 18:00" }
     : isSecondSeatWorkspace
-      ? { window: "19 days", signal: isFreshLearner ? "Practice baseline pending" : "78 · practice", event: isFreshLearner ? "First practice round" : "Adaptive mock 08", eventTime: isFreshLearner ? "After start" : "Tue · 20:00" }
-      : { window: "13 days", signal: "84 · coach calibrated", event: "Calibration session", eventTime: "Thu · 18:30" };
+      ? { window: "19 days", signal: isFreshLearner ? "Starting score pending" : "78 · practice", event: isFreshLearner ? "First practice round" : "Adaptive mock 08", eventTime: isFreshLearner ? "After start" : "Tue · 20:00" }
+      : { window: "13 days", signal: "84 · coach reviewed", event: "Calibration session", eventTime: "Thu · 18:30" };
   const conversion = profile.id === "foundation"
     ? isLive
       ? { href: "/learn/roadmap", label: "Continue Foundation", event: undefined }
@@ -119,8 +119,8 @@ export function MemberShell({
             </div>
             <div className="member-vault-header-metrics">
               <div><span>Target</span><strong>{profile.target}</strong></div>
-              <div><span>Current track</span><strong><RoadmapTrackLabel fallbackWeek={profile.week} roadmapWeeks={profile.roadmapWeeks} /></strong></div>
-              <div><span>Interview window</span><strong>{workspaceState.window}</strong></div>
+              <div><span>Current plan</span><strong><RoadmapTrackLabel fallbackWeek={profile.week} roadmapWeeks={profile.roadmapWeeks} /></strong></div>
+              <div><span>Plan timeline</span><strong>{workspaceState.window}</strong></div>
               <div><span>Time zone</span><strong>Asia / Kolkata</strong></div>
               <div><span>Learner data</span><strong>{isLive ? "Account-backed" : "Sample profile"}</strong></div>
             </div>
@@ -190,18 +190,18 @@ function WorkspaceStatusContent({
 
   return (
     <>
-      <div className="ops-rail-head"><span>OPS / STATUS</span><i /></div>
+      <div className="ops-rail-head"><span>WORKSPACE / STATUS</span><i /></div>
       <section>
-        <span>Next event</span>
+        <span>Next activity</span>
         <strong>{workspaceState.event}</strong>
         <small>{workspaceState.eventTime} · IST</small>
         <Link href={preparationHref}>Open preparation ↗</Link>
       </section>
       <section>
-        <span>Current signal</span>
+        <span>Current score</span>
         <strong>{workspaceState.signal}</strong>
         <div className="ops-signal-trace" aria-hidden="true"><i /><i /><i /><i /><i /></div>
-        <small>{profile.id === "foundation" || workspaceState.signal.includes("pending") ? "No scored mocks yet" : "Evidence from recent sessions"}</small>
+        <small>{profile.id === "foundation" || workspaceState.signal.includes("pending") ? "No scored practice yet" : "Evidence from recent sessions"}</small>
       </section>
       {showCurrentAccess ? (
         <section className="ops-current-access">
@@ -214,11 +214,11 @@ function WorkspaceStatusContent({
         </section>
       ) : null}
       <section>
-        <span>Access stack</span>
+        <span>Your access</span>
         <ul>
-          <li className="is-on"><i /> Vault library</li>
+          <li className="is-on"><i /> Vault materials</li>
           <li className={profile.access.practice ? "is-on" : ""}><i /> AI practice</li>
-          <li className={profile.access.coaching ? "is-on" : ""}><i /> Coach room</li>
+          <li className={profile.access.coaching ? "is-on" : ""}><i /> Coaching</li>
         </ul>
       </section>
       <p>{profile.isLive

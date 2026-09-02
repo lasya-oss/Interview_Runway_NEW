@@ -367,7 +367,7 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(libraryClient, /onClick=\{\(\) => setCategory\(item\)\}/i);
   assert.match(libraryClient, /library-category-view__records">\{renderResults\(false\)\}/i);
   assert.match(libraryClient, /import\("\.\/library-catalog"\)/i);
-  assert.match(libraryClient, /Choose a category to open its records/i);
+  assert.match(libraryClient, /Choose a category to view its materials/i);
   assert.match(libraryClient, /library-catalog-loading/i);
   assert.match(libraryStartHere, /Not sure where to start\? Build your preparation from the right foundation\./i);
   assert.match(libraryStartHere, /<span>Choose your focus<\/span>/i);
@@ -543,7 +543,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(dashboardText, /Choose your first practice round/i);
   assert.match(dashboardText, /Demo workspace/i);
   assert.match(dashboardText, /0 \/ 12/i);
-  assert.match(dashboardText, /Second Seat \/ Today/i);
+  assert.match(dashboardText, /Second Seat \/ Dashboard/i);
   assert.match(dashboardText, /The Second Seat workspace/i);
   const secondSeatWeekStrip = dashboardHtml.match(/<ol\b[^>]*class=["'][^"']*week-strip[^"']*["'][^>]*>[\s\S]*?<\/ol>/i)?.[0] ?? "";
   assert.equal((secondSeatWeekStrip.match(/class=["']week-progress-item week-progress-item--/g) ?? []).length, 4);
@@ -566,7 +566,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal(library.status, 200);
   const libraryHtml = await library.text();
   assert.match(visibleText(libraryHtml), /1000\+\s+Resources\s+Available/i);
-  assert.match(visibleText(libraryHtml), /Choose a category to open its records/i);
+  assert.match(visibleText(libraryHtml), /Choose a category to view its materials/i);
   assert.match(visibleText(libraryHtml), /All\s+1,\d{3}/i);
   assert.doesNotMatch(visibleText(libraryHtml), /Drive PDF guides/i);
   assert.doesNotMatch(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
@@ -663,7 +663,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const roadmapText = visibleText(roadmapHtml);
   assert.equal((roadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 7);
   assert.equal((roadmapText.match(/View in Library/g) ?? []).length, 7);
-  assert.equal((roadmapText.match(/No exact Library match/g) ?? []).length, 5);
+  assert.equal((roadmapText.match(/No matching material/g) ?? []).length, 5);
   assert.match(roadmapHtml, /href=["'][^"']*\/learn\/material\/notification-mock["']/i);
   assert.doesNotMatch(roadmapHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-3-correct["']/i);
 
@@ -678,7 +678,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   });
   assert.equal(planned.status, 200);
   const plannedText = visibleText(await planned.text());
-  assert.match(plannedText, /The destination exists; the reviewed lesson does not yet/i);
+  assert.match(plannedText, /This lesson is not available yet/i);
   assert.match(plannedText, /Scored feedback loop and re-test worksheet/i);
 
   const practice = await request("/learn/practice", {
@@ -929,7 +929,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal((vaultRoadmapHtml.match(/roadmap-week roadmap-week--/g) ?? []).length, 12);
   assert.equal((vaultRoadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 7);
   assert.equal((vaultRoadmapText.match(/View in Library/g) ?? []).length, 7);
-  assert.equal((vaultRoadmapText.match(/No exact Library match/g) ?? []).length, 17);
+  assert.equal((vaultRoadmapText.match(/No matching material/g) ?? []).length, 17);
   for (const slug of [
     "sliding-window",
     "graph-traversal",
@@ -1334,7 +1334,7 @@ test("live Foundation cannot open four-week unpublished briefs", async () => {
   const taskPage = await readFile(new URL("../app/learn/roadmap/task/[id]/page.tsx", import.meta.url), "utf8");
   assert.match(taskPage, /roadmapPlanForWeeks\(profile\.roadmapWeeks\)/);
   assert.match(taskPage, /if \(!isProfileRoadmapTask\)/);
-  assert.match(taskPage, /four-week brief remains unpublished and gated/i);
+  assert.match(taskPage, /four-week plan remains unpublished and gated/i);
 });
 
 test("pending Foundation previews cannot be recorded as completed lessons", async () => {
@@ -1391,7 +1391,7 @@ test("Foundation demo starts Today with a clean learner state", async () => {
   assert.match(todayDashboard, /isFreshLearner\s*\?\s*`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/);
   assert.match(todayDashboard, /const weekProgress = roadmap\.weekProgress/);
   assert.match(todayDashboard, /const totalPlanTasks = roadmap\.totalTaskCount;/);
-  assert.match(todayDashboard, /Build the first signal from your own work/);
+  assert.match(todayDashboard, /Build your first readiness score from your own work/);
   assert.match(memberShell, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
   assert.match(memberShell, /event: isFreshLearner \? "First study step"/);
   assert.match(roadmapClient, /roadmapStorageKey\(profileId\)/);

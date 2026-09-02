@@ -10,7 +10,7 @@ import { StudyProgressButton } from "../../../study-progress-button";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Learning brief | Learner workspace",
+  title: "Lesson details | Learner workspace",
   robots: { index: false, follow: false },
 };
 
@@ -33,10 +33,10 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
       <div className="member-page">
         <LockedMemberPanel
           tier={requestedTier}
-          title="This checkpoint is outside your current roadmap."
+          title="This step is outside your current roadmap."
           body={isVaultRoadmapTask
-            ? "The current workspace uses the 12-week Foundation roadmap. This four-week brief remains unpublished and gated until its separate content and access review is complete."
-            : "The current workspace uses the four-week practice roadmap. Foundation checkpoints remain separate from this tier and are not opened by a direct link."}
+            ? "The current workspace uses the 12-week Foundation roadmap. This four-week plan remains unpublished and gated until its separate content and access review is complete."
+            : "The current workspace uses the four-week practice roadmap. Foundation steps remain separate from this plan and are not opened by a direct link."}
         />
       </div>
     );
@@ -58,14 +58,14 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
             <dl>
               <div><dt>Format</dt><dd>{task.learning.plannedFormat}</dd></div>
               <div><dt>Study time</dt><dd>{task.meta.split(" · ").at(-1) ?? task.meta}</dd></div>
-                <div><dt>Content state</dt><dd>{profile.roadmapWeeks === 12 ? "Vault QA lesson" : "Second Seat QA lesson"}</dd></div>
+                <div><dt>Lesson status</dt><dd>{profile.roadmapWeeks === 12 ? "Vault lesson" : "Second Seat lesson"}</dd></div>
             </dl>
           </header>
 
           <section className="roadmap-task-status roadmap-task-status-published" aria-labelledby="roadmap-task-status-title">
-            <p className="member-kicker">{profile.roadmapWeeks === 12 ? "Vault learning content" : "Second Seat learning content"}</p>
-            <h2 id="roadmap-task-status-title">A complete QA lesson for this {profile.roadmapWeeks === 12 ? "Foundation" : "Second Seat"} checkpoint.</h2>
-            <p>Work through the decision sequence, complete the checkpoint, and record it in your account roadmap. This is authenticated {profile.roadmapWeeks === 12 ? "Vault" : "Second Seat"} testing content; it is not a publication approval for the underlying asset archive or a practice, feedback, or coaching unlock.</p>
+            <p className="member-kicker">{profile.roadmapWeeks === 12 ? "Vault lesson" : "Second Seat lesson"}</p>
+            <h2 id="roadmap-task-status-title">A complete lesson for this {profile.roadmapWeeks === 12 ? "Foundation" : "Second Seat"} step.</h2>
+            <p>Work through the decision sequence, complete the step, and mark it in your account roadmap. This is authenticated {profile.roadmapWeeks === 12 ? "Vault" : "Second Seat"} lesson content; it is not a publication approval for the underlying asset archive or a practice, feedback, or coaching unlock.</p>
           </section>
 
           <section className="roadmap-lesson-sections" aria-labelledby="roadmap-lesson-title">
@@ -85,7 +85,7 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
 
           <section className="roadmap-task-resources roadmap-lesson-checkpoint" aria-labelledby="roadmap-checkpoint-title">
             <div className="member-section-heading">
-              <div><p className="member-kicker">Checkpoint</p><h2 id="roadmap-checkpoint-title">Produce evidence, not just notes.</h2></div>
+              <div><p className="member-kicker">Practice step</p><h2 id="roadmap-checkpoint-title">Produce evidence, not just notes.</h2></div>
             </div>
             <p>{task.learning.exercise}</p>
             <ul>
@@ -95,7 +95,7 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
           </section>
 
           <footer className="material-next-step">
-            <div><p className="member-kicker">Continue the plan</p><h2>Return to the roadmap.</h2><p>Your completion is stored against the signed-in {profile.roadmapWeeks === 12 ? "Foundation" : "Second Seat"} account when you record this checkpoint.</p></div>
+            <div><p className="member-kicker">Continue the plan</p><h2>Return to the roadmap.</h2><p>Your completion is stored against the signed-in {profile.roadmapWeeks === 12 ? "Foundation" : "Second Seat"} account when you mark this step complete.</p></div>
             <Link className="member-primary-button" href="/learn/roadmap">Back to roadmap <span aria-hidden="true">↗</span></Link>
           </footer>
         </article>
@@ -105,31 +105,31 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
   return (
       <article className="member-page roadmap-task-page">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/learn/roadmap">Roadmap</Link><span>/</span><span>Learning brief</span><span>/</span><strong>{task.id}</strong>
+          <Link href="/learn/roadmap">Roadmap</Link><span>/</span><span>Lesson details</span><span>/</span><strong>{task.id}</strong>
         </nav>
 
         <header className="roadmap-task-header">
           <div>
-            <p className="member-kicker">Roadmap learning destination · content brief</p>
+            <p className="member-kicker">Roadmap item · lesson details</p>
             <h1>{task.title}</h1>
             <p>{task.learning.objective}</p>
           </div>
           <dl>
             <div><dt>Planned format</dt><dd>{task.learning.plannedFormat}</dd></div>
             <div><dt>Study time</dt><dd>{task.meta.split(" · ").at(-1) ?? task.meta}</dd></div>
-            <div><dt>Content state</dt><dd>Not published</dd></div>
+            <div><dt>Lesson status</dt><dd>Not published</dd></div>
           </dl>
         </header>
 
         <section className="roadmap-task-status" aria-labelledby="roadmap-task-status-title">
           <p className="member-kicker">Honest content boundary</p>
-          <h2 id="roadmap-task-status-title">The destination exists; the reviewed lesson does not yet.</h2>
-          <p>This roadmap item is connected to a named content record so it has a stable place in the learning journey. It is intentionally not presented as a completed lesson or filled with placeholder teaching copy.</p>
+          <h2 id="roadmap-task-status-title">This lesson is not available yet.</h2>
+          <p>This roadmap item has a named learning material and a stable place in your plan. It is intentionally not presented as a completed lesson or filled with placeholder teaching copy.</p>
         </section>
 
         <section className="roadmap-task-resources" aria-labelledby="roadmap-task-resources-title">
           <div className="member-section-heading">
-            <div><p className="member-kicker">Content contract</p><h2 id="roadmap-task-resources-title">What this item must contain.</h2></div>
+            <div><p className="member-kicker">What you’ll need</p><h2 id="roadmap-task-resources-title">Materials for this lesson.</h2></div>
             <span>Before publication</span>
           </div>
           <ul>

@@ -61,7 +61,7 @@ export function StudyProgressButton({
   return (
     <div>
       <button className="member-primary-button" type="button" onClick={markComplete} disabled={completed || saving}>
-        {completed ? "Recorded in your roadmap" : saving ? "Saving…" : "Mark lesson complete"}
+        {completed ? "Saved in your roadmap" : saving ? "Saving…" : "Mark lesson complete"}
         <span aria-hidden="true">{completed ? "✓" : "↗"}</span>
       </button>
       {error ? <p role="alert">{error}</p> : null}
