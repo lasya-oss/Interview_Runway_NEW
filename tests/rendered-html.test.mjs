@@ -661,10 +661,11 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal(roadmap.status, 200);
   const roadmapHtml = await roadmap.text();
   const roadmapText = visibleText(roadmapHtml);
-  assert.match(roadmapText, /Open learning content/i);
-  assert.match(roadmapText, /View learning brief/i);
+  assert.equal((roadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 7);
+  assert.equal((roadmapText.match(/View in Library/g) ?? []).length, 7);
+  assert.equal((roadmapText.match(/No exact Library match/g) ?? []).length, 5);
   assert.match(roadmapHtml, /href=["'][^"']*\/learn\/material\/notification-mock["']/i);
-  assert.match(roadmapHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-3-correct["']/i);
+  assert.doesNotMatch(roadmapHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-3-correct["']/i);
 
   const material = await request("/learn/material/notification-mock", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -918,6 +919,29 @@ test("demo sign-in issues a protected session and opens the learner product", as
     assert.match(sectionHtml, new RegExp(`Vault(?:\\s*<!-- -->\\s*)* \/(?:\\s*<!-- -->\\s*)*${section}`, "i"), pathname);
     assert.doesNotMatch(sectionHtml, /member-ops-rail(?:\b|-)/i, pathname);
   }
+
+  const vaultRoadmap = await request("/learn/roadmap", {
+    headers: { accept: "text/html", cookie: vaultCookie },
+  });
+  assert.equal(vaultRoadmap.status, 200);
+  const vaultRoadmapHtml = await vaultRoadmap.text();
+  const vaultRoadmapText = visibleText(vaultRoadmapHtml);
+  assert.equal((vaultRoadmapHtml.match(/roadmap-week roadmap-week--/g) ?? []).length, 12);
+  assert.equal((vaultRoadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 7);
+  assert.equal((vaultRoadmapText.match(/View in Library/g) ?? []).length, 7);
+  assert.equal((vaultRoadmapText.match(/No exact Library match/g) ?? []).length, 17);
+  for (const slug of [
+    "sliding-window",
+    "graph-traversal",
+    "cache-consistency",
+    "rate-limiter",
+    "scope-stories",
+    "outage-story",
+    "us-ats-resume",
+  ]) {
+    assert.match(vaultRoadmapHtml, new RegExp(`href=["'][^"']*/learn/material/${slug}["']`, "i"), slug);
+  }
+  assert.doesNotMatch(vaultRoadmapHtml, /href=["'][^"']*\/learn\/roadmap\/task\//i);
 
   const lockedReplay = await request("/learn/practice/replays/coding-dynamic-programming-05", {
     headers: { accept: "text/html", cookie: vaultCookie },

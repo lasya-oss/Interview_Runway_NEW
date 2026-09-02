@@ -1,3 +1,5 @@
+import { LEARNING_MATERIALS, type LearningMaterial } from "@/app/lib/demo-data";
+
 export type RoadmapTaskContent =
   | { kind: "material"; slug: string }
   | {
@@ -452,4 +454,14 @@ export function findRoadmapTask(id: string): RoadmapTask | null {
     }
   }
   return null;
+}
+
+export function libraryMaterialForRoadmapTask(task: RoadmapTask): LearningMaterial | null {
+  if (task.learning.kind !== "material") return null;
+  return LEARNING_MATERIALS.find((material) => material.slug === task.learning.slug) ?? null;
+}
+
+export function libraryHrefForRoadmapTask(task: RoadmapTask): string | null {
+  const material = libraryMaterialForRoadmapTask(task);
+  return material ? `/learn/material/${material.slug}` : null;
 }

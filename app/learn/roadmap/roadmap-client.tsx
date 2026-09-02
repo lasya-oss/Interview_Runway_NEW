@@ -11,7 +11,7 @@ import {
   serializeStoredRoadmapProgress,
   type CompletionActivity,
 } from "@/app/lib/learner-progress";
-import type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
+import { libraryHrefForRoadmapTask, type RoadmapWeek } from "@/app/lib/roadmap-data";
 
 export type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
 
@@ -134,11 +134,6 @@ export function RoadmapChecklist({
     void persist(next, nextCompletionActivity, previous, completionActivity);
   };
 
-  const learningHref = (task: RoadmapTask) =>
-    task.learning.kind === "material"
-      ? `/learn/material/${task.learning.slug}`
-      : `/learn/roadmap/task/${task.id}`;
-
   return (
     <div className="roadmap-workspace">
       <section className="roadmap-overview" aria-labelledby="roadmap-overview-title">
@@ -203,11 +198,13 @@ export function RoadmapChecklist({
                 <div className="roadmap-task-list">
                   {week.tasks.map((task) => {
                     const isComplete = completed.has(task.id);
-                    const contentLabel = task.learning.kind === "material"
-                      ? "Open learning content"
-                      : task.learning.kind === "lesson"
-                        ? `Open ${planLabel} lesson`
-                        : "View learning brief";
+                    const libraryHref = libraryHrefForRoadmapTask(task);
+                    const taskCopy = (
+                      <span className="roadmap-task-copy">
+                        <strong>{task.title}</strong>
+                        <small>{task.meta}</small>
+                      </span>
+                    );
                     return (
                       <div className={`roadmap-task-row ${isComplete ? "is-complete" : ""}`} key={task.id}>
                         <label className="roadmap-task-check">
@@ -219,13 +216,17 @@ export function RoadmapChecklist({
                           />
                           <span aria-hidden="true" />
                         </label>
-                        <Link className="roadmap-task-learning" href={learningHref(task)}>
-                          <span className="roadmap-task-copy">
-                            <strong>{task.title}</strong>
-                            <small>{task.meta}</small>
-                          </span>
-                          <span className="roadmap-task-link-label">{contentLabel} <span aria-hidden="true">↗</span></span>
-                        </Link>
+                        {libraryHref ? (
+                          <Link className="roadmap-task-learning" href={libraryHref}>
+                            {taskCopy}
+                            <span className="roadmap-task-library-button">View in Library <span aria-hidden="true">↗</span></span>
+                          </Link>
+                        ) : (
+                          <div className="roadmap-task-learning roadmap-task-learning--unmatched">
+                            {taskCopy}
+                            <span className="roadmap-task-link-label roadmap-task-link-label--unavailable">No exact Library match</span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

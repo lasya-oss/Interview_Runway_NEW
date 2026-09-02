@@ -6059,7 +6059,12 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .roadmap-task-learning strong { font-size: 10px; }
 .roadmap-task-row.is-complete .roadmap-task-learning strong { color: #809098; text-decoration: line-through; }
 .roadmap-task-learning small { color: #73868f; font-family: var(--font-mono); font-size: 7px; }
+.roadmap-task-library-button { min-height: 32px; padding: 0 11px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #f36a32; border-radius: 999px; color: #fff; background: var(--afterburner); box-shadow: 0 4px 12px rgba(255,107,44,.16); font-family: var(--font-mono); font-size: 7px; letter-spacing: .04em; white-space: nowrap; transition: background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+.roadmap-task-library-button:hover, .roadmap-task-learning:focus-visible .roadmap-task-library-button { border-color: #d95422; background: #e65b26; transform: translateY(-1px); }
+.roadmap-task-library-button span { font-size: 10px; line-height: 1; }
 .roadmap-task-link-label { color: #983b1b; font-family: var(--font-mono); font-size: 7px; letter-spacing: .03em; white-space: nowrap; }
+.roadmap-task-link-label--unavailable { color: #8a9aa0; }
+.roadmap-task-learning--unmatched { cursor: default; }
 .roadmap-task-learning:hover strong, .roadmap-task-learning:focus-visible strong { color: #983b1b; }
 
 /* Roadmap content briefs keep unpublished work explicit rather than filling the route with placeholder lessons. */
@@ -6684,7 +6689,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .roadmap-week-outcome { align-items: flex-start; flex-direction: column; gap: 14px; }
   .roadmap-week-time { align-items: flex-start; text-align: left; }
   .roadmap-task-learning { grid-template-columns: 1fr; gap: 5px; padding-block: 12px; }
-  .roadmap-task-link-label { white-space: normal; }
+  .roadmap-task-library-button, .roadmap-task-link-label { white-space: normal; }
   .library-controls { grid-template-columns: 1fr; }
   .library-scope { overflow-x: auto; }
   .library-category-view__header { grid-template-columns: 1fr; padding: 22px 18px; }
