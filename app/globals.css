@@ -5202,15 +5202,15 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .week-progress-item { min-width: 0; height: 100%; display: flex; align-items: center; flex-direction: column; justify-content: flex-end; gap: 8px; }
 .week-progress-track { position: relative; display: block; width: 100%; max-width: 24px; flex: 1; overflow: hidden; border: 1px solid rgba(50,84,96,.12); border-radius: 6px 6px 2px 2px; background: rgba(59,91,103,.07); }
 .week-progress-track i { position: absolute; right: 0; bottom: 0; left: 0; display: block; border-radius: 5px 5px 1px 1px; background: #78939d; transition: height .25s ease, background .25s ease; }
-.week-progress-item--completed .week-progress-track { border-color: rgba(69,108,121,.19); background: rgba(69,108,121,.1); }
-.week-progress-item--completed .week-progress-track i { background: linear-gradient(180deg, #688f9d, #456f7c); }
-.week-progress-item--in-progress .week-progress-track { border-color: rgba(255,107,44,.5); box-shadow: 0 0 0 3px rgba(255,107,44,.07), 0 0 17px rgba(255,107,44,.13); }
-.week-progress-item--in-progress .week-progress-track i { background: linear-gradient(180deg, var(--afterburner), #b84e24); }
+.week-progress-item--completed .week-progress-track { border-color: rgba(255,107,44,.5); background: rgba(255,107,44,.07); box-shadow: 0 0 0 3px rgba(255,107,44,.07), 0 0 17px rgba(255,107,44,.13); }
+.week-progress-item--completed .week-progress-track i { background: linear-gradient(180deg, var(--afterburner), #b84e24); }
+.week-progress-item--in-progress .week-progress-track { border-color: rgba(69,108,121,.19); background: rgba(69,108,121,.1); }
+.week-progress-item--in-progress .week-progress-track i { background: linear-gradient(180deg, #688f9d, #456f7c); }
 .week-progress-item--upcoming .week-progress-track { opacity: .72; }
 .week-progress-item--upcoming .week-progress-track i { background: #9aadb4; }
 .week-progress-item b { color: #71848d; font-family: var(--font-mono); font-size: 8px; font-weight: 500; letter-spacing: -.03em; white-space: nowrap; }
-.week-progress-item--completed b { color: #456f7c; }
-.week-progress-item--in-progress b { color: #a84926; font-weight: 700; }
+.week-progress-item--completed b { color: #a84926; font-weight: 700; }
+.week-progress-item--in-progress b { color: #456f7c; }
 .week-progress-item--upcoming b { color: #84969e; }
 .week-strip-status { margin: 12px 0 0; color: #73858e; font-family: var(--font-mono); font-size: 7px; line-height: 1.4; }
 .weekly-stats { margin: auto 0 0; padding-top: 20px; display: grid; gap: 8px; border-top: 1px solid rgba(30,63,76,.11); }
