@@ -10938,14 +10938,14 @@ html[data-second-seat-film="open"] .home-aero-stage {
 
 /* Learner actions keep the reference button's readable scale across both plans. */
 .member-shell .member-primary-button {
-  min-height: 52px;
-  padding-inline: 18px;
-  gap: clamp(18px, 1.6vw, 28px);
-  border-radius: 11px;
+  min-height: 48px;
+  padding-inline: 16px;
+  gap: clamp(15px, 1.4vw, 24px);
+  border-radius: 10px;
   color: #fff;
   background: linear-gradient(135deg, #ff6b2c, #e65b26);
-  font-size: clamp(13px, .9vw, 15px);
-  font-weight: 750;
+  font-size: clamp(12px, .8vw, 14px);
+  font-weight: 740;
   line-height: 1.2;
 }
 
@@ -10957,13 +10957,13 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .member-shell .member-card-action,
 .member-shell .practice-history-record__action,
 .member-shell .roadmap-task-library-button {
-  min-height: 44px;
-  padding-inline: 14px;
-  border-radius: 10px;
+  min-height: 40px;
+  padding-inline: 12px;
+  border-radius: 9px;
   color: #fff;
   background: linear-gradient(135deg, #ff6b2c, #e65b26);
-  font-size: clamp(11px, .75vw, 13px);
-  font-weight: 740;
+  font-size: clamp(10px, .7vw, 12px);
+  font-weight: 730;
   line-height: 1.2;
 }
 
@@ -10974,16 +10974,35 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .member-shell .library-record-meta > a.library-record-action-button,
 .member-shell .practice-history a > b.practice-history-record__action,
 .member-shell .feedback-action-list a.feedback-action-button {
-  font-size: clamp(11px, .75vw, 13px);
+  font-size: clamp(10px, .7vw, 12px);
 }
 
 .member-shell .member-secondary-button,
 .member-shell .roadmap-toolbar__reset {
-  min-height: 42px;
-  padding-inline: 14px;
-  border-radius: 10px;
+  min-height: 38px;
+  padding-inline: 12px;
+  border-radius: 9px;
   color: #fff;
   background: linear-gradient(135deg, #ff6b2c, #e65b26);
-  font-size: clamp(11px, .75vw, 13px);
-  font-weight: 740;
+  font-size: clamp(10px, .7vw, 12px);
+  font-weight: 730;
+}
+
+.member-shell .library-start-here__toggle {
+  min-height: 42px;
+  padding-inline: 15px;
+  gap: 8px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 730;
+}
+
+.member-shell .library-start-here__toggle span { font-size: 13px; }
+
+.member-shell .library-record-meta > button.library-record-open,
+.member-shell .material-review-link small.material-review-link__action {
+  min-height: 40px;
+  padding-inline: 12px;
+  border-radius: 9px;
+  font-size: 9px;
 }
