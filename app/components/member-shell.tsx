@@ -78,7 +78,7 @@ export function MemberShell({
         initialProgress={profile.progress}
         initialWeek={profile.week}
       >
-      {isLive && isVaultWorkspace ? <FocusTimeTracker profileId={profile.id} /> : null}
+      {isLive ? <FocusTimeTracker profileId={profile.id} /> : null}
       <aside className="member-sidebar">
         <div className="member-sidebar-brand"><Brand /><span>Learning workspace</span></div>
 
@@ -220,7 +220,11 @@ function WorkspaceStatusContent({
           <li className={profile.access.coaching ? "is-on" : ""}><i /> Coach room</li>
         </ul>
       </section>
-      <p>{profile.isLive ? "PAID FOUNDATION QA<br />₹799 ACCESS ACTIVE" : "DEMO WORKSPACE<br />NO PURCHASE REQUIRED"}</p>
+      <p>{profile.isLive
+        ? profile.id === "practice"
+          ? "PAID SECOND SEAT QA<br />₹2,499 ACCESS ACTIVE"
+          : "PAID FOUNDATION QA<br />₹799 ACCESS ACTIVE"
+        : "DEMO WORKSPACE<br />NO PURCHASE REQUIRED"}</p>
     </>
   );
 }

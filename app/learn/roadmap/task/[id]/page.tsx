@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { roadmapPlanForWeeks } from "@/app/lib/learner-progress";
 import { findRoadmapTask, TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
 import { StudyProgressButton } from "../../../study-progress-button";
 
@@ -23,9 +24,9 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
   const isVaultRoadmapTask = TWELVE_WEEK_PLAN.some((week) =>
     week.tasks.some((entry) => entry.id === task.id),
   );
-  const isProfileRoadmapTask = profile.roadmapWeeks === 12
-    ? isVaultRoadmapTask
-    : !isVaultRoadmapTask;
+  const isProfileRoadmapTask = roadmapPlanForWeeks(profile.roadmapWeeks).some((week) =>
+    week.tasks.some((entry) => entry.id === task.id),
+  );
   if (!isProfileRoadmapTask) {
     const requestedTier = isVaultRoadmapTask ? "The Vault" : "The Second Seat";
     return (
@@ -44,27 +45,27 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
   if (task.learning.kind === "lesson") {
     return (
         <article className="member-page roadmap-task-page roadmap-published-lesson">
-          <nav className="material-breadcrumb" aria-label="Breadcrumb">
-            <Link href="/learn/roadmap">Roadmap</Link><span>/</span><span>Foundation lesson</span><span>/</span><strong>{task.id}</strong>
+            <nav className="material-breadcrumb" aria-label="Breadcrumb">
+              <Link href="/learn/roadmap">Roadmap</Link><span>/</span><span>{profile.roadmapWeeks === 12 ? "Foundation lesson" : "Second Seat lesson"}</span><span>/</span><strong>{task.id}</strong>
           </nav>
 
           <header className="roadmap-task-header">
             <div>
-              <p className="member-kicker">Foundation lesson · {task.learning.plannedFormat}</p>
+              <p className="member-kicker">{profile.roadmapWeeks === 12 ? "Foundation lesson" : "Second Seat lesson"} · {task.learning.plannedFormat}</p>
               <h1>{task.title}</h1>
               <p>{task.learning.objective}</p>
             </div>
             <dl>
               <div><dt>Format</dt><dd>{task.learning.plannedFormat}</dd></div>
               <div><dt>Study time</dt><dd>{task.meta.split(" · ").at(-1) ?? task.meta}</dd></div>
-              <div><dt>Content state</dt><dd>Vault QA lesson</dd></div>
+                <div><dt>Content state</dt><dd>{profile.roadmapWeeks === 12 ? "Vault QA lesson" : "Second Seat QA lesson"}</dd></div>
             </dl>
           </header>
 
           <section className="roadmap-task-status roadmap-task-status-published" aria-labelledby="roadmap-task-status-title">
-            <p className="member-kicker">Vault learning content</p>
-            <h2 id="roadmap-task-status-title">A complete QA lesson for this Foundation checkpoint.</h2>
-            <p>Work through the decision sequence, complete the checkpoint, and record it in your account roadmap. This is authenticated Vault testing content; it is not a publication approval for the underlying asset archive or a practice, feedback, or coaching unlock.</p>
+            <p className="member-kicker">{profile.roadmapWeeks === 12 ? "Vault learning content" : "Second Seat learning content"}</p>
+            <h2 id="roadmap-task-status-title">A complete QA lesson for this {profile.roadmapWeeks === 12 ? "Foundation" : "Second Seat"} checkpoint.</h2>
+            <p>Work through the decision sequence, complete the checkpoint, and record it in your account roadmap. This is authenticated {profile.roadmapWeeks === 12 ? "Vault" : "Second Seat"} testing content; it is not a publication approval for the underlying asset archive or a practice, feedback, or coaching unlock.</p>
           </section>
 
           <section className="roadmap-lesson-sections" aria-labelledby="roadmap-lesson-title">
@@ -94,7 +95,7 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
           </section>
 
           <footer className="material-next-step">
-            <div><p className="member-kicker">Continue the plan</p><h2>Return to the roadmap.</h2><p>Your completion is stored against the signed-in Foundation account when you record this checkpoint.</p></div>
+            <div><p className="member-kicker">Continue the plan</p><h2>Return to the roadmap.</h2><p>Your completion is stored against the signed-in {profile.roadmapWeeks === 12 ? "Foundation" : "Second Seat"} account when you record this checkpoint.</p></div>
             <Link className="member-primary-button" href="/learn/roadmap">Back to roadmap <span aria-hidden="true">↗</span></Link>
           </footer>
         </article>

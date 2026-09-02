@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { LockedMemberPanel } from "@/app/components/member-shell";
 import { canAccessMaterial, LEARNING_MATERIALS, type DemoTier, type LearningMaterial } from "@/app/lib/demo-data";
 import { requireDemoProfile } from "@/app/lib/demo-session";
-import { TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
+import { roadmapPlanForWeeks } from "@/app/lib/learner-progress";
 import { StudyProgressButton } from "../../study-progress-button";
 
 export const dynamic = "force-dynamic";
@@ -175,11 +175,17 @@ function tierLabel(tier: DemoTier) {
   return "The Vault";
 }
 
-function materialState(profileIsLive: boolean, materialAvailability: LearningMaterial["availability"]) {
+function materialState(
+  profileIsLive: boolean,
+  material: LearningMaterial,
+) {
   if (!profileIsLive) return "Demo preview";
-  return materialAvailability === "included"
-    ? "Included in Vault QA"
-    : "Preview · review pending";
+  if (material.tier === "foundation") {
+    return material.availability === "included"
+      ? "Included in Vault QA"
+      : "Preview · review pending";
+  }
+  return `${tierLabel(material.tier)} sample`;
 }
 
 export default async function MaterialPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -216,9 +222,20 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
   };
 
   const destination = material.tier === "premium" ? "/learn/coaching" : material.tier === "practice" ? "/learn/practice" : "/learn/roadmap";
-  const linkedTask = TWELVE_WEEK_PLAN
+  const linkedTask = roadmapPlanForWeeks(profile.roadmapWeeks)
     .flatMap((week) => week.tasks)
     .find((task) => task.learning.kind === "material" && task.learning.slug === material.slug);
+
+  const liveMaterialKicker = material.tier === "foundation"
+    ? material.availability === "included"
+      ? "Foundation lesson"
+      : "Foundation preview"
+    : `${tierLabel(material.tier)} sample`;
+  const liveMaterialState = material.tier === "foundation"
+    ? material.availability === "included"
+      ? "Included with paid Foundation"
+      : "Vault preview · review pending"
+    : `Sample in ${tierLabel(material.tier)}`;
 
   return (
       <article className="member-page material-workspace">
@@ -228,20 +245,20 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
 
         <header className="material-header">
           <div>
-            <p className="member-kicker">{profile.isLive ? material.availability === "included" ? `Foundation lesson · ${material.format}` : `Foundation preview · ${material.format}` : `Representative ${material.format} · sample progress`}</p>
+            <p className="member-kicker">{profile.isLive ? `${liveMaterialKicker} · ${material.format}` : `Representative ${material.format} · sample progress`}</p>
             <h1>{material.title}</h1>
             <p>{material.description}</p>
           </div>
           <dl>
             <div><dt>Access</dt><dd>{tierLabel(material.tier)}</dd></div>
             <div><dt>Working time</dt><dd>{material.duration}</dd></div>
-            <div><dt>State</dt><dd>{materialState(profile.isLive === true, material.availability)}</dd></div>
+            <div><dt>State</dt><dd>{materialState(profile.isLive === true, material)}</dd></div>
           </dl>
         </header>
 
         <div className="material-layout">
           <section className="material-stage" aria-labelledby="material-stage-title">
-            <div className="material-stage-top"><span>Decision lab / {material.number}</span><b>{profile.isLive ? material.availability === "included" ? "Included with paid Foundation" : "Vault preview · review pending" : "Sample, not a published lesson"}</b></div>
+            <div className="material-stage-top"><span>Decision lab / {material.number}</span><b>{profile.isLive ? liveMaterialState : "Sample, not a published lesson"}</b></div>
             <div className="material-stage-visual" aria-hidden="true"><i /><i /><i /><span /></div>
             <p>Decision to make</p>
             <h2 id="material-stage-title">{detail.decision}</h2>

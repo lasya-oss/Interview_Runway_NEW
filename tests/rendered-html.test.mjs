@@ -1252,7 +1252,7 @@ test("Vault review materials do not point at legacy demo PDFs", async () => {
 
 test("live Foundation cannot open four-week unpublished briefs", async () => {
   const taskPage = await readFile(new URL("../app/learn/roadmap/task/[id]/page.tsx", import.meta.url), "utf8");
-  assert.match(taskPage, /const isProfileRoadmapTask = profile\.roadmapWeeks === 12/);
+  assert.match(taskPage, /roadmapPlanForWeeks\(profile\.roadmapWeeks\)/);
   assert.match(taskPage, /if \(!isProfileRoadmapTask\)/);
   assert.match(taskPage, /four-week brief remains unpublished and gated/i);
 });
@@ -1271,7 +1271,21 @@ test("live Foundation access takes precedence over a seeded demo cookie", async 
   assert.match(session, /const \[profile, user\] = await Promise\.all\(\[getDemoProfile\(\), getChatGPTUser\(\)\]\);/);
   assert.match(session, /if \(profile\) return profile;/);
   assert.match(session, /getLearnerAccess\(user\.email\)/);
-  assert.match(session, /profile: createFoundationProfile\(\s*user,\s*await getLearnerProgress\(user\.email\),/s);
+  assert.match(session, /profile: createFoundationProfile\(user, await getLearnerProgress\(user\.email\)\)/s);
+});
+
+test("live Second Seat access selects its own workspace and roadmap", async () => {
+  const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const materialPage = await readFile(new URL("../app/learn/material/[slug]/page.tsx", import.meta.url), "utf8");
+
+  assert.match(session, /if \(access\.secondSeat\)[\s\S]*createSecondSeatProfile\([\s\S]*getLearnerProgress\(user\.email, 4\)/);
+  assert.match(paidAccess, /export function createSecondSeatProfile\([\s\S]*roadmapWeeks: 4[\s\S]*plan: "The Second Seat/);
+  assert.match(paidAccess, /selectedPlan = roadmapPlanForWeeks\(config\.roadmapWeeks\)/);
+  assert.match(shell, /\{isLive \? <FocusTimeTracker profileId=\{profile\.id\} \/> : null\}/);
+  assert.match(shell, /PAID SECOND SEAT QA/);
+  assert.match(materialPage, /roadmapPlanForWeeks\(profile\.roadmapWeeks\)/);
 });
 
 test("Foundation demo starts Today with a clean learner state", async () => {
@@ -1318,7 +1332,7 @@ test("fresh Vault learners derive Today and Roadmap state from account progress"
   );
   assert.match(todayDashboard, /const weeklyActivity = isTracked[\s\S]*?roadmap\.weeklyActivity/);
 
-  assert.match(paidAccess, /const currentWeek = currentFoundationWeek\(progress\.completedTaskIds\);/);
+  assert.match(paidAccess, /const currentWeek = roadmapProgressFor\(selectedPlan, progress\.completedTaskIds\)\.currentWeek;/);
   assert.match(
     paidAccess,
     /export function currentFoundationWeek\(completedTaskIds: readonly string\[\]\)[\s\S]*?roadmapProgressFor\(TWELVE_WEEK_PLAN, completedTaskIds\)\.currentWeek/,

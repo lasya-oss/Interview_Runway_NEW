@@ -33,6 +33,7 @@ export function RoadmapChecklist({
   persistMode?: "demo" | "account";
 }) {
   const isAccount = persistMode === "account";
+  const planLabel = roadmapWeeks === 12 ? "Foundation" : "Second Seat";
   const storageKey = roadmapStorageKey(profileId);
   const [initialProgress] = useState(() => {
     const stored = isAccount ? null : readDemoProgress(storageKey, initialCompleted);
@@ -144,7 +145,7 @@ export function RoadmapChecklist({
         <div>
           <p className="member-kicker">{isAccount ? "Account roadmap" : "Device-local demo checklist"}</p>
           <h1 id="roadmap-overview-title">A plan with a finish line.</h1>
-          <p>{isAccount ? "Check off work as you study. Your Foundation progress is stored with your account and follows you across sessions." : "Check off sample work to see this browser-only plan respond. No learner record is created or synced."}</p>
+          <p>{isAccount ? `Check off work as you study. Your ${planLabel} progress is stored with your account and follows you across sessions.` : "Check off sample work to see this browser-only plan respond. No learner record is created or synced."}</p>
         </div>
         <div className="roadmap-completion" aria-label={`${completion}% of ${isAccount ? "your" : "sample"} plan complete`}>
           <strong>{completion}<small>%</small></strong>
@@ -205,7 +206,7 @@ export function RoadmapChecklist({
                     const contentLabel = task.learning.kind === "material"
                       ? "Open learning content"
                       : task.learning.kind === "lesson"
-                        ? "Open Foundation lesson"
+                        ? `Open ${planLabel} lesson`
                         : "View learning brief";
                     return (
                       <div className={`roadmap-task-row ${isComplete ? "is-complete" : ""}`} key={task.id}>

@@ -5,6 +5,7 @@ import { findDemoById, type DemoProfile, type DemoTier } from "./demo-data";
 import { getChatGPTUser, requireChatGPTUser } from "@/app/chatgpt-auth";
 import {
   createFoundationProfile,
+  createSecondSeatProfile,
   getLearnerAccess,
   getLearnerProgress,
   hasVaultAccess,
@@ -64,9 +65,9 @@ export async function requireDemoProfile(
 ): Promise<DemoProfile> {
   const state = await resolveWorkspaceProfile();
   const profile = state.profile;
-  // An authenticated Vault owner is always represented by the live Foundation
-  // profile. This prevents an older demo cookie from replacing account-backed
-  // identity or progress after the user has signed in.
+  // An authenticated owner is always represented by the highest entitled live
+  // plan. This prevents an older demo cookie from replacing account-backed
+  // identity, plan selection, or progress after the user has signed in.
   if (profile) return profile;
 
   const authenticatedUser = state.user ?? (await requireChatGPTUser(returnTo));
@@ -79,7 +80,6 @@ export async function requireDemoProfile(
   return createFoundationProfile(
     authenticatedUser,
     await getLearnerProgress(authenticatedUser.email),
-    { secondSeatAccess: state.secondSeatAccess },
   );
 }
 
@@ -119,15 +119,23 @@ const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> =
     };
   }
 
-  return {
-    profile: createFoundationProfile(
+  if (access.secondSeat) {
+    return {
+      profile: createSecondSeatProfile(
+        user,
+        await getLearnerProgress(user.email, 4),
+      ),
       user,
-      await getLearnerProgress(user.email),
-      { secondSeatAccess: access.secondSeat },
-    ),
+      vaultAccess: true,
+      secondSeatAccess: true,
+    };
+  }
+
+  return {
+    profile: createFoundationProfile(user, await getLearnerProgress(user.email)),
     user,
     vaultAccess: true,
-    secondSeatAccess: access.secondSeat,
+    secondSeatAccess: false,
   };
 });
 

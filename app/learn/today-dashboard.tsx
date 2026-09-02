@@ -177,11 +177,17 @@ function ReviewMaterials({
   profile: DemoProfileView;
   materials: readonly DemoReviewMaterial[];
 }) {
+  const planLabel = profile.id === "foundation"
+    ? "Foundation"
+    : profile.id === "practice"
+      ? "Second Seat"
+      : "Human Calibration";
+
   return (
     <section className="member-section member-review-materials">
       <div className="member-section-heading">
-        <div><p className="member-kicker">{profile.isLive ? "Inside your Foundation plan" : "Inside this demo"}</p><h2>Open the material—not a placeholder.</h2></div>
-        <span>{profile.isLive ? "Included with ₹799 access" : "Review editions · human approval pending"}</span>
+        <div><p className="member-kicker">{profile.isLive ? `Inside your ${planLabel} plan` : "Inside this demo"}</p><h2>Open the material—not a placeholder.</h2></div>
+        <span>{profile.isLive ? `Included with ${planLabel === "Foundation" ? "₹799 Foundation" : "₹2,499 Second Seat"} access` : "Review editions · human approval pending"}</span>
       </div>
       <div className="member-review-material-grid">
         {materials.map((material) => (

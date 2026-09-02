@@ -365,18 +365,65 @@ function hasNewCompletionActivity(
 export function createFoundationProfile(
   user: ChatGPTUser,
   progress: LearnerProgress,
-  options: { secondSeatAccess?: boolean } = {},
+) {
+  return createLiveLearnerProfile(user, progress, {
+    id: "foundation",
+    roadmapWeeks: 12,
+    plan: "The Vault · Foundation · ₹799 paid",
+    planShort: "Vault",
+    fallbackNextAction: "Review your completed Foundation roadmap",
+    fallbackNextActionMeta: "Foundation · complete",
+    focus: "Build repeatable technical patterns before adding timed mocks.",
+    practiceAccess: false,
+    isSecondSeatLive: false,
+  });
+}
+
+export function createSecondSeatProfile(
+  user: ChatGPTUser,
+  progress: LearnerProgress,
+) {
+  return createLiveLearnerProfile(user, progress, {
+    id: "practice",
+    roadmapWeeks: 4,
+    plan: "The Second Seat · Practice · ₹2,499 paid",
+    planShort: "The Second Seat",
+    fallbackNextAction: "Choose your first practice round",
+    fallbackNextActionMeta: "Practice · 30 min",
+    fallbackNextActionHref: "/learn/practice",
+    focus: "Start with one interview-shaped round and use the transcript to choose the next correction.",
+    practiceAccess: true,
+    isSecondSeatLive: true,
+  });
+}
+
+function createLiveLearnerProfile(
+  user: ChatGPTUser,
+  progress: LearnerProgress,
+  config: {
+    id: "foundation" | "practice";
+    roadmapWeeks: RoadmapWeeks;
+    plan: string;
+    planShort: string;
+    fallbackNextAction: string;
+    fallbackNextActionMeta: string;
+    fallbackNextActionHref?: string;
+    focus: string;
+    practiceAccess: boolean;
+    isSecondSeatLive: boolean;
+  },
 ) {
   const displayName = user.fullName || user.displayName;
   const firstName = displayName.trim().split(/\s+/)[0] || user.email;
-  const allTasks = TWELVE_WEEK_PLAN.flatMap((week) => week.tasks);
+  const selectedPlan = roadmapPlanForWeeks(config.roadmapWeeks);
+  const allTasks = selectedPlan.flatMap((week) => week.tasks);
   const nextTask = allTasks.find(
     (task) => !progress.completedTaskIds.includes(task.id),
   );
-  const currentWeek = currentFoundationWeek(progress.completedTaskIds);
+  const currentWeek = roadmapProgressFor(selectedPlan, progress.completedTaskIds).currentWeek;
 
   return {
-    id: "foundation" as const,
+    id: config.id,
     isLive: true,
     name: displayName,
     firstName,
@@ -384,28 +431,28 @@ export function createFoundationProfile(
     email: user.email,
     role: "Vivid Labs · authenticated learner",
     target: "Remote engineering roles",
-    plan: "The Vault · Foundation · ₹799 paid",
-    planShort: "Vault",
+    plan: config.plan,
+    planShort: config.planShort,
     progress: progress.progressPercent,
     streak: 0,
     week: currentWeek,
-    roadmapWeeks: 12,
+    roadmapWeeks: config.roadmapWeeks,
     completedTaskIds: progress.completedTaskIds,
     completionActivity: progress.completionActivity,
     focusedSeconds: progress.focusedSeconds,
-    isSecondSeatLive: options.secondSeatAccess === true,
-    nextAction: nextTask?.title || "Review your completed Foundation roadmap",
-    nextActionMeta: nextTask?.meta || "Foundation · complete",
+    isSecondSeatLive: config.isSecondSeatLive,
+    nextAction: nextTask?.title || config.fallbackNextAction,
+    nextActionMeta: nextTask?.meta || config.fallbackNextActionMeta,
     nextActionHref: nextTask
       ? nextTask.learning.kind === "material"
         ? `/learn/material/${nextTask.learning.slug}`
         : `/learn/roadmap/task/${nextTask.id}`
-      : "/learn/roadmap",
-    focus: "Build repeatable technical patterns before adding timed mocks.",
+      : config.fallbackNextActionHref ?? "/learn/roadmap",
+    focus: config.focus,
     access: {
       library: true,
-      practice: options.secondSeatAccess === true,
-      feedback: options.secondSeatAccess === true,
+      practice: config.practiceAccess,
+      feedback: config.practiceAccess,
       coaching: false,
     },
   };
