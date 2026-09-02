@@ -21,7 +21,7 @@ export default async function LibraryPage() {
         isLive={isLive}
         googleClientId={process.env.GOOGLE_CLIENT_ID ?? ""}
         loginHint={profile.email}
-        categorySummary={getLibraryCategorySummary(isLive)}
+        categorySummary={getLibraryCategorySummary(isLive, profile.id)}
       />
     </div>
   );

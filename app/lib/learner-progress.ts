@@ -1,5 +1,5 @@
 import {
-  FOUR_WEEK_PLAN,
+  SECOND_SEAT_PLAN,
   TWELVE_WEEK_PLAN,
   type RoadmapTask,
   type RoadmapWeek,
@@ -38,7 +38,7 @@ export type StoredRoadmapProgress = {
 export const LEARNER_TIME_ZONE = "Asia/Kolkata";
 
 export function roadmapPlanForWeeks(roadmapWeeks: number): readonly RoadmapWeek[] {
-  return roadmapWeeks === 12 ? TWELVE_WEEK_PLAN : FOUR_WEEK_PLAN;
+  return roadmapWeeks === 12 ? TWELVE_WEEK_PLAN : SECOND_SEAT_PLAN;
 }
 
 export function roadmapStorageKey(profileId: string) {

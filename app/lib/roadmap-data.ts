@@ -444,7 +444,26 @@ export const TWELVE_WEEK_PLAN: readonly RoadmapWeek[] = [
   },
 ] as const;
 
-export const ROADMAP_PLANS: readonly (readonly RoadmapWeek[])[] = [FOUR_WEEK_PLAN, TWELVE_WEEK_PLAN];
+const SECOND_SEAT_HIDDEN_TASK_IDS = new Set([
+  // These five tasks are still represented in the source plan for traceability,
+  // but are not published until their promised materials exist.
+  "4w-1-patterns",
+  "4w-1-design",
+  "4w-3-correct",
+  "4w-3-company",
+  "4w-4-rehearse",
+  // This task points at a premium-only material and is not part of Second Seat.
+  "4w-4-runbook",
+]);
+
+export const SECOND_SEAT_PLAN: readonly RoadmapWeek[] = FOUR_WEEK_PLAN
+  .map((week) => ({
+    ...week,
+    tasks: week.tasks.filter((task) => !SECOND_SEAT_HIDDEN_TASK_IDS.has(task.id)),
+  }))
+  .filter((week) => week.tasks.length > 0);
+
+export const ROADMAP_PLANS: readonly (readonly RoadmapWeek[])[] = [SECOND_SEAT_PLAN, TWELVE_WEEK_PLAN];
 
 export function findRoadmapTask(id: string): RoadmapTask | null {
   for (const plan of ROADMAP_PLANS) {

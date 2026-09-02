@@ -225,6 +225,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
   const linkedTask = roadmapPlanForWeeks(profile.roadmapWeeks)
     .flatMap((week) => week.tasks)
     .find((task) => task.learning.kind === "material" && task.learning.slug === material.slug);
+  const hasCompletionAction = profile.isLive === true && material.availability === "included" && linkedTask;
 
   const liveMaterialKicker = material.tier === "foundation"
     ? material.availability === "included"
@@ -263,7 +264,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
             <p>Decision to make</p>
             <h2 id="material-stage-title">{detail.decision}</h2>
             <div className="material-stage-controls"><span>00:00</span><i><b /></i><span>{material.duration}</span></div>
-            {profile.isLive && material.availability === "included" && linkedTask ? <StudyProgressButton profileId={profile.id} taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
+            {hasCompletionAction && linkedTask ? <StudyProgressButton profileId={profile.id} taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
           </section>
 
           <aside className="material-notes">
@@ -300,7 +301,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
         </section>
 
         <footer className="material-next-step">
-          <div><p className="member-kicker">Continue learning</p><h2>{detail.related}</h2><p>{profile.isLive ? "Use the button above to mark this study step complete, then continue through the roadmap." : "This action opens another representative demo surface; it does not mark completion or invoke an AI service."}</p></div>
+          <div><p className="member-kicker">Continue learning</p><h2>{detail.related}</h2><p>{hasCompletionAction ? "Use the button above to mark this study step complete, then continue through the roadmap." : profile.isLive ? "Use this material as a reference while you continue through the roadmap." : "This action opens another representative demo surface; it does not mark completion or invoke an AI service."}</p></div>
           <Link className="member-primary-button" href={destination}>Continue <span aria-hidden="true">↗</span></Link>
         </footer>
       </article>

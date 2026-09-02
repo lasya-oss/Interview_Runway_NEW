@@ -432,8 +432,9 @@ test("curated Library count is consistent for Vault and Second Seat", async () =
     assert.equal(library.status, 200, tier);
     const html = await library.text();
     const text = visibleText(html);
-    assert.match(text, /100\+\s+Resources\s+Available/i, tier);
-    assert.match(text, /All\s+100\+/i, tier);
+    const expectedLibraryCount = tier === "foundation" ? "89" : "100+";
+    assert.match(text, new RegExp(`${expectedLibraryCount.replace("+", "\\+")}\\s+Resources\\s+Available`, "i"), tier);
+    assert.match(text, new RegExp(`All\\s+${expectedLibraryCount.replace("+", "\\+")}`, "i"), tier);
     assert.doesNotMatch(text, /1000\+|Company Evidence|Vault Production Workspace/i, tier);
   }
 
@@ -606,7 +607,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(dashboardText, /Start here · Week 1 of 4/i);
   assert.match(dashboardText, /Choose your first practice round/i);
   assert.match(dashboardText, /Demo workspace/i);
-  assert.match(dashboardText, /0 \/ 12/i);
+  assert.match(dashboardText, /0 \/ 6/i);
   assert.match(dashboardText, /Second Seat \/ Dashboard/i);
   assert.match(dashboardText, /The Second Seat workspace/i);
   const secondSeatWeekStrip = dashboardHtml.match(/<ol\b[^>]*class=["'][^"']*week-strip[^"']*["'][^>]*>[\s\S]*?<\/ol>/i)?.[0] ?? "";
@@ -720,11 +721,12 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal(roadmap.status, 200);
   const roadmapHtml = await roadmap.text();
   const roadmapText = visibleText(roadmapHtml);
-  assert.equal((roadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 7);
-  assert.equal((roadmapText.match(/View in Library/g) ?? []).length, 7);
-  assert.equal((roadmapText.match(/No matching material/g) ?? []).length, 5);
+  assert.equal((roadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 6);
+  assert.equal((roadmapText.match(/View in Library/g) ?? []).length, 6);
+  assert.equal((roadmapText.match(/No matching material/g) ?? []).length, 0);
   assert.match(roadmapHtml, /href=["'][^"']*\/learn\/material\/notification-mock["']/i);
   assert.doesNotMatch(roadmapHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-3-correct["']/i);
+  assert.doesNotMatch(roadmapText, /Prepare the interview-day runbook|metrics-pipeline-mock|queue-backlog-mock|Resume profile lab|Rehearse the compensation conversation/i);
 
   const material = await request("/learn/material/notification-mock", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -735,10 +737,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const planned = await request("/learn/roadmap/task/4w-3-correct", {
     headers: { accept: "text/html", cookie: sessionCookie },
   });
-  assert.equal(planned.status, 200);
-  const plannedText = visibleText(await planned.text());
-  assert.match(plannedText, /This lesson is not available yet/i);
-  assert.match(plannedText, /Scored feedback loop and re-test worksheet/i);
+  assert.equal(planned.status, 404);
 
   const practice = await request("/learn/practice", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -766,7 +765,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(replayHtml, /data-google-drive-file-id=/i);
   assert.doesNotMatch(replayHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(replayHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(replayHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-1-patterns["']/i);
+  assert.doesNotMatch(replayHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-1-patterns["']/i);
 
   const behavioralReplay = await request("/learn/practice/replays/behavioural-prioritizing-under-product-ambiguity-03", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1028,7 +1027,7 @@ test("Foundation demo Today renders the clean starting values", async () => {
   assert.equal(dashboard.status, 200);
   const dashboardText = visibleText(await dashboard.text());
   assert.match(dashboardText, /Start here · Week 1 of 12/i);
-  assert.match(dashboardText, /0 Plan complete/i);
+  assert.match(dashboardText, /0 Plan progress/i);
   assert.match(dashboardText, /Create the target-role map/i);
   assert.match(dashboardText, /0 \/ 24/i);
   assert.match(dashboardText, /Starts at 0m/i);
@@ -1381,8 +1380,10 @@ test("Vault review materials do not point at legacy demo PDFs", async () => {
   assert.match(data, /\/pdf-guides\/roadmap_12week\.pdf/i);
   assert.match(data, /\/pdf-guides\/dsa_sliding-window\.pdf/i);
   assert.match(data, /Qualified review required/i);
-  assert.match(libraryPage, /getLibraryCategorySummary\(isLive\)/);
+  assert.match(libraryPage, /getLibraryCategorySummary\(isLive, profile\.id\)/);
   assert.match(libraryCatalog, /isLive\s*\n?\s*\? DRIVE_PDF_GUIDES\.filter/);
+  assert.match(libraryCatalog, /profileId === "foundation"\s*\n?\s*\? \[\]/);
+  assert.match(libraryCatalog, /SECOND_SEAT_DEMO_SHELL_SLUGS/);
   assert.match(libraryCatalog, /roadmap_4week\.pdf/);
   assert.doesNotMatch(libraryCatalog, /new Set\(\["roadmap_4week\.pdf",\s*"dsa_sliding-window\.pdf"\]\)/);
   assert.equal(existsSync(new URL("../public/demo-materials/roadmap_4week.pdf", import.meta.url)), false);

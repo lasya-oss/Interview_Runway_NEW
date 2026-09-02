@@ -45,7 +45,7 @@ const EVIDENCE = [
 ] as const;
 
 const ACTIONS = [
-  { number: "01", title: "Defend the consistency model", body: "Re-answer the same architecture opening with staleness and failover behaviour stated in the first five minutes.", meta: "15 min · verbal rehearsal", href: "/learn/material/rate-limiter", why: "A design can sound scalable while remaining ambiguous about what readers observe after failure. Naming the model makes the trade-off reviewable." },
+  { number: "01", title: "Defend the consistency model", body: "Re-answer the same architecture opening with staleness and failover behaviour stated in the first five minutes.", meta: "15 min · verbal rehearsal", href: "/learn/material/cache-consistency", why: "A design can sound scalable while remaining ambiguous about what readers observe after failure. Naming the model makes the trade-off reviewable." },
   { number: "02", title: "Diagnose backlog with the right metric", body: "Write the operating response for queue age, retry amplification, and priority shedding during a 20× spike.", meta: "20 min · scenario", href: "/learn/material/notification-mock", why: "Queue length alone does not show whether older, higher-priority work is breaching the product promise." },
   { number: "03", title: "Repeat under a new prompt", body: "Run the notification-service sample and apply the same decision order without reusing the architecture.", meta: "35 min · scripted mock", href: "/learn/practice", why: "A changed prompt tests whether the correction transferred into a repeatable interview habit." },
 ] as const;

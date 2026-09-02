@@ -93,7 +93,7 @@ export function LibraryClient({
     let mounted = true;
     void import("./library-catalog")
       .then(({ getLibraryCatalog }) => {
-        if (mounted) setCatalog(getLibraryCatalog(isLive));
+        if (mounted) setCatalog(getLibraryCatalog(isLive, profileId));
       })
       .catch(() => {
         // Category summaries remain useful if the deferred catalogue chunk fails.
@@ -101,7 +101,7 @@ export function LibraryClient({
     return () => {
       mounted = false;
     };
-  }, [isLive]);
+  }, [isLive, profileId]);
 
   const categoryCounts = categorySummary.counts;
 

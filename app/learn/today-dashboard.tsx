@@ -66,6 +66,9 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
       : `/learn/roadmap/task/${nextTask.id}`
     : profile.nextActionHref ?? (profile.id === "premium" ? "/learn/coaching" : profile.id === "practice" ? "/learn/practice" : "/learn/roadmap");
   const nextActionDescription = describeNextAction(profile, nextTask, isFreshLearner);
+  const readinessLabel = profile.id === "foundation"
+    ? progress === 100 ? <>Plan<br />complete</> : <>Plan<br />progress</>
+    : <>Readiness<br />score</>;
   const completedLabel = isTracked
     ? `${roadmap.completedCount} / ${totalPlanTasks}`
     : profile.id === "practice" ? "8 / 11" : "9 / 10";
@@ -87,7 +90,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
           <p>{profile.focus}</p>
         </div>
         <div className="readiness-dial" style={{ "--readiness": `${progress * 3.6}deg` } as CSSProperties}>
-          <div><strong>{progress}</strong><span>{profile.id === "foundation" ? <>Plan<br />complete</> : <>Readiness<br />score</>}</span></div>
+          <div><strong>{progress}</strong><span>{readinessLabel}</span></div>
           <i /><i /><i />
         </div>
       </section>
