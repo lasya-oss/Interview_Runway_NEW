@@ -11002,6 +11002,7 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .member-shell .library-record-meta > button.library-record-open,
 .member-shell .material-review-link small.material-review-link__action {
   min-height: 40px;
+  min-width: 146px;
   width: max-content;
   padding-inline: 12px;
   display: inline-flex;
