@@ -317,7 +317,7 @@ export function VaultStartHere({
               </select>
               <small>{domain ? VAULT_START_HERE_DOMAINS.find((item) => item.id === domain)?.detail : "Choose the interview decision you want to practise."}</small>
             </label>
-            {hasSelection ? <button className="library-start-here__clear" type="button" onClick={clearSelection}>Clear selection</button> : null}
+            {hasSelection ? <button className="library-start-here__clear member-action-button member-action-button--quiet" type="button" onClick={clearSelection}>Clear selection</button> : null}
           </div>
 
           {!catalog ? (
@@ -383,7 +383,7 @@ export function VaultStartHere({
                             <small>{record.category} · {record.format}</small>
                             <h4>{record.title}</h4>
                             <p>{record.description}</p>
-                            <Link href={record.href} target={record.external ? "_blank" : undefined} rel={record.external ? "noreferrer" : undefined}>
+                            <Link className="library-start-here__resource-action" href={record.href} target={record.external ? "_blank" : undefined} rel={record.external ? "noreferrer" : undefined}>
                               {record.action} <span aria-hidden="true">↗</span>
                             </Link>
                           </article>

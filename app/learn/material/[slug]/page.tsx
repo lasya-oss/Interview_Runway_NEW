@@ -241,7 +241,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
   return (
       <article className="member-page material-workspace">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/learn/library">Library</Link><span>/</span><span>{material.category}</span><span>/</span><strong>{material.number}</strong>
+          <Link className="material-breadcrumb__link" href="/learn/library">Library</Link><span>/</span><span>{material.category}</span><span>/</span><strong>{material.number}</strong>
         </nav>
 
         <header className="material-header">
@@ -278,7 +278,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
               <a className="material-review-link" href={material.demoAsset.href} target="_blank" rel="noreferrer">
                     <span>{profile.isLive ? "Vault QA supporting material" : "Built sample material"}</span>
                 <strong>{material.demoAsset.label}</strong>
-                    <small>{profile.isLive ? "Open the first-party QA reference ↗" : "Human editorial review pending ↗"}</small>
+                    <small className="material-review-link__action">{profile.isLive ? "Open the first-party QA reference" : "Human editorial review pending"} <span aria-hidden="true">↗</span></small>
               </a>
             ) : null}
           </aside>

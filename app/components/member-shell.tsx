@@ -143,7 +143,7 @@ export function MemberShell({
                 </div>
               </details>
               <span className="member-account-status"><i />{accessLabel}</span>
-              <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
+              <Link className="member-header-action-button" href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} <span aria-hidden="true">↗</span></Link>
             </div>
           </div>
         </header>
@@ -195,7 +195,7 @@ function WorkspaceStatusContent({
         <span>Next activity</span>
         <strong>{workspaceState.event}</strong>
         <small>{workspaceState.eventTime} · IST</small>
-        <Link href={preparationHref}>Open preparation ↗</Link>
+        <Link className="member-action-button" href={preparationHref}>Open preparation <span aria-hidden="true">↗</span></Link>
       </section>
       <section>
         <span>Current score</span>

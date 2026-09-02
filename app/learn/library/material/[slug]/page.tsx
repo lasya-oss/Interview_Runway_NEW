@@ -41,7 +41,7 @@ export default async function DriveMaterialPage({ params }: { params: Promise<{ 
   return (
       <article className="member-page material-workspace drive-material-workspace">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/learn/library">Library</Link><span>/</span><span>{category}</span><span>/</span><strong>{number}</strong>
+          <Link className="material-breadcrumb__link" href="/learn/library">Library</Link><span>/</span><span>{category}</span><span>/</span><strong>{number}</strong>
         </nav>
 
         <header className="material-header">

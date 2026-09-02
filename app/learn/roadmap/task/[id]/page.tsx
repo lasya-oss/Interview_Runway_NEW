@@ -46,7 +46,7 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
     return (
         <article className="member-page roadmap-task-page roadmap-published-lesson">
             <nav className="material-breadcrumb" aria-label="Breadcrumb">
-              <Link href="/learn/roadmap">Roadmap</Link><span>/</span><span>{profile.roadmapWeeks === 12 ? "Foundation lesson" : "Second Seat lesson"}</span><span>/</span><strong>{task.id}</strong>
+              <Link className="material-breadcrumb__link" href="/learn/roadmap">Roadmap</Link><span>/</span><span>{profile.roadmapWeeks === 12 ? "Foundation lesson" : "Second Seat lesson"}</span><span>/</span><strong>{task.id}</strong>
           </nav>
 
           <header className="roadmap-task-header">
@@ -105,7 +105,7 @@ export default async function RoadmapTaskPage({ params }: { params: Promise<{ id
   return (
       <article className="member-page roadmap-task-page">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/learn/roadmap">Roadmap</Link><span>/</span><span>Lesson details</span><span>/</span><strong>{task.id}</strong>
+              <Link className="material-breadcrumb__link" href="/learn/roadmap">Roadmap</Link><span>/</span><span>Lesson details</span><span>/</span><strong>{task.id}</strong>
         </nav>
 
         <header className="roadmap-task-header">

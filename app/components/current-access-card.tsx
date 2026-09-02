@@ -24,7 +24,7 @@ export function CurrentAccessCard({
       <strong>{plan}</strong>
       <div><i style={{ width: `${planProgress}%` }} /></div>
       <small>{planProgress}% plan progress · Week {week}</small>
-      <Link href="/pricing">Compare access</Link>
+      <Link className="member-action-button" href="/pricing">Compare access <span aria-hidden="true">↗</span></Link>
     </div>
   );
 }

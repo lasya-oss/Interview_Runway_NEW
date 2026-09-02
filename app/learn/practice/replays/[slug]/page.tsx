@@ -47,7 +47,7 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
   return (
       <article className="member-page practice-replay-page">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/learn/practice">Practice</Link><span>/</span><span>{replay.category}</span><span>/</span><strong>Replay {replayNumber}</strong>
+          <Link className="material-breadcrumb__link" href="/learn/practice">Practice</Link><span>/</span><span>{replay.category}</span><span>/</span><strong>Replay {replayNumber}</strong>
         </nav>
 
         <header className="practice-replay-header">
@@ -100,7 +100,7 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
           </div>
           <div className="practice-replay-next-actions">
             {linkedRoadmapHref ? <Link className="member-primary-button" href={linkedRoadmapHref}>{linkedRoadmapLabel} <span aria-hidden="true">↗</span></Link> : null}
-            <Link href="/learn/practice">Back to Practice</Link>
+            <Link className="member-action-button" href="/learn/practice">Back to Practice <span aria-hidden="true">↗</span></Link>
           </div>
         </footer>
       </article>

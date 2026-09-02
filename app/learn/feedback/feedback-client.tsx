@@ -134,7 +134,7 @@ export function FeedbackClient({
               <article key={action.number}>
                 <span>{action.number}</span>
                 <div><small>{action.meta}</small><h3>{action.title}</h3><p>{action.body}</p></div>
-                <Link href={action.href}>Open sample <span aria-hidden="true">↗</span></Link>
+                <Link className="feedback-action-button" href={action.href}>Open sample <span aria-hidden="true">↗</span></Link>
               </article>
             ))}
           </div>
@@ -272,7 +272,7 @@ function SecondSeatFeedbackExperience({
                     <div className="feedback-action-what"><span>What to improve</span><h3>{details.what}</h3></div>
                     <div className="feedback-action-detail"><div><span>Why it matters</span><p>{details.why}</p></div><div><span>Practice next</span><p>{details.next}</p></div></div>
                   </div>
-                  <Link href={action.href}>{actionLinkLabel(action.href)} <span aria-hidden="true">↗</span></Link>
+                  <Link className="feedback-action-button" href={action.href}>{actionLinkLabel(action.href)} <span aria-hidden="true">↗</span></Link>
                 </article>
               );
             })}

@@ -68,7 +68,7 @@ export default async function CoachingPage() {
             <p className="member-kicker">Assigned founder coach</p>
             <h2>Verified identity appears here before paid coaching opens.</h2>
             <p>The public founder record must supply the real name, photograph, professional history, and coaching scope. This demo intentionally does not invent them.</p>
-            <Link href="/about">Review the verification standard <span aria-hidden="true">↗</span></Link>
+            <Link className="member-action-button member-action-button--dark" href="/about">Review the verification standard <span aria-hidden="true">↗</span></Link>
           </aside>
         </section>
 

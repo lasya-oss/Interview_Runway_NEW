@@ -130,7 +130,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
       <ReviewMaterials profile={profile} materials={reviewMaterials} />
 
       <section className="member-section">
-        <div className="member-section-heading"><div><p className="member-kicker">Skill progress</p><h2>Your progress and next focus.</h2></div><Link href="/learn/feedback">Open full feedback <span>↗</span></Link></div>
+        <div className="member-section-heading"><div><p className="member-kicker">Skill progress</p><h2>Your progress and next focus.</h2></div><Link className="member-section-action" href="/learn/feedback">Open full feedback <span aria-hidden="true">↗</span></Link></div>
         <div className="signal-grid">
           {profile.id === "foundation" || isFreshLearner || profile.isLive ? (
             <article className="foundation-baseline-panel">
@@ -138,7 +138,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
               <div className="baseline-radar" aria-hidden="true"><i /><i /><i /><b>?</b></div>
               <h3>{profile.id === "foundation" ? "No readiness score yet." : "No practice score yet."}</h3>
               <p>{profile.id === "foundation" ? "Your lesson completion is tracked, but a readiness score appears only after a scored practice session. Until then, the product keeps those concepts separate." : "Your practice access is ready, but a readiness score appears only after a scored transcript. Until then, the product keeps your starting state clean."}</p>
-              <Link href={emptySignalLink}>{emptySignalLinkLabel} ↗</Link>
+              <Link className="member-action-button" href={emptySignalLink}>{emptySignalLinkLabel} <span aria-hidden="true">↗</span></Link>
             </article>
           ) : (
             <article className="signal-bars">
@@ -157,7 +157,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
 
       {profile.access.practice && !profile.isLive && !isFreshLearner ? (
         <section className="member-section">
-          <div className="member-section-heading"><div><p className="member-kicker">Recent practice</p><h2>Every attempt leaves evidence.</h2></div><Link href="/learn/practice">Start another mock <span>↗</span></Link></div>
+          <div className="member-section-heading"><div><p className="member-kicker">Recent practice</p><h2>Every attempt leaves evidence.</h2></div><Link className="member-section-action" href="/learn/practice">Start another mock <span aria-hidden="true">↗</span></Link></div>
           <div className="mock-history-table">
             {MOCK_HISTORY.map((mock) => <div key={mock.id}><span>{mock.id}</span><strong>{mock.title}</strong><small>{mock.signal}</small><b>{mock.score}</b><time>{mock.date}</time></div>)}
           </div>
@@ -165,11 +165,11 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
       ) : null}
 
       <section className="member-section">
-        <div className="member-section-heading"><div><p className="member-kicker">Continue learning</p><h2>Materials placed in context.</h2></div><Link href="/learn/library">View the library <span>↗</span></Link></div>
+        <div className="member-section-heading"><div><p className="member-kicker">Continue learning</p><h2>Materials placed in context.</h2></div><Link className="member-section-action" href="/learn/library">View the library <span aria-hidden="true">↗</span></Link></div>
         <div className="member-material-row">
           {continuedMaterials.map((material) => (
             <Link href={`/learn/material/${material.slug}`} className="member-material-card" key={material.slug}>
-              <span>{material.number}</span><small>{material.category} · {material.duration}</small><h3>{material.title}</h3><p>{material.description}</p><b>{material.format} ↗</b>
+              <span>{material.number}</span><small>{material.category} · {material.duration}</small><h3>{material.title}</h3><p>{material.description}</p><b className="member-card-action">{material.format} <span aria-hidden="true">↗</span></b>
             </Link>
           ))}
         </div>
@@ -259,7 +259,7 @@ function ReviewMaterials({
                 </span>
               )}
             </span>
-            <span className="member-review-copy"><small>{material.category} · {material.format}</small><strong>{material.title}</strong><p>{material.detail}</p><b>{profile.isLive ? `Open ${planLabel} material` : "Open review edition"} ↗</b></span>
+            <span className="member-review-copy"><small>{material.category} · {material.format}</small><strong>{material.title}</strong><p>{material.detail}</p><b className="member-card-action">{profile.isLive ? `Open ${planLabel} material` : "Open review edition"} <span aria-hidden="true">↗</span></b></span>
           </a>
         ))}
       </div>

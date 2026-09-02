@@ -226,11 +226,11 @@ export function PracticeClient({
               {recentSessions.map((session) => {
                 const completedMock = findSecondSeatMock(session.mockId);
                 return (
-                  <Link href={feedbackHref(session.id, isLive)} key={session.id}>
+                  <Link className="practice-history-record" href={feedbackHref(session.id, isLive)} key={session.id}>
                     <span>{completedMock?.category ?? "Practice"}</span>
                     <strong>{completedMock?.title ?? "Completed session"}</strong>
                     <small>{session.evaluation?.overall ?? "—"} practice score · {formatDate(session.completedAt)}</small>
-                    <b>Open feedback ↗</b>
+                    <b className="practice-history-record__action">Open feedback <span aria-hidden="true">↗</span></b>
                   </Link>
                 );
               })}
@@ -254,7 +254,7 @@ export function PracticeClient({
           <p>{evaluation.insightBody}</p>
           <div className="practice-complete-actions">
             <Link className="member-primary-button" href={feedbackHref(sessionId, isLive)}>Open your feedback <span aria-hidden="true">↗</span></Link>
-            <button type="button" onClick={() => { setState("briefing"); setEvaluation(null); }}>Run another round</button>
+            <button className="member-secondary-button" type="button" onClick={() => { setState("briefing"); setEvaluation(null); }}>Run another round</button>
           </div>
         </section>
         <div className="practice-transcript-summary">
@@ -277,7 +277,7 @@ export function PracticeClient({
       <header className="practice-session-header">
         <div><span>{mock.category}</span><strong>{mock.title}</strong></div>
         <div><span>{isLive ? "Account transcript" : "Preview transcript"}</span><b>{String(step + 1).padStart(2, "0")} / {String(mock.turns.length).padStart(2, "0")}</b></div>
-        <button type="button" onClick={() => setState("briefing")}>Pause session</button>
+        <button className="practice-session-header__pause" type="button" onClick={() => setState("briefing")}>Pause session</button>
       </header>
 
       <div className="practice-session-layout">

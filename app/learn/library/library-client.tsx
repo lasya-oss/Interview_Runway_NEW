@@ -183,11 +183,11 @@ export function LibraryClient({
                   <b>{materialAccessLabel(material, unlocked, isLive)}</b>
                   {unlocked && material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
                   {hasDirectAsset ? (
-                    <a href={material.demoAsset.href} target="_blank" rel="noreferrer">
+                    <a className="library-record-action-button" href={material.demoAsset.href} target="_blank" rel="noreferrer">
                       Open actual content <span aria-hidden="true">↗</span>
                     </a>
                   ) : (
-                    <Link href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
+                    <Link className="library-record-action-button" href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
                   )}
                 </div>
               </article>
@@ -197,7 +197,7 @@ export function LibraryClient({
       ) : !pdfResults.length && !driveResults.length ? (
         <div className="library-empty">
           <strong>No library materials match those filters.</strong>
-          <button type="button" onClick={clearFilters}>Clear filters</button>
+          <button className="member-action-button member-action-button--quiet" type="button" onClick={clearFilters}>Clear filters</button>
         </div>
       ) : null}
 

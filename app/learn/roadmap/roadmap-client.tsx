@@ -151,7 +151,7 @@ export function RoadmapChecklist({
 
       <div className="roadmap-toolbar">
         <span><i /> Current week · Week {activeWeek}</span>
-        <button type="button" onClick={reset} disabled={saving}>{isAccount ? "Reset progress" : "Reset sample progress"}</button>
+        <button className="roadmap-toolbar__reset" type="button" onClick={reset} disabled={saving}>{isAccount ? "Reset progress" : "Reset sample progress"}</button>
         {saving ? <small>Saving…</small> : null}
       </div>
       {saveError ? <p role="alert">{saveError}</p> : null}
