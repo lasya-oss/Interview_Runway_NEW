@@ -359,7 +359,8 @@ test("Library categories expose filtered records and real content viewers", asyn
     "utf8",
   );
 
-  assert.match(libraryClient, /<strong>\{totalResourceCount\.toLocaleString\("en-IN"\)\}<\/strong>/i);
+  assert.match(libraryClient, /const resourceCountLabel = totalResourceCount >= 100/i);
+  assert.match(libraryClient, /<strong>\{resourceCountLabel\}<\/strong>/i);
   assert.match(libraryClient, /aria-expanded=\{category === item\}/i);
   assert.match(libraryClient, /id="library-category-results"/i);
   assert.match(libraryClient, /className="library-category-view"/i);
@@ -431,8 +432,8 @@ test("curated Library count is consistent for Vault and Second Seat", async () =
     assert.equal(library.status, 200, tier);
     const html = await library.text();
     const text = visibleText(html);
-    assert.match(text, /145\s+Resources\s+Available/i, tier);
-    assert.match(text, /All\s+145/i, tier);
+    assert.match(text, /100\+\s+Resources\s+Available/i, tier);
+    assert.match(text, /All\s+100\+/i, tier);
     assert.doesNotMatch(text, /1000\+|Company Evidence|Vault Production Workspace/i, tier);
   }
 
@@ -598,9 +599,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   });
   assert.equal(library.status, 200);
   const libraryHtml = await library.text();
-  assert.match(visibleText(libraryHtml), /145\s+Resources\s+Available/i);
+  assert.match(visibleText(libraryHtml), /100\+\s+Resources\s+Available/i);
   assert.match(visibleText(libraryHtml), /Choose a category to view its materials/i);
-  assert.match(visibleText(libraryHtml), /All\s+145/i);
+  assert.match(visibleText(libraryHtml), /All\s+100\+/i);
   assert.doesNotMatch(visibleText(libraryHtml), /Drive PDF guides/i);
   assert.doesNotMatch(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
   assert.doesNotMatch(libraryHtml, /class="library-record library-pdf-record"/i);

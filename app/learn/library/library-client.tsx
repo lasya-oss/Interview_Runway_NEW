@@ -85,6 +85,9 @@ export function LibraryClient({
   const driveMaterials = catalog?.driveMaterials ?? EMPTY_DRIVE_MATERIALS;
   const categories = categorySummary.categories;
   const totalResourceCount = categorySummary.total;
+  const resourceCountLabel = totalResourceCount >= 100
+    ? "100+"
+    : totalResourceCount.toLocaleString("en-IN");
 
   useEffect(() => {
     let mounted = true;
@@ -230,8 +233,8 @@ export function LibraryClient({
           <h1>Everything has a place in the plan.</h1>
           <p>Search the library by the interview decision it helps you make. Learning materials, PDF guides, and the supplied Drive archive now sit in the same searchable workspace.</p>
         </div>
-        <div className="library-index" aria-label={`${isLive ? "Vault" : "Sample"} catalogue summary: ${totalResourceCount} Resources Available`}>
-          <strong>{totalResourceCount.toLocaleString("en-IN")}</strong>
+        <div className="library-index" aria-label={`${isLive ? "Vault" : "Sample"} catalogue summary: ${resourceCountLabel} Resources Available`}>
+          <strong>{resourceCountLabel}</strong>
           <span>Resources<br />Available</span>
         </div>
       </section>
@@ -299,7 +302,7 @@ export function LibraryClient({
               >
                 <span className="library-category-card__topline">
                   <b>{item}</b>
-                <i>{(item === "All" ? totalResourceCount : categoryCounts[item] ?? 0).toLocaleString("en-IN")}</i>
+                <i>{item === "All" ? resourceCountLabel : (categoryCounts[item] ?? 0).toLocaleString("en-IN")}</i>
                 </span>
                 <small>{CATEGORY_DESCRIPTIONS[item] ?? "Resources for this interview-prep theme"}</small>
               </button>
