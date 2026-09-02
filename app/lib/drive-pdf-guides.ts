@@ -1,3 +1,5 @@
+import { isActivePdfFilename } from "./active-library-selection";
+
 export type DrivePdfGuide = {
   id: string;
   filename: string;
@@ -328,7 +330,7 @@ export const DRIVE_PDF_GUIDES: readonly DrivePdfGuide[] = [
 
 export function drivePdfPreviewHref(id: string) {
   const guide = DRIVE_PDF_GUIDES.find((candidate) => candidate.id === id);
-  return guide ? `/pdf-guides/${encodeURIComponent(guide.filename)}` : null;
+  return guide && isActivePdfFilename(guide.filename) ? `/pdf-guides/${encodeURIComponent(guide.filename)}` : null;
 }
 
 const ACRONYMS: Record<string, string> = {

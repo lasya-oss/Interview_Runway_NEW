@@ -1,6 +1,7 @@
 import { DRIVE_MATERIALS, driveMaterialCategory, type DriveMaterial } from "@/app/lib/drive-materials";
 import { DRIVE_PDF_GUIDES, drivePdfCategory, type DrivePdfGuide } from "@/app/lib/drive-pdf-guides";
 import { LEARNING_MATERIALS, type LearningMaterial } from "@/app/lib/demo-data";
+import { ACTIVE_DRIVE_RECORD_KEY_SET, ACTIVE_PDF_FILENAME_SET } from "@/app/lib/active-library-selection";
 
 const VAULT_LEGACY_PDF_FILENAMES = new Set(["roadmap_4week.pdf"]);
 
@@ -20,9 +21,9 @@ export function getLibraryCatalog(isLive: boolean): LibraryCatalog {
   return {
     materials: LEARNING_MATERIALS,
     pdfGuides: isLive
-      ? DRIVE_PDF_GUIDES.filter((guide) => !VAULT_LEGACY_PDF_FILENAMES.has(guide.filename))
-      : DRIVE_PDF_GUIDES,
-    driveMaterials: DRIVE_MATERIALS,
+      ? DRIVE_PDF_GUIDES.filter((guide) => ACTIVE_PDF_FILENAME_SET.has(guide.filename) && !VAULT_LEGACY_PDF_FILENAMES.has(guide.filename))
+      : DRIVE_PDF_GUIDES.filter((guide) => ACTIVE_PDF_FILENAME_SET.has(guide.filename)),
+    driveMaterials: DRIVE_MATERIALS.filter((material) => ACTIVE_DRIVE_RECORD_KEY_SET.has(`${material.kind}:${material.filename}`)),
   };
 }
 

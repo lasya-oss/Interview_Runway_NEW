@@ -359,7 +359,7 @@ test("Library categories expose filtered records and real content viewers", asyn
     "utf8",
   );
 
-  assert.match(libraryClient, /<strong>1000\+<\/strong>/i);
+  assert.match(libraryClient, /<strong>\{totalResourceCount\.toLocaleString\("en-IN"\)\}<\/strong>/i);
   assert.match(libraryClient, /aria-expanded=\{category === item\}/i);
   assert.match(libraryClient, /id="library-category-results"/i);
   assert.match(libraryClient, /className="library-category-view"/i);
@@ -410,6 +410,39 @@ test("Start Here is shared by Vault and Second Seat with plan-scoped material", 
   assert.match(libraryStartHere, /Second Seat’s existing practice material/i);
   assert.match(libraryStartHere, /normalizedCategory === "ai practice"/i);
   assert.match(libraryStartHere, /className="library-start-here__toggle"/i);
+});
+
+test("curated Library count is consistent for Vault and Second Seat", async () => {
+  for (const tier of ["foundation", "practice"]) {
+    const login = await request("/api/demo-session", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin: "http://localhost",
+      },
+      body: JSON.stringify({ preview: tier }),
+    });
+    assert.equal(login.status, 200, tier);
+    const sessionCookie = login.headers.get("set-cookie")?.split(";")[0] ?? "";
+    const library = await request("/learn/library", {
+      headers: { accept: "text/html", cookie: sessionCookie },
+    });
+    assert.equal(library.status, 200, tier);
+    const html = await library.text();
+    const text = visibleText(html);
+    assert.match(text, /145\s+Resources\s+Available/i, tier);
+    assert.match(text, /All\s+145/i, tier);
+    assert.doesNotMatch(text, /1000\+|Company Evidence|Vault Production Workspace/i, tier);
+  }
+
+  const selection = await readFile(
+    new URL("../app/lib/active-library-selection.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(selection, /ACTIVE_PDF_FILENAMES/);
+  assert.match(selection, /ACTIVE_DRIVE_FILENAMES/);
+  assert.match(selection, /ACTIVE_DRIVE_RECORD_KEY_SET/);
 });
 
 const coreRoutes = [
@@ -565,9 +598,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   });
   assert.equal(library.status, 200);
   const libraryHtml = await library.text();
-  assert.match(visibleText(libraryHtml), /1000\+\s+Resources\s+Available/i);
+  assert.match(visibleText(libraryHtml), /145\s+Resources\s+Available/i);
   assert.match(visibleText(libraryHtml), /Choose a category to view its materials/i);
-  assert.match(visibleText(libraryHtml), /All\s+1,\d{3}/i);
+  assert.match(visibleText(libraryHtml), /All\s+145/i);
   assert.doesNotMatch(visibleText(libraryHtml), /Drive PDF guides/i);
   assert.doesNotMatch(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
   assert.doesNotMatch(libraryHtml, /class="library-record library-pdf-record"/i);
@@ -626,15 +659,10 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(visibleText(driveMaterialHtml), /Material context/i);
   assert.doesNotMatch(driveMaterialHtml, /class="material-next-step"/i);
 
-  const vaultReadme = await request("/learn/library/material/vault-readme-md-nqbojpax", {
+  const archivedMaterial = await request("/learn/library/material/vault-readme-md-nqbojpax", {
     headers: { accept: "text/html", cookie: sessionCookie },
   });
-  assert.equal(vaultReadme.status, 200);
-  const vaultReadmeHtml = await vaultReadme.text();
-  assert.match(visibleText(vaultReadmeHtml), /PDF Preparing the PDF preview inside InterviewRunway/i);
-  assert.match(vaultReadmeHtml, /class="library-material-pdf-state library-material-state"/i);
-  assert.doesNotMatch(vaultReadmeHtml, /class="library-material-text"/i);
-  assert.doesNotMatch(visibleText(vaultReadmeHtml), /catalogued in InterviewRunway/i);
+  assert.equal(archivedMaterial.status, 404);
 
   const materialViewer = await readFile(
     new URL("../app/learn/library/material-viewer.tsx", import.meta.url),

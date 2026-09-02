@@ -1,3 +1,5 @@
+import { isActiveDriveRecord } from "./active-library-selection";
+
 export type DriveMaterialKind =
   | "template"
   | "narrated"
@@ -6374,5 +6376,5 @@ export function formatMaterialSize(bytes: number) {
 }
 
 export function findDriveMaterial(slug: string) {
-  return DRIVE_MATERIALS.find((material) => driveMaterialSlug(material) === slug) ?? null;
+  return DRIVE_MATERIALS.find((material) => isActiveDriveRecord(material.filename, material.kind) && driveMaterialSlug(material) === slug) ?? null;
 }

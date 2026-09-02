@@ -230,8 +230,8 @@ export function LibraryClient({
           <h1>Everything has a place in the plan.</h1>
           <p>Search the library by the interview decision it helps you make. Learning materials, PDF guides, and the supplied Drive archive now sit in the same searchable workspace.</p>
         </div>
-        <div className="library-index" aria-label={`${isLive ? "Vault" : "Sample"} catalogue summary: 1000+ Resources Available`}>
-          <strong>1000+</strong>
+        <div className="library-index" aria-label={`${isLive ? "Vault" : "Sample"} catalogue summary: ${totalResourceCount} Resources Available`}>
+          <strong>{totalResourceCount.toLocaleString("en-IN")}</strong>
           <span>Resources<br />Available</span>
         </div>
       </section>
