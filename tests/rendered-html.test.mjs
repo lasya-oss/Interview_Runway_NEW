@@ -446,6 +446,36 @@ test("curated Library count is consistent for Vault and Second Seat", async () =
   assert.match(selection, /ACTIVE_DRIVE_RECORD_KEY_SET/);
 });
 
+test("low-information Library PDFs are archived and excluded from the active catalog", async () => {
+  const selection = await readFile(
+    new URL("../app/lib/active-library-selection.ts", import.meta.url),
+    "utf8",
+  );
+  const archivedNames = [
+    "behavioral_story-bank.pdf",
+    "behavioral_follow-up-probes.pdf",
+    "behavioral_evidence-and-metrics.pdf",
+    "behavioral_final-prep.pdf",
+    "behavioral_recruiter-screen.pdf",
+    "career_ats-resume.pdf",
+    "career_resume-bullets.pdf",
+    "career_resume-metrics.pdf",
+    "career_linkedin-headline.pdf",
+    "career_resume-review.pdf",
+    "operations_interview-day.pdf",
+    "operations_post-interview-debrief.pdf",
+    "operations_study-planning.pdf",
+  ];
+
+  const activePdfNames = selection.match(/export const ACTIVE_PDF_FILENAMES = \[([\s\S]*?)\] as const/)?.[1].match(/"([^"]+)"/g) ?? [];
+  assert.equal(activePdfNames.length, 70);
+  for (const filename of archivedNames) {
+    assert.doesNotMatch(selection, new RegExp(`\\"${filename.replace(".", "\\.")}\\"`));
+    assert.equal(existsSync(new URL(`../public/pdf-guides/${filename}`, import.meta.url)), false, filename);
+    assert.equal(existsSync(new URL(`../library-archive/pdf-guides/${filename}`, import.meta.url)), true, filename);
+  }
+});
+
 const coreRoutes = [
   {
     pathname: "/vault",
