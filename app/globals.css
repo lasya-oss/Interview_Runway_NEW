@@ -11002,7 +11002,48 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .member-shell .library-record-meta > button.library-record-open,
 .member-shell .material-review-link small.material-review-link__action {
   min-height: 40px;
+  width: max-content;
   padding-inline: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border-radius: 9px;
-  font-size: 9px;
+  border: 1px solid #f36a32;
+  font-size: clamp(10px, .7vw, 12px);
+  font-weight: 730;
+  line-height: 1.2;
+  color: #fff;
+  background: linear-gradient(135deg, #ff6b2c, #e65b26);
+  box-shadow: 0 9px 20px rgba(255,107,44,.2);
+}
+
+.member-shell .library-record-meta > button.library-record-open {
+  margin-top: 13px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out-expo), border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.member-shell .library-record-meta > button.library-record-open span {
+  display: inline-block;
+  margin-left: 0;
+  color: #fff;
+  transition: transform 160ms var(--ease-out-expo);
+}
+
+.member-shell .library-record-meta > button.library-record-open:hover,
+.member-shell .library-record-meta > button.library-record-open:focus-visible {
+  border-color: #d95422;
+  color: #fff;
+  background: linear-gradient(135deg, #e65b26, #d95422);
+  box-shadow: 0 12px 24px rgba(180,61,20,.22);
+  outline: 2px solid #17323e;
+  outline-offset: 3px;
+  transform: translateY(-2px);
+}
+
+.member-shell .library-record-meta > button.library-record-open:hover span,
+.member-shell .library-record-meta > button.library-record-open:focus-visible span {
+  transform: translateX(3px);
 }
