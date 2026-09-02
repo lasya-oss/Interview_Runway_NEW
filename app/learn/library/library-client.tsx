@@ -139,6 +139,14 @@ export function LibraryClient({
     setScope("all");
   };
 
+  const openSearchResults = (value: string) => {
+    setQuery(value);
+    // Search and access scopes are global Library views when no category is open.
+    // Opening the synthetic All category keeps the filtered records visible and
+    // means clearing a query restores the complete result set.
+    setCategory((current) => current ?? "All");
+  };
+
   const renderResults = (showSummary: boolean) => (
     <>
       {showSummary ? (
@@ -231,11 +239,19 @@ export function LibraryClient({
       <section className="library-controls" aria-label="Library filters">
         <label className="library-search">
           <span>Search materials</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} type="search" placeholder="Try “trade-offs” or “behavioural”" />
+          <input value={query} onChange={(event) => openSearchResults(event.target.value)} type="search" placeholder="Try “trade-offs” or “behavioural”" />
         </label>
         <div className="library-scope" aria-label="Access filter">
           {(["all", "included", "locked"] as const).map((value) => (
-            <button className={scope === value ? "is-active" : ""} type="button" onClick={() => setScope(value)} key={value}>
+            <button
+              className={scope === value ? "is-active" : ""}
+              type="button"
+              onClick={() => {
+                setScope(value);
+                setCategory(value === "all" ? "All" : (current) => current ?? "All");
+              }}
+              key={value}
+            >
               {value === "all" ? "All records" : value === "included" ? "Included" : "Higher tiers"}
             </button>
           ))}
