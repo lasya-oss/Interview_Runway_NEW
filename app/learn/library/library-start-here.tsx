@@ -58,6 +58,42 @@ export const VAULT_START_HERE_DOMAINS = [
 
 type StartHereDomain = (typeof VAULT_START_HERE_DOMAINS)[number]["id"];
 type StartHereLevel = "basics" | "intermediate" | "advanced";
+export type StartHerePlan = "vault" | "second-seat";
+
+const START_HERE_COPY: Record<StartHerePlan, {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  panelEyebrow: string;
+  panelDescription: string;
+  loading: string;
+  selectionPrompt: string;
+  levelPrompt: string;
+  empty: string;
+}> = {
+  vault: {
+    eyebrow: "A guided first step",
+    title: "New to interview preparation?",
+    intro: "Not sure where to start? Build your preparation from the right foundation.",
+    panelEyebrow: "Choose your focus",
+    panelDescription: "These fixed paths are based on the Vault’s existing lesson, guide, explainer, and template metadata. Each focus shows only directly relevant primary material.",
+    loading: "Loading the Vault starting paths…",
+    selectionPrompt: "Select a focus to see the directly relevant Library content.",
+    levelPrompt: "Choose a level to open only its relevant Vault records.",
+    empty: "No matching Vault material at this level.",
+  },
+  "second-seat": {
+    eyebrow: "A guided first practice",
+    title: "New to interview preparation?",
+    intro: "Not sure where to start? Build your next practice round from the right foundation.",
+    panelEyebrow: "Choose your practice focus",
+    panelDescription: "These fixed paths combine the Vault foundation with the Second Seat’s existing practice material. Each focus shows directly relevant content for your next round.",
+    loading: "Loading the Second Seat starting paths…",
+    selectionPrompt: "Select a focus to see the directly relevant Second Seat content.",
+    levelPrompt: "Choose a level to open only its relevant Second Seat records.",
+    empty: "No matching Second Seat material at this level.",
+  },
+};
 
 const LEVELS: readonly { id: StartHereLevel; label: string; detail: string }[] = [
   { id: "basics", label: "Basics", detail: "Start with the core idea and vocabulary." },
@@ -78,9 +114,10 @@ type StartHereRecord = {
   external?: boolean;
 };
 
-function domainForLibraryRecord(category: string, filename = ""): StartHereDomain | null {
+function domainForLibraryRecord(category: string, filename = "", context = ""): StartHereDomain | null {
   const normalizedCategory = category.toLowerCase();
   const normalizedFilename = filename.toLowerCase();
+  const normalizedContext = `${category} ${filename} ${context}`.toLowerCase();
 
   // These are intentionally canonical signals from the catalog, not loose
   // keyword matches. A record is surfaced only when its source category or
@@ -92,6 +129,11 @@ function domainForLibraryRecord(category: string, filename = ""): StartHereDomai
   if (normalizedCategory === "career signal" || normalizedFilename.startsWith("career_") || /template_(?:us-ats-resume|title-translation-guide|remote-cover-letter|outreach-|linkedin-)/.test(normalizedFilename)) return "career";
   if (normalizedCategory === "company research" || normalizedFilename.startsWith("company_")) return "company";
   if (normalizedCategory === "roadmaps" || normalizedCategory === "operations" || /template_(?:weekly-prep-tracker|recruiter-screen-notes|interview-availability)/.test(normalizedFilename)) return "execution";
+  if (normalizedCategory === "ai practice") {
+    if (/negotiat|compensation|\busd\b/.test(normalizedContext)) return "remote";
+    if (/design|service|pipeline|queue|backlog|metrics|delivery|scale|reliability/.test(normalizedContext)) return "system-design";
+    return "execution";
+  }
   return null;
 }
 
@@ -115,7 +157,7 @@ function levelFromFilename(filename: string, source: "pdf" | "narrated" | "templ
 }
 
 function recordFromLearningMaterial(material: LearningMaterial): StartHereRecord | null {
-  const domain = domainForLibraryRecord(material.category);
+  const domain = domainForLibraryRecord(material.category, "", `${material.title} ${material.description} ${material.tags.join(" ")}`);
   if (!domain) return null;
   const hasDirectAsset = Boolean(material.demoAsset);
   return {
@@ -169,11 +211,12 @@ function recordFromDriveMaterial(material: DriveMaterial): StartHereRecord | nul
   };
 }
 
-function buildStartHereRecords(catalog: LibraryCatalog, isLive: boolean): readonly StartHereRecord[] {
+function buildStartHereRecords(catalog: LibraryCatalog, isLive: boolean, plan: StartHerePlan): readonly StartHereRecord[] {
   const records: StartHereRecord[] = [];
 
   catalog.materials.forEach((material) => {
-    if (material.tier !== "foundation" || (isLive && material.availability !== "included")) return;
+    const belongsToPlan = material.tier === "foundation" || (plan === "second-seat" && material.tier === "practice");
+    if (!belongsToPlan || (isLive && material.tier === "foundation" && material.availability !== "included")) return;
     const record = recordFromLearningMaterial(material);
     if (record) records.push(record);
   });
@@ -185,7 +228,7 @@ function buildStartHereRecords(catalog: LibraryCatalog, isLive: boolean): readon
 
   // Supporting transcripts, captions, storyboards, manifests, and Second Seat
   // mock files stay in the existing Library archive; this path surfaces only
-  // primary Vault lessons, guides, explainers, and editable templates.
+  // primary lessons, guides, explainers, and editable templates.
   catalog.driveMaterials.forEach((material) => {
     if (material.kind !== "narrated" && material.kind !== "template") return;
     const record = recordFromDriveMaterial(material);
@@ -198,15 +241,18 @@ function buildStartHereRecords(catalog: LibraryCatalog, isLive: boolean): readon
 export function VaultStartHere({
   catalog,
   isLive,
+  plan = "vault",
 }: {
   catalog: LibraryCatalog | null;
   isLive: boolean;
+  plan?: StartHerePlan;
 }) {
   const [open, setOpen] = useState(false);
   const [domain, setDomain] = useState<StartHereDomain | "">("");
   const [selectedLevel, setSelectedLevel] = useState<StartHereLevel | "">("");
   const learningPathRef = useRef<HTMLDivElement>(null);
-  const allRecords = useMemo(() => (catalog ? buildStartHereRecords(catalog, isLive) : []), [catalog, isLive]);
+  const copy = START_HERE_COPY[plan];
+  const allRecords = useMemo(() => (catalog ? buildStartHereRecords(catalog, isLive, plan) : []), [catalog, isLive, plan]);
   const matchingRecords = useMemo(
     () => allRecords.filter((record) => !domain || record.domain === domain),
     [allRecords, domain],
@@ -234,9 +280,9 @@ export function VaultStartHere({
     <section className="library-start-here" aria-labelledby="library-start-here-title">
       <div className="library-start-here__intro">
         <div>
-          <p className="member-kicker">A guided first step</p>
-          <h2 id="library-start-here-title">New to interview preparation?</h2>
-          <p>Not sure where to start? Build your preparation from the right foundation.</p>
+          <p className="member-kicker">{copy.eyebrow}</p>
+          <h2 id="library-start-here-title">{copy.title}</h2>
+          <p>{copy.intro}</p>
         </div>
         <button
           className="library-start-here__toggle"
@@ -252,8 +298,8 @@ export function VaultStartHere({
       {open ? (
         <div id="library-start-here-panel" className="library-start-here__panel">
           <div className="library-start-here__copy">
-            <p className="member-kicker">Choose your focus</p>
-            <p>These fixed paths are based on the Vault’s existing lesson, guide, explainer, and template metadata. Each focus shows only directly relevant primary material.</p>
+            <p className="member-kicker">{copy.panelEyebrow}</p>
+            <p>{copy.panelDescription}</p>
           </div>
 
           <div className="library-start-here__filters" aria-label="Start here filters">
@@ -275,9 +321,9 @@ export function VaultStartHere({
           </div>
 
           {!catalog ? (
-            <div className="library-start-here__loading" aria-busy="true">Loading the Vault starting paths…</div>
+            <div className="library-start-here__loading" aria-busy="true">{copy.loading}</div>
           ) : !hasSelection ? (
-            <div className="library-start-here__prompt">Select a focus to see the directly relevant Library content.</div>
+            <div className="library-start-here__prompt">{copy.selectionPrompt}</div>
           ) : (
             <div
               ref={learningPathRef}
@@ -344,12 +390,12 @@ export function VaultStartHere({
                         ))}
                       </div>
                     ) : (
-                      <p className="library-start-here__empty">No matching Vault material at this level.</p>
+                      <p className="library-start-here__empty">{copy.empty}</p>
                     )}
                   </section>
                 );
               })() : (
-                <p className="library-start-here__prompt">Choose a level to open only its relevant Vault records.</p>
+                <p className="library-start-here__prompt">{copy.levelPrompt}</p>
               )}
             </div>
           )}

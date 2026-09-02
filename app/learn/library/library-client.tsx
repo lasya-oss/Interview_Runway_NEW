@@ -258,7 +258,13 @@ export function LibraryClient({
         </div>
       </section>
 
-      {profileId === "foundation" ? <VaultStartHere catalog={catalog} isLive={isLive} /> : null}
+      {profileId === "foundation" || profileId === "practice" ? (
+        <VaultStartHere
+          catalog={catalog}
+          isLive={isLive}
+          plan={profileId === "practice" ? "second-seat" : "vault"}
+        />
+      ) : null}
 
       {category ? (
         <section id="library-category-results" className="library-category-view" aria-label={`${category} category view`}>
