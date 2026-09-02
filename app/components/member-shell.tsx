@@ -49,6 +49,7 @@ export function MemberShell({
   const isFreshLearner = profile.progress === 0 && (profile.completedTaskIds?.length ?? 0) === 0;
   const isVaultWorkspace = profile.id === "foundation";
   const isSecondSeatWorkspace = profile.id === "practice";
+  const showDashboardLabel = isVaultWorkspace || isSecondSeatWorkspace;
   const workspaceState: WorkspaceState = isVaultWorkspace
     ? { window: "8–12 weeks", signal: "Baseline pending", event: isFreshLearner ? "First study step" : "Weekly review", eventTime: isFreshLearner ? "After start" : "Sun · 18:00" }
     : isSecondSeatWorkspace
@@ -87,7 +88,7 @@ export function MemberShell({
             const unlocked = profile.access[item.access];
             return (
               <Link className={`${currentSection === item.key ? "is-active" : ""} ${unlocked ? "" : "is-locked"}`} href={item.href} key={item.key}>
-                <span>{item.mark}</span><b>{item.label}</b>{unlocked ? null : <small>Upgrade</small>}
+                <span>{item.mark}</span><b>{item.key === "today" && showDashboardLabel ? "Dashboard" : item.label}</b>{unlocked ? null : <small>Upgrade</small>}
               </Link>
             );
           })}
