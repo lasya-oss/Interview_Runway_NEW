@@ -193,26 +193,34 @@ function describeNextAction(
   nextTask: RoadmapTask | null,
   isFreshLearner: boolean,
 ) {
+  const isLearnerPlan = profile.id === "foundation" || profile.id === "practice";
+
   if (nextTask) {
     if (nextTask.learning.kind === "material") {
-      return LEARNING_MATERIALS.find((material) => material.slug === nextTask.learning.slug)?.description
-        ?? "Open the matching Library material to build the next interview signal.";
+      const materialDescription = LEARNING_MATERIALS.find((material) => material.slug === nextTask.learning.slug)?.description;
+      return materialDescription
+        ? isLearnerPlan
+          ? `${materialDescription} Use it to practise the decision cues this roadmap step is building, then carry one clear explanation into your next interview-style response.`
+          : materialDescription
+        : "Open the matching Library material to build the next interview signal.";
     }
-    return nextTask.learning.objective;
+    return isLearnerPlan
+      ? `${nextTask.learning.objective} Finish by capturing one concrete takeaway you can reuse in the next practice step.`
+      : nextTask.learning.objective;
   }
 
   if (isFreshLearner) {
     return profile.id === "foundation"
-      ? "Define your target role, interview loop, and evidence bar so the rest of the Foundation plan stays focused."
+      ? "Define your target role, interview loop, and evidence bar so the rest of the Foundation plan stays focused. This gives every later study step a clear target and evidence to build on."
       : profile.id === "practice"
-        ? "Choose an interview-shaped round, then use the transcript and rubric to identify the first correction worth practising."
+        ? "Choose an interview-shaped round, then use the transcript and rubric to identify the first correction worth practising. The result gives your next correction a clear starting point instead of a generic score."
         : "Bring two examples that show cross-team influence so the coach can calibrate your scope and decision signal.";
   }
 
   return profile.id === "foundation"
-    ? "Continue the lesson, then explain the decision aloud so the reasoning is ready for interview pressure."
+    ? "Continue the lesson, then explain the decision aloud so the reasoning is ready for interview pressure. Capture the reasoning in your own words so it is ready for the next roadmap step."
     : profile.id === "practice"
-      ? "Use the next practice round to turn the previous gap into a repeatable interview decision."
+      ? "Use the next practice round to turn the previous gap into a repeatable interview decision. Focus on one observable improvement so the next review shows what actually changed."
       : "Bring two examples that show cross-team influence so the coach can calibrate your scope and decision signal.";
 }
 

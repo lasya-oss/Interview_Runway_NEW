@@ -5195,7 +5195,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .next-action-visual i:nth-child(3) { top: 69px; transform: rotate(1deg); opacity: .4; }
 .next-action-visual span { position: absolute; top: 38px; right: 28%; width: 8px; height: 8px; border-radius: 50%; background: var(--afterburner); box-shadow: 0 0 20px var(--afterburner); }
 .next-action-panel h2 { position: relative; margin: 7px 0 0; max-width: 720px; font-family: var(--font-display); font-size: clamp(2rem, 3.1vw, 3.35rem); font-weight: 570; line-height: 1.04; letter-spacing: -.052em; }
-.next-action-panel > p { position: relative; display: -webkit-box; max-width: 690px; margin: 13px 0 22px; overflow: hidden; color: #667881; font-size: 11px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.next-action-panel > p { position: relative; display: -webkit-box; max-width: 620px; margin: 13px 0 22px; overflow: hidden; color: #667881; font-size: 11px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .weekly-plan-panel { display: flex; flex-direction: column; }
 .week-strip { --week-count: 4; height: 154px; margin: 30px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(var(--week-count), minmax(0, 1fr)); gap: clamp(3px, .6vw, 7px); align-items: stretch; }
 .week-strip--12 { --week-count: 12; }
