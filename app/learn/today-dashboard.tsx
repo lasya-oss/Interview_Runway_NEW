@@ -11,6 +11,7 @@ import {
   type DemoProfileView,
   type DemoReviewMaterial,
 } from "@/app/lib/demo-data";
+import type { RoadmapTask } from "@/app/lib/roadmap-data";
 import { useRoadmapProgress } from "./roadmap/learner-progress-client";
 
 export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
@@ -64,6 +65,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
       ? `/learn/material/${nextTask.learning.slug}`
       : `/learn/roadmap/task/${nextTask.id}`
     : profile.nextActionHref ?? (profile.id === "premium" ? "/learn/coaching" : profile.id === "practice" ? "/learn/practice" : "/learn/roadmap");
+  const nextActionDescription = describeNextAction(profile, nextTask, isFreshLearner);
   const completedLabel = isTracked
     ? `${roadmap.completedCount} / ${totalPlanTasks}`
     : profile.id === "practice" ? "8 / 11" : "9 / 10";
@@ -95,7 +97,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
           <div className="member-panel-label"><span>Next action</span><b>{nextActionMeta}</b></div>
           <div className="next-action-visual" aria-hidden="true"><i /><i /><i /><span /></div>
           <h2>{nextAction}</h2>
-          <p>{isFreshLearner ? "Choose one round, answer in your own words, and use the transcript to decide what to practise next." : profile.id === "foundation" ? "Continue the lesson, then explain your choice aloud before viewing the worked decision tree." : profile.id === "practice" ? "The prompt adapts after each design commitment. Your previous gap is already loaded into the rubric." : "Bring two examples that show cross-team influence. The coach packet has the evidence prompts ready."}</p>
+          <p>{nextActionDescription}</p>
           <Link className="member-primary-button" href={nextActionHref}>Continue <span aria-hidden="true">↗</span></Link>
         </article>
 
@@ -184,6 +186,34 @@ function formatFocusedTime(seconds: number) {
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
   return remainingMinutes ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+}
+
+function describeNextAction(
+  profile: DemoProfileView,
+  nextTask: RoadmapTask | null,
+  isFreshLearner: boolean,
+) {
+  if (nextTask) {
+    if (nextTask.learning.kind === "material") {
+      return LEARNING_MATERIALS.find((material) => material.slug === nextTask.learning.slug)?.description
+        ?? "Open the matching Library material to build the next interview signal.";
+    }
+    return nextTask.learning.objective;
+  }
+
+  if (isFreshLearner) {
+    return profile.id === "foundation"
+      ? "Define your target role, interview loop, and evidence bar so the rest of the Foundation plan stays focused."
+      : profile.id === "practice"
+        ? "Choose an interview-shaped round, then use the transcript and rubric to identify the first correction worth practising."
+        : "Bring two examples that show cross-team influence so the coach can calibrate your scope and decision signal.";
+  }
+
+  return profile.id === "foundation"
+    ? "Continue the lesson, then explain the decision aloud so the reasoning is ready for interview pressure."
+    : profile.id === "practice"
+      ? "Use the next practice round to turn the previous gap into a repeatable interview decision."
+      : "Bring two examples that show cross-team influence so the coach can calibrate your scope and decision signal.";
 }
 
 function ReviewMaterials({

@@ -977,6 +977,31 @@ test("Foundation demo Today renders the clean starting values", async () => {
   assert.doesNotMatch(dashboardText, /Friday · Week 2|18 Plan complete|5 \/ 9|2h 14m|Next review Sunday/i);
 });
 
+test("Vault and Second Seat Today use plan-appropriate Next Action introductions", async () => {
+  for (const [preview, description] of [
+    ["foundation", /Define your target role, interview loop, and evidence bar/],
+    ["practice", /Choose an interview-shaped round, then use the transcript and rubric/],
+  ]) {
+    const login = await request("/api/demo-session", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin: "http://localhost",
+      },
+      body: JSON.stringify({ preview }),
+    });
+    assert.equal(login.status, 200, preview);
+
+    const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+    const dashboard = await request("/learn", {
+      headers: { accept: "text/html", cookie: sessionCookie },
+    });
+    assert.equal(dashboard.status, 200, preview);
+    assert.match(visibleText(await dashboard.text()), description, preview);
+  }
+});
+
 test("analytics contract is present on acquisition and payment surfaces", async () => {
   const homepage = await render();
   const homepageHtml = await homepage.text();
@@ -1422,6 +1447,9 @@ test("Today and Status consume the Roadmap snapshot for both learner tiers", asy
   assert.match(dashboard, /const completedLabel = isTracked[\s\S]*?roadmap\.completedCount/);
   assert.match(dashboard, /const weekProgress = roadmap\.weekProgress/);
   assert.match(dashboard, /week-progress-item--\$\{week\.status\}/);
+  assert.match(dashboard, /const nextActionDescription = describeNextAction\(profile, nextTask, isFreshLearner\)/);
+  assert.match(dashboard, /function describeNextAction\([\s\S]*?nextTask\.learning\.kind === "material"[\s\S]*?LEARNING_MATERIALS\.find[\s\S]*?nextTask\.learning\.objective/);
+  assert.doesNotMatch(dashboard, /Continue the lesson, then explain your choice aloud before viewing the worked decision tree/);
   assert.match(accessCard, /progress\.synchronized \? progress\.progressPercent : fallbackProgress/);
   assert.match(roadmap, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.next\], nextCompletionActivity\)/);
   assert.match(studyButton, /emitRoadmapProgressUpdated\(\s*profileId,/);
