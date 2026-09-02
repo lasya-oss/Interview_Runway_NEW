@@ -143,7 +143,7 @@ export function MemberShell({
                 </div>
               </details>
               <span className="member-account-status"><i />{accessLabel}</span>
-              <Link className="member-header-action-button" href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} <span aria-hidden="true">↗</span></Link>
+              <Link href={conversion.href} data-analytics-event={conversion.event}>{conversion.label} ↗</Link>
             </div>
           </div>
         </header>
