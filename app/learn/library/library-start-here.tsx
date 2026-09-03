@@ -4,13 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   driveMaterialCategory,
   driveMaterialKindLabel,
-  driveMaterialPreviewHref,
   driveMaterialTitle,
   type DriveMaterial,
 } from "@/app/lib/drive-materials";
 import {
   drivePdfCategory,
-  drivePdfPreviewHref,
   drivePdfTitle,
   type DrivePdfGuide,
 } from "@/app/lib/drive-pdf-guides";
@@ -115,9 +113,7 @@ type StartHereRecord = {
   format: string;
   level: StartHereLevel;
   domain: StartHereDomain;
-  href: string;
   action: string;
-  external?: boolean;
   contentUnavailable?: boolean;
   viewerSource: LibraryMaterialViewerSource | null;
 };
@@ -176,9 +172,7 @@ function recordFromLearningMaterial(material: LearningMaterial): StartHereRecord
     format: material.format,
     level: levelFromLearningMaterial(material),
     domain,
-    href: hasDirectAsset ? material.demoAsset!.href : `/learn/material/${material.slug}`,
     action: hasDirectAsset ? "Open actual content" : "Open lesson",
-    external: hasDirectAsset,
     contentUnavailable: !hasDirectAsset,
     viewerSource: learningMaterialViewerSource(material),
   };
@@ -196,9 +190,7 @@ function recordFromPdfGuide(guide: DrivePdfGuide): StartHereRecord | null {
     format: "PDF guide",
     level: levelFromFilename(guide.filename, "pdf"),
     domain,
-    href: drivePdfPreviewHref(guide.id) ?? "#",
     action: "Open guide",
-    external: true,
     viewerSource: drivePdfViewerSource(guide, drivePdfTitle(guide.filename)),
   };
 }
@@ -216,9 +208,7 @@ function recordFromDriveMaterial(material: DriveMaterial): StartHereRecord | nul
     format: kind,
     level: levelFromFilename(material.filename, material.kind === "template" ? "template" : "narrated"),
     domain,
-    href: driveMaterialPreviewHref(material),
     action: material.kind === "template" ? "Open template" : "Open explainer",
-    external: true,
     viewerSource: driveMaterialViewerSource(material, driveMaterialTitle(material.filename)),
   };
 }

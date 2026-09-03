@@ -291,7 +291,6 @@ test("Vault template and explainer actions open first-party inline PDF previews"
     "utf8",
   );
 
-  assert.match(libraryStartHere, /driveMaterialPreviewHref\(material\)/i);
   assert.match(libraryStartHere, /LibraryMaterialDialog/i);
   assert.doesNotMatch(libraryStartHere, /target=\{record\.external \? "_blank"/i);
   assert.match(previewRoute, /Content-Type.*application\/pdf/i);
@@ -445,25 +444,17 @@ test("PDF viewer shows a record header and user-controlled fullscreen option", a
     "utf8",
   );
 
-  assert.match(styles, /\.library-pdf-dialog\s*\{[^}]*inset:\s*0;[^}]*padding:\s*0;/);
-  assert.match(styles, /\.library-pdf-dialog__surface\s*\{[^}]*width:\s*100%;[^}]*height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
-  assert.match(styles, /\.library-pdf-dialog__header\s*\{[^}]*display:\s*flex;[^}]*justify-content:\s*space-between;/);
-  assert.match(styles, /\.library-pdf-dialog__viewer\s*\{[^}]*min-height:\s*0;[^}]*padding:\s*14px;/);
-  assert.match(styles, /\.library-pdf-dialog__viewer iframe\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*border:/);
-  assert.match(pdfShelf, /library-pdf-dialog__header/);
-  assert.match(pdfShelf, /library-pdf-dialog__fullscreen/);
-  assert.match(pdfShelf, /viewer\.requestFullscreen\(\)/);
-  assert.match(pdfShelf, /viewerRef/);
-  assert.match(styles, /\.library-pdf-dialog__viewer:fullscreen\s*\{[^}]*padding:\s*0;/);
-  assert.match(pdfShelf, /library-pdf-dialog\$\{isFullscreen/);
-  assert.match(styles, /\.library-pdf-dialog\.is-fullscreen \.library-pdf-dialog__header\s*\{[^}]*display:\s*none;/);
-  assert.doesNotMatch(pdfShelf, /document\.documentElement\.requestFullscreen\(\)/);
   assert.match(styles, /\.library-material-dialog\s*\{[^}]*inset:\s*0;[^}]*padding:\s*0;/);
   assert.match(styles, /\.library-material-dialog__surface\s*\{[^}]*width:\s*100%;[^}]*height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
+  assert.match(styles, /\.library-material-dialog__actions\s*\{/);
+  assert.match(styles, /\.library-material-dialog__fullscreen\s*\{[^}]*width:\s*48px;[^}]*height:\s*48px;/);
+  assert.match(styles, /\.library-material-dialog__close\s*\{/);
   assert.match(styles, /\.library-material-dialog__body\s*>\s*\.library-material-pdf-frame\s*\{[^}]*width:\s*100%;[^}]*min-height:\s*0;/);
   assert.match(styles, /\.library-material-dialog__body\s*>\s*\.library-material-media\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*max-height:\s*none;/);
   assert.match(styles, /\.library-material-dialog__body:fullscreen\s*\{[^}]*width:\s*100vw;[^}]*height:\s*100dvh;/);
-  assert.match(driveShelf, /<div ref=\{viewerRef\} className="library-material-dialog__body">\s*<MaterialViewer/);
+  assert.match(driveShelf, /<LibraryMaterialDialog[\s\S]*driveMaterialViewerSource\(material, title\)/i);
+  assert.match(pdfShelf, /<LibraryMaterialDialog[\s\S]*drivePdfViewerSource\(guide, title\)/i);
+  assert.match(pdfShelf, /initialOpen=\{initialFilename === guide\.filename\}/i);
   assert.doesNotMatch(driveShelf, /<div className="library-material-viewer">/);
 });
 
@@ -521,7 +512,8 @@ test("Library categories expose filtered records and real content viewers", asyn
   const unavailableFallback = materialViewer.indexOf("library-material-content-unavailable", protectedViewerBranch);
   assert.ok(protectedViewerBranch >= 0, "protected media branch should exist");
   assert.ok(protectedViewer >= 0 && protectedViewer < unavailableFallback, "protected media should be selected before unavailable fallback");
-  assert.match(libraryStartHere, /action: material\.kind === "template" \? "Open template" : "Open explainer",\s*external: true,/i);
+  assert.match(libraryStartHere, /action: material\.kind === "template" \? "Open template" : "Open explainer",/i);
+  assert.match(libraryStartHere, /driveMaterialViewerSource\(material/i);
   assert.match(driveReplayPlayer, /mediaType\?: "video" \| "audio"/i);
   assert.match(driveReplayPlayer, /<audio className="library-material-audio-player"/i);
 });
@@ -682,7 +674,7 @@ test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable",
   assert.match(roadmap, /"12w-8-linkedin": "\/learn\/library\/material\/template-linkedin-profile-docx-cyog_vzk"/);
   assert.match(libraryPage, /requestedPdf && isActivePdfFilename\(requestedPdf\)/);
   assert.match(libraryClient, /initialFilename=\{initialPdfFilename\}/);
-  assert.match(pdfShelf, /guides\.find\(\(guide\) => guide\.filename === initialFilename\)/);
+  assert.match(pdfShelf, /initialOpen=\{initialFilename === guide\.filename\}/);
 });
 
 const coreRoutes = [
@@ -863,18 +855,14 @@ test("demo sign-in issues a protected session and opens the learner product", as
     "utf8",
   );
   assert.match(driveShelf, /className="library-record-open"/i);
-  assert.match(driveShelf, /aria-haspopup="dialog"/i);
-  assert.match(driveShelf, /library-material-dialog/i);
-  assert.match(driveShelf, /DRIVE_MATERIAL_CONTENT/i);
-  assert.match(driveShelf, /driveMaterialCompanionAssetHref/i);
+  assert.match(driveShelf, /<LibraryMaterialDialog[\s\S]*driveMaterialViewerSource\(material, title\)/i);
   assert.doesNotMatch(driveShelf, /<Link\b/i);
   const pdfShelf = await readFile(
     new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(pdfShelf, /aria-haspopup="dialog"/i);
-  assert.match(pdfShelf, /role="dialog"/i);
-  assert.match(pdfShelf, /drivePdfPreviewHref\(activeGuide\.id\)/i);
+  assert.match(pdfShelf, /<LibraryMaterialDialog[\s\S]*drivePdfViewerSource\(guide, title\)/i);
+  assert.match(pdfShelf, /initialOpen=\{initialFilename === guide\.filename\}/i);
   assert.match(pdfShelf, /<article className="library-record library-pdf-record"/i);
   assert.match(pdfShelf, /className="library-record-open"/i);
   assert.doesNotMatch(pdfShelf, /<button\s+className="library-record library-pdf-record"/i);
@@ -919,9 +907,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(materialViewer, /Allow material access/i);
   assert.doesNotMatch(materialViewer, /requestAccessToken|accounts\.oauth2|Authorization:.*Bearer/i);
   assert.doesNotMatch(materialViewer, /drive\.google\.com/i);
-  assert.match(driveShelf, /library-pdf-dialog__fullscreen/i);
-  assert.match(driveShelf, /requestFullscreen\(\)/i);
-  assert.match(driveShelf, /fullscreenchange/i);
+  assert.doesNotMatch(driveShelf, /<Link\b/i);
 
   const roadmap = await request("/learn/roadmap", {
     headers: { accept: "text/html", cookie: sessionCookie },

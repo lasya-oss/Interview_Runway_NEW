@@ -16,6 +16,7 @@ export function LibraryMaterialDialog({
   googleClientId = "",
   loginHint = null,
   emptyState,
+  initialOpen = false,
 }: {
   source: LibraryMaterialViewerSource | null;
   title: string;
@@ -27,8 +28,9 @@ export function LibraryMaterialDialog({
   googleClientId?: string;
   loginHint?: string | null;
   emptyState?: ReactNode;
+  initialOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
@@ -146,9 +148,9 @@ export function LibraryMaterialDialog({
                 <h2 id={titleId}>{title}</h2>
                 <p id={descriptionId}>{description}</p>
               </div>
-              <div className="library-pdf-dialog__actions">
+              <div className="library-material-dialog__actions">
                 <button
-                  className="library-pdf-dialog__fullscreen"
+                  className="library-material-dialog__fullscreen"
                   type="button"
                   onClick={toggleFullscreen}
                   aria-label={isFullscreen ? "Exit full screen" : "Open material in full screen"}
@@ -156,7 +158,7 @@ export function LibraryMaterialDialog({
                 >
                   <span aria-hidden="true">⛶</span>
                 </button>
-                <button className="library-pdf-dialog__close" ref={closeRef} type="button" onClick={closeViewer} aria-label="Close material viewer">
+                <button className="library-material-dialog__close" ref={closeRef} type="button" onClick={closeViewer} aria-label="Close material viewer">
                   <span>CLOSE</span><b aria-hidden="true">×</b>
                 </button>
               </div>
