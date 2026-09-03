@@ -10978,6 +10978,28 @@ html[data-second-seat-film="open"] .home-aero-stage {
   line-height: 1.2;
 }
 
+/* Status drawer actions stay compact, centered, and legible in both learner plans. */
+.member-shell .member-status-drawer-content a.member-action-button {
+  min-height: 38px;
+  min-width: 132px;
+  width: max-content;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 9px;
+  color: #fff;
+  font-size: 10px;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.member-shell .member-status-drawer-content a.member-action-button span {
+  color: #fff;
+  line-height: 1;
+}
+
 .member-shell .member-section-heading > a.member-section-action,
 .member-shell .member-material-card b.member-card-action,
 .member-shell .member-review-copy b.member-card-action,
