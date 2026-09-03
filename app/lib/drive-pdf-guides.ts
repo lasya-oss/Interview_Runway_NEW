@@ -13,6 +13,7 @@ export const DRIVE_PDF_GUIDES: readonly DrivePdfGuide[] = [
   { id: "local-operations-final-loop-interview-day-runbook", filename: "operations_final-loop-interview-day-runbook.pdf" },
   { id: "local-operations-technical-baseline-scorecard", filename: "operations_technical-baseline-scorecard.pdf" },
   { id: "local-operations-timed-technical-rehearsal-workbook", filename: "operations_timed-technical-rehearsal-workbook.pdf" },
+  { id: "local-remote-compensation-and-offer-decision-workbook", filename: "remote_compensation-and-offer-decision-workbook.pdf" },
   { id: "1s2Jdj-GBoQ8JW9w4n6CmFBZ4Z6f5fQLO", filename: "sysdesign_url-shortener-walkthrough.pdf" },
   { id: "1ne88LVY1wF7ZWPbB31oo9eTeIPkajRR0", filename: "sysdesign_url-shortener-follow-up-bank.pdf" },
   { id: "1eVxZg3ZBSLdmQY9itOVgLfeke1CD3T-D", filename: "sysdesign_url-shortener-capacity-workbook.pdf" },

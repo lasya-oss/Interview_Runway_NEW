@@ -89,6 +89,7 @@ export const ACTIVE_PDF_FILENAMES = [
   "operations_final-loop-interview-day-runbook.pdf",
   "operations_technical-baseline-scorecard.pdf",
   "operations_timed-technical-rehearsal-workbook.pdf",
+  "remote_compensation-and-offer-decision-workbook.pdf",
   "roadmap_12week.pdf",
   "roadmap_4week.pdf",
 ] as const;
