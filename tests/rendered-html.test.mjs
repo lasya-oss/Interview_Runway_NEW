@@ -460,6 +460,7 @@ test("PDF viewer shows a record header and user-controlled fullscreen option", a
   assert.match(styles, /\.library-material-dialog\s*\{[^}]*inset:\s*0;[^}]*padding:\s*0;/);
   assert.match(styles, /\.library-material-dialog__surface\s*\{[^}]*width:\s*100%;[^}]*height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
   assert.match(styles, /\.library-material-dialog__body\s*>\s*\.library-material-pdf-frame\s*\{[^}]*width:\s*100%;[^}]*min-height:\s*0;/);
+  assert.match(styles, /\.library-material-dialog__body\s*>\s*\.library-material-media\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*max-height:\s*none;/);
   assert.match(styles, /\.library-material-dialog__body:fullscreen\s*\{[^}]*width:\s*100vw;[^}]*height:\s*100dvh;/);
   assert.match(driveShelf, /<div ref=\{viewerRef\} className="library-material-dialog__body">\s*<MaterialViewer/);
   assert.doesNotMatch(driveShelf, /<div className="library-material-viewer">/);
