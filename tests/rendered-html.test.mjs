@@ -411,6 +411,12 @@ test("Supplied narrated mirrors play directly and unsupplied records stay honest
     "sysdesign_notification-system_01.mp4",
     "sysdesign_rate-limiting_01.mp4",
     "sysdesign_url-shortener_01.mp4",
+    "sysdesign_load-balancing_01.mp4",
+    "behavioral_ownership_01.mp4",
+    "behavioral_star-method_01.mp4",
+    "behavioral_failure-answers_01.mp4",
+    "remote_async-collaboration_01.mp4",
+    "behavioral_career-transitions_01.mp4",
   ]);
   for (const filename of narratedFiles) {
     const isLocal = localFiles.includes(filename);
