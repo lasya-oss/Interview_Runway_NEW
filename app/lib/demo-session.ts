@@ -7,6 +7,7 @@ import {
   createFoundationProfile,
   createHumanCalibrationProfile,
   createSecondSeatProfile,
+  learnerPlansForAccess,
   getLearnerAccess,
   getLearnerProgress,
   hasVaultAccess,
@@ -14,6 +15,8 @@ import {
 
 export const DEMO_SESSION_COOKIE = "ir_demo_session";
 export const DEMO_SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
+export const ACTIVE_LEARNER_PLAN_COOKIE = "ir_active_learner_plan";
+export const ACTIVE_LEARNER_PLAN_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 const SESSION_VERSION = 1;
 const MINIMUM_SECRET_LENGTH = 32;
@@ -66,9 +69,9 @@ export async function requireDemoProfile(
 ): Promise<DemoProfile> {
   const state = await resolveWorkspaceProfile();
   const profile = state.profile;
-  // An authenticated owner is always represented by the highest entitled live
-  // plan. This prevents an older demo cookie from replacing account-backed
-  // identity, plan selection, or progress after the user has signed in.
+  // An authenticated owner is always represented by an entitled live plan.
+  // This prevents an older demo cookie from replacing account-backed identity,
+  // plan selection, or progress after the user has signed in.
   if (profile) return profile;
 
   const authenticatedUser = state.user ?? (await requireChatGPTUser(returnTo));
@@ -121,6 +124,9 @@ const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> =
 
   if (!access.vault) {
     return {
+      // An explicit demo session remains a sample workspace. It never
+      // supplies live access because authenticated accounts are only upgraded
+      // through getLearnerAccess above.
       profile,
       user,
       vaultAccess: false,
@@ -129,40 +135,57 @@ const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> =
     };
   }
 
-  if (access.humanCalibration) {
-    return {
-      profile: createHumanCalibrationProfile(
-        user,
-        await getLearnerProgress(user.email, 4),
-      ),
-      user,
-      vaultAccess: true,
-      secondSeatAccess: true,
-      humanCalibrationAccess: true,
-    };
-  }
-
-  if (access.secondSeat) {
-    return {
-      profile: createSecondSeatProfile(
-        user,
-        await getLearnerProgress(user.email, 4),
-      ),
-      user,
-      vaultAccess: true,
-      secondSeatAccess: true,
-      humanCalibrationAccess: false,
-    };
-  }
+  const availablePlans = learnerPlansForAccess(access);
+  const selectedPlan = selectActivePlan(await getActivePlanPreference(), availablePlans);
+  const liveProfile = await createProfileForPlan(user, selectedPlan, availablePlans);
 
   return {
-    profile: createFoundationProfile(user, await getLearnerProgress(user.email)),
+    profile: liveProfile,
     user,
-    vaultAccess: true,
-    secondSeatAccess: false,
-    humanCalibrationAccess: false,
+    vaultAccess: access.vault,
+    secondSeatAccess: access.secondSeat,
+    humanCalibrationAccess: access.humanCalibration,
   };
 });
+
+async function getActivePlanPreference(): Promise<DemoTier | null> {
+  const value = (await cookies()).get(ACTIVE_LEARNER_PLAN_COOKIE)?.value;
+  return isDemoTier(value) ? value : null;
+}
+
+function selectActivePlan(
+  preference: DemoTier | null,
+  availablePlans: readonly DemoTier[],
+): DemoTier {
+  if (preference && availablePlans.includes(preference)) return preference;
+  return availablePlans.at(-1) ?? "foundation";
+}
+
+async function createProfileForPlan(
+  user: ChatGPTUser,
+  plan: DemoTier,
+  availablePlans: readonly DemoTier[],
+): Promise<DemoProfile> {
+  if (plan === "premium") {
+    return createHumanCalibrationProfile(
+      user,
+      await getLearnerProgress(user.email, 4),
+      availablePlans,
+    );
+  }
+  if (plan === "practice") {
+    return createSecondSeatProfile(
+      user,
+      await getLearnerProgress(user.email, 4),
+      availablePlans,
+    );
+  }
+  return createFoundationProfile(
+    user,
+    await getLearnerProgress(user.email),
+    availablePlans,
+  );
+}
 
 async function verifyDemoSession(
   token: string,

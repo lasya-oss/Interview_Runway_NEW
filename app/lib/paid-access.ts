@@ -2,6 +2,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { entitlements, learnerProgress } from "@/db/schema";
 import type { ChatGPTUser } from "@/app/chatgpt-auth";
+import type { DemoTier } from "@/app/lib/demo-data";
 import { isInternalFullAccessEmail } from "@/app/lib/internal-access";
 import { ROADMAP_PLANS, TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
 import {
@@ -26,6 +27,29 @@ export type LearnerAccess = {
   secondSeat: boolean;
   humanCalibration: boolean;
 };
+
+export function isLearnerPlan(value: unknown): value is DemoTier {
+  return value === "foundation" || value === "practice" || value === "premium";
+}
+
+export function learnerPlansForAccess(access: LearnerAccess): DemoTier[] {
+  return [
+    access.vault ? "foundation" : null,
+    access.secondSeat ? "practice" : null,
+    access.humanCalibration ? "premium" : null,
+  ].filter((plan): plan is DemoTier => plan !== null);
+}
+
+export function canAccessLearnerPlan(
+  access: LearnerAccess,
+  plan: DemoTier,
+): boolean {
+  return plan === "foundation"
+    ? access.vault
+    : plan === "practice"
+      ? access.secondSeat
+      : access.humanCalibration;
+}
 
 /**
  * The authenticated Vivid Labs workspace is the internal customer-preview
@@ -380,6 +404,7 @@ function hasNewCompletionActivity(
 export function createFoundationProfile(
   user: ChatGPTUser,
   progress: LearnerProgress,
+  availablePlans: readonly DemoTier[] = ["foundation"],
 ) {
   return createLiveLearnerProfile(user, progress, {
     id: "foundation",
@@ -392,12 +417,14 @@ export function createFoundationProfile(
     practiceAccess: false,
     isSecondSeatLive: false,
     coachingAccess: false,
+    availablePlans,
   });
 }
 
 export function createSecondSeatProfile(
   user: ChatGPTUser,
   progress: LearnerProgress,
+  availablePlans: readonly DemoTier[] = ["practice"],
 ) {
   return createLiveLearnerProfile(user, progress, {
     id: "practice",
@@ -411,12 +438,14 @@ export function createSecondSeatProfile(
     practiceAccess: true,
     isSecondSeatLive: true,
     coachingAccess: false,
+    availablePlans,
   });
 }
 
 export function createHumanCalibrationProfile(
   user: ChatGPTUser,
   progress: LearnerProgress,
+  availablePlans: readonly DemoTier[] = ["premium"],
 ) {
   return createLiveLearnerProfile(user, progress, {
     id: "premium",
@@ -430,6 +459,7 @@ export function createHumanCalibrationProfile(
     practiceAccess: true,
     isSecondSeatLive: true,
     coachingAccess: true,
+    availablePlans,
   });
 }
 
@@ -448,6 +478,7 @@ function createLiveLearnerProfile(
     practiceAccess: boolean;
     isSecondSeatLive: boolean;
     coachingAccess: boolean;
+    availablePlans: readonly DemoTier[];
   },
 ) {
   const displayName = user.fullName || user.displayName;
@@ -466,6 +497,7 @@ function createLiveLearnerProfile(
     firstName,
     initials: initialsFor(displayName),
     email: user.email,
+    availablePlans: config.availablePlans,
     role: "Vivid Labs · authenticated learner",
     target: "Remote engineering roles",
     plan: config.plan,

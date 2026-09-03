@@ -4,6 +4,8 @@ export type DemoProfile = {
   id: DemoTier;
   isLive?: boolean;
   isSecondSeatLive?: boolean;
+  /** Plans the authenticated account may select for QA; demo profiles omit this. */
+  availablePlans?: readonly DemoTier[];
   name: string;
   firstName: string;
   initials: string;

@@ -26,7 +26,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const activeWeek = weekProgress.find((week) => week.status === "in-progress") ?? weekProgress.at(-1);
   const todayKicker = isFreshLearner
     ? `Start here · Week 1 of ${profile.roadmapWeeks}`
-    : `Week ${currentWeek} of ${profile.roadmapWeeks} · ${profile.id === "foundation" ? "Foundation" : profile.id === "practice" ? "Second Seat" : "Calibration"} plan`;
+    : `Week ${currentWeek} of ${profile.roadmapWeeks} · ${profile.id === "foundation" ? "Foundation" : profile.id === "practice" ? "Second Seat" : "Human Calibration"} plan`;
   const planStatus = activeWeek?.status === "completed" ? "Plan complete" : activeWeek ? `Week ${activeWeek.week} active` : "Plan active";
   const weeklyProgressStatus = activeWeek?.status === "completed"
     ? `${completedWeeks} of ${profile.roadmapWeeks} weeks complete`
@@ -50,13 +50,17 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
     .slice(0, 3);
   const emptySignalTitle = profile.id === "foundation"
     ? "Build your first readiness score from your own work."
-    : "Your first practice score is waiting.";
+    : profile.id === "practice"
+      ? "Your first practice score is waiting."
+      : "Your first calibration review is waiting.";
   const emptySignalBody = profile.id === "foundation"
     ? "Complete the next Foundation step to turn your study work into a result you can review."
-    : "Complete one practice round to create a score you can review. Until then, this workspace keeps readiness separate from sample data.";
-  const emptySignalLink = profile.id === "foundation" ? "/pricing" : "/learn/practice";
-  const emptySignalLinkLabel = profile.id === "foundation" ? "See how AI practice builds your score" : "Start your first practice round";
-  const signalLabel = profile.id === "foundation" ? "Foundation progress" : "Second Seat progress";
+    : profile.id === "practice"
+      ? "Complete one practice round to create a score you can review. Until then, this workspace keeps readiness separate from sample data."
+      : "Open the Coach room to review the named gap and calibration agenda. This workspace keeps human coaching evidence distinct from practice scores.";
+  const emptySignalLink = profile.id === "foundation" ? "/pricing" : profile.id === "practice" ? "/learn/practice" : "/learn/coaching";
+  const emptySignalLinkLabel = profile.id === "foundation" ? "See how AI practice builds your score" : profile.id === "practice" ? "Start your first practice round" : "Open the Coach room";
+  const signalLabel = profile.id === "foundation" ? "Foundation progress" : profile.id === "practice" ? "Second Seat progress" : "Human Calibration status";
   const nextTask = isTracked && !isFreshLearner ? roadmap.nextTask : null;
   const nextAction = nextTask?.title ?? profile.nextAction;
   const nextActionMeta = nextTask?.meta ?? profile.nextActionMeta;
@@ -68,7 +72,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const nextActionDescription = describeNextAction(profile, nextTask, isFreshLearner);
   const readinessLabel = profile.id === "foundation"
     ? progress === 100 ? <>Plan<br />complete</> : <>Plan<br />progress</>
-    : <>Readiness<br />score</>;
+    : profile.id === "practice" ? <>Readiness<br />score</> : <>Calibration<br />status</>;
   const completedLabel = isTracked
     ? `${roadmap.completedCount} / ${totalPlanTasks}`
     : profile.id === "practice" ? "8 / 11" : "9 / 10";
@@ -76,8 +80,8 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
     ? isFreshLearner ? "Starts at 0m" : roadmap.focusedSeconds > 0 ? formatFocusedTime(roadmap.focusedSeconds) : "Not tracked yet"
     : profile.id === "practice" ? "4h 38m" : "5h 06m";
   const nextReviewLabel = isTracked
-    ? isFreshLearner
-      ? "After first study step"
+      ? isFreshLearner
+        ? profile.id === "premium" ? "After first calibration step" : "After first study step"
       : roadmap.nextTask ? "After next study step" : "Roadmap complete"
     : "Thu 18:30";
 

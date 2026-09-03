@@ -1428,7 +1428,10 @@ test("live Foundation access takes precedence over a seeded demo cookie", async 
   assert.match(session, /const \[profile, user\] = await Promise\.all\(\[getDemoProfile\(\), getChatGPTUser\(\)\]\);/);
   assert.match(session, /if \(profile\) return profile;/);
   assert.match(session, /getLearnerAccess\(user\.email\)/);
-  assert.match(session, /profile: createFoundationProfile\(user, await getLearnerProgress\(user\.email\)\)/s);
+  assert.match(session, /if \(!access\.vault\)[\s\S]*profile,/);
+  assert.match(session, /authenticated accounts are only upgraded/);
+  assert.match(session, /through getLearnerAccess above/);
+  assert.match(session, /createProfileForPlan\(user, selectedPlan, availablePlans\)/);
 });
 
 test("live Second Seat access selects its own workspace and roadmap", async () => {
@@ -1437,7 +1440,7 @@ test("live Second Seat access selects its own workspace and roadmap", async () =
   const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
   const materialPage = await readFile(new URL("../app/learn/material/[slug]/page.tsx", import.meta.url), "utf8");
 
-  assert.match(session, /if \(access\.secondSeat\)[\s\S]*createSecondSeatProfile\([\s\S]*getLearnerProgress\(user\.email, 4\)/);
+  assert.match(session, /if \(plan === "practice"\)[\s\S]*createSecondSeatProfile\([\s\S]*getLearnerProgress\(user\.email, 4\)/);
   assert.match(paidAccess, /export function createSecondSeatProfile\([\s\S]*roadmapWeeks: 4[\s\S]*plan: "The Second Seat/);
   assert.match(paidAccess, /selectedPlan = roadmapPlanForWeeks\(config\.roadmapWeeks\)/);
   assert.match(shell, /\{isLive \? <FocusTimeTracker profileId=\{profile\.id\} \/> : null\}/);
@@ -1457,7 +1460,7 @@ test("the configured internal domain receives live Human Calibration full access
 
   assert.match(internalAccess, /INTERNAL_FULL_ACCESS_DOMAIN/);
   assert.match(paidAccess, /return \{ vault: true, secondSeat: true, humanCalibration: true \}/);
-  assert.match(session, /if \(access\.humanCalibration\)[\s\S]*createHumanCalibrationProfile\([\s\S]*getLearnerProgress\(user\.email, 4\)/);
+  assert.match(session, /if \(plan === "premium"\)[\s\S]*createHumanCalibrationProfile\([\s\S]*getLearnerProgress\(user\.email, 4\)/);
   assert.match(paidAccess, /export function createHumanCalibrationProfile\([\s\S]*id: "premium"[\s\S]*practiceAccess: true[\s\S]*isSecondSeatLive: true[\s\S]*coachingAccess: true/);
   assert.match(shell, /HUMAN CALIBRATION<br \/>FULL ACCESS ACTIVE/);
   assert.match(shell, /isLive[\s\S]*href: "\/learn\/coaching", label: "Open Coach room"/);
@@ -1465,6 +1468,28 @@ test("the configured internal domain receives live Human Calibration full access
   assert.match(checkoutStore, /hasActiveVaultEntitlement[\s\S]*isInternalFullAccessEmail\(userEmail\)/);
   assert.match(checkoutPage, /isInternalFullAccessEmail\(user\.email\)[\s\S]*redirect\("\/learn"\)/);
   assert.match(viteConfig, /INTERNAL_FULL_ACCESS_DOMAIN: process\.env\.INTERNAL_FULL_ACCESS_DOMAIN \?\? ""/);
+});
+
+test("live paid accounts can switch only among their existing entitled plans", async () => {
+  const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const route = await readFile(new URL("../app/api/learner/plan/route.ts", import.meta.url), "utf8");
+  const actions = await readFile(new URL("../app/components/member-actions.tsx", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+
+  assert.match(paidAccess, /export function learnerPlansForAccess\(access: LearnerAccess\)/);
+  assert.match(paidAccess, /export function canAccessLearnerPlan\(/);
+  assert.match(session, /ACTIVE_LEARNER_PLAN_COOKIE/);
+  assert.match(session, /availablePlans\.includes\(preference\)/);
+  assert.match(session, /createProfileForPlan\([\s\S]*plan === "premium"[\s\S]*plan === "practice"/);
+  assert.match(route, /getLearnerAccess\(user\.email\)/);
+  assert.match(route, /canAccessLearnerPlan\(access, selectedPlan\)/);
+  assert.match(route, /httpOnly: true/);
+  assert.match(route, /ACTIVE_LEARNER_PLAN_MAX_AGE_SECONDS/);
+  assert.match(actions, /fetch\("\/api\/learner\/plan"/);
+  assert.match(actions, /window\.location\.assign\("\/learn"\)/);
+  assert.match(shell, /<LivePlanSwitcher/);
+  assert.match(shell, /profile\.availablePlans/);
 });
 
 test("Foundation demo starts Today with a clean learner state", async () => {

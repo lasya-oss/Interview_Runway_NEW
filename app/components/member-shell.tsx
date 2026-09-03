@@ -7,7 +7,7 @@ import type { DemoProfile } from "@/app/lib/demo-data";
 import { CurrentAccessCard } from "./current-access-card";
 import { RoadmapProgressProvider, RoadmapTrackLabel } from "@/app/learn/roadmap/learner-progress-client";
 import { FocusTimeTracker } from "@/app/learn/focus-time-tracker";
-import { DemoLogoutButton, LiveLogoutButton } from "./member-actions";
+import { DemoLogoutButton, LiveLogoutButton, LivePlanSwitcher } from "./member-actions";
 
 const MEMBER_NAV = [
   { key: "today", href: "/learn", label: "Dashboard", mark: "01", access: "library" },
@@ -54,7 +54,7 @@ export function MemberShell({
     ? { window: "8–12 weeks", signal: "Starting score pending", event: isFreshLearner ? "First study step" : "Weekly review", eventTime: isFreshLearner ? "After start" : "Sun · 18:00" }
     : isSecondSeatWorkspace
       ? { window: "19 days", signal: isFreshLearner ? "Starting score pending" : "78 · practice", event: isFreshLearner ? "First practice round" : "Adaptive mock 08", eventTime: isFreshLearner ? "After start" : "Tue · 20:00" }
-      : { window: "13 days", signal: "84 · coach reviewed", event: "Calibration session", eventTime: "Thu · 18:30" };
+      : { window: "13 days", signal: "84 · coach reviewed", event: "Human Calibration session", eventTime: "Thu · 18:30" };
   const conversion = profile.id === "foundation"
     ? isLive
       ? { href: "/learn/roadmap", label: "Continue Foundation", event: undefined }
@@ -64,10 +64,10 @@ export function MemberShell({
       : isLive
         ? { href: "/learn/coaching", label: "Open Coach room", event: undefined }
         : { href: "/qualify", label: "Check Phase 3 eligibility", event: undefined };
-  const workspaceRoot = isVaultWorkspace ? "Vault" : isSecondSeatWorkspace ? "Second Seat" : "Calibration";
+  const workspaceRoot = isVaultWorkspace ? "Vault" : isSecondSeatWorkspace ? "Second Seat" : "Human Calibration";
   const workspaceTitle = isVaultWorkspace ? "Foundation workspace" : isSecondSeatWorkspace ? "The Second Seat workspace" : "Human Calibration workspace";
   const workspaceSubtitle = isLive ? "Signed-in learner view" : "Preview learner view";
-  const accessLabel = isVaultWorkspace ? (isLive ? "₹799 access active" : "Demo workspace") : isSecondSeatWorkspace ? (isLive ? "₹2,499 access active" : "Demo workspace") : (isLive ? "Calibration access active" : "Demo workspace");
+  const accessLabel = isVaultWorkspace ? (isLive ? "₹799 access active" : "Demo workspace") : isSecondSeatWorkspace ? (isLive ? "₹2,499 access active" : "Demo workspace") : (isLive ? "Human Calibration access active" : "Demo workspace");
 
   return (
     <div className="member-shell" data-member-tier={profile.id} data-member-layout={isVaultWorkspace ? "vault" : isSecondSeatWorkspace ? "second-seat" : "calibration"}>
@@ -127,6 +127,12 @@ export function MemberShell({
               <div><span>Learner data</span><strong>{isLive ? "Account-backed" : "Sample profile"}</strong></div>
             </div>
             <div className="member-vault-header-actions">
+              {isLive && (profile.availablePlans?.length ?? 0) > 1 ? (
+                <LivePlanSwitcher
+                  currentPlan={profile.id}
+                  availablePlans={profile.availablePlans}
+                />
+              ) : null}
               <details className="member-status-drawer" aria-label="Workspace status">
                 <summary className="member-status-drawer-toggle" title="Open workspace status panel">
                   <span className="ops-rail-toggle-icon" aria-hidden="true"><i /><i /><i /></span>
