@@ -5,6 +5,7 @@ import { findDemoById, type DemoProfile, type DemoTier } from "./demo-data";
 import { getChatGPTUser, requireChatGPTUser } from "@/app/chatgpt-auth";
 import {
   createFoundationProfile,
+  createHumanCalibrationProfile,
   createSecondSeatProfile,
   getLearnerAccess,
   getLearnerProgress,
@@ -88,6 +89,7 @@ type WorkspaceProfileState = {
   user: ChatGPTUser | null;
   vaultAccess: boolean;
   secondSeatAccess: boolean;
+  humanCalibrationAccess: boolean;
 };
 
 // Layout and page components both need the learner identity. React's request
@@ -96,12 +98,19 @@ type WorkspaceProfileState = {
 const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> => {
   const [profile, user] = await Promise.all([getDemoProfile(), getChatGPTUser()]);
   if (!user) {
-    return { profile, user: null, vaultAccess: false, secondSeatAccess: false };
+    return {
+      profile,
+      user: null,
+      vaultAccess: false,
+      secondSeatAccess: false,
+      humanCalibrationAccess: false,
+    };
   }
 
   let access: Awaited<ReturnType<typeof getLearnerAccess>> = {
     vault: false,
     secondSeat: false,
+    humanCalibration: false,
   };
   try {
     access = await getLearnerAccess(user.email);
@@ -116,6 +125,20 @@ const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> =
       user,
       vaultAccess: false,
       secondSeatAccess: false,
+      humanCalibrationAccess: false,
+    };
+  }
+
+  if (access.humanCalibration) {
+    return {
+      profile: createHumanCalibrationProfile(
+        user,
+        await getLearnerProgress(user.email, 4),
+      ),
+      user,
+      vaultAccess: true,
+      secondSeatAccess: true,
+      humanCalibrationAccess: true,
     };
   }
 
@@ -128,6 +151,7 @@ const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> =
       user,
       vaultAccess: true,
       secondSeatAccess: true,
+      humanCalibrationAccess: false,
     };
   }
 
@@ -136,6 +160,7 @@ const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> =
     user,
     vaultAccess: true,
     secondSeatAccess: false,
+    humanCalibrationAccess: false,
   };
 });
 

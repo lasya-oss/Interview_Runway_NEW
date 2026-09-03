@@ -2,6 +2,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { entitlements, learnerProgress } from "@/db/schema";
 import type { ChatGPTUser } from "@/app/chatgpt-auth";
+import { isInternalFullAccessEmail } from "@/app/lib/internal-access";
 import { ROADMAP_PLANS, TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
 import {
   dateKeyForTimeZone,
@@ -23,11 +24,19 @@ export type LearnerProgress = {
 export type LearnerAccess = {
   vault: boolean;
   secondSeat: boolean;
+  humanCalibration: boolean;
 };
+
+/**
+ * The authenticated Vivid Labs workspace is the internal customer-preview
+ * cohort. Every account on the explicitly configured internal domain receives
+ * the complete product stack without requiring seeded purchase records.
+ */
+export { isInternalFullAccessEmail };
 
 export function isConfiguredTestFoundationEmail(email: string): boolean {
   const normalizedEmail = normalizeEmail(email);
-  if (!isAllowedTestEmailDomain(normalizedEmail)) return false;
+  if (!isAllowedEmailDomain(normalizedEmail)) return false;
   return configuredTestEmails("TEST_FOUNDATION_EMAILS").includes(normalizedEmail);
 }
 
@@ -38,12 +47,13 @@ export function isConfiguredTestFoundationEmail(email: string): boolean {
  */
 export function isConfiguredTestSecondSeatEmail(email: string): boolean {
   const normalizedEmail = normalizeEmail(email);
-  if (!isAllowedTestEmailDomain(normalizedEmail)) return false;
+  if (!isAllowedEmailDomain(normalizedEmail)) return false;
   return configuredTestEmails("TEST_SECOND_SEAT_EMAILS").includes(normalizedEmail);
 }
 
 export async function hasVaultAccess(email: string): Promise<boolean> {
   if (
+    isInternalFullAccessEmail(email) ||
     isConfiguredTestFoundationEmail(email) ||
     isConfiguredTestSecondSeatEmail(email)
   ) {
@@ -66,6 +76,7 @@ export async function hasVaultAccess(email: string): Promise<boolean> {
 }
 
 export async function hasSecondSeatAccess(email: string): Promise<boolean> {
+  if (isInternalFullAccessEmail(email)) return true;
   if (isConfiguredTestSecondSeatEmail(email)) return true;
   if (!(await hasVaultAccess(email))) return false;
 
@@ -91,10 +102,13 @@ export async function hasSecondSeatAccess(email: string): Promise<boolean> {
  */
 export async function getLearnerAccess(email: string): Promise<LearnerAccess> {
   const normalizedEmail = normalizeEmail(email);
+  if (isInternalFullAccessEmail(normalizedEmail)) {
+    return { vault: true, secondSeat: true, humanCalibration: true };
+  }
   const foundationTestEmail = isConfiguredTestFoundationEmail(normalizedEmail);
   const secondSeatTestEmail = isConfiguredTestSecondSeatEmail(normalizedEmail);
   if (secondSeatTestEmail) {
-    return { vault: true, secondSeat: true };
+    return { vault: true, secondSeat: true, humanCalibration: false };
   }
   const offers = foundationTestEmail ? ["ai-prep"] : ["vault", "ai-prep"];
   const records = await (await getDb())
@@ -113,6 +127,7 @@ export async function getLearnerAccess(email: string): Promise<LearnerAccess> {
   return {
     vault,
     secondSeat: vault && secondSeat,
+    humanCalibration: false,
   };
 }
 
@@ -123,7 +138,7 @@ function configuredTestEmails(key: "TEST_FOUNDATION_EMAILS" | "TEST_SECOND_SEAT_
     .filter(Boolean);
 }
 
-function isAllowedTestEmailDomain(email: string) {
+function isAllowedEmailDomain(email: string) {
   const domain =
     process.env.AUTH_ALLOWED_DOMAIN?.trim().toLowerCase() || DEFAULT_DOMAIN;
   return email.endsWith(`@${domain}`);
@@ -376,6 +391,7 @@ export function createFoundationProfile(
     focus: "Build repeatable technical patterns before adding timed mocks.",
     practiceAccess: false,
     isSecondSeatLive: false,
+    coachingAccess: false,
   });
 }
 
@@ -394,6 +410,26 @@ export function createSecondSeatProfile(
     focus: "Start with one interview-shaped round and use the transcript to choose the next correction.",
     practiceAccess: true,
     isSecondSeatLive: true,
+    coachingAccess: false,
+  });
+}
+
+export function createHumanCalibrationProfile(
+  user: ChatGPTUser,
+  progress: LearnerProgress,
+) {
+  return createLiveLearnerProfile(user, progress, {
+    id: "premium",
+    roadmapWeeks: 4,
+    plan: "Human Calibration · Qualified",
+    planShort: "Human Calibration",
+    fallbackNextAction: "Open your calibration workspace",
+    fallbackNextActionMeta: "Coach review · full access",
+    fallbackNextActionHref: "/learn/coaching",
+    focus: "Use the complete preparation, practice, feedback, and calibration system as one connected workflow.",
+    practiceAccess: true,
+    isSecondSeatLive: true,
+    coachingAccess: true,
   });
 }
 
@@ -401,7 +437,7 @@ function createLiveLearnerProfile(
   user: ChatGPTUser,
   progress: LearnerProgress,
   config: {
-    id: "foundation" | "practice";
+    id: "foundation" | "practice" | "premium";
     roadmapWeeks: RoadmapWeeks;
     plan: string;
     planShort: string;
@@ -411,6 +447,7 @@ function createLiveLearnerProfile(
     focus: string;
     practiceAccess: boolean;
     isSecondSeatLive: boolean;
+    coachingAccess: boolean;
   },
 ) {
   const displayName = user.fullName || user.displayName;
@@ -453,7 +490,7 @@ function createLiveLearnerProfile(
       library: true,
       practice: config.practiceAccess,
       feedback: config.practiceAccess,
-      coaching: false,
+      coaching: config.coachingAccess,
     },
   };
 }

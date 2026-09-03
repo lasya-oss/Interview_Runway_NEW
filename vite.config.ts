@@ -35,6 +35,7 @@ const localBindingConfig = {
     AUTH_ALLOWED_DOMAIN: process.env.AUTH_ALLOWED_DOMAIN ?? "vividlabsai.com",
     AUTH_SESSION_SECRET: process.env.AUTH_SESSION_SECRET ?? "",
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? "",
+    INTERNAL_FULL_ACCESS_DOMAIN: process.env.INTERNAL_FULL_ACCESS_DOMAIN ?? "",
     TEST_FOUNDATION_EMAILS: process.env.TEST_FOUNDATION_EMAILS ?? "",
     TEST_SECOND_SEAT_EMAILS: process.env.TEST_SECOND_SEAT_EMAILS ?? "",
   },

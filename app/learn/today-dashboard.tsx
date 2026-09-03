@@ -239,12 +239,17 @@ function ReviewMaterials({
     : profile.id === "practice"
       ? "Second Seat"
       : "Human Calibration";
+  const liveAccessLabel = profile.id === "foundation"
+    ? "₹799 Foundation"
+    : profile.id === "practice"
+      ? "₹2,499 Second Seat"
+      : "Human Calibration";
 
   return (
     <section className="member-section member-review-materials">
       <div className="member-section-heading">
         <div><p className="member-kicker">{profile.isLive ? `Inside your ${planLabel} plan` : "Inside this demo"}</p><h2>Open the material—not a placeholder.</h2></div>
-        <span>{profile.isLive ? `Included with ${planLabel === "Foundation" ? "₹799 Foundation" : "₹2,499 Second Seat"} access` : "Review editions · human approval pending"}</span>
+        <span>{profile.isLive ? `Included with ${liveAccessLabel} access` : "Review editions · human approval pending"}</span>
       </div>
       <div className="member-review-material-grid">
         {materials.map((material) => (

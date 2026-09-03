@@ -226,6 +226,22 @@ test("application pages stay protected", async () => {
   assert.match(protectedPage.headers.get("location") ?? "", /\/sign-in\?/i);
 });
 
+test("internal full access matches only the exact configured email domain", async () => {
+  const { isInternalFullAccessEmail } = await import(
+    new URL("../app/lib/internal-access.ts", import.meta.url)
+  );
+
+  assert.equal(isInternalFullAccessEmail("lasya@vividlabsai.com", "vividlabsai.com"), true);
+  assert.equal(isInternalFullAccessEmail(" LASYA@VIVIDLABSAI.COM ", " VividLabsAI.com "), true);
+  assert.equal(isInternalFullAccessEmail("lasya@team.vividlabsai.com", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@evilvividlabsai.com", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@vividlabsai.com.evil.test", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("@vividlabsai.com", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@@vividlabsai.com", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@other.example", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@vividlabsai.com", ""), false);
+});
+
 test("R2 replay assets are served without a separate Drive permission", async () => {
   const response = await request(
     "/api/replay-assets/mock_behavioral_customer-integrity_05.mp4.part-00",
@@ -1429,6 +1445,28 @@ test("live Second Seat access selects its own workspace and roadmap", async () =
   assert.match(materialPage, /roadmapPlanForWeeks\(profile\.roadmapWeeks\)/);
 });
 
+test("the configured internal domain receives live Human Calibration full access", async () => {
+  const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const internalAccess = await readFile(new URL("../app/lib/internal-access.ts", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const today = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const checkoutStore = await readFile(new URL("../app/lib/checkout-store.ts", import.meta.url), "utf8");
+  const checkoutPage = await readFile(new URL("../app/checkout/[offer]/page.tsx", import.meta.url), "utf8");
+  const viteConfig = await readFile(new URL("../vite.config.ts", import.meta.url), "utf8");
+
+  assert.match(internalAccess, /INTERNAL_FULL_ACCESS_DOMAIN/);
+  assert.match(paidAccess, /return \{ vault: true, secondSeat: true, humanCalibration: true \}/);
+  assert.match(session, /if \(access\.humanCalibration\)[\s\S]*createHumanCalibrationProfile\([\s\S]*getLearnerProgress\(user\.email, 4\)/);
+  assert.match(paidAccess, /export function createHumanCalibrationProfile\([\s\S]*id: "premium"[\s\S]*practiceAccess: true[\s\S]*isSecondSeatLive: true[\s\S]*coachingAccess: true/);
+  assert.match(shell, /HUMAN CALIBRATION<br \/>FULL ACCESS ACTIVE/);
+  assert.match(shell, /isLive[\s\S]*href: "\/learn\/coaching", label: "Open Coach room"/);
+  assert.match(today, /profile\.id === "practice"[\s\S]*"₹2,499 Second Seat"[\s\S]*"Human Calibration"/);
+  assert.match(checkoutStore, /hasActiveVaultEntitlement[\s\S]*isInternalFullAccessEmail\(userEmail\)/);
+  assert.match(checkoutPage, /isInternalFullAccessEmail\(user\.email\)[\s\S]*redirect\("\/learn"\)/);
+  assert.match(viteConfig, /INTERNAL_FULL_ACCESS_DOMAIN: process\.env\.INTERNAL_FULL_ACCESS_DOMAIN \?\? ""/);
+});
+
 test("Foundation demo starts Today with a clean learner state", async () => {
   const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
   const todayPage = await readFile(new URL("../app/learn/page.tsx", import.meta.url), "utf8");
@@ -1607,7 +1645,7 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(engine, /problemFraming|technicalDepth|tradeoffClarity|communication/);
   assert.match(paidAccess, /isConfiguredTestSecondSeatEmail/);
   assert.match(paidAccess, /TEST_SECOND_SEAT_EMAILS/);
-  assert.match(paidAccess, /return \{ vault: true, secondSeat: true \}/);
+  assert.match(paidAccess, /return \{ vault: true, secondSeat: true, humanCalibration: false \}/);
   assert.match(viteConfig, /TEST_SECOND_SEAT_EMAILS: process\.env\.TEST_SECOND_SEAT_EMAILS \?\? ""/);
   assert.match(store, /secondSeatSessions/);
   assert.match(store, /evaluateSecondSeatSession\(mock, answers\)/);

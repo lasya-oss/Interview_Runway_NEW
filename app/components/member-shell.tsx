@@ -61,7 +61,9 @@ export function MemberShell({
       : { href: "/checkout/vault", label: "Start Vault · ₹799", event: "checkout_started" }
     : profile.id === "practice"
       ? { href: "/second-seat", label: "Review Second Seat access", event: undefined }
-      : { href: "/qualify", label: "Check Phase 3 eligibility", event: undefined };
+      : isLive
+        ? { href: "/learn/coaching", label: "Open Coach room", event: undefined }
+        : { href: "/qualify", label: "Check Phase 3 eligibility", event: undefined };
   const workspaceRoot = isVaultWorkspace ? "Vault" : isSecondSeatWorkspace ? "Second Seat" : "Calibration";
   const workspaceTitle = isVaultWorkspace ? "Foundation workspace" : isSecondSeatWorkspace ? "The Second Seat workspace" : "Human Calibration workspace";
   const workspaceSubtitle = isLive ? "Signed-in learner view" : "Preview learner view";
@@ -222,9 +224,11 @@ function WorkspaceStatusContent({
         </ul>
       </section>
       <p>{profile.isLive
-        ? profile.id === "practice"
-          ? "PAID SECOND SEAT QA<br />₹2,499 ACCESS ACTIVE"
-          : "PAID FOUNDATION QA<br />₹799 ACCESS ACTIVE"
+        ? profile.id === "premium"
+          ? "HUMAN CALIBRATION<br />FULL ACCESS ACTIVE"
+          : profile.id === "practice"
+            ? "PAID SECOND SEAT QA<br />₹2,499 ACCESS ACTIVE"
+            : "PAID FOUNDATION QA<br />₹799 ACCESS ACTIVE"
         : "DEMO WORKSPACE<br />NO PURCHASE REQUIRED"}</p>
     </>
   );

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireChatGPTUser } from "@/app/chatgpt-auth";
 import { Brand } from "@/app/components/site-chrome";
 import { OFFERS } from "@/app/lib/site-data";
+import { isInternalFullAccessEmail } from "@/app/lib/paid-access";
 import {
   getPaddleClientToken,
   paddleEnvironment,
@@ -25,7 +26,8 @@ export default async function CheckoutPage({
   const { offer } = await params;
   if (offer !== "vault") notFound();
 
-  await requireChatGPTUser("/checkout/vault");
+  const user = await requireChatGPTUser("/checkout/vault");
+  if (isInternalFullAccessEmail(user.email)) redirect("/learn");
   const vault = OFFERS.vault;
   const clientToken = getPaddleClientToken();
 
