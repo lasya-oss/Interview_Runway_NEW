@@ -485,12 +485,42 @@ test("low-information Library PDFs are archived and excluded from the active cat
   ];
 
   const activePdfNames = selection.match(/export const ACTIVE_PDF_FILENAMES = \[([\s\S]*?)\] as const/)?.[1].match(/"([^"]+)"/g) ?? [];
-  assert.equal(activePdfNames.length, 70);
+  assert.equal(activePdfNames.length, 74);
   for (const filename of archivedNames) {
     assert.doesNotMatch(selection, new RegExp(`\\"${filename.replace(".", "\\.")}\\"`));
     assert.equal(existsSync(new URL(`../public/pdf-guides/${filename}`, import.meta.url)), false, filename);
     assert.equal(existsSync(new URL(`../library-archive/pdf-guides/${filename}`, import.meta.url)), true, filename);
   }
+});
+
+test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable", async () => {
+  const filenames = [
+    "career_target-role-evidence-map.pdf",
+    "operations_technical-baseline-scorecard.pdf",
+    "company_interview-loop-gap-map.pdf",
+    "operations_evidence-comparison-correction-workbook.pdf",
+  ];
+  const selection = await readFile(new URL("../app/lib/active-library-selection.ts", import.meta.url), "utf8");
+  const pdfManifest = await readFile(new URL("../app/lib/drive-pdf-guides.ts", import.meta.url), "utf8");
+  const roadmap = await readFile(new URL("../app/lib/roadmap-data.ts", import.meta.url), "utf8");
+  const libraryPage = await readFile(new URL("../app/learn/library/page.tsx", import.meta.url), "utf8");
+  const libraryClient = await readFile(new URL("../app/learn/library/library-client.tsx", import.meta.url), "utf8");
+  const pdfShelf = await readFile(new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url), "utf8");
+
+  for (const filename of filenames) {
+    assert.equal(existsSync(new URL(`../public/pdf-guides/${filename}`, import.meta.url)), true, filename);
+    assert.equal((selection.match(new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length, 1, filename);
+    assert.equal((pdfManifest.match(new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length, 1, filename);
+    assert.match(roadmap, new RegExp(`pdfLibraryHref\\(\\"${filename.replace(".", "\\.")}\\"\\)`));
+  }
+
+  assert.match(roadmap, /"12w-9-map": pdfLibraryHref\("company_interview-loop-gap-map\.pdf"\)/);
+  assert.match(roadmap, /"12w-9-gaps": pdfLibraryHref\("company_interview-loop-gap-map\.pdf"\)/);
+  assert.match(roadmap, /"12w-4-frame": "\/learn\/library\/material\/template-system-design-canvas-docx-vnkzbt0l"/);
+  assert.match(roadmap, /"12w-8-linkedin": "\/learn\/library\/material\/template-linkedin-profile-docx-cyog_vzk"/);
+  assert.match(libraryPage, /requestedPdf && isActivePdfFilename\(requestedPdf\)/);
+  assert.match(libraryClient, /initialFilename=\{initialPdfFilename\}/);
+  assert.match(pdfShelf, /guides\.find\(\(guide\) => guide\.filename === initialFilename\)/);
 });
 
 const coreRoutes = [
@@ -1001,9 +1031,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const vaultRoadmapHtml = await vaultRoadmap.text();
   const vaultRoadmapText = visibleText(vaultRoadmapHtml);
   assert.equal((vaultRoadmapHtml.match(/roadmap-week roadmap-week--/g) ?? []).length, 12);
-  assert.equal((vaultRoadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 7);
-  assert.equal((vaultRoadmapText.match(/View in Library/g) ?? []).length, 7);
-  assert.equal((vaultRoadmapText.match(/No matching material/g) ?? []).length, 17);
+  assert.equal((vaultRoadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 18);
+  assert.equal((vaultRoadmapText.match(/View in Library/g) ?? []).length, 18);
+  assert.equal((vaultRoadmapText.match(/No matching material/g) ?? []).length, 6);
   for (const slug of [
     "sliding-window",
     "graph-traversal",

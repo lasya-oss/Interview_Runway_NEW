@@ -11,11 +11,15 @@ import {
 export function PdfGuideShelf({
   guides,
   startNumber,
+  initialFilename = null,
 }: {
   guides: readonly DrivePdfGuide[];
   startNumber: number;
+  initialFilename?: string | null;
 }) {
-  const [activeGuide, setActiveGuide] = useState<DrivePdfGuide | null>(null);
+  const [activeGuide, setActiveGuide] = useState<DrivePdfGuide | null>(() => (
+    initialFilename ? guides.find((guide) => guide.filename === initialFilename) ?? null : null
+  ));
   const [isFullscreen, setIsFullscreen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
