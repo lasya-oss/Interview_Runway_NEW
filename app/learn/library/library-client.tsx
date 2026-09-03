@@ -64,7 +64,10 @@ function materialOpenLabel(material: LearningMaterial, unlocked: boolean, isLive
 }
 
 function isPreviewContentUnavailable(material: LearningMaterial, unlocked: boolean, isLive: boolean) {
-  return unlocked && isLive && material.availability === "preview" && !material.demoAsset;
+  // Live Library actions must never send an entitled learner to the generic
+  // decision-lab shell when the catalog has no supplied source asset. Demo
+  // profiles still use that shell as their representative sample experience.
+  return unlocked && isLive && !material.demoAsset;
 }
 
 export function LibraryClient({

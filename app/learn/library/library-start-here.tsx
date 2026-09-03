@@ -112,6 +112,7 @@ type StartHereRecord = {
   href: string;
   action: string;
   external?: boolean;
+  contentUnavailable?: boolean;
 };
 
 function domainForLibraryRecord(category: string, filename = "", context = ""): StartHereDomain | null {
@@ -171,6 +172,7 @@ function recordFromLearningMaterial(material: LearningMaterial): StartHereRecord
     href: hasDirectAsset ? material.demoAsset!.href : `/learn/material/${material.slug}`,
     action: hasDirectAsset ? "Open actual content" : "Open lesson",
     external: hasDirectAsset,
+    contentUnavailable: !hasDirectAsset,
   };
 }
 
@@ -383,9 +385,16 @@ export function VaultStartHere({
                             <small>{record.category} · {record.format}</small>
                             <h4>{record.title}</h4>
                             <p>{record.description}</p>
-                            <Link className="library-start-here__resource-action" href={record.href} target={record.external ? "_blank" : undefined} rel={record.external ? "noreferrer" : undefined}>
-                              {record.action} <span aria-hidden="true">↗</span>
-                            </Link>
+                            {isLive && record.contentUnavailable ? (
+                              <div className="library-record-content-unavailable" role="status" aria-label={`${record.title} content unavailable`}>
+                                <strong>Content unavailable</strong>
+                                <small>Source material not supplied yet</small>
+                              </div>
+                            ) : (
+                              <Link className="library-start-here__resource-action" href={record.href} target={record.external ? "_blank" : undefined} rel={record.external ? "noreferrer" : undefined}>
+                                {record.action} <span aria-hidden="true">↗</span>
+                              </Link>
+                            )}
                           </article>
                         ))}
                       </div>

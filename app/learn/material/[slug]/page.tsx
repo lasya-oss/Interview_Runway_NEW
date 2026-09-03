@@ -237,7 +237,10 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
       ? "Included with paid Foundation"
       : "Vault preview · review pending"
     : `Sample in ${tierLabel(material.tier)}`;
-  const contentUnavailable = profile.isLive === true && material.availability === "preview" && !material.demoAsset;
+  // A live learner must never be shown the representative decision-lab shell
+  // for a catalog entry that has no supplied source asset. Demo profiles retain
+  // the shell because it is their intentional sample experience.
+  const contentUnavailable = profile.isLive === true && !material.demoAsset;
 
   return (
       <article className="member-page material-workspace">

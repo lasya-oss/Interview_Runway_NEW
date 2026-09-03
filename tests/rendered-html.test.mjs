@@ -331,6 +331,10 @@ test("Library content actions never point at missing assets", async () => {
     new URL("../app/learn/library/library-client.tsx", import.meta.url),
     "utf8",
   );
+  const libraryStartHere = await readFile(
+    new URL("../app/learn/library/library-start-here.tsx", import.meta.url),
+    "utf8",
+  );
   const materialPage = await readFile(
     new URL("../app/learn/material/[slug]/page.tsx", import.meta.url),
     "utf8",
@@ -343,9 +347,14 @@ test("Library content actions never point at missing assets", async () => {
   }
 
   assert.match(libraryClient, /isPreviewContentUnavailable/i);
+  assert.match(libraryClient, /isLive && !material\.demoAsset/i);
   assert.match(libraryClient, /className="library-record-content-unavailable"/i);
   assert.match(libraryClient, /Source material not supplied yet/i);
+  assert.match(libraryClient, /generic[\s\S]+decision-lab shell/i);
+  assert.match(libraryStartHere, /contentUnavailable\?: boolean/i);
+  assert.match(libraryStartHere, /isLive && record\.contentUnavailable/i);
   assert.match(materialPage, /contentUnavailable/i);
+  assert.match(materialPage, /profile\.isLive === true && !material\.demoAsset/i);
   assert.match(materialPage, /source material for this preview has not been supplied yet/i);
 });
 
