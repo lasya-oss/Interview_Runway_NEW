@@ -73,6 +73,7 @@ export const ACTIVE_PDF_FILENAMES = [
   "dsa_two-pointers.pdf",
   "dsa_union-find.pdf",
   "dsa_bfs-problem-ladder.pdf",
+  "dsa_traversal-decision-practice-workbook.pdf",
   "dsa_binary-search-problem-ladder.pdf",
   "dsa_dynamic-programming-1d-problem-ladder.pdf",
   "dsa_sliding-window-problem-ladder.pdf",

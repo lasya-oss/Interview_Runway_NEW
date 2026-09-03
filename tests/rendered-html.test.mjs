@@ -523,7 +523,7 @@ test("low-information Library PDFs are archived and excluded from the active cat
   ];
 
   const activePdfNames = selection.match(/export const ACTIVE_PDF_FILENAMES = \[([\s\S]*?)\] as const/)?.[1].match(/"([^"]+)"/g) ?? [];
-  assert.equal(activePdfNames.length, 76);
+  assert.equal(activePdfNames.length, 77);
   for (const filename of archivedNames) {
     assert.doesNotMatch(selection, new RegExp(`\\"${filename.replace(".", "\\.")}\\"`));
     assert.equal(existsSync(new URL(`../public/pdf-guides/${filename}`, import.meta.url)), false, filename);
@@ -534,6 +534,7 @@ test("low-information Library PDFs are archived and excluded from the active cat
 test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable", async () => {
   const filenames = [
     "career_target-role-evidence-map.pdf",
+    "dsa_traversal-decision-practice-workbook.pdf",
     "operations_technical-baseline-scorecard.pdf",
     "company_interview-loop-gap-map.pdf",
     "operations_evidence-comparison-correction-workbook.pdf",
@@ -556,6 +557,7 @@ test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable",
 
   assert.match(roadmap, /"12w-9-map": pdfLibraryHref\("company_interview-loop-gap-map\.pdf"\)/);
   assert.match(roadmap, /"12w-9-gaps": pdfLibraryHref\("company_interview-loop-gap-map\.pdf"\)/);
+  assert.match(roadmap, /"12w-3-practice": pdfLibraryHref\("dsa_traversal-decision-practice-workbook\.pdf"\)/);
   assert.match(roadmap, /"12w-10-coding": pdfLibraryHref\("operations_timed-technical-rehearsal-workbook\.pdf"\)/);
   assert.match(roadmap, /"12w-10-design": pdfLibraryHref\("operations_timed-technical-rehearsal-workbook\.pdf"\)/);
   assert.match(roadmap, /"12w-11-correct": pdfLibraryHref\("operations_evidence-comparison-correction-workbook\.pdf"\)/);
@@ -1076,9 +1078,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const vaultRoadmapHtml = await vaultRoadmap.text();
   const vaultRoadmapText = visibleText(vaultRoadmapHtml);
   assert.equal((vaultRoadmapHtml.match(/roadmap-week roadmap-week--/g) ?? []).length, 12);
-  assert.equal((vaultRoadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 23);
-  assert.equal((vaultRoadmapText.match(/View in Library/g) ?? []).length, 23);
-  assert.equal((vaultRoadmapText.match(/No matching material/g) ?? []).length, 1);
+  assert.equal((vaultRoadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 24);
+  assert.equal((vaultRoadmapText.match(/View in Library/g) ?? []).length, 24);
+  assert.equal((vaultRoadmapText.match(/No matching material/g) ?? []).length, 0);
   for (const slug of [
     "sliding-window",
     "graph-traversal",
@@ -1091,6 +1093,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
     assert.match(vaultRoadmapHtml, new RegExp(`href=["'][^"']*/learn/material/${slug}["']`, "i"), slug);
   }
   for (const filename of [
+    "dsa_traversal-decision-practice-workbook.pdf",
     "operations_timed-technical-rehearsal-workbook.pdf",
     "operations_evidence-comparison-correction-workbook.pdf",
     "operations_final-loop-interview-day-runbook.pdf",

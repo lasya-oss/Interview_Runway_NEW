@@ -8,6 +8,7 @@ export type DrivePdfGuide = {
 export const DRIVE_PDF_GUIDES: readonly DrivePdfGuide[] = [
   { id: "local-career-target-role-evidence-map", filename: "career_target-role-evidence-map.pdf" },
   { id: "local-company-interview-loop-gap-map", filename: "company_interview-loop-gap-map.pdf" },
+  { id: "local-dsa-traversal-decision-practice-workbook", filename: "dsa_traversal-decision-practice-workbook.pdf" },
   { id: "local-operations-evidence-comparison-correction-workbook", filename: "operations_evidence-comparison-correction-workbook.pdf" },
   { id: "local-operations-final-loop-interview-day-runbook", filename: "operations_final-loop-interview-day-runbook.pdf" },
   { id: "local-operations-technical-baseline-scorecard", filename: "operations_technical-baseline-scorecard.pdf" },
