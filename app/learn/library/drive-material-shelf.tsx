@@ -8,6 +8,7 @@ import {
   type DriveMaterial,
 } from "@/app/lib/drive-materials";
 import { LibraryMaterialDialog } from "./library-material-dialog";
+import { LIBRARY_OPEN_LABEL } from "./library-copy";
 import { driveMaterialViewerSource } from "./library-material-source";
 
 export function DriveMaterialShelf({
@@ -61,7 +62,7 @@ export function DriveMaterialShelf({
                   title={title}
                   eyebrow={`${category} · ${kind}`}
                   description="Open the material here without leaving InterviewRunway."
-                  buttonLabel="Open"
+                  buttonLabel={LIBRARY_OPEN_LABEL}
                   buttonClassName="library-record-open"
                   buttonAriaLabel={`Open ${title} inside InterviewRunway`}
                   googleClientId={googleClientId}

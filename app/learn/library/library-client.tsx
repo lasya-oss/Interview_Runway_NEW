@@ -13,6 +13,7 @@ import type { DriveMaterial } from "@/app/lib/drive-materials";
 import type { LibraryCategorySummary, LibraryCatalog } from "./library-catalog";
 import { DriveMaterialShelf } from "./drive-material-shelf";
 import { LibraryMaterialDialog } from "./library-material-dialog";
+import { LIBRARY_OPEN_LABEL } from "./library-copy";
 import { learningMaterialViewerSource } from "./library-material-source";
 import { VaultStartHere } from "./library-start-here";
 import { PdfGuideShelf } from "./pdf-guide-shelf";
@@ -57,12 +58,9 @@ function materialAccessLabel(material: LearningMaterial, unlocked: boolean, isLi
   return `Included with ${accessLabel(material.tier)}`;
 }
 
-function materialOpenLabel(material: LearningMaterial, unlocked: boolean, isLive: boolean) {
+function materialOpenLabel(unlocked: boolean) {
   if (!unlocked) return "Compare access";
-  if (isLive && material.tier === "foundation") {
-    return material.availability === "included" ? "Open lesson" : "Open preview";
-  }
-  return "Open sample";
+  return LIBRARY_OPEN_LABEL;
 }
 
 function isPreviewContentUnavailable(material: LearningMaterial, unlocked: boolean, isLive: boolean) {
@@ -210,7 +208,7 @@ export function LibraryClient({
                       title={material.title}
                       eyebrow={`${material.category} · ${material.format}`}
                       description="Open the material here without leaving InterviewRunway."
-                      buttonLabel="Open actual content"
+                      buttonLabel={LIBRARY_OPEN_LABEL}
                       googleClientId={googleClientId}
                       loginHint={loginHint}
                     />
@@ -221,7 +219,7 @@ export function LibraryClient({
                         title={material.title}
                         eyebrow={`${material.category} · ${material.format}`}
                         description="This representative sample opens inside InterviewRunway."
-                        buttonLabel={materialOpenLabel(material, unlocked, isLive)}
+                        buttonLabel={materialOpenLabel(unlocked)}
                         googleClientId={googleClientId}
                         loginHint={loginHint}
                         emptyState={
@@ -232,7 +230,7 @@ export function LibraryClient({
                         }
                       />
                     ) : (
-                      <Link className="library-record-action-button" href="/pricing">{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
+                      <Link className="library-record-action-button" href="/pricing">{materialOpenLabel(unlocked)} <span aria-hidden="true">↗</span></Link>
                     )
                   )}
                 </div>

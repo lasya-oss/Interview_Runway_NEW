@@ -15,6 +15,7 @@ import {
 import type { LearningMaterial } from "@/app/lib/demo-data";
 import type { LibraryCatalog } from "./library-catalog";
 import { LibraryMaterialDialog } from "./library-material-dialog";
+import { LIBRARY_OPEN_LABEL } from "./library-copy";
 import {
   driveMaterialViewerSource,
   drivePdfViewerSource,
@@ -172,7 +173,7 @@ function recordFromLearningMaterial(material: LearningMaterial): StartHereRecord
     format: material.format,
     level: levelFromLearningMaterial(material),
     domain,
-    action: hasDirectAsset ? "Open actual content" : "Open lesson",
+    action: LIBRARY_OPEN_LABEL,
     contentUnavailable: !hasDirectAsset,
     viewerSource: learningMaterialViewerSource(material),
   };
@@ -190,7 +191,7 @@ function recordFromPdfGuide(guide: DrivePdfGuide): StartHereRecord | null {
     format: "PDF guide",
     level: levelFromFilename(guide.filename, "pdf"),
     domain,
-    action: "Open guide",
+    action: LIBRARY_OPEN_LABEL,
     viewerSource: drivePdfViewerSource(guide, drivePdfTitle(guide.filename)),
   };
 }
@@ -208,7 +209,7 @@ function recordFromDriveMaterial(material: DriveMaterial): StartHereRecord | nul
     format: kind,
     level: levelFromFilename(material.filename, material.kind === "template" ? "template" : "narrated"),
     domain,
-    action: material.kind === "template" ? "Open template" : "Open explainer",
+    action: LIBRARY_OPEN_LABEL,
     viewerSource: driveMaterialViewerSource(material, driveMaterialTitle(material.filename)),
   };
 }

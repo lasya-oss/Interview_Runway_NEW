@@ -6,6 +6,7 @@ import {
   type DrivePdfGuide,
 } from "@/app/lib/drive-pdf-guides";
 import { LibraryMaterialDialog } from "./library-material-dialog";
+import { LIBRARY_OPEN_LABEL } from "./library-copy";
 import { drivePdfViewerSource } from "./library-material-source";
 
 export function PdfGuideShelf({
@@ -41,7 +42,7 @@ export function PdfGuideShelf({
                   title={title}
                   eyebrow={`${category} · PDF guide`}
                   description="Open the guide here without leaving InterviewRunway."
-                  buttonLabel="Open guide"
+                  buttonLabel={LIBRARY_OPEN_LABEL}
                   buttonClassName="library-record-open"
                   buttonAriaLabel={`Open ${title} inside InterviewRunway`}
                   initialOpen={initialFilename === guide.filename}

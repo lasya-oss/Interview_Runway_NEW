@@ -501,7 +501,8 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.doesNotMatch(libraryStartHere, /Select a role or domain/i);
   assert.match(libraryClient, /learningMaterialViewerSource\(material\)/i);
   assert.match(libraryClient, /LibraryMaterialDialog/i);
-  assert.match(libraryClient, /Open actual content/i);
+  assert.match(libraryClient, /LIBRARY_OPEN_LABEL/);
+  assert.doesNotMatch(libraryClient, /Open (?:actual content|lesson|preview|sample)/i);
   assert.match(materialViewer, /DriveReplayPlayer/i);
   assert.match(materialViewer, /mediaType=\{displayKind\}/i);
   assert.match(materialViewer, /isMediaKind\(displayKind\)/i);
@@ -512,7 +513,8 @@ test("Library categories expose filtered records and real content viewers", asyn
   const unavailableFallback = materialViewer.indexOf("library-material-content-unavailable", protectedViewerBranch);
   assert.ok(protectedViewerBranch >= 0, "protected media branch should exist");
   assert.ok(protectedViewer >= 0 && protectedViewer < unavailableFallback, "protected media should be selected before unavailable fallback");
-  assert.match(libraryStartHere, /action: material\.kind === "template" \? "Open template" : "Open explainer",/i);
+  assert.match(libraryStartHere, /action: LIBRARY_OPEN_LABEL,/i);
+  assert.doesNotMatch(libraryStartHere, /Open (?:actual content|lesson|guide|template|explainer)/i);
   assert.match(libraryStartHere, /driveMaterialViewerSource\(material/i);
   assert.match(driveReplayPlayer, /mediaType\?: "video" \| "audio"/i);
   assert.match(driveReplayPlayer, /<audio className="library-material-audio-player"/i);
