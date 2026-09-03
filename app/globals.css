@@ -10791,6 +10791,35 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .member-action-button--dark:hover,
 .member-action-button--dark:focus-visible { color: #fff; background: linear-gradient(135deg, #e65b26, #d95422); border-color: #d95422; }
 
+.library-record-content-unavailable {
+  min-height: 42px;
+  width: max-content;
+  max-width: 190px;
+  margin-top: 13px;
+  padding: 7px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  border: 1px solid rgba(117,137,143,.3);
+  border-radius: 10px;
+  color: #657981;
+  background: rgba(226,234,232,.72);
+  font-size: 9px;
+  line-height: 1.15;
+  cursor: not-allowed;
+}
+
+.library-record-content-unavailable strong { color: #536970; font-weight: 750; }
+.library-record-content-unavailable small { color: #819197; font-size: 7px; }
+
+.material-stage--unavailable { justify-content: flex-start; }
+.material-content-unavailable { max-width: 720px; margin: auto 0; display: grid; gap: 14px; }
+.material-content-unavailable > p { margin: 0; color: var(--afterburner); font-family: var(--font-mono); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
+.material-content-unavailable h2 { margin: 0; font-family: var(--font-display); font-size: clamp(2rem, 3.5vw, 3.6rem); font-weight: 550; line-height: 1.04; letter-spacing: -.052em; }
+.material-content-unavailable > span { max-width: 560px; color: #a9bbc2; font-size: 13px; line-height: 1.55; }
+.material-content-unavailable a { margin-top: 4px; justify-self: start; }
+
 .member-topbar-vault .member-vault-header-actions > a.member-header-action-button {
   min-height: 34px;
   padding: 0 12px;
@@ -10977,6 +11006,17 @@ html[data-second-seat-film="open"] .home-aero-stage {
   font-weight: 730;
   line-height: 1.2;
 }
+
+.member-shell .library-record-content-unavailable {
+  min-height: 40px;
+  min-width: 146px;
+  margin-top: 13px;
+  padding-inline: 12px;
+  border-radius: 9px;
+  font-size: clamp(10px, .7vw, 12px);
+}
+
+.member-shell .library-record-content-unavailable small { font-size: 8px; }
 
 /* Status drawer actions stay compact, centered, and legible in both learner plans. */
 .member-shell .member-status-drawer-content a.member-action-button {

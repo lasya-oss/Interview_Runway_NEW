@@ -325,6 +325,30 @@ test("Vault template and explainer actions open first-party inline PDF previews"
   }
 });
 
+test("Library content actions never point at missing assets", async () => {
+  const demoData = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+  const materialPage = await readFile(
+    new URL("../app/learn/material/[slug]/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const assetHrefs = [...demoData.matchAll(/demoAsset:\s*\{\s*href:\s*"([^"]+)"/g)].map((match) => match[1]);
+
+  assert.ok(assetHrefs.length > 0, "learning materials should expose at least one real preview asset");
+  for (const href of assetHrefs) {
+    assert.ok(existsSync(new URL(`../public${href}`, import.meta.url)), `missing first-party preview asset: ${href}`);
+  }
+
+  assert.match(libraryClient, /isPreviewContentUnavailable/i);
+  assert.match(libraryClient, /className="library-record-content-unavailable"/i);
+  assert.match(libraryClient, /Source material not supplied yet/i);
+  assert.match(materialPage, /contentUnavailable/i);
+  assert.match(materialPage, /source material for this preview has not been supplied yet/i);
+});
+
 test("PDF viewer shows a record header and user-controlled fullscreen option", async () => {
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const pdfShelf = await readFile(

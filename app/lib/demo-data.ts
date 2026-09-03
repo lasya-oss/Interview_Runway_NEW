@@ -237,7 +237,6 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Week 2",
     progress: 0,
-    demoAsset: { href: "/pdf-guides/behavioral_star-template.pdf", label: "Open the Vault story template" },
   },
   {
     slug: "remote-compensation",
@@ -355,7 +354,6 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Week 3",
     progress: 20,
-    demoAsset: { href: "/pdf-guides/behavioral_failure-answer-lab.pdf", label: "Open the Vault ownership lab" },
   },
   {
     slug: "us-ats-resume",
@@ -372,7 +370,6 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Setup",
     progress: 0,
-    demoAsset: { href: "/pdf-guides/career_ats-resume.pdf", label: "Open the Vault resume template" },
   },
   {
     slug: "remote-offer-matrix",

@@ -63,6 +63,10 @@ function materialOpenLabel(material: LearningMaterial, unlocked: boolean, isLive
   return "Open sample";
 }
 
+function isPreviewContentUnavailable(material: LearningMaterial, unlocked: boolean, isLive: boolean) {
+  return unlocked && isLive && material.availability === "preview" && !material.demoAsset;
+}
+
 export function LibraryClient({
   profileId,
   isLive = false,
@@ -170,7 +174,8 @@ export function LibraryClient({
         <div className="library-record-list">
           {results.map((material) => {
             const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
-            const hasDirectAsset = unlocked && material.demoAsset;
+            const hasDirectAsset = unlocked ? material.demoAsset : null;
+            const contentUnavailable = isPreviewContentUnavailable(material, unlocked, isLive);
             return (
               <article className={`library-record ${unlocked ? "is-unlocked" : "is-locked"}`} key={material.slug}>
                 <span className="library-record-number">{material.number}</span>
@@ -185,7 +190,16 @@ export function LibraryClient({
                   <small>{material.reviewed}<br />{material.roadmap}</small>
                   <b>{materialAccessLabel(material, unlocked, isLive)}</b>
                   {unlocked && material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
-                  {hasDirectAsset ? (
+                  {contentUnavailable ? (
+                    <div
+                      className="library-record-content-unavailable"
+                      role="status"
+                      aria-label={`${material.title} content unavailable`}
+                    >
+                      <strong>Content unavailable</strong>
+                      <small>Source material not supplied yet</small>
+                    </div>
+                  ) : hasDirectAsset ? (
                     <a className="library-record-action-button" href={material.demoAsset.href} target="_blank" rel="noreferrer">
                       Open actual content <span aria-hidden="true">↗</span>
                     </a>

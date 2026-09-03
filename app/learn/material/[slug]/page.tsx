@@ -237,6 +237,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
       ? "Included with paid Foundation"
       : "Vault preview · review pending"
     : `Sample in ${tierLabel(material.tier)}`;
+  const contentUnavailable = profile.isLive === true && material.availability === "preview" && !material.demoAsset;
 
   return (
       <article className="member-page material-workspace">
@@ -258,13 +259,24 @@ export default async function MaterialPage({ params }: { params: Promise<{ slug:
         </header>
 
         <div className="material-layout">
-          <section className="material-stage" aria-labelledby="material-stage-title">
-            <div className="material-stage-top"><span>Decision lab / {material.number}</span><b>{profile.isLive ? liveMaterialState : "Sample, not a published lesson"}</b></div>
-            <div className="material-stage-visual" aria-hidden="true"><i /><i /><i /><span /></div>
-            <p>Decision to make</p>
-            <h2 id="material-stage-title">{detail.decision}</h2>
-            <div className="material-stage-controls"><span>00:00</span><i><b /></i><span>{material.duration}</span></div>
-            {hasCompletionAction && linkedTask ? <StudyProgressButton profileId={profile.id} taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
+          <section className={`material-stage${contentUnavailable ? " material-stage--unavailable" : ""}`} aria-labelledby="material-stage-title">
+            <div className="material-stage-top"><span>{contentUnavailable ? "Material status / " : "Decision lab / "}{material.number}</span><b>{contentUnavailable ? "Source material not supplied" : profile.isLive ? liveMaterialState : "Sample, not a published lesson"}</b></div>
+            {contentUnavailable ? (
+              <div className="material-content-unavailable" role="status">
+                <p>Preview unavailable</p>
+                <h2 id="material-stage-title">The source material for this preview has not been supplied yet.</h2>
+                <span>InterviewRunway is not showing placeholder content in its place. Return to the Library after the source file is provided.</span>
+                <Link className="member-primary-button" href="/learn/library">Back to Library <span aria-hidden="true">↗</span></Link>
+              </div>
+            ) : (
+              <>
+                <div className="material-stage-visual" aria-hidden="true"><i /><i /><i /><span /></div>
+                <p>Decision to make</p>
+                <h2 id="material-stage-title">{detail.decision}</h2>
+                <div className="material-stage-controls"><span>00:00</span><i><b /></i><span>{material.duration}</span></div>
+                {hasCompletionAction && linkedTask ? <StudyProgressButton profileId={profile.id} taskId={linkedTask.id} initiallyCompleted={profile.completedTaskIds?.includes(linkedTask.id) === true} /> : null}
+              </>
+            )}
           </section>
 
           <aside className="material-notes">
