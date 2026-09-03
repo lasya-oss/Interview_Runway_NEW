@@ -404,7 +404,12 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(materialViewer, /mediaType=\{displayKind\}/i);
   assert.match(materialViewer, /displayKind === "video" \|\| displayKind === "audio"/i);
   assert.match(materialViewer, /companionPdfUrl/i);
-  assert.match(materialViewer, /Prefer that companion/i);
+  assert.match(materialViewer, /Builds without protected Drive playback/i);
+  const protectedViewerBranch = materialViewer.indexOf('if (!assetUrl && googleClientId && (displayKind === "video" || displayKind === "audio"))');
+  const protectedViewer = materialViewer.indexOf("<DriveReplayPlayer", protectedViewerBranch);
+  const companionFallback = materialViewer.indexOf("const companionPdfUrl", protectedViewerBranch);
+  assert.ok(protectedViewerBranch >= 0, "protected media branch should exist");
+  assert.ok(protectedViewer >= 0 && protectedViewer < companionFallback, "protected media should be selected before transcript fallback");
   assert.match(libraryStartHere, /action: material\.kind === "template" \? "Open template" : "Open explainer",\s*external: true,/i);
   assert.match(driveReplayPlayer, /mediaType\?: "video" \| "audio"/i);
   assert.match(driveReplayPlayer, /<audio className="library-material-audio-player"/i);

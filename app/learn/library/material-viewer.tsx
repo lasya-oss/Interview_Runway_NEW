@@ -58,15 +58,21 @@ export function MaterialViewer({
     return <audio className="library-material-audio-player" aria-label={`${title} audio`} controls preload="metadata" src={assetUrl} />;
   }
 
+  // The original narrated media lives in Drive rather than the static asset
+  // bundle. When the protected viewer is configured, use it before considering
+  // the first-party transcript fallback so a video record remains playable.
+  if (!assetUrl && googleClientId && (displayKind === "video" || displayKind === "audio")) {
+    return <DriveReplayPlayer clientId={googleClientId} fileId={fileId} loginHint={loginHint} mediaType={displayKind} title={title} />;
+  }
+
   const pdfSourceUrl = isPdfAsset(filename, mimeType)
     ? assetUrl
     : displayKind === "video" || displayKind === "audio"
       ? null
       : fallbackAssetUrl ?? (isTextMaterial(filename, mimeType) ? assetUrl : null);
 
-  // Narrated explainers have a first-party transcript companion even though
-  // their original MP4 masters remain in Drive. Prefer that companion so the
-  // Library always opens usable context without a Drive OAuth prompt.
+  // Builds without protected Drive playback still get a first-party transcript
+  // companion even though the original MP4 masters remain in Drive.
   const companionPdfUrl = fallbackAssetUrl && (displayKind === "video" || displayKind === "audio")
     ? fallbackAssetUrl
     : null;
@@ -77,10 +83,6 @@ export function MaterialViewer({
 
   if (pdfSourceUrl && (fallbackAssetUrl || isTextMaterial(filename, mimeType) || isPdfAsset(filename, mimeType))) {
     return <PdfMaterialPreview assetUrl={pdfSourceUrl} fileId={fileId} filename={filename} mimeType={mimeType} title={title} />;
-  }
-
-  if (!assetUrl && googleClientId && (displayKind === "video" || displayKind === "audio")) {
-    return <DriveReplayPlayer clientId={googleClientId} fileId={fileId} loginHint={loginHint} mediaType={displayKind} title={title} />;
   }
 
   return (
