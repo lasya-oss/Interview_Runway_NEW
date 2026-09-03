@@ -81,7 +81,12 @@ const ROADMAP_LIBRARY_HREFS: Readonly<Record<string, string>> = {
   "12w-8-linkedin": "/learn/library/material/template-linkedin-profile-docx-cyog_vzk",
   "12w-9-map": pdfLibraryHref("company_interview-loop-gap-map.pdf"),
   "12w-9-gaps": pdfLibraryHref("company_interview-loop-gap-map.pdf"),
+  "12w-10-coding": pdfLibraryHref("operations_timed-technical-rehearsal-workbook.pdf"),
+  "12w-10-design": pdfLibraryHref("operations_timed-technical-rehearsal-workbook.pdf"),
   "12w-11-review": pdfLibraryHref("operations_evidence-comparison-correction-workbook.pdf"),
+  "12w-11-correct": pdfLibraryHref("operations_evidence-comparison-correction-workbook.pdf"),
+  "12w-12-loop": pdfLibraryHref("operations_final-loop-interview-day-runbook.pdf"),
+  "12w-12-runbook": pdfLibraryHref("operations_final-loop-interview-day-runbook.pdf"),
 };
 
 export const FOUR_WEEK_PLAN: readonly RoadmapWeek[] = [

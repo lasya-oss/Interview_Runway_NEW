@@ -1143,17 +1143,17 @@ def build_evidence_story() -> list[Flowable]:
     s += page_heading(
         "Worksheet 3",
         "Run the targeted re-test",
-        "First repeat the original lowest-score scenario under the same conditions. Only then use a nearby prompt to test whether the behavior transfers.",
+        "Use one 35-minute block: spend 28 minutes replaying the original decision window, then use a seven-minute adjacent transfer probe. The probe is not a second full attempt.",
     )
     s += [grid_table(
         ["Re-test setup", "Your plan"],
         [
             ["Phase 1: original lowest-score scenario", ""],
-            ["Same date conditions / time box / tools", ""],
+            ["Same prompt conditions / decision-window time box / tools", ""],
             ["Correction cue", ""],
             ["Where the behavior must appear", ""],
             ["Primary success evidence", ""],
-            ["Phase 2: adjacent transfer prompt", ""],
+            ["Phase 2: 7-minute adjacent transfer probe", ""],
         ],
         [158, 335],
         row_heights=[42, 42, 48, 48, 58, 48],
@@ -1165,7 +1165,7 @@ def build_evidence_story() -> list[Flowable]:
         row_height=63,
         prompts=[
             ["Phase 1: same scenario", "", "Keep / adjust / gather evidence"],
-            ["Phase 2: transfer check", "", "Stable / prompt-specific / unclear"],
+            ["Phase 2: brief transfer probe", "", "Stable / prompt-specific / unclear"],
         ],
     ), spacer(10)]
     s += [callout("Stop condition", "Return to the main roadmap when the correction appears unaided in the comparable re-test and at least once in a nearby prompt. Do not rehearse until the answer becomes a script.")]
@@ -1195,6 +1195,611 @@ def build_evidence_story() -> list[Flowable]:
         "A repeated decision moment is separated from noise.",
         "One correction is attached to a cue and decision point.",
         "The comparable re-test and transfer check are defined.",
+    ], checklist=True, compact=True)]
+    return s
+
+
+def build_timed_rehearsal_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Rehearse the decision order",
+        "Use the clock without racing",
+        "A timed rehearsal tests whether clarification, reasoning, testing, and trade-offs still appear when the interview window is fixed.",
+    )
+    s += [callout(
+        "Core idea",
+        "The timer measures decision order, not intelligence or readiness. Protect the steps that make an answer trustworthy; compress detail before silently skipping the contract, evidence, testing, or failure handling.",
+    ), spacer(11)]
+    s += [numbered_chain([
+        ("Set", "Choose one coding prompt and one design prompt, then lock time, tools, and assistance."),
+        ("Run", "Speak decisions aloud and mark the moments where the answer changes direction."),
+        ("Capture", "Save the prompt, artifacts, score, quote, timestamp, and first missed decision."),
+        ("Correct", "Choose one behavior to test next; do not turn the debrief into a new syllabus."),
+    ]), spacer(12)]
+    s += [two_cards(
+        ("Solo mode", "Record audio or screen only when permitted. Use visible timestamps and score from artifacts immediately after the run.", "Self-review"),
+        ("Observer mode", "Ask the observer to note quotes and decision moments. Neutral prompts may clarify; they must not rescue the solution.", "Paired review"),
+    ), spacer(11)]
+    s += [p("The 80-minute practice block", H2), bullet_list([
+        "Coding rehearsal: 30-minute attempt plus 10-minute evidence capture.",
+        "System-design rehearsal: 35-minute attempt plus 5-minute evidence capture.",
+        "Use the stated clock, the task-specific rubric, one 0 / 1 / 2 evidence scale, and the same assistance policy for each run.",
+        "Save the required artifacts before choosing a correction.",
+    ], checklist=True, compact=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Prepare the conditions",
+        "Select prompts that expose decisions",
+        "Use an active Library mock or a prompt you have not recently solved. The goal is retrieval and explanation, not recognition from memory.",
+    )
+    s += [grid_table(
+        ["Block", "Prompt choice", "Target dimension", "Locked conditions"],
+        [
+            ["Coding", "One sliding-window, graph, or dynamic-programming prompt", "The decision you want the clock to expose", "30 min; editor; language; no solution lookup"],
+            ["Design", "One URL, notification, storage, or scheduling prompt", "Requirements, scale, trade-off, or failure handling", "35 min; blank canvas; calculator policy stated"],
+            ["Recording", "Audio, screen, observer notes, or written timestamps", "Exact quote and decision moment", "Permission confirmed; no confidential prompt capture"],
+            ["Evidence", "Code and tests; diagram and decision ledger", "Observable result, not a feeling", "Scored immediately with the same rubric"],
+        ],
+        [70, 158, 126, 139],
+        row_heights=[60, 60, 60, 60],
+    ), spacer(12)]
+    s += [p("Setup record", H2), worksheet_table(
+        ["Field", "Coding block", "System-design block"],
+        4,
+        [94, 199, 200],
+        row_height=40,
+        prompts=[
+            ["Prompt / source", "", ""],
+            ["Start time / end time", "", ""],
+            ["Tools / assistance", "", ""],
+            ["Completion evidence", "", ""],
+        ],
+    ), spacer(9)]
+    s += [callout("Prompt rule", "Use the Library mock as a prompt source, not as an answer script. If you remember the solution path, choose another prompt and record why.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Coding block",
+        "Protect the contract, invariant, and tests",
+        "The 30-minute run keeps the roadmap task interview-shaped. The following 10 minutes preserve evidence before memory rewrites the attempt.",
+    )
+    s += [grid_table(
+        ["Clock", "Decision to make", "What the learner says or saves"],
+        [
+            ["0-5 min", "Clarify contract, constraints, and examples", "Inputs, outputs, edge rules, one normal example, one boundary example"],
+            ["5-10 min", "Choose approach and state invariant", "Pattern cue, state, invariant, rejected alternative, expected complexity"],
+            ["10-25 min", "Implement with audible checkpoints", "What each block preserves; any changed assumption; uncertainty named"],
+            ["25-30 min", "Test and close", "Empty/minimum, boundary or duplicate, main transition, time and space complexity"],
+            ["30-40 min", "Capture evidence", "Artifacts, scores, quote/timestamp, first missed edge, one correction"],
+        ],
+        [70, 177, 246],
+        row_heights=[53, 53, 58, 58, 53],
+    ), spacer(12)]
+    s += [p("If you are stuck", H2), numbered_chain([
+        ("Restate", "Say the contract and the exact uncertainty."),
+        ("Shrink", "Use the smallest example that forces the main state change."),
+        ("Baseline", "Name a correct simple approach before optimizing."),
+        ("Resume", "Choose the next observable step and state its cost."),
+    ]), spacer(10)]
+    s += [callout("Time-pressure rule", "Do not hide. A visible correct baseline plus a named optimization gap is stronger evidence than silent guessing or an unexplained code jump.")]
+    end_page(s)
+
+    s += page_heading(
+        "Coding worksheet",
+        "Save the reasoning that produced the code",
+        "Complete the left side during clarification and planning. Complete the evidence rows immediately after the timer ends.",
+    )
+    s += [worksheet_table(
+        ["Artifact", "Your record"],
+        7,
+        [139, 354],
+        row_height=44,
+        prompts=[
+            ["Contract and constraints", ""],
+            ["Normal + boundary example", ""],
+            ["Pattern cue / approach", ""],
+            ["State and invariant", ""],
+            ["Rejected alternative + reason", ""],
+            ["Time / space complexity", ""],
+            ["First missed edge + timestamp", ""],
+        ],
+    ), spacer(10)]
+    s += [grid_table(
+        ["Score", "Evidence standard"],
+        [
+            ["0 - absent", "The behavior never appears or appears only after the run."],
+            ["1 - prompted / late", "The behavior appears after a rescue, late realization, or unexplained change."],
+            ["2 - independent", "The behavior appears at the correct decision point and is supported by an artifact."],
+        ],
+        [92, 401],
+        row_heights=[36, 40, 40],
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Coding evidence",
+        "Score moments, not confidence",
+        "Use one evidence scale across dimensions. A total is useful only when each mark points to something the learner said, wrote, implemented, or tested.",
+    )
+    s += [worksheet_table(
+        ["Dimension", "0 / 1 / 2", "Quote, timestamp, code, or test evidence"],
+        6,
+        [123, 73, 297],
+        row_height=49,
+        prompts=[
+            ["Clarification / contract", "", ""],
+            ["Approach / decision order", "", ""],
+            ["State / invariant", "", ""],
+            ["Correctness / recovery", "", ""],
+            ["Complexity / alternatives", "", ""],
+            ["Testing / communication", "", ""],
+        ],
+    ), spacer(11)]
+    s += [p("Worked evidence example", H2), grid_table(
+        ["Observed moment", "Cause hypothesis", "Smallest correction"],
+        [
+            ["Invariant stated at minute 18 after implementation drifted", "Planning named the pattern but not what the window must preserve", "State the invariant before the first loop and re-check it at each pointer move"],
+            ["Final duplicate boundary test was missed", "Testing started without a written edge list", "Write four test labels during clarification; run them in the last five minutes"],
+        ],
+        [171, 159, 163],
+        row_heights=[60, 60],
+    ), spacer(9)]
+    s += [callout("Do not copy the example", "Use it to separate symptom, cause, and correction. Your correction must attach to your own evidence and decision cue.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "System-design block",
+        "Make assumptions reversible",
+        "A strong timed design answer connects requirements and scale to components, then closes with bottlenecks, recovery, and one deliberate trade-off.",
+    )
+    s += [grid_table(
+        ["Clock", "Decision to make", "What the learner says or saves"],
+        [
+            ["0-5 min", "Requirements and non-goals", "Users, core actions, latency/durability needs, boundaries, explicit exclusions"],
+            ["5-9 min", "Order-of-magnitude scale", "Traffic, storage, peaks, retention, and which estimate changes the design"],
+            ["9-17 min", "API, data, and main flow", "Contract, source of truth, write/read path, key entities, access pattern"],
+            ["17-25 min", "Architecture and bottleneck", "Components, ownership boundaries, first saturation or contention point"],
+            ["25-31 min", "Failure and recovery", "Failure mode, detection signal, containment, retry/idempotency or fallback"],
+            ["31-35 min", "Trade-off and operations close", "Alternative rejected, consequence accepted, observability, next question"],
+            ["35-40 min", "Capture evidence", "Diagram, three assumptions, decision ledger, score, quote, correction"],
+        ],
+        [65, 161, 267],
+        row_heights=[44, 44, 49, 49, 49, 49, 44],
+    ), spacer(10)]
+    s += [callout("Compression rule", "When time is short, reduce breadth and say what is deferred. Never silently skip requirements, a source of truth, the primary bottleneck, or failure handling.")]
+    end_page(s)
+
+    s += page_heading(
+        "Design worksheet",
+        "Show what each assumption caused",
+        "The three-row decision ledger is the minimum artifact for the roadmap task. Each row must make a design choice revisitable.",
+    )
+    s += [worksheet_table(
+        ["Assumption", "Decision caused", "Cost / trade-off", "What would change it"],
+        3,
+        [116, 134, 121, 122],
+        row_height=60,
+    ), spacer(11)]
+    s += [worksheet_table(
+        ["Design evidence", "Your record"],
+        4,
+        [145, 348],
+        row_height=45,
+        prompts=[
+            ["Source of truth + data flow", ""],
+            ["Primary bottleneck + limit", ""],
+            ["Failure / recovery / metric", ""],
+            ["Trade-off to revisit", ""],
+        ],
+    ), spacer(10)]
+    s += [callout("Decision test", "If an assumption changes, point to the component, data path, or operating policy that changes with it. If nothing changes, the assumption may not be decision-relevant.")]
+    end_page(s)
+
+    s += page_heading(
+        "Design evidence",
+        "Score the answer and test one pivot",
+        "Use the same 0 / 1 / 2 evidence scale. Then introduce one nearby requirement change and observe whether the learner updates only the affected decisions.",
+    )
+    s += [worksheet_table(
+        ["Dimension", "0 / 1 / 2", "Quote, timestamp, diagram, or decision evidence"],
+        7,
+        [126, 73, 294],
+        row_height=42,
+        prompts=[
+            ["Requirements / non-goals", "", ""],
+            ["Scale / capacity", "", ""],
+            ["Decision order / data flow", "", ""],
+            ["Architecture / bottleneck", "", ""],
+            ["Trade-off clarity", "", ""],
+            ["Failure / recovery / metrics", "", ""],
+            ["Communication / recovery", "", ""],
+        ],
+    ), spacer(10)]
+    s += [p("Worked pivot", H2), grid_table(
+        ["Requirement change", "What changes", "What stays stable"],
+        [[
+            "Delivery may be delayed, but duplicate actions are unacceptable",
+            "Idempotency key, deduplication store, retry policy, and success metric become explicit",
+            "The product contract, source of truth, and unrelated read path remain unchanged",
+        ]],
+        [149, 188, 156],
+        row_heights=[66],
+    ), spacer(8)]
+    s += [callout("Neutral observer prompts", "Use: What assumption drives that? What fails first? Which decision changes if the requirement changes? Avoid suggesting the component or answer.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Finish both tasks",
+        "Leave with artifacts and one next correction",
+        "The rehearsal is complete when both runs are saved, evidence is scored, and the next test is smaller than the practice block you just finished.",
+    )
+    s += [grid_table(
+        ["Roadmap task", "Required saved artifact", "Completion proof"],
+        [
+            ["Timed coding rehearsal", "Prompt, approach, invariant, complexity, test list, first missed edge", "One quote/timestamp and a rubric score tied to code or tests"],
+            ["Timed system-design rehearsal", "Prompt, three assumptions and caused decisions, diagram, trade-off to revisit", "One quote/timestamp and a rubric score tied to the decision ledger"],
+        ],
+        [121, 230, 142],
+        row_heights=[74, 74],
+    ), spacer(11)]
+    s += [p("Common mistakes", H2), bullet_list([
+        "Starting implementation or architecture before clarifying the contract.",
+        "Optimizing for speed while dropping tests, failure handling, or a clear close.",
+        "Using a familiar prompt whose solution is already memorized.",
+        "Scoring from confidence instead of quotes, artifacts, and decision moments.",
+        "Choosing several corrections and losing evidence about what worked.",
+    ], compact=True), spacer(8)]
+    s += [callout("Your next action", "Choose one lowest evidence dimension, write one correction sentence, and schedule one comparable rehearsal. Keep the prompt shape and rubric stable enough to measure change."), spacer(10)]
+    s += [p("Completion check", H2), bullet_list([
+        "Both prompts and conditions are recorded.",
+        "Both clocks preserve the required decision stages.",
+        "Coding and design artifacts are saved.",
+        "Scores cite observable evidence.",
+        "Only one correction is active for the next test.",
+    ], checklist=True, compact=True)]
+    return s
+
+
+def build_final_loop_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Consolidate, then reduce friction",
+        "Use the final loop to protect proven skills",
+        "The capstone combines a compressed multi-round rehearsal with a one-page operating runbook. It is a practice sequence, not a prediction of a company's exact interview loop.",
+    )
+    s += [callout(
+        "Core idea",
+        "Week 12 is a taper. Use representative prompts, protect transitions, prove recovery, and remove day-of uncertainty. Do not add a new syllabus or chase a perfect score.",
+    ), spacer(11)]
+    s += [numbered_chain([
+        ("Assemble", "Select one coding, design, behavioral, and follow-up segment from existing preparation."),
+        ("Rehearse", "Run the 60-minute sequence and reset deliberately between segments."),
+        ("Debrief", "Record three stable strengths, one remaining risk, and one final action."),
+        ("Operate", "Build the 15-minute day-of runbook from the rehearsal evidence."),
+    ]), spacer(12)]
+    s += [two_cards(
+        ("60 minutes", "A compressed full-loop rehearsal that tests retrieval, transitions, recovery, and a focused close.", "Rehearsal"),
+        ("15 minutes", "A one-page logistics and cognitive-load runbook that supports the real interview day.", "Runbook"),
+    ), spacer(11)]
+    s += [p("Boundaries", H2), bullet_list([
+        "Use only prompts, stories, and frameworks already prepared.",
+        "Use mini-prompts that fit the compressed segment windows.",
+        "Do not record confidential prompts or another person without permission.",
+        "The runbook lowers cognitive load; it is not a binder to read during answers.",
+    ], checklist=True, compact=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Worksheet 1",
+        "Assemble a representative loop",
+        "Choose segments that reflect the target role and the corrected gap. Each segment needs a capability, evidence cue, time box, and stop condition.",
+    )
+    s += [worksheet_table(
+        ["Segment", "Capability", "Prompt / source", "Evidence cue", "Time / stop"],
+        4,
+        [76, 99, 134, 104, 80],
+        row_height=74,
+        prompts=[
+            ["Coding", "", "", "", "18 min"],
+            ["System design", "", "", "", "18 min"],
+            ["Behavioral", "", "", "", "10 min"],
+            ["Follow-up pivot", "", "", "", "6 min"],
+        ],
+    ), spacer(11)]
+    s += [p("Selection rules", H2), bullet_list([
+        "Coding: use a prompt that requires a visible invariant or boundary decision.",
+        "Design: use a prompt with one meaningful capacity or failure trade-off.",
+        "Behavioral: use a story with ownership, tension, action, and measurable result.",
+        "Follow-up: change one requirement or ask for one deeper evidence layer.",
+        "Corrected gap: name the segment and exact cue where the new behavior must appear.",
+    ], compact=True), spacer(9)]
+    s += [callout("Source rule", "Select from active Library mocks and your own evidence map. Do not use leaked company questions, confidential material, or a prompt you can answer from memory.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "The 60-minute clock",
+        "Protect transitions as part of the answer",
+        "A full loop is more than four prompts. It tests whether the learner can release one context, establish the next contract, and recover without carrying forward stale assumptions.",
+    )
+    s += [grid_table(
+        ["Clock", "Segment", "Protected behavior"],
+        [
+            ["0-2", "Setup", "Confirm prompts, assistance policy, timer, evidence capture, and corrected-gap cue"],
+            ["2-20", "Coding", "Clarify contract; state approach and invariant; implement; test one boundary and close"],
+            ["20-22", "Reset 1", "Release code context; breathe; restate the design contract; ask first clarification"],
+            ["22-40", "System design", "Set requirements and scale; draw flow; name bottleneck, failure, trade-off, metric"],
+            ["40-42", "Reset 2", "Release architecture assumptions; retrieve the selected story cue; reopen listening"],
+            ["42-52", "Behavioral", "Answer with context, ownership, actions, result, learning, and evidence"],
+            ["52-58", "Follow-up pivot", "Respond to one changed constraint or probe without rewriting the whole answer"],
+            ["58-60", "Capture", "Write strongest skill, remaining risk, and one action before the real loop"],
+        ],
+        [61, 96, 336],
+        row_heights=[38, 47, 43, 50, 43, 47, 47, 43],
+    ), spacer(10)]
+    s += [callout("Compressed-prompt rule", "If a segment cannot reach its main decision inside the time box, shorten the prompt before the rehearsal. Do not create artificial speed by skipping the contract or evidence.")]
+    end_page(s)
+
+    s += page_heading(
+        "Transition protocol",
+        "Close, clear, and reopen",
+        "The two-minute reset prevents a weak moment from becoming the next round's starting state. It is a controlled handoff, not a postmortem.",
+    )
+    s += [numbered_chain([
+        ("Close", "Name what is complete and what you would verify with more time."),
+        ("Clear", "Release the prior artifact; one breath, posture reset, water if needed."),
+        ("Contract", "State the new segment's input, output, scope, and first uncertainty."),
+        ("Clarify", "Ask one useful opening question before importing any old assumption."),
+    ]), spacer(12)]
+    s += [grid_table(
+        ["Carryover risk", "Reset sentence", "Evidence of recovery"],
+        [
+            ["A coding edge case was missed", "That round is closed. For this design prompt, I will first define users, guarantees, and scale.", "The design answer opens with its own contract rather than an apology"],
+            ["A design assumption changed late", "The prior assumption belongs to that prompt. For this story, I will use only facts from the selected event.", "The behavioral answer does not borrow invented scale or ownership"],
+            ["A prior answer felt weak", "I have one note for later. The next contract starts now.", "First clarification arrives without re-litigating the old answer"],
+        ],
+        [137, 221, 135],
+        row_heights=[66, 66, 58],
+    ), spacer(10)]
+    s += [p("Transition evidence", H2), worksheet_table(
+        ["Reset", "What I released", "First new contract / clarification"],
+        2,
+        [80, 172, 241],
+        row_height=47,
+        prompts=[["Coding -> design", "", ""], ["Design -> behavioral", "", ""]],
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Worksheet 2",
+        "Score the full loop with evidence",
+        "Use 0 for absent, 1 for prompted or late, and 2 for independent at the correct decision point. Add a quote, timestamp, artifact, or observer note.",
+    )
+    s += [worksheet_table(
+        ["Segment", "Opening contract", "Decision quality", "Boundary / failure", "Communication / recovery", "Close"],
+        4,
+        [78, 80, 83, 85, 92, 75],
+        row_height=55,
+        prompts=[
+            ["Coding", "", "", "", "", ""],
+            ["Design", "", "", "", "", ""],
+            ["Behavioral", "", "", "", "", ""],
+            ["Follow-up", "", "", "", "", ""],
+        ],
+    ), spacer(12)]
+    s += [worksheet_table(
+        ["Transition", "0 / 1 / 2", "Quote, timestamp, or observer evidence"],
+        2,
+        [123, 78, 292],
+        row_height=55,
+        prompts=[["Coding -> design", "", ""], ["Design -> behavioral", "", ""]],
+    ), spacer(11)]
+    s += [callout("Evidence rule", "Do not average away a missing contract or unsafe failure decision. Record the specific moment, then decide whether it is a remaining risk or normal performance noise.")]
+    end_page(s)
+
+    s += page_heading(
+        "Worked recovery example",
+        "An imperfect moment does not have to spread",
+        "The purpose of the final rehearsal is not a flawless sequence. It is evidence that the learner can notice, reset, and restore the next decision order.",
+    )
+    s += [grid_table(
+        ["Moment", "Carryover risk", "Reset used", "Evidence after reset"],
+        [
+            ["Coding closes without the duplicate-input test", "Learner keeps replaying the miss and enters design silently", "Writes one later-note, closes the editor, breathes, states design users and guarantees", "First design clarification appears within 25 seconds"],
+            ["Design bottleneck is identified late", "Learner overexplains the miss inside the behavioral story", "Labels the assumption for debrief, retrieves the selected story cue only", "Story opens with factual context and owned decision"],
+            ["Behavioral result lacks one metric", "Learner invents precision during follow-up", "States what was measured and what was not; asks which result layer matters", "Follow-up stays accurate and distinguishes fact from estimate"],
+        ],
+        [119, 132, 146, 96],
+        row_heights=[79, 79, 79],
+    ), spacer(12)]
+    s += [two_cards(
+        ("Recovery", "The next segment regains its contract, evidence, and decision order without needing a rescue.", "Useful signal"),
+        ("Masking", "The learner rushes, apologizes repeatedly, invents evidence, or silently imports the prior answer.", "Risk signal"),
+    ), spacer(10)]
+    s += [p("Your recovery note", H2), worksheet_table(
+        ["Imperfect moment", "Reset action", "Evidence that the next segment recovered"],
+        1,
+        [144, 155, 194],
+        row_height=64,
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Debrief and taper",
+        "Keep three strengths and one remaining risk",
+        "Use the final evidence to reduce work. A taper protects retrieval, sleep, and decision clarity; it does not reopen every weak topic.",
+    )
+    s += [worksheet_table(
+        ["Final evidence", "Quote, artifact, or observed moment", "What to carry forward"],
+        4,
+        [112, 229, 152],
+        row_height=58,
+        prompts=[
+            ["Stable strength 1", "", ""],
+            ["Stable strength 2", "", ""],
+            ["Stable strength 3", "", ""],
+            ["One remaining risk", "", ""],
+        ],
+    ), spacer(11)]
+    s += [grid_table(
+        ["Time horizon", "Do", "Avoid"],
+        [
+            ["48-24 hours", "One short retrieval pass; confirm logistics; normal sleep and meals", "Novel hard problems, whole-plan rewrite, long late-night mock"],
+            ["24-2 hours", "Review cue cards and one risk sentence; stop when retrieval is clean", "Adding stories, memorizing scripts, comparing yourself to others"],
+            ["Last 2 hours", "Protect energy, equipment, water, quiet, and arrival time", "Score analysis, forum browsing, or another full rehearsal"],
+        ],
+        [84, 212, 197],
+        row_heights=[58, 58, 58],
+    ), spacer(9)]
+    s += [callout("Final action", "Rehearse one exact sentence or decision once more only if it addresses the remaining risk. Stop when it appears unaided; do not rehearse until it becomes a brittle script.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Runbook design",
+        "Build a one-page operating sheet",
+        "The runbook should answer what to do before, between, and after rounds without competing for attention during the interview.",
+    )
+    s += [grid_table(
+        ["Section", "Include", "Exclude"],
+        [
+            ["Logistics", "Timezone, date, format, links, contact, backup connection, accommodation", "Passwords, sensitive identity data, unnecessary account details"],
+            ["Evidence cues", "Target-role sentence, compact story index, technical decision cues, two reminders", "Full scripts, model answers, leaked prompts, confidential notes"],
+            ["Reset ritual", "One fact, one question, one adjustment; breath, posture, water", "A full postmortem while the loop continues"],
+            ["Recovery path", "Contact method, interruption sentence, reconnect order, backup device", "Improvised promises or unauthorized recording"],
+            ["Questions", "Two role- and team-relevant questions with one follow-up each", "Questions already answered in the interview or public role brief"],
+        ],
+        [94, 233, 166],
+        row_heights=[57, 61, 57, 57, 61],
+    ), spacer(12)]
+    s += [p("Carry only useful evidence", H2), bullet_list([
+        "One target-role and level sentence.",
+        "Three story labels with outcome and ownership cue, not full scripts.",
+        "Coding contract / invariant / test cue and design requirement / failure / trade-off cue.",
+        "Two questions and the two personal reminders most likely to improve decisions.",
+    ], checklist=True, compact=True), spacer(8)]
+    s += [callout("Ethical boundary", "Use your own notes and public or authorized preparation material. Never carry leaked questions, confidential employer information, or recordings made without consent.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Pre-loop checklist",
+        "Remove avoidable friction by horizon",
+        "Confirm the items when they can still be fixed. The final ten minutes should be a calm readiness check, not a technology project.",
+    )
+    s += [p("24 hours before", H2), bullet_list([
+        "Date, timezone, expected duration, round format, and interviewers when supplied.",
+        "Meeting links, calendar access, contact path, and any requested documents.",
+        "Accommodation or accessibility needs are confirmed through the proper contact.",
+        "Primary and backup location, internet path, and transport or arrival buffer.",
+        "Sleep, meal, medication, and other personal energy needs are planned safely.",
+    ], checklist=True, compact=True), spacer(9)]
+    s += [p("60 minutes before", H2), bullet_list([
+        "Power, charger, audio, microphone, camera, browser, editor, and permitted tools work.",
+        "Primary link opens; backup connection and backup device are available.",
+        "Quiet space, lighting, background, temperature, water, and interruption plan are ready.",
+        "Runbook, blank paper, and allowed notes are visible but do not obstruct the screen.",
+    ], checklist=True, compact=True), spacer(9)]
+    s += [p("10 minutes before", H2), bullet_list([
+        "Close notifications, unrelated tabs, messaging apps, downloads, and system updates.",
+        "Use the restroom, reset posture, breathe normally, and take water.",
+        "Open the correct link and join at the expected time; do not start a new practice problem.",
+    ], checklist=True, compact=True), spacer(9)]
+    s += [callout("Interruption sentence", "I am experiencing [brief factual issue]. I am switching to [backup] now. If we disconnect, may I rejoin through the same link or contact [name / channel]?")]
+    end_page(s)
+
+    s += page_heading(
+        "Between rounds",
+        "Use the three-minute reset",
+        "Capture only what helps the next round. Do not grade the entire interview while the loop is still running.",
+    )
+    s += [grid_table(
+        ["Minute", "Action", "Write only"],
+        [
+            ["0-1", "Release", "One factual moment from the prior round; no verdict"],
+            ["1-2", "Recover", "One breath cycle, posture, water, and any immediate logistics need"],
+            ["2-3", "Reopen", "One question and one adjustment for the next round's contract"],
+        ],
+        [70, 182, 241],
+        row_heights=[55, 55, 55],
+    ), spacer(12)]
+    s += [worksheet_table(
+        ["Round", "One fact", "One question", "One adjustment"],
+        3,
+        [72, 142, 142, 137],
+        row_height=52,
+    ), spacer(11)]
+    s += [grid_table(
+        ["Situation", "Recovery script"],
+        [
+            ["Prompt is unclear", "Before I choose an approach, may I confirm [input / goal / constraint]?"],
+            ["You are stuck", "I will restate the contract, test the smallest case, and name the correct baseline."],
+            ["Connection fails", "Reconnect using the backup path, then send the prepared factual message."],
+            ["Prior round felt weak", "I have one note for later. I will start the next contract without carrying a verdict."],
+        ],
+        [135, 358],
+        row_heights=[42, 42, 42, 48],
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Printable runbook",
+        "Finish the operating sheet",
+        "Complete this page in 15 minutes after the rehearsal. Keep a digital backup, but use only the format permitted in the real interview.",
+    )
+    s += [worksheet_table(
+        ["Runbook field", "Your final record"],
+        7,
+        [143, 350],
+        row_height=45,
+        prompts=[
+            ["Schedule / timezone / links", ""],
+            ["Contact / interruption path", ""],
+            ["Backup connection / device", ""],
+            ["Target role + two evidence cues", ""],
+            ["Three story labels", ""],
+            ["Technical reset cues", ""],
+            ["Two questions to ask", ""],
+        ],
+    ), spacer(10)]
+    s += [grid_table(
+        ["Final summary", "Your evidence"],
+        [
+            ["Three stable strengths", ""],
+            ["One remaining risk", ""],
+            ["One next action before the loop", ""],
+        ],
+        [143, 350],
+        row_heights=[44, 44, 44],
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Finish Week 12",
+        "Stop when the system is ready",
+        "The capstone is complete when the rehearsal proves usable skills, the remaining risk is bounded, and the runbook removes avoidable day-of decisions.",
+    )
+    s += [grid_table(
+        ["Roadmap task", "Required artifact", "Completion proof"],
+        [
+            ["Complete the full-loop rehearsal", "Selected prompts, 60-minute run sheet, segment evidence, transition notes", "Three stable strengths, one remaining risk, and one exact next action"],
+            ["Finish the interview-day runbook", "One-page schedule, logistics, evidence cues, reset ritual, backup path, questions", "The sheet can be used in under one minute without reading answer scripts"],
+        ],
+        [126, 226, 141],
+        row_heights=[76, 76],
+    ), spacer(12)]
+    s += [p("Common mistakes", H2), bullet_list([
+        "Using full-length prompts that cannot reach the intended decision in the compressed clock.",
+        "Treating transitions as dead time instead of a recovery skill.",
+        "Turning one imperfect segment into a verdict about the whole loop.",
+        "Adding new content during the taper or rehearsing until language becomes brittle.",
+        "Building a long runbook that competes with listening and live reasoning.",
+    ], compact=True), spacer(8)]
+    s += [callout("Your next action", "Confirm the runbook once, rehearse the one remaining risk only to the stop condition, then protect sleep, energy, logistics, and honest decision-making."), spacer(10)]
+    s += [p("Completion check", H2), bullet_list([
+        "Four representative segments and two transitions were rehearsed.",
+        "Each score cites an observable moment.",
+        "Three strengths, one risk, and one action are recorded.",
+        "The logistics and backup path are confirmed.",
+        "The three-minute reset and ethical boundaries are visible.",
     ], checklist=True, compact=True)]
     return s
 
@@ -1235,6 +1840,24 @@ SPECS = [
         thesis="Find the repeated decision moment behind the score, change one behavior, and require evidence of transfer.",
         slug="operations / evidence-comparison-correction",
         build_story=build_evidence_story,
+    ),
+    PdfSpec(
+        filename="operations_timed-technical-rehearsal-workbook.pdf",
+        category="Operations workbook",
+        title="Timed Coding and System Design Rehearsal Workbook",
+        subtitle="Two controlled, interview-shaped practice blocks with protected decision clocks, evidence rubrics, worksheets, and debriefs.",
+        thesis="Use time pressure to test decision order while protecting clarification, invariants, testing, trade-offs, and failure handling.",
+        slug="operations / timed-technical-rehearsal",
+        build_story=build_timed_rehearsal_story,
+    ),
+    PdfSpec(
+        filename="operations_final-loop-interview-day-runbook.pdf",
+        category="Operations workbook",
+        title="Final-Loop Rehearsal and Interview-Day Runbook",
+        subtitle="A compressed multi-round rehearsal, transition protocol, evidence debrief, taper plan, and printable day-of operating sheet.",
+        thesis="Consolidate proven skills, protect recovery between rounds, and remove avoidable interview-day friction.",
+        slug="operations / final-loop-interview-day-runbook",
+        build_story=build_final_loop_story,
     ),
 ]
 
