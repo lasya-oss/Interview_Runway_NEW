@@ -144,8 +144,25 @@ export const ACTIVE_DRIVE_FILENAMES = [
   "mock_recruiter_platform-eor_03.md",
 ] as const;
 
+// These supplied narrated masters have been mirrored into the public asset
+// bundle so learners can play them without a second Drive authorization.
+// Records that are not listed here continue to use the protected Drive viewer
+// when configured, or show the unavailable state when no source is connected.
+export const LOCAL_DRIVE_MATERIAL_FILENAMES = [
+  "dsa_bfs_01.mp4",
+  "dsa_binary-search_01.mp4",
+  "dsa_dynamic-programming-1d_01.mp4",
+  "dsa_sliding-window_01.mp4",
+  "dsa_two-pointers_01.mp4",
+  "sysdesign_caching_01.mp4",
+  "sysdesign_notification-system_01.mp4",
+  "sysdesign_rate-limiting_01.mp4",
+  "sysdesign_url-shortener_01.mp4",
+] as const;
+
 export const ACTIVE_PDF_FILENAME_SET = new Set<string>(ACTIVE_PDF_FILENAMES);
 export const ACTIVE_DRIVE_FILENAME_SET = new Set<string>(ACTIVE_DRIVE_FILENAMES);
+export const LOCAL_DRIVE_MATERIAL_FILENAME_SET = new Set<string>(LOCAL_DRIVE_MATERIAL_FILENAMES);
 export const ACTIVE_DRIVE_RECORD_KEY_SET = new Set<string>(
   ACTIVE_DRIVE_FILENAMES.map((filename) => {
     const kind = filename.endsWith(".mp4") ? "narrated" : filename.startsWith("mock_") ? "mock-script" : "template";
