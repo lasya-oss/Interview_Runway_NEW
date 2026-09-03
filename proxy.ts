@@ -67,9 +67,14 @@ export async function proxy(request: NextRequest) {
   requestHeaders.set("x-interviewrunway-user-email", session.email);
   requestHeaders.set("x-interviewrunway-user-domain", session.hostedDomain);
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: { headers: requestHeaders },
   });
+  // Learner pages vary by the authenticated account and active-plan cookie.
+  // Keep an edge cache from replaying the default Human Calibration render
+  // after a QA plan switch.
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
 }
 
 export const config = {

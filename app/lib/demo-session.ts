@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { cache } from "react";
 import { redirect } from "next/navigation";
 import { findDemoById, type DemoProfile, type DemoTier } from "./demo-data";
 import { getChatGPTUser, requireChatGPTUser } from "@/app/chatgpt-auth";
@@ -95,10 +94,10 @@ type WorkspaceProfileState = {
   humanCalibrationAccess: boolean;
 };
 
-// Layout and page components both need the learner identity. React's request
-// cache makes that shared lookup one operation during a render, including when
-// their return-to paths differ.
-const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> => {
+// Do not memoize this lookup outside the request lifecycle. The active plan is
+// a browser cookie that changes when the QA selector is used; a long-lived edge
+// worker must never reuse a previous request's selected profile.
+async function resolveWorkspaceProfile(): Promise<WorkspaceProfileState> {
   const [profile, user] = await Promise.all([getDemoProfile(), getChatGPTUser()]);
   if (!user) {
     return {
@@ -146,7 +145,7 @@ const resolveWorkspaceProfile = cache(async (): Promise<WorkspaceProfileState> =
     secondSeatAccess: access.secondSeat,
     humanCalibrationAccess: access.humanCalibration,
   };
-});
+}
 
 async function getActivePlanPreference(): Promise<DemoTier | null> {
   const value = (await cookies()).get(ACTIVE_LEARNER_PLAN_COOKIE)?.value;

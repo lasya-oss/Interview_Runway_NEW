@@ -30,6 +30,8 @@ export function LivePlanSwitcher({
       const response = await fetch("/api/learner/plan", {
         method: "POST",
         headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        cache: "no-store",
         body: JSON.stringify({ plan }),
       });
       if (!response.ok) throw new Error("Plan switch failed");

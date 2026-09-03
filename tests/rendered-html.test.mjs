@@ -1476,6 +1476,7 @@ test("live paid accounts can switch only among their existing entitled plans", a
   const route = await readFile(new URL("../app/api/learner/plan/route.ts", import.meta.url), "utf8");
   const actions = await readFile(new URL("../app/components/member-actions.tsx", import.meta.url), "utf8");
   const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const proxy = await readFile(new URL("../proxy.ts", import.meta.url), "utf8");
 
   assert.match(paidAccess, /export function learnerPlansForAccess\(access: LearnerAccess\)/);
   assert.match(paidAccess, /export function canAccessLearnerPlan\(/);
@@ -1487,9 +1488,13 @@ test("live paid accounts can switch only among their existing entitled plans", a
   assert.match(route, /httpOnly: true/);
   assert.match(route, /ACTIVE_LEARNER_PLAN_MAX_AGE_SECONDS/);
   assert.match(actions, /fetch\("\/api\/learner\/plan"/);
+  assert.match(actions, /credentials: "same-origin"/);
+  assert.match(actions, /cache: "no-store"/);
   assert.match(actions, /window\.location\.assign\("\/learn"\)/);
   assert.match(shell, /<LivePlanSwitcher/);
   assert.match(shell, /profile\.availablePlans/);
+  assert.match(proxy, /Cache-Control", "private, no-store"/);
+  assert.doesNotMatch(session, /const resolveWorkspaceProfile = cache\(/);
 });
 
 test("Foundation demo starts Today with a clean learner state", async () => {
