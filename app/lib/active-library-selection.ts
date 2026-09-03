@@ -85,7 +85,9 @@ export const ACTIVE_PDF_FILENAMES = [
   "career_target-role-evidence-map.pdf",
   "company_interview-loop-gap-map.pdf",
   "operations_evidence-comparison-correction-workbook.pdf",
+  "operations_final-loop-interview-day-runbook.pdf",
   "operations_technical-baseline-scorecard.pdf",
+  "operations_timed-technical-rehearsal-workbook.pdf",
   "roadmap_12week.pdf",
   "roadmap_4week.pdf",
 ] as const;
