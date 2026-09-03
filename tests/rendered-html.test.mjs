@@ -374,9 +374,13 @@ test("Library content actions never point at missing assets", async () => {
   assert.match(materialPage, /source material for this preview has not been supplied yet/i);
 });
 
-test("Drive-only narrated records never substitute a transcript for the original lesson", async () => {
+test("Supplied narrated mirrors play directly and unsupplied records stay honest", async () => {
   const activeSelection = await readFile(
     new URL("../app/lib/active-library-selection.ts", import.meta.url),
+    "utf8",
+  );
+  const materialData = await readFile(
+    new URL("../app/lib/drive-materials.ts", import.meta.url),
     "utf8",
   );
   const materialViewer = await readFile(
@@ -387,14 +391,35 @@ test("Drive-only narrated records never substitute a transcript for the original
     new URL("../app/learn/practice/replays/drive-replay-player.tsx", import.meta.url),
     "utf8",
   );
-  const narratedFiles = [...activeSelection.matchAll(/^  "([^\"]+\.mp4)",$/gm)].map((match) => match[1]);
+  const activeDriveSection = activeSelection.slice(
+    activeSelection.indexOf("export const ACTIVE_DRIVE_FILENAMES"),
+    activeSelection.indexOf("export const LOCAL_DRIVE_MATERIAL_FILENAMES"),
+  );
+  const narratedFiles = [...activeDriveSection.matchAll(/^  "([^\"]+\.mp4)",$/gm)].map((match) => match[1]);
+  const localFiles = [...activeSelection.matchAll(/LOCAL_DRIVE_MATERIAL_FILENAMES = \[([\s\S]*?)\] as const;/g)].flatMap((match) =>
+    [...match[1].matchAll(/^  "([^\"]+\.mp4)",$/gm)].map((entry) => entry[1]),
+  );
 
   assert.equal(narratedFiles.length, 15, "Vault should expose the 15 curated narrated records");
+  assert.deepEqual(localFiles, [
+    "dsa_bfs_01.mp4",
+    "dsa_binary-search_01.mp4",
+    "dsa_dynamic-programming-1d_01.mp4",
+    "dsa_sliding-window_01.mp4",
+    "dsa_two-pointers_01.mp4",
+    "sysdesign_caching_01.mp4",
+    "sysdesign_notification-system_01.mp4",
+    "sysdesign_rate-limiting_01.mp4",
+    "sysdesign_url-shortener_01.mp4",
+  ]);
   for (const filename of narratedFiles) {
-    assert.equal(existsSync(new URL(`../public/drive-materials/${filename}`, import.meta.url)), false, filename);
+    const isLocal = localFiles.includes(filename);
+    assert.equal(existsSync(new URL(`../public/drive-materials/${filename}`, import.meta.url)), isLocal, filename);
     assert.equal(existsSync(new URL(`../public/drive-materials/${filename.replace(/\.mp4$/i, "_transcript.md")}`, import.meta.url)), true, `${filename} should retain its transcript companion`);
   }
 
+  assert.match(materialData, /LOCAL_DRIVE_MATERIAL_FILENAME_SET\.has\(material\.filename\)/i);
+  assert.match(materialData, /return driveMaterialAssetHref\(material\.filename\)/i);
   assert.match(materialViewer, /Never make a Drive-only video or audio record look playable/i);
   assert.match(materialViewer, /library-material-content-unavailable/i);
   assert.doesNotMatch(materialViewer, /const companionPdfUrl/);

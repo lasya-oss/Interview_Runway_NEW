@@ -1,4 +1,7 @@
-import { isActiveDriveRecord } from "./active-library-selection";
+import {
+  isActiveDriveRecord,
+  LOCAL_DRIVE_MATERIAL_FILENAME_SET,
+} from "./active-library-selection";
 
 export type DriveMaterialKind =
   | "template"
@@ -6342,8 +6345,12 @@ export function driveMaterialAssetHref(filename: string) {
 }
 
 export function driveMaterialPrimaryAssetHref(material: Pick<DriveMaterial, "filename" | "kind">) {
-  // Large media masters stay in Drive and are loaded by the authenticated media
-  // viewer; first-party mirrors handle the smaller document and text records.
+  // Supplied narrated masters that have a verified first-party mirror can play
+  // directly in the in-app viewer. Other large media masters stay in Drive and
+  // are loaded by the authenticated media viewer.
+  if (LOCAL_DRIVE_MATERIAL_FILENAME_SET.has(material.filename)) {
+    return driveMaterialAssetHref(material.filename);
+  }
   if (material.kind === "narrated" || material.kind === "silent" || material.kind === "mock-audio") {
     return null;
   }
