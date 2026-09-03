@@ -20,6 +20,7 @@ from reportlab.platypus import (
     PageBreak,
     PageTemplate,
     Paragraph,
+    Preformatted,
     Spacer,
     Table,
     TableStyle,
@@ -86,6 +87,7 @@ H2 = style("IRH2", font="Helvetica-Bold", size=12.8, leading=15, color=NAVY_2, b
 H3 = style("IRH3", font="Helvetica-Bold", size=9.8, leading=12, color=TEAL, after=4, keep=True)
 LABEL = style("IRLabel", font="Courier-Bold", size=6.8, leading=8.4, color=ORANGE, after=3, keep=True)
 MONO = style("IRMono", font="Courier", size=7.2, leading=10, color=MUTED)
+CODE = style("IRCode", font="Courier", size=7.25, leading=9.8, color=WHITE)
 WHITE_HEAD = style("IRWhiteHead", font="Helvetica-Bold", size=7.5, leading=9, color=WHITE)
 TABLE_TEXT = style("IRTableText", size=7.45, leading=9.6, color=INK)
 TABLE_MUTED = style("IRTableMuted", size=7.2, leading=9.2, color=MUTED)
@@ -119,6 +121,165 @@ class CheckboxMark(Flowable):
         self.canv.setLineWidth(0.85)
         self.canv.rect(1, 2.5, 6.5, 6.5, stroke=1, fill=0)
         self.canv.restoreState()
+
+
+class NetworkDiagram(Flowable):
+    """Compact vector graph used for traversal prompts and worked traces."""
+
+    def __init__(
+        self,
+        nodes: dict[str, tuple[float, float]],
+        edges: Sequence[tuple[str, str]],
+        *,
+        label: str,
+        directed: bool = False,
+        highlighted_edges: Sequence[tuple[str, str]] = (),
+        highlighted_nodes: Sequence[str] = (),
+        height: float = 150,
+    ) -> None:
+        super().__init__()
+        self.nodes = nodes
+        self.edges = list(edges)
+        self.label = label
+        self.directed = directed
+        self.highlighted_edges = set(highlighted_edges)
+        self.highlighted_nodes = set(highlighted_nodes)
+        self.width = CONTENT_W
+        self.height = height
+
+    def wrap(self, avail_width: float, avail_height: float) -> tuple[float, float]:
+        self.width = min(avail_width, CONTENT_W)
+        return self.width, self.height
+
+    def draw(self) -> None:
+        canvas = self.canv
+        canvas.saveState()
+        canvas.setFillColor(PALE)
+        canvas.setStrokeColor(LINE_DARK)
+        canvas.setLineWidth(0.7)
+        canvas.roundRect(0, 0, self.width, self.height, 5, stroke=1, fill=1)
+        canvas.setFillColor(ORANGE)
+        canvas.setFont("Courier-Bold", 6.8)
+        canvas.drawString(12, self.height - 17, self.label.upper())
+
+        left = 32
+        bottom = 23
+        usable_w = self.width - 64
+        usable_h = self.height - 54
+        radius = 11
+
+        def point(name: str) -> tuple[float, float]:
+            px, py = self.nodes[name]
+            return left + px * usable_w, bottom + py * usable_h
+
+        for start, end in self.edges:
+            x1, y1 = point(start)
+            x2, y2 = point(end)
+            dx = x2 - x1
+            dy = y2 - y1
+            length = max((dx * dx + dy * dy) ** 0.5, 1)
+            ux = dx / length
+            uy = dy / length
+            sx = x1 + ux * radius
+            sy = y1 + uy * radius
+            tx = x2 - ux * radius
+            ty = y2 - uy * radius
+            highlighted = (start, end) in self.highlighted_edges or (
+                not self.directed and (end, start) in self.highlighted_edges
+            )
+            canvas.setStrokeColor(ORANGE if highlighted else LINE_DARK)
+            canvas.setFillColor(ORANGE if highlighted else LINE_DARK)
+            canvas.setLineWidth(2.0 if highlighted else 1.0)
+            canvas.line(sx, sy, tx, ty)
+            if self.directed:
+                arrow_back_x = tx - ux * 7
+                arrow_back_y = ty - uy * 7
+                path = canvas.beginPath()
+                path.moveTo(tx, ty)
+                path.lineTo(arrow_back_x - uy * 3.6, arrow_back_y + ux * 3.6)
+                path.lineTo(arrow_back_x + uy * 3.6, arrow_back_y - ux * 3.6)
+                path.close()
+                canvas.drawPath(path, stroke=0, fill=1)
+
+        for name in self.nodes:
+            x, y = point(name)
+            highlighted = name in self.highlighted_nodes
+            canvas.setFillColor(ORANGE if highlighted else WHITE)
+            canvas.setStrokeColor(ORANGE if highlighted else TEAL)
+            canvas.setLineWidth(1.2)
+            canvas.circle(x, y, radius, stroke=1, fill=1)
+            canvas.setFillColor(WHITE if highlighted else NAVY_2)
+            canvas.setFont("Helvetica-Bold", 7.4)
+            canvas.drawCentredString(x, y - 2.6, name)
+        canvas.restoreState()
+
+
+class GridPathDiagram(Flowable):
+    """Small grid visual for the path-reconstruction exercise."""
+
+    def __init__(
+        self,
+        rows: Sequence[str],
+        *,
+        label: str,
+        path: Sequence[tuple[int, int]] = (),
+        height: float = 176,
+    ) -> None:
+        super().__init__()
+        self.rows = list(rows)
+        self.label = label
+        self.path = list(path)
+        self.width = CONTENT_W
+        self.height = height
+
+    def wrap(self, avail_width: float, avail_height: float) -> tuple[float, float]:
+        self.width = min(avail_width, CONTENT_W)
+        return self.width, self.height
+
+    def draw(self) -> None:
+        canvas = self.canv
+        canvas.saveState()
+        canvas.setFillColor(PALE)
+        canvas.setStrokeColor(LINE_DARK)
+        canvas.setLineWidth(0.7)
+        canvas.roundRect(0, 0, self.width, self.height, 5, stroke=1, fill=1)
+        canvas.setFillColor(ORANGE)
+        canvas.setFont("Courier-Bold", 6.8)
+        canvas.drawString(12, self.height - 17, self.label.upper())
+
+        row_count = len(self.rows)
+        col_count = len(self.rows[0])
+        cell = min(31, (self.width - 70) / col_count, (self.height - 48) / row_count)
+        grid_w = col_count * cell
+        grid_h = row_count * cell
+        origin_x = (self.width - grid_w) / 2
+        origin_y = 14 + (self.height - 40 - grid_h) / 2
+        path_index = {coord: index for index, coord in enumerate(self.path)}
+
+        for row_index, row in enumerate(self.rows):
+            for col_index, value in enumerate(row):
+                x = origin_x + col_index * cell
+                y = origin_y + (row_count - row_index - 1) * cell
+                coordinate = (row_index, col_index)
+                if value == "#":
+                    fill = NAVY_2
+                elif coordinate in path_index:
+                    fill = ORANGE_SOFT
+                else:
+                    fill = WHITE
+                canvas.setFillColor(fill)
+                canvas.setStrokeColor(ORANGE if coordinate in path_index else LINE_DARK)
+                canvas.setLineWidth(1.4 if coordinate in path_index else 0.65)
+                canvas.rect(x, y, cell, cell, stroke=1, fill=1)
+                if value in {"S", "T"}:
+                    canvas.setFillColor(ORANGE)
+                    canvas.setFont("Helvetica-Bold", 8.2)
+                    canvas.drawCentredString(x + cell / 2, y + cell / 2 - 2.8, value)
+                elif coordinate in path_index:
+                    canvas.setFillColor(NAVY_2)
+                    canvas.setFont("Courier-Bold", 6.5)
+                    canvas.drawCentredString(x + cell / 2, y + cell / 2 - 2.4, str(path_index[coordinate]))
+        canvas.restoreState()
 
 
 def p(text: str, paragraph_style: ParagraphStyle = BODY) -> Paragraph:
@@ -263,6 +424,24 @@ def worksheet_table(
         else:
             body_rows.append(["" for _ in headers])
     return grid_table(headers, body_rows, widths, font_size=7.1, row_heights=[row_height] * rows)
+
+
+def code_block(lines: Sequence[str]) -> Table:
+    block = Preformatted("\n".join(lines), CODE)
+    table = Table([[block]], colWidths=[CONTENT_W], hAlign="LEFT")
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), NAVY_2),
+                ("BOX", (0, 0), (-1, -1), 0.8, ORANGE),
+                ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                ("TOPPADDING", (0, 0), (-1, -1), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+            ]
+        )
+    )
+    return table
 
 
 def numbered_chain(items: Sequence[tuple[str, str]]) -> Table:
@@ -1804,7 +1983,464 @@ def build_final_loop_story() -> list[Flowable]:
     return s
 
 
+def build_traversal_practice_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Complete the exact Week 3 task",
+        "Four problems, four visible decisions",
+        "This workbook turns traversal practice into evidence: choose from the guarantee, name the state, preserve an invariant, test the boundary, and explain the near miss.",
+    )
+    s += [callout(
+        "Task objective",
+        "Solve one component problem, one shortest unweighted path, one directed dependency-cycle problem, and one path-reconstruction problem. Attempt each prompt before opening its worked review.",
+    ), spacer(10)]
+    s += [numbered_chain([
+        ("Classify", "Name the guarantee the prompt requires before naming BFS or DFS."),
+        ("Separate", "Define frontier, discovery, problem state, and final answer independently."),
+        ("Prove", "State the invariant and the exact moment a node becomes discovered."),
+        ("Review", "Test boundaries, defend complexity, and name a prompt change that breaks the choice."),
+    ]), spacer(11)]
+    s += [p("The 75-minute practice block", H2), grid_table(
+        ["Clock", "Activity", "Required artifact"],
+        [
+            ["0-8", "Refresh the decision model", "Guarantee, frontier, state, invariant, visited timing"],
+            ["8-20", "Problem 1: components", "Attempt plus three tests"],
+            ["20-33", "Problem 2: minimum edges", "Attempt plus queue-layer trace"],
+            ["33-46", "Problem 3: dependency cycle", "Attempt plus active-path trace"],
+            ["46-61", "Problem 4: reconstruct route", "Attempt plus parent chain"],
+            ["61-70", "Open the worked reviews", "Compare decisions, not just final answers"],
+            ["70-75", "Save evidence", "One repeated weakness and one correction sentence"],
+        ],
+        [55, 142, 296],
+        row_heights=[32, 32, 32, 32, 32, 32, 32],
+    ), spacer(9)]
+    s += [p("Evidence to save for every problem", H2), bullet_list([
+        "Decisive cue and required guarantee.",
+        "Traversal, frontier, state meanings, and invariant.",
+        "At least three boundary tests and a complexity explanation.",
+        "One near miss: the smallest prompt change that would require another method.",
+    ], checklist=True, compact=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Decision model",
+        "Choose from the guarantee, not the keyword",
+        "Words such as graph, path, or dependency do not choose the algorithm. The required guarantee and the state carried through the traversal do.",
+    )
+    s += [two_cards(
+        ("BFS", "Use a queue when equal-cost edges must be explored by layer: minimum edges, minimum steps, nearest target, or level order.", "Layer guarantee"),
+        ("DFS", "Use a stack or recursion when the central job is to finish a component, explore a branch, or expose active-path state.", "Branch guarantee"),
+    ), spacer(10)]
+    s += [grid_table(
+        ["Prompt requirement", "Default tool", "State that makes it correct", "Disqualifying cue"],
+        [
+            ["Explore every node in one component", "DFS or BFS", "Global discovered set", "If minimum distance is required, order now matters"],
+            ["Minimum edges or steps", "BFS", "Distance at discovery; queue by layer", "Unequal edge costs break plain BFS"],
+            ["Directed cycle on the active dependency path", "3-color DFS", "Unseen / visiting / done", "One visited set cannot identify a back edge"],
+            ["Return an actual shortest route", "BFS + parent", "Parent fixed on first discovery", "DFS proves reachability, not minimum edges"],
+            ["Nonnegative weighted shortest path", "Weight-aware search", "Best-known cost and priority frontier", "Plain BFS / DFS is not enough"],
+        ],
+        [137, 76, 163, 117],
+        row_heights=[48, 48, 48, 48, 48],
+    ), spacer(10)]
+    s += [callout(
+        "Truthful nuance",
+        "BFS and DFS are both correct for basic reachability and component discovery. Choose deliberately, then explain the real trade-off: queue width, stack depth, path-local state, or a required layer guarantee.",
+    ), spacer(9)]
+    s += [p("Separate these four layers", H2), numbered_chain([
+        ("Frontier", "Queue, stack, or recursion: what is processed next."),
+        ("Discovery", "What has already entered the search and cannot be added again."),
+        ("Problem state", "Distance, color, component ID, indegree, or other meaning."),
+        ("Answer", "Count, boolean, parent chain, path, or requested evidence."),
+    ])]
+    end_page(s)
+
+    component_nodes = {
+        "0": (0.03, 0.72), "1": (0.20, 0.83), "2": (0.34, 0.59),
+        "3": (0.52, 0.80), "4": (0.67, 0.62), "5": (0.57, 0.23),
+        "6": (0.73, 0.31), "7": (0.84, 0.13), "8": (0.96, 0.73),
+    }
+    component_edges = [("0", "1"), ("1", "2"), ("3", "4"), ("5", "6"), ("6", "7"), ("7", "5")]
+    s += page_heading(
+        "Problem 1 / attempt first",
+        "Count connected components",
+        "This is a disconnected undirected graph. The result must include isolated nodes and every component, not only the region reachable from node 0.",
+    )
+    s += [callout(
+        "Prompt",
+        "Given n = 9 nodes labeled 0 through 8 and undirected edges {0-1, 1-2, 3-4, 5-6, 6-7, 7-5}, return the number of connected components.",
+        warm=True,
+    ), spacer(9)]
+    s += [NetworkDiagram(component_nodes, component_edges, label="Undirected communication graph", height=154), spacer(9)]
+    s += [two_cards(
+        ("Input contract", "Adjacency-list graph; an isolated node has an empty neighbor list; edges may appear in both directions.", "Representation"),
+        ("Return contract", "One integer: the number of disjoint connected components across all n nodes.", "Output"),
+    ), spacer(9)]
+    s += [p("Write these decisions before coding", H2), bullet_list([
+        "What prompt cue makes traversal appropriate, and does BFS versus DFS affect correctness here?",
+        "When is a node marked discovered: before it enters the frontier or after it leaves?",
+        "Why is an outer loop over every node necessary?",
+        "What remains true when one complete traversal finishes?",
+        "Test an isolated node, no edges, one large component, and the triangle 5-6-7.",
+    ], checklist=True, compact=True), spacer(8)]
+    s += [callout("Attempt boundary", "Spend up to 12 minutes. Save your count, pseudocode or code, invariant, three tests, complexity, and one near-miss before turning the page.")]
+    end_page(s)
+
+    s += page_heading(
+        "Problem 1 / worked review",
+        "Finish one component before counting the next",
+        "An iterative DFS is used here to make stack depth explicit. BFS would also be correct because this prompt asks for component membership, not minimum distance.",
+    )
+    s += [numbered_chain([
+        ("Cue", "Count every disconnected region, including isolated nodes."),
+        ("Choice", "Scan all nodes; start iterative DFS from each unseen node."),
+        ("State", "A global discovered set survives between component traversals."),
+        ("Invariant", "Each completed start marks exactly one full component."),
+    ]), spacer(10)]
+    s += [code_block([
+        "count = 0",
+        "discovered = empty set",
+        "for node in 0 .. n - 1:",
+        "    if node in discovered: continue",
+        "    count = count + 1",
+        "    stack = [node]; add node to discovered",
+        "    while stack is not empty:",
+        "        current = stack.pop()",
+        "        for next in neighbors[current]:",
+        "            if next not in discovered:",
+        "                add next to discovered; stack.push(next)",
+        "return count",
+    ]), spacer(10)]
+    s += [grid_table(
+        ["Outer-loop start", "Newly finished component", "Discovered after traversal", "Count"],
+        [
+            ["0", "{0, 1, 2}", "{0, 1, 2}", "1"],
+            ["3", "{3, 4}", "{0, 1, 2, 3, 4}", "2"],
+            ["5", "{5, 6, 7}", "{0, 1, 2, 3, 4, 5, 6, 7}", "3"],
+            ["8", "{8}", "All nine nodes", "4"],
+        ],
+        [86, 132, 216, 59],
+        row_heights=[37, 37, 37, 37],
+    ), spacer(9)]
+    s += [two_cards(
+        ("Near miss", "One DFS from node 0 returns one component and silently misses nodes 3 through 8. If the prompt changes to minimum edges, DFS no longer supplies the required guarantee.", "What fails"),
+        ("Boundary proof", "Mark on push so duplicate edges and the 5-6-7 cycle cannot add the same node repeatedly. The isolated node 8 still starts and completes a component.", "Why it holds"),
+    ), spacer(8)]
+    s += [callout("Complexity", "With adjacency lists, every node is discovered once and every stored edge is scanned: O(V + E) time and O(V) discovered/frontier space.")]
+    end_page(s)
+
+    shortest_nodes = {
+        "S": (0.03, 0.50), "A": (0.27, 0.77), "B": (0.27, 0.22),
+        "C": (0.56, 0.74), "D": (0.56, 0.25), "T": (0.94, 0.50),
+    }
+    shortest_edges = [("S", "A"), ("S", "B"), ("A", "C"), ("B", "C"), ("B", "D"), ("C", "S"), ("C", "T"), ("D", "T")]
+    s += page_heading(
+        "Problem 2 / attempt first",
+        "Find the minimum number of edges",
+        "The graph is directed and every edge has equal cost. Duplicate edges and a cycle are present, so discovery timing is part of correctness and efficiency.",
+    )
+    s += [callout(
+        "Prompt",
+        "Adjacency: S -> [A, B, B], A -> [C], B -> [C, D], C -> [S, T], D -> [T], T -> []. Return the minimum number of edges from S to T, 0 when source equals target, and -1 when unreachable.",
+        warm=True,
+    ), spacer(9)]
+    s += [NetworkDiagram(shortest_nodes, shortest_edges, label="Directed equal-cost graph; the duplicate S -> B input edge is shown once", directed=True, highlighted_nodes=["S", "T"], height=154), spacer(9)]
+    s += [two_cards(
+        ("Required guarantee", "The returned distance must be the smallest number of directed equal-cost edges from source to target.", "Minimum"),
+        ("Noise to handle", "S points to B twice and C points back to S. Neither should duplicate useful work.", "Duplicates + cycle"),
+    ), spacer(9)]
+    s += [p("Before coding", H2), bullet_list([
+        "Name the cue that rules out a plain DFS answer.",
+        "Define what the queue stores and what distance means at discovery.",
+        "Choose mark-on-enqueue or mark-on-dequeue and defend the timing.",
+        "Write the layer invariant and the unreachable return contract.",
+        "Test source equals target, direct edge, duplicate edge, cycle, and unreachable target.",
+    ], checklist=True, compact=True), spacer(8)]
+    s += [callout("Attempt boundary", "Spend up to 13 minutes. Draw the queue by layer and record the distance assigned to each node on first discovery.")]
+    end_page(s)
+
+    s += page_heading(
+        "Problem 2 / worked review",
+        "First discovery is shortest only because edges cost the same",
+        "BFS processes equal-cost edges in layers. Distance can double as the discovery marker, preventing duplicate queue entries and preserving the first shortest distance.",
+    )
+    s += [numbered_chain([
+        ("Cue", "Minimum number of equal-cost directed edges."),
+        ("Choice", "BFS from S with distance assigned before enqueue."),
+        ("State", "Queue frontier plus distance map; no separate visited set needed."),
+        ("Invariant", "Queued nodes have final shortest distance and leave in nondecreasing distance."),
+    ]), spacer(10)]
+    s += [code_block([
+        "distance = {source: 0}",
+        "queue = [source]",
+        "while queue is not empty:",
+        "    node = queue.pop_left()",
+        "    if node == target: return distance[node]",
+        "    for next in neighbors[node]:",
+        "        if next in distance: continue",
+        "        distance[next] = distance[node] + 1",
+        "        queue.push_right(next)",
+        "return -1",
+    ]), spacer(10)]
+    s += [grid_table(
+        ["Layer", "First discoveries", "Frontier before layer", "Meaning"],
+        [
+            ["0", "S = 0", "[S]", "Source contract"],
+            ["1", "A = 1, B = 1", "[A, B]", "Duplicate S -> B is ignored"],
+            ["2", "C = 2, D = 2", "[C, D]", "C is not enqueued twice"],
+            ["3", "T = 3", "[T]", "First T discovery proves minimum 3"],
+        ],
+        [54, 135, 116, 188],
+        row_heights=[38, 38, 38, 38],
+    ), spacer(9)]
+    s += [two_cards(
+        ("Near miss", "DFS may return a valid but longer path first. Marking only on dequeue lets duplicate edges add the same node repeatedly and can destabilize later state.", "Wrong guarantee"),
+        ("Prompt change", "If edges carry unequal nonnegative costs, minimum edges is not minimum cost. Use a cost-aware method such as Dijkstra instead of plain BFS.", "Switch method"),
+    ), spacer(8)]
+    s += [callout("Complexity", "Each discovered vertex enters the queue once; every adjacency entry, including duplicates, is scanned once: O(V + E) time and O(V) space.")]
+    end_page(s)
+
+    dependency_nodes = {
+        "0": (0.02, 0.65), "1": (0.25, 0.72), "2": (0.50, 0.78),
+        "3": (0.71, 0.50), "4": (0.10, 0.16), "5": (0.38, 0.16),
+        "6": (0.92, 0.17),
+    }
+    dependency_edges = [("0", "1"), ("1", "2"), ("2", "3"), ("3", "1"), ("4", "5")]
+    s += page_heading(
+        "Problem 3 / attempt first",
+        "Detect a directed dependency cycle",
+        "Edge direction is part of the contract: u -> v means u must finish before v. A cycle means at least one chain of work can never become complete.",
+    )
+    s += [callout(
+        "Prompt",
+        "Tasks are 0 through 6 with dependencies 0 -> 1, 1 -> 2, 2 -> 3, 3 -> 1, and 4 -> 5. Node 6 is isolated. Return whether every task can finish; if not, identify one blocking cycle.",
+        warm=True,
+    ), spacer(9)]
+    s += [NetworkDiagram(dependency_nodes, dependency_edges, label="Directed prerequisite graph", directed=True, height=154), spacer(9)]
+    s += [two_cards(
+        ("Global fact", "A node may have been seen in an earlier, completely finished branch.", "Completed state"),
+        ("Path-local fact", "A node may still be active in the current dependency chain.", "Visiting state"),
+    ), spacer(9)]
+    s += [p("Define the evidence before coding", H2), bullet_list([
+        "Choose 3-color DFS or Kahn's indegree BFS and state why it exposes the evidence you need.",
+        "If using DFS, define unseen, visiting, and done precisely.",
+        "Name the exact edge event that proves a directed cycle.",
+        "Handle a self-loop, a safe edge to a completed node, disconnected work, and an isolated node.",
+        "State the dependency edge direction before interpreting any output.",
+    ], checklist=True, compact=True), spacer(8)]
+    s += [callout("Attempt boundary", "Spend up to 13 minutes. Save the color transition trace for the first cycle proof; do not rely on a single visited set.")]
+    end_page(s)
+
+    s += page_heading(
+        "Problem 3 / worked review",
+        "A back edge to the active path proves the cycle",
+        "Three-color DFS distinguishes a safe edge to completed work from an edge that re-enters the dependency chain currently being explored.",
+    )
+    s += [NetworkDiagram(
+        dependency_nodes,
+        dependency_edges,
+        label="Cycle evidence: 1 -> 2 -> 3 -> 1",
+        directed=True,
+        highlighted_edges=[("1", "2"), ("2", "3"), ("3", "1")],
+        highlighted_nodes=["1", "2", "3"],
+        height=118,
+    ), spacer(6)]
+    s += [numbered_chain([
+        ("Enter", "Set the node to visiting when its DFS frame opens."),
+        ("Explore", "Recurse on unseen work; an edge to visiting work proves a cycle."),
+        ("Finish", "Mark done only after every outgoing edge is safe."),
+        ("Scan", "Start from every unseen node to include disconnected work."),
+    ]), spacer(6)]
+    s += [code_block([
+        "color = all UNSEEN; active = []; position = {}",
+        "visit(node):",
+        "    color[node] = VISITING; position[node] = len(active); active.push(node)",
+        "    for next in neighbors[node]:",
+        "        if color[next] == VISITING: return active[position[next]:] + [next]",
+        "        if color[next] == UNSEEN:",
+        "            cycle = visit(next); if cycle: return cycle",
+        "    active.pop(); position.remove(node); color[node] = DONE; return []",
+        "# scan every unseen node; any returned cycle blocks completion",
+    ]), spacer(6)]
+    s += [grid_table(
+        ["Trace moment", "Colors / active path", "Conclusion"],
+        [
+            ["Enter 0, 1, 2, 3", "0, 1, 2, 3 are visiting", "Current path is 0 -> 1 -> 2 -> 3"],
+            ["Inspect 3 -> 1", "1 is still visiting", "Back edge proves cycle 1 -> 2 -> 3 -> 1"],
+            ["Return", "No need to finish remaining branches", "Not every dependency can complete"],
+        ],
+        [117, 184, 192],
+        row_heights=[34, 34, 34],
+    ), spacer(6)]
+    s += [two_cards(
+        ("Why one visited set fails", "It cannot distinguish completed work from a node still on the active path.", "Near miss"),
+        ("Valid alternative", "Kahn's BFS removes zero-indegree nodes. If it removes fewer than V, a cycle remains.", "Comparison"),
+    ), spacer(5)]
+    s += [callout("Complexity", "Every node changes color at most twice and every directed edge is inspected once: O(V + E) time and O(V) color, active-path, position, and DFS-stack space.")]
+    end_page(s)
+
+    grid_rows = ["S.#..", "#.#.#", ".....", ".##.T"]
+    worked_path = [(0, 0), (0, 1), (1, 1), (2, 1), (2, 2), (2, 3), (2, 4), (3, 4)]
+    s += page_heading(
+        "Problem 4 / attempt first",
+        "Return one shortest route through a grid",
+        "Four-direction moves have equal cost. The learner must return the route itself, not only prove reachability or report its length.",
+    )
+    s += [callout(
+        "Prompt",
+        "In the 4 x 5 grid, move through open cells using Right, Down, Left, Up as the fixed neighbor order. Return any shortest coordinate path from S to T, [S] when source equals target, and [] when unreachable.",
+        warm=True,
+    ), spacer(8)]
+    s += [GridPathDiagram(grid_rows, label="Open cells are white; # cells are blocked", height=160), spacer(8)]
+    s += [two_cards(
+        ("Discovery contract", "The first time a cell is discovered, save exactly one parent and do not overwrite it.", "Stable parent"),
+        ("Answer contract", "Backtrack from T to S through parent links, then reverse the collected coordinates.", "Reconstruction"),
+    ), spacer(8)]
+    s += [p("Before coding", H2), bullet_list([
+        "Separate queue order, discovered cells, parent links, and the final path.",
+        "Choose the exact moment a parent is assigned and a cell becomes discovered.",
+        "State when it is safe to stop: target discovery or target dequeue.",
+        "Test source equals target, blocked target, unreachable target, one corridor, and multiple shortest paths.",
+        "Explain why fixed neighbor order stabilizes this example without proving a globally lexicographic path.",
+    ], checklist=True, compact=True), spacer(3)]
+    s += [p("Pre-code decision record", H2), grid_table(
+        ["Decision", "Write this before implementation", "Quality check"],
+        [
+            ["Guarantee", "Minimum moves plus the coordinate route", "Reachability alone is insufficient"],
+            ["Frontier + state", "FIFO queue; discovered cells; one stable parent", "Keep final path separate"],
+            ["Invariant", "Each queued cell has a shortest parent chain from S", "Assign parent before enqueue"],
+            ["Attempt trace", "Predict the first parent chain that reaches T", "Use stated neighbor order"],
+            ["Boundaries", "[S] for same cell; [] if blocked or unreachable; tied routes allowed", "Never overwrite parents"],
+        ],
+        [78, 244, 171],
+        row_heights=[27, 30, 30, 28, 35],
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Problem 4 / worked review",
+        "Parent links turn a distance guarantee into a route",
+        "BFS provides the minimum-edge guarantee. The parent map preserves the evidence needed to reconstruct one of the shortest paths.",
+    )
+    s += [GridPathDiagram(grid_rows, label="Worked shortest path; numbers show path order", path=worked_path, height=128), spacer(5)]
+    s += [numbered_chain([
+        ("Discover", "Queue S with parent[S] = none."),
+        ("Assign once", "Set each unseen neighbor's parent before enqueue."),
+        ("Stop safely", "First target discovery has minimum distance."),
+        ("Reverse", "Follow T back to S, then reverse the chain."),
+    ]), spacer(5)]
+    s += [code_block([
+        "parent = {source: none}; queue = [source]",
+        "while queue is not empty and target not in parent:",
+        "    cell = queue.pop_left()",
+        "    for next in valid_neighbors(cell):",
+        "        if next in parent: continue",
+        "        parent[next] = cell; queue.push_right(next)",
+        "if target not in parent: return []",
+        "path = []; cell = target",
+        "while cell is not none: path.append(cell); cell = parent[cell]",
+        "reverse(path); return path",
+    ]), spacer(5)]
+    s += [grid_table(
+        ["Evidence", "Worked result"],
+        [
+            ["Path", "(0,0) -> (0,1) -> (1,1) -> (2,1) -> (2,2) -> (2,3) -> (2,4) -> (3,4)"],
+            ["Length", "7 moves; eight coordinates including source and target"],
+            ["Why shortest", "Every discovered cell receives its parent from the earliest reachable BFS layer"],
+            ["Multiple answers", "Another equal-length route is valid if its parent chain follows the same first-discovery rule"],
+        ],
+        [105, 388],
+        row_heights=[34, 30, 35, 35],
+    ), spacer(5)]
+    s += [two_cards(
+        ("Near miss", "Overwriting a parent destabilizes the chain. DFS finds a route but may not find the fewest moves.", "What fails"),
+        ("Prompt change", "Different cell costs require a cost-aware shortest-path method, not equal-layer BFS.", "Switch method"),
+    ), spacer(5)]
+    s += [callout("Complexity", "Each grid cell is discovered at most once and checks four neighbors: O(R x C) time and O(R x C) queue, parent, and output space.")]
+    end_page(s)
+
+    s += page_heading(
+        "Cross-problem review",
+        "Explain the decision, not only the code",
+        "A strong answer links the prompt guarantee to frontier order, state meaning, visited timing, tests, and complexity. The method name alone is not evidence.",
+    )
+    s += [grid_table(
+        ["Problem", "Decisive cue", "Traversal", "Extra state", "Invariant / proof"],
+        [
+            ["Components", "Finish every disconnected region", "DFS or BFS", "Global discovered + count", "Each unseen outer-loop start completes exactly one component"],
+            ["Minimum edges", "Equal-cost shortest distance", "BFS", "Distance at discovery", "Queue order is nondecreasing shortest distance"],
+            ["Dependency cycle", "Edge back to active directed path", "3-color DFS", "Unseen / visiting / done", "Visiting nodes are exactly the current recursion path"],
+            ["Shortest route", "Minimum edges plus actual path", "BFS", "Stable parent at discovery", "First discovery supplies a shortest parent chain"],
+        ],
+        [82, 118, 69, 108, 116],
+        row_heights=[58, 58, 58, 58],
+    ), spacer(10)]
+    s += [p("Use the 0 / 1 / 2 explanation rubric", H2), grid_table(
+        ["Score", "Evidence standard", "What to improve"],
+        [
+            ["0 - absent", "Method is named after coding, or state meanings never appear", "Return to the prompt guarantee and define state before the loop"],
+            ["1 - prompted / late", "Correct idea appears after a hint, failed trace, or unexplained change", "Move the decision to the cue that should trigger it"],
+            ["2 - independent", "Cue, state, invariant, timing, tests, and complexity appear at the correct decision point", "Preserve the behavior and test it on an adjacent prompt"],
+        ],
+        [74, 242, 177],
+        row_heights=[48, 48, 53],
+    ), spacer(10)]
+    s += [two_cards(
+        ("Correct but silent", "Code returns the expected sample, but the learner cannot say why traversal order and state guarantee correctness.", "Weak evidence"),
+        ("Interview-ready", "The learner predicts the approach, traces the state, tests a boundary, and explains what prompt change would invalidate it.", "Strong evidence"),
+    ), spacer(8)]
+    s += [callout("Correction sentence", "When I notice [cue], I will state [required guarantee], define [frontier and state], and name [invariant] before implementation so the choice is observable.")]
+    end_page(s)
+
+    s += page_heading(
+        "Completion and next action",
+        "Save four decisions and one correction",
+        "The task is complete when each attempt has inspectable reasoning. A solved sample without cue, state, proof, tests, and a near miss is not yet useful interview evidence.",
+    )
+    s += [grid_table(
+        ["Required attempt", "Completion proof", "Near-miss check"],
+        [
+            ["Connected components", "Count = 4; outer loop and discovery invariant explained", "Minimum-edge version would require BFS"],
+            ["Shortest unweighted path", "Distance = 3; queue layers and mark-on-discovery shown", "Weighted edges require cost-aware search"],
+            ["Directed dependency cycle", "False; cycle 1 -> 2 -> 3 -> 1 proved with visiting state", "One visited set is insufficient"],
+            ["Shortest reconstructed route", "A 7-move path; stable parent chain reversed", "DFS does not guarantee minimum moves"],
+        ],
+        [126, 225, 142],
+        row_heights=[58, 58, 58, 58],
+    ), spacer(10)]
+    s += [p("Common mistakes", H2), bullet_list([
+        "Choosing BFS or DFS from a keyword instead of the required guarantee.",
+        "Mixing frontier order, visited state, distance or color, parent, and final answer into one vague variable.",
+        "Marking on dequeue and allowing duplicate work or parent overwrite.",
+        "Using a single visited set for a directed active-path cycle.",
+        "Starting from one node and forgetting disconnected components.",
+        "Claiming O(V + E) without explaining the graph representation and stored edges.",
+    ], compact=True), spacer(8)]
+    s += [p("Completion check", H2), bullet_list([
+        "All four prompts were attempted before the worked reviews were opened.",
+        "Every solution records cue, traversal, state, invariant, three tests, complexity, and near miss.",
+        "The component, layer, active-path, and parent-chain traces can be explained aloud.",
+        "One repeated weak decision and one observable correction sentence are saved.",
+        "The next practice problem is chosen to test the correction, not to add a new topic.",
+    ], checklist=True, compact=True), spacer(8)]
+    s += [callout(
+        "Final talk track",
+        "I choose [method] because the prompt requires [guarantee]. My frontier is [structure]; state means [definition]; invariant is [truth]. I mark discovery [when]. I will test [boundaries]. Complexity is [bound]. I would switch approaches if [prompt change].",
+        warm=True,
+    )]
+    return s
+
+
 SPECS = [
+    PdfSpec(
+        filename="dsa_traversal-decision-practice-workbook.pdf",
+        category="DSA practice workbook",
+        title="Four Traversal Problems: Decision Practice Workbook",
+        subtitle="A 75-minute mixed BFS and DFS practice set with original prompts, worked traces, invariants, tests, near misses, and an explanation rubric.",
+        thesis="Choose traversal from the guarantee the prompt needs, keep state separate from the answer, and prove correctness across four representative graph problems.",
+        slug="dsa / traversal-decision-practice",
+        build_story=build_traversal_practice_story,
+    ),
     PdfSpec(
         filename="career_target-role-evidence-map.pdf",
         category="Career profile guide",

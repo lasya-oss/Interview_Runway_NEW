@@ -74,6 +74,7 @@ const ROADMAP_LIBRARY_HREFS: Readonly<Record<string, string>> = {
   "12w-1-map": pdfLibraryHref("career_target-role-evidence-map.pdf"),
   "12w-1-base": pdfLibraryHref("operations_technical-baseline-scorecard.pdf"),
   "12w-2-hash": pdfLibraryHref("dsa_hash-maps.pdf"),
+  "12w-3-practice": pdfLibraryHref("dsa_traversal-decision-practice-workbook.pdf"),
   "12w-4-frame": "/learn/library/material/template-system-design-canvas-docx-vnkzbt0l",
   "12w-4-capacity": pdfLibraryHref("sysdesign_capacity-estimation.pdf"),
   "12w-5-consistency": pdfLibraryHref("sysdesign_eventual-consistency.pdf"),
