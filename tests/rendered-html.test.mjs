@@ -292,7 +292,8 @@ test("Vault template and explainer actions open first-party inline PDF previews"
   );
 
   assert.match(libraryStartHere, /driveMaterialPreviewHref\(material\)/i);
-  assert.match(libraryStartHere, /target=\{record\.external \? "_blank"/i);
+  assert.match(libraryStartHere, /LibraryMaterialDialog/i);
+  assert.doesNotMatch(libraryStartHere, /target=\{record\.external \? "_blank"/i);
   assert.match(previewRoute, /Content-Type.*application\/pdf/i);
   assert.match(previewRoute, /Content-Disposition.*inline/i);
   assert.match(previewRoute, /readFirstPartyText/i);
@@ -507,7 +508,8 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(libraryStartHere, /scrollIntoView/);
   assert.doesNotMatch(libraryStartHere, /VAULT_START_HERE_ROLES|StartHereRole|setRole/i);
   assert.doesNotMatch(libraryStartHere, /Select a role or domain/i);
-  assert.match(libraryClient, /material\.demoAsset\.href/i);
+  assert.match(libraryClient, /learningMaterialViewerSource\(material\)/i);
+  assert.match(libraryClient, /LibraryMaterialDialog/i);
   assert.match(libraryClient, /Open actual content/i);
   assert.match(materialViewer, /DriveReplayPlayer/i);
   assert.match(materialViewer, /mediaType=\{displayKind\}/i);

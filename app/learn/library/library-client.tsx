@@ -12,6 +12,8 @@ import type { DemoTier, LearningMaterial } from "@/app/lib/demo-data";
 import type { DriveMaterial } from "@/app/lib/drive-materials";
 import type { LibraryCategorySummary, LibraryCatalog } from "./library-catalog";
 import { DriveMaterialShelf } from "./drive-material-shelf";
+import { LibraryMaterialDialog } from "./library-material-dialog";
+import { learningMaterialViewerSource } from "./library-material-source";
 import { VaultStartHere } from "./library-start-here";
 import { PdfGuideShelf } from "./pdf-guide-shelf";
 
@@ -203,11 +205,35 @@ export function LibraryClient({
                       <small>Source material not supplied yet</small>
                     </div>
                   ) : hasDirectAsset ? (
-                    <a className="library-record-action-button" href={material.demoAsset.href} target="_blank" rel="noreferrer">
-                      Open actual content <span aria-hidden="true">↗</span>
-                    </a>
+                    <LibraryMaterialDialog
+                      source={learningMaterialViewerSource(material)}
+                      title={material.title}
+                      eyebrow={`${material.category} · ${material.format}`}
+                      description="Open the material here without leaving InterviewRunway."
+                      buttonLabel="Open actual content"
+                      googleClientId={googleClientId}
+                      loginHint={loginHint}
+                    />
                   ) : (
-                    <Link className="library-record-action-button" href={unlocked ? `/learn/material/${material.slug}` : "/pricing"}>{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
+                    unlocked ? (
+                      <LibraryMaterialDialog
+                        source={null}
+                        title={material.title}
+                        eyebrow={`${material.category} · ${material.format}`}
+                        description="This representative sample opens inside InterviewRunway."
+                        buttonLabel={materialOpenLabel(material, unlocked, isLive)}
+                        googleClientId={googleClientId}
+                        loginHint={loginHint}
+                        emptyState={
+                          <div className="library-material-state library-material-content-unavailable" role="status">
+                            <strong>Sample preview</strong>
+                            <p>This representative material does not have a supplied source file.</p>
+                          </div>
+                        }
+                      />
+                    ) : (
+                      <Link className="library-record-action-button" href="/pricing">{materialOpenLabel(material, unlocked, isLive)} <span aria-hidden="true">↗</span></Link>
+                    )
                   )}
                 </div>
               </article>
@@ -290,6 +316,8 @@ export function LibraryClient({
           catalog={catalog}
           isLive={isLive}
           plan={profileId === "practice" ? "second-seat" : "vault"}
+          googleClientId={googleClientId}
+          loginHint={loginHint}
         />
       ) : null}
 

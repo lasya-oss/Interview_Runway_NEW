@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   driveMaterialCategory,
@@ -17,6 +16,13 @@ import {
 } from "@/app/lib/drive-pdf-guides";
 import type { LearningMaterial } from "@/app/lib/demo-data";
 import type { LibraryCatalog } from "./library-catalog";
+import { LibraryMaterialDialog } from "./library-material-dialog";
+import {
+  driveMaterialViewerSource,
+  drivePdfViewerSource,
+  learningMaterialViewerSource,
+  type LibraryMaterialViewerSource,
+} from "./library-material-source";
 
 export const VAULT_START_HERE_DOMAINS = [
   {
@@ -113,6 +119,7 @@ type StartHereRecord = {
   action: string;
   external?: boolean;
   contentUnavailable?: boolean;
+  viewerSource: LibraryMaterialViewerSource | null;
 };
 
 function domainForLibraryRecord(category: string, filename = "", context = ""): StartHereDomain | null {
@@ -173,6 +180,7 @@ function recordFromLearningMaterial(material: LearningMaterial): StartHereRecord
     action: hasDirectAsset ? "Open actual content" : "Open lesson",
     external: hasDirectAsset,
     contentUnavailable: !hasDirectAsset,
+    viewerSource: learningMaterialViewerSource(material),
   };
 }
 
@@ -191,6 +199,7 @@ function recordFromPdfGuide(guide: DrivePdfGuide): StartHereRecord | null {
     href: drivePdfPreviewHref(guide.id) ?? "#",
     action: "Open guide",
     external: true,
+    viewerSource: drivePdfViewerSource(guide, drivePdfTitle(guide.filename)),
   };
 }
 
@@ -210,6 +219,7 @@ function recordFromDriveMaterial(material: DriveMaterial): StartHereRecord | nul
     href: driveMaterialPreviewHref(material),
     action: material.kind === "template" ? "Open template" : "Open explainer",
     external: true,
+    viewerSource: driveMaterialViewerSource(material, driveMaterialTitle(material.filename)),
   };
 }
 
@@ -244,10 +254,14 @@ export function VaultStartHere({
   catalog,
   isLive,
   plan = "vault",
+  googleClientId = "",
+  loginHint = null,
 }: {
   catalog: LibraryCatalog | null;
   isLive: boolean;
   plan?: StartHerePlan;
+  googleClientId?: string;
+  loginHint?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [domain, setDomain] = useState<StartHereDomain | "">("");
@@ -391,9 +405,16 @@ export function VaultStartHere({
                                 <small>Source material not supplied yet</small>
                               </div>
                             ) : (
-                              <Link className="library-start-here__resource-action" href={record.href} target={record.external ? "_blank" : undefined} rel={record.external ? "noreferrer" : undefined}>
-                                {record.action} <span aria-hidden="true">↗</span>
-                              </Link>
+                              <LibraryMaterialDialog
+                                source={record.viewerSource}
+                                title={record.title}
+                                eyebrow={`${record.category} · ${record.format}`}
+                                description="Open the material here without leaving InterviewRunway."
+                                buttonLabel={record.action}
+                                buttonClassName="library-start-here__resource-action"
+                                googleClientId={googleClientId}
+                                loginHint={loginHint}
+                              />
                             )}
                           </article>
                         ))}
