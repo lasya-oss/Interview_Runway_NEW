@@ -12,10 +12,16 @@ import {
   type CompletionActivity,
 } from "@/app/lib/learner-progress";
 import { libraryHrefForRoadmapTask, type RoadmapWeek } from "@/app/lib/roadmap-data";
+import { useRoadmapProgress } from "./learner-progress-client";
 
 export type { RoadmapTask, RoadmapWeek } from "@/app/lib/roadmap-data";
 
 type RoadmapWeekStatus = "completed" | "in-progress" | "upcoming";
+
+type AccountProgressOverride = {
+  completedTaskIds: string[];
+  completionActivity: CompletionActivity;
+};
 
 export function RoadmapChecklist({
   profileId,
@@ -35,21 +41,32 @@ export function RoadmapChecklist({
   const isAccount = persistMode === "account";
   const planLabel = roadmapWeeks === 12 ? "Foundation" : "Second Seat";
   const storageKey = roadmapStorageKey(profileId);
+  const roadmap = useRoadmapProgress();
   const [initialProgress] = useState(() => {
-    const stored = isAccount ? null : readDemoProgress(storageKey, initialCompleted);
+    if (isAccount) return roadmap;
+    const stored = readDemoProgress(storageKey, initialCompleted);
     return roadmapProgressFor(
       weeks,
       stored?.completedTaskIds ?? initialCompleted,
       stored?.completionActivity,
     );
   });
-  const [completed, setCompleted] = useState<Set<string>>(() =>
+  const [demoCompleted, setDemoCompleted] = useState<Set<string>>(() =>
     new Set(initialProgress.completedTaskIds),
   );
-  const [completionActivity, setCompletionActivity] = useState<CompletionActivity>(initialProgress.completionActivity);
+  const [demoCompletionActivity, setDemoCompletionActivity] = useState<CompletionActivity>(initialProgress.completionActivity);
+  const [accountOverride, setAccountOverride] = useState<AccountProgressOverride | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const allTasks = useMemo(() => weeks.flatMap((week) => week.tasks), [weeks]);
+  const completed = useMemo(
+    () => new Set(isAccount ? accountOverride?.completedTaskIds ?? roadmap.completedTaskIds : demoCompleted),
+    [accountOverride?.completedTaskIds, demoCompleted, isAccount, roadmap.completedTaskIds],
+  );
+  const completionActivity = isAccount
+    ? accountOverride?.completionActivity ?? roadmap.completionActivity
+    : demoCompletionActivity;
+
   const completedCount = allTasks.filter((task) => completed.has(task.id)).length;
   const completion = Math.round((completedCount / allTasks.length) * 100);
   const activeWeek = useMemo(() => {
@@ -97,9 +114,14 @@ export function RoadmapChecklist({
           : [...next],
         readCompletionActivity(saved.completionActivity),
       );
+      if (isAccount) setAccountOverride(null);
     } catch {
-      setCompleted(previous);
-      setCompletionActivity(previousCompletionActivity);
+      if (isAccount) {
+        setAccountOverride(null);
+      } else {
+        setDemoCompleted(previous);
+        setDemoCompletionActivity(previousCompletionActivity);
+      }
       setSaveError("Progress could not be saved. Please try again.");
     } finally {
       setSaving(false);
@@ -118,8 +140,12 @@ export function RoadmapChecklist({
       }
     }
     if (!next.has(taskId)) delete nextCompletionActivity[taskId];
-    setCompleted(next);
-    setCompletionActivity(nextCompletionActivity);
+    if (isAccount) {
+      setAccountOverride({ completedTaskIds: [...next], completionActivity: nextCompletionActivity });
+    } else {
+      setDemoCompleted(next);
+      setDemoCompletionActivity(nextCompletionActivity);
+    }
     void persist(next, nextCompletionActivity, previous, completionActivity);
   };
 
@@ -129,8 +155,12 @@ export function RoadmapChecklist({
       roadmapProgressFor(weeks, isAccount ? [] : initialCompleted).completedTaskIds,
     );
     const nextCompletionActivity: CompletionActivity = {};
-    setCompleted(next);
-    setCompletionActivity(nextCompletionActivity);
+    if (isAccount) {
+      setAccountOverride({ completedTaskIds: [...next], completionActivity: nextCompletionActivity });
+    } else {
+      setDemoCompleted(next);
+      setDemoCompletionActivity(nextCompletionActivity);
+    }
     void persist(next, nextCompletionActivity, previous, completionActivity);
   };
 

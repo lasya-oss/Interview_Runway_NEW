@@ -1603,6 +1603,8 @@ test("Today and Status consume the Roadmap snapshot for both learner tiers", asy
   assert.match(progress, /roadmapProgressFor\([\s\S]*?completedCount[\s\S]*?progressPercent[\s\S]*?currentWeek/);
   assert.match(provider, /if \(!isLive\)[\s\S]*?window\.localStorage\.getItem\(storageKey\)/);
   assert.match(provider, /fetch\(`\/api\/learner\/progress\?roadmapWeeks=\$\{roadmapWeeks\}`,[\s\S]*?cache: "no-store"/);
+  assert.match(provider, /const pathname = usePathname\(\)/);
+  assert.match(provider, /\[isLive, pathname, profileId, roadmapWeeks, storageKey, synchronized, weeks\]/);
   assert.match(dashboard, /const completedLabel = isTracked[\s\S]*?roadmap\.completedCount/);
   assert.match(dashboard, /const weekProgress = roadmap\.weekProgress/);
   assert.match(dashboard, /week-progress-item--\$\{week\.status\}/);
@@ -1610,6 +1612,9 @@ test("Today and Status consume the Roadmap snapshot for both learner tiers", asy
   assert.match(dashboard, /function describeNextAction\([\s\S]*?nextTask\.learning\.kind === "material"[\s\S]*?LEARNING_MATERIALS\.find[\s\S]*?nextTask\.learning\.objective/);
   assert.doesNotMatch(dashboard, /Continue the lesson, then explain your choice aloud before viewing the worked decision tree/);
   assert.match(accessCard, /progress\.synchronized \? progress\.progressPercent : fallbackProgress/);
+  assert.match(roadmap, /useRoadmapProgress\(\)/);
+  assert.match(roadmap, /accountOverride\?\.completedTaskIds \?\? roadmap\.completedTaskIds/);
+  assert.match(roadmap, /accountOverride\?\.completionActivity \?\? roadmap\.completionActivity/);
   assert.match(roadmap, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.next\], nextCompletionActivity\)/);
   assert.match(studyButton, /emitRoadmapProgressUpdated\(\s*profileId,/);
   assert.match(shell, /<RoadmapProgressProvider[\s\S]*?initialCompleted=\{profile\.completedTaskIds\}/);

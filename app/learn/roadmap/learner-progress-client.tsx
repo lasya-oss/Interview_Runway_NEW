@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useContext,
@@ -50,6 +51,7 @@ export function RoadmapProgressProvider({
 }) {
   const weeks = useMemo(() => roadmapPlanForWeeks(roadmapWeeks), [roadmapWeeks]);
   const synchronized = isLive || initialCompleted !== undefined;
+  const pathname = usePathname();
   const initialSnapshot = useMemo(
     () =>
       synchronized
@@ -156,7 +158,7 @@ export function RoadmapProgressProvider({
       window.removeEventListener("focus", refreshLiveProgress);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
-  }, [isLive, profileId, roadmapWeeks, storageKey, synchronized, weeks]);
+  }, [isLive, pathname, profileId, roadmapWeeks, storageKey, synchronized, weeks]);
 
   const value = useMemo(
     () => ({ ...snapshot, synchronized }),
