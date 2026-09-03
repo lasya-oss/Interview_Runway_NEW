@@ -23,6 +23,10 @@ function isPdfAsset(filename: string, mimeType: string) {
   return /^application\/pdf$/i.test(mimeType) || /\.pdf$/i.test(filename);
 }
 
+function isMediaKind(kind: ReturnType<typeof materialDisplayKind>): kind is "video" | "audio" {
+  return kind === "video" || kind === "audio";
+}
+
 export function MaterialViewer({
   fileId,
   filename,
@@ -59,35 +63,37 @@ export function MaterialViewer({
   }
 
   // The original narrated media lives in Drive rather than the static asset
-  // bundle. When the protected viewer is configured, use it before considering
-  // the first-party transcript fallback so a video record remains playable.
-  if (!assetUrl && googleClientId && (displayKind === "video" || displayKind === "audio")) {
+  // bundle. When the protected viewer is configured, use it so a video record
+  // can still play its original source.
+  if (!assetUrl && googleClientId && isMediaKind(displayKind)) {
     return <DriveReplayPlayer clientId={googleClientId} fileId={fileId} loginHint={loginHint} mediaType={displayKind} title={title} />;
+  }
+
+  // A transcript is useful study context, but it is not the narrated lesson.
+  // Never make a Drive-only video or audio record look playable by rendering a
+  // different companion file when the original media is not connected.
+  if (isMediaKind(displayKind)) {
+    return (
+      <div className="library-material-state library-material-content-unavailable" data-material-file-id={fileId} aria-live="polite">
+        <span aria-hidden="true">!</span>
+        <strong>Content unavailable</strong>
+        <p>The original {displayKind} is not connected to this workspace yet.</p>
+      </div>
+    );
   }
 
   const pdfSourceUrl = isPdfAsset(filename, mimeType)
     ? assetUrl
-    : displayKind === "video" || displayKind === "audio"
-      ? null
-      : fallbackAssetUrl ?? (isTextMaterial(filename, mimeType) ? assetUrl : null);
-
-  // Builds without protected Drive playback still get a first-party transcript
-  // companion even though the original MP4 masters remain in Drive.
-  const companionPdfUrl = fallbackAssetUrl && (displayKind === "video" || displayKind === "audio")
-    ? fallbackAssetUrl
-    : null;
-
-  if (companionPdfUrl) {
-    return <PdfMaterialPreview assetUrl={companionPdfUrl} fileId={fileId} filename={filename.replace(/\.mp4$/i, ".md")} mimeType="text/markdown" title={title} />;
-  }
+    : fallbackAssetUrl ?? (isTextMaterial(filename, mimeType) ? assetUrl : null);
 
   if (pdfSourceUrl && (fallbackAssetUrl || isTextMaterial(filename, mimeType) || isPdfAsset(filename, mimeType))) {
     return <PdfMaterialPreview assetUrl={pdfSourceUrl} fileId={fileId} filename={filename} mimeType={mimeType} title={title} />;
   }
 
   return (
-    <div className="library-material-state" data-material-file-id={fileId} aria-live="polite">
+    <div className="library-material-state library-material-content-unavailable" data-material-file-id={fileId} aria-live="polite">
       <span aria-hidden="true">PREVIEW</span>
+      <strong>Content unavailable</strong>
       <p>{displayKind === "video" ? "Original video playback is not configured for this workspace." : displayKind === "audio" ? "Original audio playback is not configured for this workspace." : "This material’s in-app PDF preview is temporarily unavailable."}</p>
     </div>
   );

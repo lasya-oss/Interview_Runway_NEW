@@ -94,7 +94,13 @@ export function DriveReplayPlayer({
           },
         );
         if (!response.ok) {
-          throw new Error(response.status === 403 ? "This Google account cannot read the supplied replay." : "The replay could not be loaded.");
+          throw new Error(
+            response.status === 403
+              ? "The signed-in account cannot read the supplied material."
+              : response.status === 404
+                ? "The supplied material was not found."
+                : "The original material could not be loaded.",
+          );
         }
 
         const blob = await response.blob();
@@ -115,7 +121,7 @@ export function DriveReplayPlayer({
       const oauth2 = window.google?.accounts.oauth2;
       if (!oauth2 || !clientId) {
         setState("error");
-        setMessage("Google Drive playback is not configured for this workspace.");
+        setMessage("The original material is not connected to this workspace yet.");
         return;
       }
 
@@ -143,7 +149,7 @@ export function DriveReplayPlayer({
       .catch(() => {
         if (!active) return;
         setState("error");
-        setMessage("Google Drive playback could not be initialized.");
+        setMessage("Protected material playback could not be initialized.");
       });
 
     return () => {
@@ -152,10 +158,20 @@ export function DriveReplayPlayer({
     };
   }, [clientId, fileId, loginHint]);
 
+  const handleMediaError = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+    setSource(null);
+    setState("error");
+    setMessage("The original material could not be played.");
+  };
+
   if (source) {
     return mediaType === "audio"
-      ? <audio className="library-material-audio-player" aria-label={`${title} audio`} controls src={source} />
-      : <video className="library-material-media" aria-label={`${title} video`} controls playsInline src={source} />;
+      ? <audio className="library-material-audio-player" aria-label={`${title} audio`} controls onError={handleMediaError} src={source} />
+      : <video className="library-material-media" aria-label={`${title} video`} controls onError={handleMediaError} playsInline src={source} />;
   }
 
   return (
@@ -166,6 +182,7 @@ export function DriveReplayPlayer({
       aria-busy={state === "loading"}
     >
       <span aria-hidden="true">{state === "loading" ? "···" : state === "permission" ? "01" : "!"}</span>
+      {state === "error" ? <strong>Content unavailable</strong> : null}
       <p>{message}</p>
       {state === "permission" ? (
         <button type="button" onClick={() => tokenClientRef.current?.requestAccessToken({ prompt: "consent" })}>

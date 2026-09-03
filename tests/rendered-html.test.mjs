@@ -358,6 +358,34 @@ test("Library content actions never point at missing assets", async () => {
   assert.match(materialPage, /source material for this preview has not been supplied yet/i);
 });
 
+test("Drive-only narrated records never substitute a transcript for the original lesson", async () => {
+  const activeSelection = await readFile(
+    new URL("../app/lib/active-library-selection.ts", import.meta.url),
+    "utf8",
+  );
+  const materialViewer = await readFile(
+    new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
+    "utf8",
+  );
+  const replayPlayer = await readFile(
+    new URL("../app/learn/practice/replays/drive-replay-player.tsx", import.meta.url),
+    "utf8",
+  );
+  const narratedFiles = [...activeSelection.matchAll(/^  "([^\"]+\.mp4)",$/gm)].map((match) => match[1]);
+
+  assert.equal(narratedFiles.length, 15, "Vault should expose the 15 curated narrated records");
+  for (const filename of narratedFiles) {
+    assert.equal(existsSync(new URL(`../public/drive-materials/${filename}`, import.meta.url)), false, filename);
+    assert.equal(existsSync(new URL(`../public/drive-materials/${filename.replace(/\.mp4$/i, "_transcript.md")}`, import.meta.url)), true, `${filename} should retain its transcript companion`);
+  }
+
+  assert.match(materialViewer, /Never make a Drive-only video or audio record look playable/i);
+  assert.match(materialViewer, /library-material-content-unavailable/i);
+  assert.doesNotMatch(materialViewer, /const companionPdfUrl/);
+  assert.match(replayPlayer, /Content unavailable/i);
+  assert.match(replayPlayer, /onError=\{handleMediaError\}/i);
+});
+
 test("PDF viewer shows a record header and user-controlled fullscreen option", async () => {
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const pdfShelf = await readFile(
@@ -435,14 +463,14 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(libraryClient, /Open actual content/i);
   assert.match(materialViewer, /DriveReplayPlayer/i);
   assert.match(materialViewer, /mediaType=\{displayKind\}/i);
-  assert.match(materialViewer, /displayKind === "video" \|\| displayKind === "audio"/i);
-  assert.match(materialViewer, /companionPdfUrl/i);
-  assert.match(materialViewer, /Builds without protected Drive playback/i);
-  const protectedViewerBranch = materialViewer.indexOf('if (!assetUrl && googleClientId && (displayKind === "video" || displayKind === "audio"))');
+  assert.match(materialViewer, /isMediaKind\(displayKind\)/i);
+  assert.match(materialViewer, /Never make a Drive-only video or audio record look playable/i);
+  assert.doesNotMatch(materialViewer, /const companionPdfUrl/);
+  const protectedViewerBranch = materialViewer.indexOf('if (!assetUrl && googleClientId && isMediaKind(displayKind))');
   const protectedViewer = materialViewer.indexOf("<DriveReplayPlayer", protectedViewerBranch);
-  const companionFallback = materialViewer.indexOf("const companionPdfUrl", protectedViewerBranch);
+  const unavailableFallback = materialViewer.indexOf("library-material-content-unavailable", protectedViewerBranch);
   assert.ok(protectedViewerBranch >= 0, "protected media branch should exist");
-  assert.ok(protectedViewer >= 0 && protectedViewer < companionFallback, "protected media should be selected before transcript fallback");
+  assert.ok(protectedViewer >= 0 && protectedViewer < unavailableFallback, "protected media should be selected before unavailable fallback");
   assert.match(libraryStartHere, /action: material\.kind === "template" \? "Open template" : "Open explainer",\s*external: true,/i);
   assert.match(driveReplayPlayer, /mediaType\?: "video" \| "audio"/i);
   assert.match(driveReplayPlayer, /<audio className="library-material-audio-player"/i);
