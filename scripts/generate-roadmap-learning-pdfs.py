@@ -2431,7 +2431,405 @@ def build_traversal_practice_story() -> list[Flowable]:
     return s
 
 
+def build_remote_compensation_offer_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Decision system",
+        "Compare the whole offer, not the USD headline",
+        "A remote offer is a bundle of cash, benefits, working conditions, contract terms, currency exposure, and career options. This workbook makes each part visible before you decide or negotiate.",
+    )
+    s += [callout(
+        "Core idea",
+        "Use one comparison date, one currency anchor, and one set of assumptions. Separate verified facts from estimates so a precise-looking total never hides uncertainty.",
+    ), spacer(10)]
+    s += [numbered_chain([
+        ("Gate", "Remove any offer that fails a non-negotiable safety or work condition."),
+        ("Normalize", "Put cash, benefits, costs, and time on the same annual basis."),
+        ("Stress-test", "Change the uncertain inputs and see whether the decision survives."),
+        ("Negotiate", "Ask for the few changes that can actually alter the result."),
+    ]), spacer(12)]
+    s += [p("Write the decision before scoring", H2), two_cards(
+        ("Decision statement", "By [date], choose the offer that best supports [12-24 month goal] while meeting [must-have conditions] and keeping [named risk] within an acceptable range.", "Use"),
+        ("Comparison boundary", "Offers A and B, evaluated on the same date, with figures converted using the same planning rate and only written terms treated as facts.", "Control"),
+    ), spacer(10)]
+    s += [p("Three evidence labels", H2), grid_table(
+        ["Label", "Meaning", "How to record it"],
+        [
+            ["Verified", "Written in the offer, benefits document, or contract.", "Quote the clause or attach the source and date."],
+            ["Estimated", "A reasonable planning input that is not guaranteed.", "Record the basis, range, owner, and next check."],
+            ["Unknown", "Material information is missing or ambiguous.", "Turn it into a named employer or adviser question."],
+        ],
+        [76, 190, 217],
+    ), spacer(10)]
+    s += [callout("Boundary", "This workbook is educational. It does not determine employment status or provide tax, legal, investment, or currency advice. Use qualified India-specific advisers for personal conclusions.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Step 1",
+        "Identify the engagement model",
+        "The same headline amount can produce very different obligations and protections. Confirm who employs or contracts with you, who pays you, and which promises are enforceable in writing.",
+    )
+    s += [grid_table(
+        ["Question", "Direct employee", "Employee through EOR", "Independent contractor"],
+        [
+            ["Legal relationship", "You are employed by the hiring entity or its local entity.", "A local employer-of-record employs you and supplies services to the client.", "You or your business supplies services under a commercial contract."],
+            ["Pay evidence", "Offer, payroll terms, payslip, and benefit documents.", "Offer and local employment terms from the EOR; client promises should also be written.", "Signed services agreement, statement of work, invoice terms, and payment method."],
+            ["Time off", "Confirm paid leave, holidays, and approval rules.", "Confirm local policy, client policy, and which one controls.", "Assume time off is unpaid unless the contract says otherwise."],
+            ["Protection to verify", "Notice, termination, benefits, probation, and policy coverage.", "Employer identity, client assignment ending, transfer, notice, and benefit continuity.", "Termination, notice, liability, IP, exclusivity, disputes, and invoice remedies."],
+            ["Operating reality", "Manager, review cycle, payroll, and working hours.", "Split responsibilities between EOR and client; escalation path matters.", "Deliverables, acceptance, availability, on-call, expenses, and scope changes."],
+        ],
+        [93, 130, 130, 130],
+        font_size=7.2,
+    ), spacer(10)]
+    s += [p("Ask until the relationship is unambiguous", H2), bullet_list([
+        "What is the exact legal name and country of the entity signing with me?",
+        "Am I an employee, an EOR employee, or an independent contractor in the written agreement?",
+        "Who owns payroll or invoicing problems, benefits questions, performance management, and termination?",
+        "What happens if the client ends its relationship with the EOR or changes providers?",
+        "Which document controls if a recruiter message conflicts with the final agreement?",
+    ], checklist=True, compact=True), spacer(8)]
+    s += [callout("Do not infer", "A company laptop, full-time schedule, or monthly payment does not by itself answer the legal classification question. Record the written model and obtain qualified advice when the reality and paperwork appear inconsistent.")]
+    end_page(s)
+
+    s += page_heading(
+        "Step 2",
+        "Normalize cash without false precision",
+        "Build an annual planning view, but keep guaranteed cash, probability-weighted cash, and speculative upside separate. Never add an uncertain promise to base pay as if both were equally reliable.",
+    )
+    s += [code_block([
+        "Guaranteed annual cash = fixed pay + guaranteed allowances",
+        "Probable annual cash   = guaranteed cash + (target bonus x confidence)",
+        "Contractor net before tax = invoice revenue - unpaid time - business costs - payment and FX costs",
+        "Planning INR value = USD cash x chosen planning rate",
+    ]), spacer(11)]
+    s += [grid_table(
+        ["Component", "Record", "Do not assume"],
+        [
+            ["Base or retainer", "Currency, pay frequency, start date, review date, and any guaranteed minimum.", "A monthly number always means twelve paid months or survives a pause."],
+            ["Bonus or commission", "Target, eligibility, measurement period, payout date, first-year proration, and history.", "Target equals expected payout or is guaranteed."],
+            ["Sign-on or retention", "Vesting, repayment trigger, tax treatment to verify, and leaving date risk.", "A one-time payment should be compared with recurring base."],
+            ["Equity", "Instrument, quantity, vesting, exercise rules, liquidity, expiry, and written valuation evidence.", "An internal valuation is cash or a future sale is certain."],
+            ["Overtime or on-call", "Whether paid, expected frequency, rate, and time-off recovery.", "Availability outside overlap hours is rare because the recruiter said so."],
+        ],
+        [100, 203, 180],
+        font_size=7.25,
+    ), spacer(9)]
+    s += [p("Confidence rule", H2), two_cards(
+        ("Guaranteed", "Include at 100 percent only when the amount and condition are written and the condition is already satisfied.", "High confidence"),
+        ("Variable", "Use a range or explicit confidence such as 0, 50, and 100 percent. Keep it visible beside the total.", "Uncertain"),
+    ), spacer(9)]
+    s += [callout("Equity rule", "Show equity as a separate scenario, not as salary. A useful decision can say Offer A wins on cash even if Offer B has uncertain upside.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Step 3",
+        "Price benefits, unpaid time, and replacement costs",
+        "A contractor premium is not extra money until it covers the protections and costs that moved from the employer to you. Use your real replacement cost, not a generic percentage.",
+    )
+    s += [grid_table(
+        ["Area", "Employee or EOR evidence", "Contractor replacement question"],
+        [
+            ["Paid time off", "Days, public holidays, sick leave, carryover, and first-year eligibility.", "How many non-billable days will I reserve for leave, illness, holidays, and administration?"],
+            ["Health cover", "People covered, limits, exclusions, waiting periods, and effective date.", "What policy or emergency reserve would I buy for the same practical protection?"],
+            ["Retirement and insurance", "Employer contributions and scheme documents; confirm actual eligibility.", "What saving and protection must I fund independently?"],
+            ["Equipment and workspace", "Laptop, repair, replacement, internet, coworking, and security requirements.", "Which purchase, depreciation, support, or security cost remains mine?"],
+            ["Administration", "Payroll, statutory records, and employer support path.", "Accountant, invoicing, record keeping, banking, compliance review, and collection time."],
+            ["Income continuity", "Notice, severance or policy terms, and benefit end date to verify.", "Bench reserve, delayed payment buffer, termination notice, and client concentration."],
+        ],
+        [95, 194, 194],
+        font_size=7.2,
+    ), spacer(10)]
+    s += [p("Convert unpaid days carefully", H2), code_block([
+        "Illustrative daily planning rate = annual contract value / planned billable days",
+        "Unpaid-time cost = daily planning rate x planned non-billable days",
+        "Replacement-cost view = quoted contract value - unpaid time - recurring business costs",
+    ]), spacer(9)]
+    s += [two_cards(
+        ("Avoid double counting", "If your annual contract value already assumes eleven billed months, do not subtract the same leave again.", "Check"),
+        ("Value access, not labels", "A benefit name has zero decision value until you confirm eligibility, coverage, start date, and practical use.", "Check"),
+    ), spacer(9)]
+    s += [callout("Personalize", "Replacement cost depends on dependants, health needs, existing cover, savings, and risk tolerance. Record your source and range instead of copying someone else's contractor uplift.")]
+    end_page(s)
+
+    s += page_heading(
+        "Step 4",
+        "Make currency and payment risk visible",
+        "Do not predict one exchange rate. Choose a documented planning rate, then test a stronger-rupee and weaker-rupee case while separating market movement from fees and payment failure.",
+    )
+    s += [numbered_chain([
+        ("Anchor", "Record the source, timestamp, and rate used for the main comparison."),
+        ("Range", "Run at least three rates; treat them as sensitivity cases, not forecasts."),
+        ("Friction", "Separate provider spread, transfer fee, receiving fee, and conversion timing."),
+        ("Control", "Decide which party bears late-payment and currency-conversion choices."),
+    ]), spacer(12)]
+    s += [grid_table(
+        ["Scenario", "USD annual cash", "Planning rate", "Gross INR view", "What it tests"],
+        [
+            ["Stronger INR", "[ ]", "[lower case]", "USD x rate", "How much INR value falls when the rupee strengthens."],
+            ["Planning", "[ ]", "[anchor]", "USD x rate", "The common comparison case used for both offers."],
+            ["Weaker INR", "[ ]", "[higher case]", "USD x rate", "Upside that should not be treated as guaranteed."],
+        ],
+        [78, 86, 78, 93, 148],
+    ), spacer(10)]
+    s += [p("Payment-path checklist", H2), bullet_list([
+        "Invoice currency, due date, acceptance condition, and late-payment remedy are written.",
+        "Transfer platform, bank fees, FX spread, intermediary deductions, and who pays each cost are known.",
+        "A small test payment confirms beneficiary details before a material invoice is due.",
+        "You know what evidence the bank, accountant, or adviser needs you to retain.",
+        "A buffer covers at least one realistic delay; the comparison records the chosen buffer, not a universal rule.",
+    ], checklist=True, compact=True), spacer(8)]
+    s += [callout("Keep two risks separate", "Exchange-rate movement changes the INR value of valid payment. Payment risk is the chance that money arrives late, short, disputed, or not at all. They need different controls.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Step 5",
+        "Compare the operating reality",
+        "A high-paying role can be a poor offer if the written schedule, on-call burden, decision access, or manager relationship makes the work unsustainable. Score the actual operating system, not the remote label.",
+    )
+    s += [grid_table(
+        ["Dimension", "Evidence to request", "Decision question"],
+        [
+            ["Time-zone overlap", "Named hours, daylight-saving impact, meeting distribution, and escalation exceptions.", "How often will work cross my protected hours, and who can change the expectation?"],
+            ["On-call and incidents", "Rotation size, pages, severity, compensation or recovery, and backup coverage.", "What does a bad week look like, and how often does it occur?"],
+            ["Leave in practice", "Approval path, blackout periods, team coverage, and actual use.", "Can I use the stated leave without creating an invisible performance penalty?"],
+            ["Manager and feedback", "Reporting line, review cadence, first 90-day outcomes, and promotion ownership.", "Who decides whether I am succeeding, and what evidence will they use?"],
+            ["Scope and learning", "First projects, decision authority, technical surface, mentorship, and roadmap access.", "Will this role produce stronger evidence for my next target?"],
+            ["Remote support", "Equipment, security, travel, coworking, communication norms, and local escalation.", "Which failure or expense becomes mine because I am remote?"],
+        ],
+        [93, 208, 182],
+        font_size=7.2,
+    ), spacer(10)]
+    s += [p("Turn vague promises into observable terms", H2), two_cards(
+        ("Vague", "Flexible hours, strong growth, generous equity, global team, and unlimited leave.", "Promise"),
+        ("Observable", "Three overlap hours, monthly career review, written grant terms, six-person rotation, and named equipment budget.", "Evidence"),
+    ), spacer(10)]
+    s += [callout("Career value", "Do not force career value into rupees. Score it separately using evidence: scope you will own, decisions you can make, systems you will touch, feedback quality, and the stories you can later defend.")]
+    end_page(s)
+
+    s += page_heading(
+        "Step 6",
+        "Inspect the contract and compliance questions",
+        "Your job is not to become a lawyer or tax adviser. Your job is to spot terms that can change value or risk, record the uncertainty, and route the exact question to the right owner.",
+    )
+    s += [grid_table(
+        ["Term", "What to locate", "Question to ask"],
+        [
+            ["Payment", "Amount, currency, invoice trigger, due date, acceptance, expenses, withholding, and dispute path.", "What event starts the payment clock, and what happens if payment is late or short?"],
+            ["Termination", "Notice for each side, immediate triggers, pay through notice, final invoice, and benefit end date.", "Which amounts survive termination, and can the client end an EOR assignment without the same notice?"],
+            ["IP and confidentiality", "Background IP, work product, open source, side projects, inventions, and confidentiality duration.", "Does the language reach work created outside the engagement or tools I already own?"],
+            ["Liability and indemnity", "Caps, exclusions, insurance expectations, data/security obligations, and defence control.", "Is my downside bounded and proportionate to the fees and control I have?"],
+            ["Exclusivity and restrictions", "Other clients, moonlighting, non-solicit, non-compete, geography, and duration.", "Which real future work would this prevent?"],
+            ["Law and disputes", "Governing law, venue, arbitration, language, costs, and notice method.", "How would I practically enforce or defend this term from India?"],
+        ],
+        [95, 204, 184],
+        font_size=7.05,
+    ), spacer(9)]
+    s += [p("Route the question", H2), grid_table(
+        ["Owner", "Best used for"],
+        [
+            ["Employer or recruiter", "Missing package facts, policy documents, operating expectations, and written amendments."],
+            ["Qualified legal adviser", "Classification, enforceability, IP, liability, restrictions, governing law, and disputes."],
+            ["Qualified tax or accounting adviser", "Personal tax, GST, invoicing, withholding, records, deductions, and entity choices."],
+            ["Bank or authorized payment provider", "Receiving requirements, fees, conversion, remittance evidence, and payment tracing."],
+        ],
+        [128, 355],
+        font_size=7.4,
+    ), spacer(8)]
+    s += [callout("Red flag", "A promise is not resolved because someone says it is standard. Ask where it appears in the document and whether an authorized person can amend the term in writing.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Step 7",
+        "Use gates before weights",
+        "A weighted score can make an unacceptable offer look attractive. Remove or escalate any offer that fails a must-have condition before assigning preference weights.",
+    )
+    s += [p("Gate worksheet", H2), worksheet_table(
+        ["Must-have condition", "Evidence or clause", "A", "B", "Action if unclear"],
+        5,
+        [142, 151, 42, 42, 106],
+        row_height=43,
+        prompts=[
+            ["Legal engagement and payer are clear", "", "", "", ""],
+            ["Minimum guaranteed cash and pay timing", "", "", "", ""],
+            ["Sustainable overlap and on-call boundary", "", "", "", ""],
+            ["Acceptable termination and downside", "", "", "", ""],
+            ["No unresolved IP, restriction, or safety issue", "", "", "", ""],
+        ],
+    ), spacer(11)]
+    s += [p("Preference score", H2), grid_table(
+        ["Dimension", "Weight 1-5", "Offer A 1-5", "Offer B 1-5", "Evidence and confidence"],
+        [
+            ["Guaranteed and probable cash", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
+            ["Benefits and replacement costs", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
+            ["Operating sustainability", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
+            ["Contract and payment risk", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
+            ["Role scope and career value", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
+        ],
+        [132, 70, 70, 70, 141],
+        font_size=7.25,
+    ), spacer(9)]
+    s += [callout("Scoring rule", "Write the evidence before the score. If two offers are within the uncertainty range, call the result close and prioritize the missing facts instead of pretending the decimal total decides.")]
+    end_page(s)
+
+    s += page_heading(
+        "Worked example",
+        "Watch the conclusion change when assumptions change",
+        "This fictional comparison teaches the method. The figures are examples only; they are not market benchmarks, forecasts, or personal advice.",
+    )
+    s += [grid_table(
+        ["Input", "Offer A: EOR employee", "Offer B: contractor"],
+        [
+            ["Written fixed cash", "USD 72,000 equivalent, locally paid", "USD 90,000 invoiced"],
+            ["Paid time", "20 leave days plus stated holidays", "No paid time; learner plans 30 non-billable days"],
+            ["Benefits", "Medical cover and employer retirement contribution; eligibility verified", "Learner estimates USD 4,000 replacement cost"],
+            ["Business and payment cost", "No separate estimate", "USD 3,000 administration, tools, and payment friction"],
+            ["Termination", "Written notice; terms verified", "Client may terminate in 14 days"],
+            ["Working hours", "Three protected overlap hours", "Five overlap hours plus an unclear incident expectation"],
+            ["Career evidence", "Clear ownership of one service", "Broader architecture scope, but manager and review path unclear"],
+        ],
+        [123, 180, 180],
+        font_size=7.15,
+    ), spacer(9)]
+    s += [code_block([
+        "Offer B planning view before personal tax:",
+        "90,000 invoice value - 4,000 benefits - 3,000 business/payment costs",
+        "- value of 30 planned non-billable days = comparable planning cash",
+        "Then test FX rate, payment delay, and an earlier termination case separately.",
+    ]), spacer(9)]
+    s += [two_cards(
+        ("Base case", "B may lead on normalized cash and architecture scope, but its termination, hours, and manager unknowns remain material.", "Provisional"),
+        ("Stress case", "If non-billable time, delayed payment, or early termination rises, A can become the stronger risk-adjusted choice without its headline changing.", "Sensitivity"),
+    ), spacer(9)]
+    s += [callout("Lesson", "The correct output is not EOR always wins or contractor always wins. It is: here is the current choice, the assumptions holding it up, and the exact fact that could reverse it.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Step 8",
+        "Negotiate the gap that changes the decision",
+        "Do not send a list of everything that could improve. Use the comparison to identify one to three gaps, explain why they matter, and propose alternatives the employer can actually approve.",
+    )
+    s += [grid_table(
+        ["Gap", "Evidence", "Primary ask", "Possible trade"],
+        [
+            ["Contractor carries benefit and leave cost", "Replacement-cost worksheet", "Higher fixed fee or paid closure days", "Longer commitment or defined delivery scope"],
+            ["Currency or fee uncertainty", "Payment-path and scenario check", "USD denomination, fee coverage, or clearer conversion rule", "Different payment schedule"],
+            ["Termination downside", "Notice and continuity comparison", "Longer notice or termination payment", "Shorter initial term with mutual review"],
+            ["Overlap burden", "Written calendar and team evidence", "Protected hours or rotating late meetings", "A smaller fixed overlap window"],
+            ["Cash gap", "Normalized guaranteed-cash comparison", "Base, sign-on, or guaranteed first-year component", "Title, start date, or review checkpoint if cash is fixed"],
+        ],
+        [105, 128, 130, 120],
+        font_size=7.15,
+    ), spacer(10)]
+    s += [p("Prepare target, rationale, and fallback", H2), worksheet_table(
+        ["Priority", "Target", "Evidence-based rationale", "Fallback", "Walk-away boundary"],
+        3,
+        [80, 82, 160, 82, 79],
+        row_height=51,
+        prompts=[
+            ["1", "", "", "", ""],
+            ["2", "", "", "", ""],
+            ["3", "", "", "", ""],
+        ],
+    ), spacer(9)]
+    s += [callout("Talk track", "I am excited about [specific role evidence]. After comparing the full package, the main gap is [term] because [verified effect]. Could we move to [target]? If that is constrained, [fallback] would address the same issue.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "One-page worksheet",
+        "Build the comparable record",
+        "Complete this page only after collecting the source documents. Use ranges for uncertain values and write unknown rather than filling the cell with a guess.",
+    )
+    s += [worksheet_table(
+        ["Decision input", "Offer A", "Offer B", "Source / confidence / next check"],
+        9,
+        [146, 92, 92, 153],
+        row_height=48,
+        prompts=[
+            ["Engagement model and signing entity", "", "", ""],
+            ["Guaranteed annual cash", "", "", ""],
+            ["Variable cash and probability", "", "", ""],
+            ["Equity scenario, kept separate", "", "", ""],
+            ["Paid time and replacement costs", "", "", ""],
+            ["FX and payment-friction cases", "", "", ""],
+            ["Termination and contract downside", "", "", ""],
+            ["Overlap, on-call, and sustainability", "", "", ""],
+            ["Scope, manager, and career evidence", "", "", ""],
+        ],
+    ), spacer(10)]
+    s += [callout("Provisional decision", "I currently prefer [offer] because [three evidence-backed reasons]. This choice assumes [top assumptions]. It would change if [reversal condition]. Before signing, I still need [named verification].")]
+    end_page(s)
+
+    s += page_heading(
+        "Decision memo",
+        "Close with evidence, uncertainty, and action",
+        "A useful decision memo is short enough to reread before signing and specific enough to show what you verified, what remains uncertain, and why the choice still makes sense.",
+    )
+    s += [grid_table(
+        ["Memo field", "Write"],
+        [
+            ["Decision", "I choose [offer] on [date], subject to [written condition]."],
+            ["Why", "The strongest evidence is [cash], [operating reality], and [career or risk factor]."],
+            ["Trade-off accepted", "I am knowingly accepting [downside] because [reason and control]."],
+            ["Uncertainty", "The largest estimate is [input, range, source, confidence]."],
+            ["Reversal condition", "I would reopen the decision if [specific clause, fact, or scenario]."],
+            ["Next action", "By [date], [owner] will provide or verify [document or answer]."],
+        ],
+        [126, 357],
+        font_size=7.55,
+    ), spacer(11)]
+    s += [p("Before you sign", H2), bullet_list([
+        "The signing entity, engagement model, payment path, start date, and first payment date agree across documents.",
+        "Every negotiated change appears in the final written offer, contract, or authorized amendment.",
+        "A qualified adviser has reviewed the personal legal, tax, GST, or classification questions you identified.",
+        "You retained the offer, policy documents, contract version, written answers, calculations, sources, and comparison date.",
+        "You reread termination, IP, liability, restrictions, governing law, confidentiality, and dispute terms in the final version.",
+        "You know the first-week contacts for manager, HR or EOR, payroll or invoicing, security, and equipment support.",
+    ], checklist=True, compact=True), spacer(9)]
+    s += [callout("Action", "Choose one real offer or two fictional offers. Complete the evidence labels first, run three sensitivity cases, write the reversal condition, and only then draft the negotiation ask.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Source discipline",
+        "Verify dated and personal questions at the source",
+        "The framework is durable; tax rules, forms, benefits, payment methods, fees, and contract effects can change. Use the official starting points below and obtain advice for your facts.",
+    )
+    s += [grid_table(
+        ["Starting point", "Use it to verify", "Official URL"],
+        [
+            ["Income Tax Department", "Current forms, filing services, tax calendar, AIS, and official help material.", "https://www.incometax.gov.in/"],
+            ["GST portal", "Current registration, returns, taxpayer services, notifications, and official learning resources.", "https://www.gst.gov.in/"],
+            ["Reserve Bank of India", "Official foreign-exchange information and regulated banking or remittance guidance.", "https://www.rbi.org.in/"],
+            ["Employees' Provident Fund Organisation", "Current scheme information and member or employer services where relevant.", "https://www.epfindia.gov.in/"],
+        ],
+        [122, 203, 158],
+        font_size=7.2,
+    ), spacer(10)]
+    s += [p("Record the evidence, not only the link", H2), bullet_list([
+        "Source title, publisher, URL or document name, and the date you checked it.",
+        "The exact question the source answers and the part that still needs interpretation.",
+        "The qualified adviser or employer owner responsible for applying it to your situation.",
+        "A refresh date for any figure, fee, rule, policy, or market-dependent assumption.",
+    ], checklist=True), spacer(8)]
+    s += [p("Quick recap", H2), numbered_chain([
+        ("Facts", "Treat only written, current terms as verified."),
+        ("Value", "Normalize cash and replacement costs without hiding ranges."),
+        ("Risk", "Stress-test currency, payment, contract, and operating assumptions."),
+        ("Choice", "Name the decision, trade-off, reversal condition, and next action."),
+    ]), spacer(10)]
+    s += [callout("Final takeaway", "The best offer is not the one with the largest converted number. It is the one whose verified value, working reality, downside, and career path best fit your decision boundary - and whose uncertainty you can explain honestly.")]
+    return s
+
+
 SPECS = [
+    PdfSpec(
+        filename="remote_compensation-and-offer-decision-workbook.pdf",
+        category="Remote career workbook",
+        title="Remote Compensation and Offer Decision Workbook",
+        subtitle="A practical system for comparing employee, EOR, and contractor offers across cash, benefits, time, currency, contract risk, working reality, and career value.",
+        thesis="Normalize what can be compared, keep uncertainty visible, stress-test the assumptions, and negotiate the few gaps that can change the decision.",
+        slug="remote / compensation-and-offer-decision",
+        build_story=build_remote_compensation_offer_story,
+    ),
     PdfSpec(
         filename="dsa_traversal-decision-practice-workbook.pdf",
         category="DSA practice workbook",

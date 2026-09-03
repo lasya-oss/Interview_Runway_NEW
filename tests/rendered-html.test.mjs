@@ -340,10 +340,26 @@ test("Library content actions never point at missing assets", async () => {
     "utf8",
   );
   const assetHrefs = [...demoData.matchAll(/demoAsset:\s*\{\s*href:\s*"([^"]+)"/g)].map((match) => match[1]);
+  const demoLogin = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "foundation" }),
+  });
+  assert.equal(demoLogin.status, 200);
+  const demoCookie = demoLogin.headers.get("set-cookie")?.split(";")[0] ?? "";
 
   assert.ok(assetHrefs.length > 0, "learning materials should expose at least one real preview asset");
   for (const href of assetHrefs) {
-    assert.ok(existsSync(new URL(`../public${href}`, import.meta.url)), `missing first-party preview asset: ${href}`);
+    if (href.startsWith("/learn/library")) {
+      const response = await request(href, { headers: { cookie: demoCookie } });
+      assert.equal(response.status, 200, `missing first-party Library material: ${href}`);
+    } else {
+      assert.ok(existsSync(new URL(`../public${href}`, import.meta.url)), `missing first-party preview asset: ${href}`);
+    }
   }
 
   assert.match(libraryClient, /isPreviewContentUnavailable/i);
@@ -576,12 +592,49 @@ test("low-information Library PDFs are archived and excluded from the active cat
   ];
 
   const activePdfNames = selection.match(/export const ACTIVE_PDF_FILENAMES = \[([\s\S]*?)\] as const/)?.[1].match(/"([^"]+)"/g) ?? [];
-  assert.equal(activePdfNames.length, 77);
+  assert.equal(activePdfNames.length, 78);
   for (const filename of archivedNames) {
     assert.doesNotMatch(selection, new RegExp(`\\"${filename.replace(".", "\\.")}\\"`));
     assert.equal(existsSync(new URL(`../public/pdf-guides/${filename}`, import.meta.url)), false, filename);
     assert.equal(existsSync(new URL(`../library-archive/pdf-guides/${filename}`, import.meta.url)), true, filename);
   }
+});
+
+test("every live Vault catalog record has a real supporting asset", async () => {
+  const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const selection = await readFile(new URL("../app/lib/active-library-selection.ts", import.meta.url), "utf8");
+  const pdfManifest = await readFile(new URL("../app/lib/drive-pdf-guides.ts", import.meta.url), "utf8");
+  const records = [...data.matchAll(/\{\s*slug: "([^"]+)"[\s\S]*?\n  \},/g)].map((match) => ({
+    slug: match[1],
+    source: match[0],
+  }));
+  const foundationRecords = records.filter((record) => /tier: "foundation"/.test(record.source));
+
+  assert.equal(foundationRecords.length, 10);
+  assert.deepEqual(
+    foundationRecords.filter((record) => !/demoAsset:\s*\{\s*href:/.test(record.source)).map((record) => record.slug),
+    [],
+  );
+
+  const expectedMappings = new Map([
+    ["scope-stories", "/learn/library/material/template-title-translation-guide-docx-9xsy6dtn"],
+    ["remote-compensation", "/learn/library?pdf=remote_compensation-and-offer-decision-workbook.pdf"],
+    ["outage-story", "/learn/library/material/mock-behavioral-ownership-failure-01-md-evtsevfm"],
+    ["us-ats-resume", "/learn/library/material/template-us-ats-resume-docx-ymrqj987"],
+    ["remote-offer-matrix", "/learn/library?pdf=remote_compensation-and-offer-decision-workbook.pdf"],
+  ]);
+  for (const [slug, href] of expectedMappings) {
+    const record = foundationRecords.find((candidate) => candidate.slug === slug);
+    assert.ok(record, slug);
+    assert.match(record.source, new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), slug);
+  }
+
+  const filename = "remote_compensation-and-offer-decision-workbook.pdf";
+  assert.equal((selection.match(new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length, 1);
+  assert.equal((pdfManifest.match(new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length, 1);
+  const pdf = await readFile(new URL(`../public/pdf-guides/${filename}`, import.meta.url));
+  assert.equal(pdf.subarray(0, 5).toString(), "%PDF-");
+  assert.ok(pdf.length > 35_000);
 });
 
 test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable", async () => {

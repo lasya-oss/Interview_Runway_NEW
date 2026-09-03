@@ -237,6 +237,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Week 2",
     progress: 0,
+    demoAsset: { href: "/learn/library/material/template-title-translation-guide-docx-9xsy6dtn", label: "Open the India-to-US scope workbook" },
   },
   {
     slug: "remote-compensation",
@@ -253,6 +254,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Week 4",
     progress: 0,
+    demoAsset: { href: "/learn/library?pdf=remote_compensation-and-offer-decision-workbook.pdf", label: "Open the compensation decision workbook" },
   },
   {
     slug: "notification-mock",
@@ -354,6 +356,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Week 3",
     progress: 20,
+    demoAsset: { href: "/learn/library/material/mock-behavioral-ownership-failure-01-md-evtsevfm", label: "Open the worked ownership interview" },
   },
   {
     slug: "us-ats-resume",
@@ -370,6 +373,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Setup",
     progress: 0,
+    demoAsset: { href: "/learn/library/material/template-us-ats-resume-docx-ymrqj987", label: "Open the editable US ATS resume" },
   },
   {
     slug: "remote-offer-matrix",
@@ -386,6 +390,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Week 4",
     progress: 0,
+    demoAsset: { href: "/learn/library?pdf=remote_compensation-and-offer-decision-workbook.pdf", label: "Open the offer comparison workbook" },
   },
   {
     slug: "metrics-pipeline-mock",
