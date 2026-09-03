@@ -68,6 +68,22 @@ const task = (id: string, title: string, meta: string, learning: RoadmapTaskCont
   learning,
 });
 
+const pdfLibraryHref = (filename: string) => `/learn/library?pdf=${encodeURIComponent(filename)}`;
+
+const ROADMAP_LIBRARY_HREFS: Readonly<Record<string, string>> = {
+  "12w-1-map": pdfLibraryHref("career_target-role-evidence-map.pdf"),
+  "12w-1-base": pdfLibraryHref("operations_technical-baseline-scorecard.pdf"),
+  "12w-2-hash": pdfLibraryHref("dsa_hash-maps.pdf"),
+  "12w-4-frame": "/learn/library/material/template-system-design-canvas-docx-vnkzbt0l",
+  "12w-4-capacity": pdfLibraryHref("sysdesign_capacity-estimation.pdf"),
+  "12w-5-consistency": pdfLibraryHref("sysdesign_eventual-consistency.pdf"),
+  "12w-6-queue": pdfLibraryHref("sysdesign_message-queues.pdf"),
+  "12w-8-linkedin": "/learn/library/material/template-linkedin-profile-docx-cyog_vzk",
+  "12w-9-map": pdfLibraryHref("company_interview-loop-gap-map.pdf"),
+  "12w-9-gaps": pdfLibraryHref("company_interview-loop-gap-map.pdf"),
+  "12w-11-review": pdfLibraryHref("operations_evidence-comparison-correction-workbook.pdf"),
+};
+
 export const FOUR_WEEK_PLAN: readonly RoadmapWeek[] = [
   {
     week: 1,
@@ -481,6 +497,8 @@ export function libraryMaterialForRoadmapTask(task: RoadmapTask): LearningMateri
 }
 
 export function libraryHrefForRoadmapTask(task: RoadmapTask): string | null {
+  const explicitHref = ROADMAP_LIBRARY_HREFS[task.id];
+  if (explicitHref) return explicitHref;
   const material = libraryMaterialForRoadmapTask(task);
   return material ? `/learn/material/${material.slug}` : null;
 }

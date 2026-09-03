@@ -25,6 +25,7 @@ const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   "System design": "Architecture choices and trade-offs",
   "DSA patterns": "Patterns, invariants, and problem solving",
   Behavioural: "Evidence-led stories and communication",
+  "Career profile": "Role targeting, evidence, and professional profile",
   "Remote career": "Remote role, offer, and work guidance",
   Roadmaps: "Step-by-step plans and tasks",
   Operations: "Interview planning, review, and execution",
@@ -68,16 +69,18 @@ export function LibraryClient({
   googleClientId = "",
   loginHint = null,
   categorySummary,
+  initialPdfFilename = null,
 }: {
   profileId: DemoTier;
   isLive?: boolean;
   googleClientId?: string;
   loginHint?: string | null;
   categorySummary: LibraryCategorySummary;
+  initialPdfFilename?: string | null;
 }) {
   const [catalog, setCatalog] = useState<LibraryCatalog | null>(null);
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<string | null>(null);
+  const [query, setQuery] = useState(initialPdfFilename ?? "");
+  const [category, setCategory] = useState<string | null>(initialPdfFilename ? "All" : null);
   const [scope, setScope] = useState<"all" | "included" | "locked">("all");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
   const materials = catalog?.materials ?? EMPTY_MATERIALS;
@@ -210,7 +213,11 @@ export function LibraryClient({
             </div>
             <span>{pdfResults.length} guides available</span>
           </div>
-          <PdfGuideShelf guides={pdfResults} startNumber={materials.length + 1} />
+          <PdfGuideShelf
+            guides={pdfResults}
+            startNumber={materials.length + 1}
+            initialFilename={initialPdfFilename}
+          />
         </section>
       ) : null}
 

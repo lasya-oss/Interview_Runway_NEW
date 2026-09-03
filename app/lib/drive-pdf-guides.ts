@@ -6,6 +6,10 @@ export type DrivePdfGuide = {
 };
 
 export const DRIVE_PDF_GUIDES: readonly DrivePdfGuide[] = [
+  { id: "local-career-target-role-evidence-map", filename: "career_target-role-evidence-map.pdf" },
+  { id: "local-company-interview-loop-gap-map", filename: "company_interview-loop-gap-map.pdf" },
+  { id: "local-operations-evidence-comparison-correction-workbook", filename: "operations_evidence-comparison-correction-workbook.pdf" },
+  { id: "local-operations-technical-baseline-scorecard", filename: "operations_technical-baseline-scorecard.pdf" },
   { id: "1s2Jdj-GBoQ8JW9w4n6CmFBZ4Z6f5fQLO", filename: "sysdesign_url-shortener-walkthrough.pdf" },
   { id: "1ne88LVY1wF7ZWPbB31oo9eTeIPkajRR0", filename: "sysdesign_url-shortener-follow-up-bank.pdf" },
   { id: "1eVxZg3ZBSLdmQY9itOVgLfeke1CD3T-D", filename: "sysdesign_url-shortener-capacity-workbook.pdf" },
@@ -357,6 +361,7 @@ export function drivePdfCategory(filename: string) {
   if (filename.startsWith("dsa_")) return "DSA patterns";
   if (filename.startsWith("sysdesign_")) return "System design";
   if (filename.startsWith("behavioral_")) return "Behavioural";
+  if (filename.startsWith("career_")) return "Career profile";
   if (filename.startsWith("remote_")) return "Remote career";
   if (filename.startsWith("roadmap_")) return "Roadmaps";
   if (filename.startsWith("operations_")) return "Operations";
@@ -366,6 +371,6 @@ export function drivePdfCategory(filename: string) {
 
 export function drivePdfTitle(filename: string) {
   const stem = filename.replace(/\.pdf$/i, "");
-  const withoutPrefix = stem.replace(/^(?:dsa|sysdesign|behavioral|remote|roadmap|operations|company)_/, "");
+  const withoutPrefix = stem.replace(/^(?:dsa|sysdesign|behavioral|career|remote|roadmap|operations|company)_/, "");
   return titleCase(withoutPrefix);
 }

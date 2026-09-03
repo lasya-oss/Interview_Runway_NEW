@@ -78,9 +78,14 @@ export const ACTIVE_PDF_FILENAMES = [
   "dsa_sliding-window-problem-ladder.pdf",
   "dsa_two-pointers-problem-ladder.pdf",
 
-  // Behavioural, career-profile, and plan guides with enough depth to support
-  // repeated preparation; short duplicate worksheet handouts stay archived.
+  // Behavioural, career-profile, company-research, operations, and plan guides
+  // with enough depth to support repeated preparation; short duplicate
+  // worksheet handouts stay archived.
   "behavioral_question-bank.pdf",
+  "career_target-role-evidence-map.pdf",
+  "company_interview-loop-gap-map.pdf",
+  "operations_evidence-comparison-correction-workbook.pdf",
+  "operations_technical-baseline-scorecard.pdf",
   "roadmap_12week.pdf",
   "roadmap_4week.pdf",
 ] as const;
