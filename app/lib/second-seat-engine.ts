@@ -23,6 +23,12 @@ export type SecondSeatRelevanceRule = {
   }[];
   minimumConcepts: number;
   minimumSignals: number;
+  /**
+   * Verbs that make the answer's connection to this particular question
+   * explicit. Generic prose may contain the right nouns without answering the
+   * question, so concept coverage alone must not unlock normal scoring.
+   */
+  answerCues: readonly string[];
 };
 
 export type SecondSeatMock = {
@@ -96,6 +102,7 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
           ],
           minimumConcepts: 2,
           minimumSignals: 3,
+          answerCues: ["clarify", "identify", "separate", "prioritise", "prioritize", "choose", "define", "set"],
         },
       },
       {
@@ -113,6 +120,7 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
           ],
           minimumConcepts: 2,
           minimumSignals: 3,
+          answerCues: ["choose", "guarantee", "deliver", "process", "record", "store", "dedupe", "retry", "handle", "prevent", "avoid"],
         },
       },
       {
@@ -130,6 +138,7 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
           ],
           minimumConcepts: 2,
           minimumSignals: 3,
+          answerCues: ["apply", "bound", "limit", "prioritise", "prioritize", "shed", "retry", "monitor", "measure", "alert", "recover", "scale"],
         },
       },
     ],
@@ -157,6 +166,7 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
           ],
           minimumConcepts: 2,
           minimumSignals: 3,
+          answerCues: ["clarify", "define", "set", "limit", "separate", "prioritise", "prioritize", "choose"],
         },
       },
       {
@@ -174,6 +184,7 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
           ],
           minimumConcepts: 2,
           minimumSignals: 3,
+          answerCues: ["choose", "use", "store", "keep", "enforce", "allow", "fail", "fallback", "place", "locate", "count", "increment"],
         },
       },
       {
@@ -191,6 +202,7 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
           ],
           minimumConcepts: 2,
           minimumSignals: 3,
+          answerCues: ["measure", "monitor", "alert", "canary", "rollback", "recover", "track", "compare", "distinguish", "prevent", "configure"],
         },
       },
     ],
@@ -218,6 +230,7 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
           ],
           minimumConcepts: 2,
           minimumSignals: 3,
+          answerCues: ["tell", "describe", "decide", "choose", "own", "lead", "pause", "ship", "explain", "risk"],
         },
       },
       {
@@ -235,6 +248,7 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
           ],
           minimumConcepts: 2,
           minimumSignals: 3,
+          answerCues: ["align", "persuade", "resolve", "influence", "explain", "present", "change", "ask", "negotiate"],
         },
       },
       {
@@ -252,6 +266,7 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
           ],
           minimumConcepts: 2,
           minimumSignals: 3,
+          answerCues: ["change", "improve", "introduce", "adopt", "measure", "track", "keep", "apply", "review", "learn"],
         },
       },
     ],
@@ -325,6 +340,7 @@ export type SecondSeatRelevanceAssessment = {
   matchedConcepts: readonly string[];
   missingConcepts: readonly string[];
   hasAnswerConnection: boolean;
+  hasQuestionConnection: boolean;
 };
 
 export function assessSecondSeatAnswer(
@@ -342,6 +358,7 @@ export function assessSecondSeatAnswer(
     .filter((concept) => !concept.signals.some((signal) => answerContainsSignal(trimmed, signal)))
     .map((concept) => concept.label);
   const hasAnswerConnection = hasDecisionConnection(trimmed);
+  const hasQuestionConnection = hasQuestionDirectedConnection(turn, trimmed);
   const isEcho = isQuestionEcho(turn.prompt, trimmed);
 
   if (!trimmed || isEcho || matchedConcepts.length === 0 || !hasAnswerConnection) {
@@ -351,12 +368,14 @@ export function assessSecondSeatAnswer(
       matchedConcepts,
       missingConcepts,
       hasAnswerConnection,
+      hasQuestionConnection,
     };
   }
 
   const isRelevant =
     matchedConcepts.length >= turn.relevance.minimumConcepts &&
-    matchedSignals.length >= turn.relevance.minimumSignals;
+    matchedSignals.length >= turn.relevance.minimumSignals &&
+    hasQuestionConnection;
 
   return {
     level: isRelevant ? "relevant" : "partial",
@@ -364,6 +383,7 @@ export function assessSecondSeatAnswer(
     matchedConcepts,
     missingConcepts,
     hasAnswerConnection,
+    hasQuestionConnection,
   };
 }
 
@@ -512,16 +532,64 @@ function dimensionNote(key: SecondSeatDimensionKey, score: number) {
 }
 
 function answerContainsSignal(normalizedAnswer: string, signal: string) {
+  const answer = normalizedAnswer.toLowerCase();
   const normalizedSignal = signal.toLowerCase().trim();
   if (!normalizedSignal) return false;
   if (normalizedSignal.includes(" ")) {
-    return normalizedAnswer.includes(normalizedSignal);
+    const words = normalizedSignal.split(/\s+/u).map(escapeRegExp);
+    return new RegExp(`\\b${words.join("[\\s-]+\\b")}\\b`, "i").test(answer);
   }
-  return new RegExp(`\\b${escapeRegExp(normalizedSignal)}`, "i").test(normalizedAnswer);
+  const stem = STEM_SIGNALS.has(normalizedSignal);
+  const suffix = stem ? "[a-z]*" : "(?:s|es|ed|ing)?";
+  return new RegExp(`\\b${escapeRegExp(normalizedSignal)}${suffix}\\b`, "i").test(answer);
 }
 
+// These entries are deliberately truncated because the rubric wants common
+// forms such as "idempotency", "clarified", and "prioritised". All other
+// signals use a bounded set of ordinary English inflections, so a word such as
+// "user" cannot accidentally match the answer cue "use".
+const STEM_SIGNALS = new Set([
+  "adopt",
+  "alert",
+  "bound",
+  "choos",
+  "clarif",
+  "decid",
+  "defin",
+  "describ",
+  "idempot",
+  "improv",
+  "introduc",
+  "measur",
+  "persuad",
+  "priorit",
+  "recover",
+  "record",
+  "resolv",
+  "retr",
+  "scale",
+  "separat",
+  "stor",
+]);
+
 function hasDecisionConnection(answer: string) {
-  return /\b(i|we|my|our|would|should|choose|use|clarif\w*|decid\w*|priorit\w*|separat\w*|measure\w*|explain\w*|describe\w*|state|name|because|therefore|however|if|when|then|to avoid|which means|trade-?off|consequence)\b/i.test(answer);
+  return splitAnswerSentences(answer).some((sentence) =>
+    /\b(?:clarif\w*|choos\w*|use|select\w*|defin\w*|set\w*|separat\w*|priorit\w*|explain\w*|describ\w*|decid\w*|record\w*|stor\w*|prevent\w*|avoid\w*|bound\w*|limit\w*|shed\w*|retr\w*|monitor\w*|measur\w*|alert\w*|recover\w*|scale\w*|align\w*|persuad\w*|resolv\w*|introduc\w*|adopt\w*|improv\w*|own\w*|lead\w*|paus\w*|ship\w*|track\w*|rollback|fallback|because|therefore|however|trade-?off|consequence)\b/i.test(sentence),
+  );
+}
+
+function hasQuestionDirectedConnection(turn: SecondSeatTurn, answer: string) {
+  return splitAnswerSentences(answer).some((sentence) => {
+    const hasSignal = turn.relevance.concepts.some((concept) =>
+      concept.signals.some((signal) => answerContainsSignal(sentence, signal)),
+    );
+    const hasCue = turn.relevance.answerCues.some((cue) => answerContainsSignal(sentence, cue));
+    return hasSignal && hasCue;
+  });
+}
+
+function splitAnswerSentences(answer: string) {
+  return answer.split(/[.!?;\n]+/u).map((sentence) => sentence.trim()).filter(Boolean);
 }
 
 function isQuestionEcho(prompt: string, answer: string) {
