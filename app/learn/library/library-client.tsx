@@ -77,6 +77,7 @@ export function LibraryClient({
   loginHint = null,
   categorySummary,
   initialPdfFilename = null,
+  initialCatalog = null,
 }: {
   profileId: DemoTier;
   isLive?: boolean;
@@ -84,8 +85,9 @@ export function LibraryClient({
   loginHint?: string | null;
   categorySummary: LibraryCategorySummary;
   initialPdfFilename?: string | null;
+  initialCatalog?: LibraryCatalog | null;
 }) {
-  const [catalog, setCatalog] = useState<LibraryCatalog | null>(null);
+  const [catalog, setCatalog] = useState<LibraryCatalog | null>(initialCatalog);
   const [query, setQuery] = useState(initialPdfFilename ?? "");
   const [category, setCategory] = useState<string | null>(initialPdfFilename ? "All" : null);
   const [scope, setScope] = useState<"all" | "included" | "locked">("all");
@@ -100,6 +102,7 @@ export function LibraryClient({
     : totalResourceCount.toLocaleString("en-IN");
 
   useEffect(() => {
+    if (initialCatalog) return;
     let mounted = true;
     void import("./library-catalog")
       .then(({ getLibraryCatalog }) => {
@@ -111,7 +114,7 @@ export function LibraryClient({
     return () => {
       mounted = false;
     };
-  }, [isLive, profileId]);
+  }, [initialCatalog, isLive, profileId]);
 
   const categoryCounts = categorySummary.counts;
 

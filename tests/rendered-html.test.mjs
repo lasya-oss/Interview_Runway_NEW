@@ -296,7 +296,7 @@ test("Vault template and explainer actions open first-party inline PDF previews"
   assert.match(previewRoute, /Content-Type.*application\/pdf/i);
   assert.match(previewRoute, /Content-Disposition.*inline/i);
   assert.match(previewRoute, /readFirstPartyText/i);
-  assert.match(materialViewer, /createTextPdf/i);
+  assert.match(materialViewer, /materialPreviewCache/i);
 
   const login = await request("/api/demo-session", {
     method: "POST",
@@ -310,6 +310,14 @@ test("Vault template and explainer actions open first-party inline PDF previews"
   assert.equal(login.status, 200);
   const demoSessionCookie = login.headers.get("set-cookie")?.split(";")[0] ?? "";
   assert.match(demoSessionCookie, /^ir_demo_session=/i);
+
+  const linkedPdf = await request("/learn/library?pdf=operations_final-loop-interview-day-runbook.pdf", {
+    headers: { cookie: demoSessionCookie },
+  });
+  assert.equal(linkedPdf.status, 200);
+  const linkedHtml = await linkedPdf.text();
+  assert.match(linkedHtml, /<iframe[^>]+src="\/pdf-guides\/operations_final-loop-interview-day-runbook\.pdf"/);
+  assert.doesNotMatch(visibleText(linkedHtml), /Loading materials for this category/);
 
   for (const slug of [
     "template-weekly-prep-tracker-docx-yzovxjy1",
@@ -900,8 +908,10 @@ test("demo sign-in issues a protected session and opens the learner product", as
   );
   assert.match(materialViewer, /content\?: string \| null/i);
   assert.match(materialViewer, /fallbackAssetUrl\?: string \| null/i);
-  assert.match(materialViewer, /createTextPdf/i);
-  assert.match(materialViewer, /application\/pdf/i);
+  assert.match(materialViewer, /materialPreviewCache/i);
+  const previewCache = await readFile(new URL("../app/learn/library/material-preview-cache.ts", import.meta.url), "utf8");
+  assert.match(previewCache, /createTextPdf/i);
+  assert.match(previewCache, /application\/pdf/i);
   assert.match(materialViewer, /library-material-pdf-frame/i);
   assert.match(materialViewer, /PDF preview for/i);
   assert.doesNotMatch(materialViewer, /catalogued in InterviewRunway and will open here/i);
