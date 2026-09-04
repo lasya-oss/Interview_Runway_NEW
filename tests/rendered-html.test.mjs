@@ -1869,6 +1869,8 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
 
   assert.match(engine, /SECOND_SEAT_MOCKS/);
   assert.match(engine, /evaluateSecondSeatSession/);
+  assert.match(engine, /isQuestionEcho/);
+  assert.match(engine, /repeating the interview question is not enough to score/i);
   assert.match(engine, /problemFraming|technicalDepth|tradeoffClarity|communication/);
   assert.match(paidAccess, /isConfiguredTestSecondSeatEmail/);
   assert.match(paidAccess, /TEST_SECOND_SEAT_EMAILS/);

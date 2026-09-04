@@ -198,6 +198,14 @@ export function validateSecondSeatAnswer(
     };
   }
 
+  if (isQuestionEcho(turn.prompt, trimmed)) {
+    return {
+      ok: false,
+      error: "Please write your own response; repeating the interview question is not enough to score.",
+      matchedSignals: [],
+    };
+  }
+
   const normalized = trimmed.toLowerCase();
   const wordCount = normalized.match(/[\p{L}\p{N}]+/gu)?.length ?? 0;
   if (wordCount < 5) {
@@ -347,6 +355,36 @@ function answerContainsSignal(normalizedAnswer: string, signal: string) {
     return normalizedAnswer.includes(normalizedSignal);
   }
   return new RegExp(`\\b${escapeRegExp(normalizedSignal)}`, "i").test(normalizedAnswer);
+}
+
+function isQuestionEcho(prompt: string, answer: string) {
+  const promptWords = comparableWords(prompt);
+  const answerWords = comparableWords(answer);
+  if (promptWords.length < 6 || answerWords.length < 6) return false;
+
+  const promptText = promptWords.join(" ");
+  const answerText = answerWords.join(" ");
+  if (answerText === promptText) return true;
+
+  const promptSet = new Set(promptWords);
+  const answerSet = new Set(answerWords);
+  const uniquePromptWords = [...promptSet];
+  const sharedUniqueWords = uniquePromptWords.filter((word) => answerSet.has(word));
+  const promptCoverage = sharedUniqueWords.length / uniquePromptWords.length;
+  const answerCoverage = sharedUniqueWords.length / answerSet.size;
+
+  // A copied question may carry a short label such as "Question:" or a brief
+  // acknowledgement. Treat it as an echo while leaving room for a real answer
+  // that naturally reuses a few words from the prompt.
+  return (
+    answerWords.length <= promptWords.length + 8 &&
+    promptCoverage >= 0.9 &&
+    answerCoverage >= 0.8
+  );
+}
+
+function comparableWords(value: string) {
+  return value.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
 }
 
 function escapeRegExp(value: string) {
