@@ -1,3 +1,33 @@
+## Turn the weekly tracker into a feedback loop
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Plan a small amount of deliberate practice, retain evidence, and choose the next exercise from an observed error rather than from the number of resources opened.
+
+## What to record
+
+Choose one primary theme that names a capability, not a resource: for example, explain why marking a node when it enters a BFS queue prevents repeated work. Count an exercise as complete only after an unaided attempt, a test, and a short review. Watching a lesson is preparation; it is not evidence that the capability is reliable.
+
+For each attempt, retain a small artifact: code plus tests, an annotated design, or a two-minute story recording. Record the first decision that went wrong. A useful error is specific enough to change next practice: 'I marked nodes after removal and queued a node twice' is actionable; 'BFS is weak' is not.
+
+## Worked week - fictional
+
+Primary theme: unweighted shortest paths and stable parent links. Planned work: two BFS prompts, one timed re-test, and one spoken explanation. Completed: one relevant lesson, one PDF drill, and three coding attempts. No system-design or behavioral work was planned this week, so those fields are marked 'not planned', not treated as failures.
+
+Evidence: first attempt found the distance but overwrote the parent of an already discovered node. The diamond graph A-B-D and A-C-D exposed duplicate discovery. Correction: mark visited and assign the parent at enqueue time. Re-test: solve an unfamiliar graph with a cycle after 48 hours; return both the shortest distance and one valid path.
+
+Review outcome: the re-test passed correctness and complexity checks, but the explanation did not justify O(V + E). Next practice: give a one-minute edge-counting explanation and test an unreachable destination. Do not repeat the whole lesson just because one explanation needs repair.
+
+## A five-minute weekly review
+
+Ask: What can I now do without notes? Which artifact proves it? Which error appeared twice? Which single exercise will test the correction? Schedule that exercise with a concrete output. Keep volume realistic enough that you can review every attempt.
+
+Use the twelve existing weekly blocks for your own work. Repeated blank blocks are writable tracking space, not twelve lessons. If a metric does not apply, write 'not planned' or 'not applicable'; do not invent a completion count. A missed target should lead to a smaller next plan or a better practice choice, not a fabricated check mark.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 INTERVIEWRUNWAY VAULT
 Weekly Prep Tracker
 Weekly execution tracker for practice volume, evidence, errors, and re-tests.

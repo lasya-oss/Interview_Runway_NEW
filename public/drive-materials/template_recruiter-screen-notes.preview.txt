@@ -1,3 +1,29 @@
+## Separate role facts from unanswered questions
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Capture enough verified information to decide whether to proceed, clarify, or decline without mistaking recruiter impressions for confirmed terms.
+
+## Use three labels
+
+Mark each note as confirmed, reported, or unresolved. 'Confirmed' means a clear current answer from the relevant owner or document; 'reported' records what someone said but still needs checking; 'unresolved' names the missing answer. Add the source and date. A neat completed sheet is not useful if uncertainty has been erased.
+
+## Worked notes - fictional
+
+Role and team: backend engineer on account notifications, reported by recruiter. Six-month outcome: reduce repeated delivery failures and document operations, awaiting hiring-manager confirmation. Work country: India, reported; contracting entity and employment arrangement not yet confirmed. Interview loop: coding, design, and behavioral conversations, with scheduling details pending.
+
+Operating expectations: two hours of shared working time were mentioned, but the actual time range and on-call frequency are unresolved. Compensation: a range was discussed, but currency, fixed versus variable components, and engagement model need written confirmation. Do not compare the range with another offer until those dimensions are clear.
+
+Decision: clarify, not decline or accept. Next message: 'Before scheduling the next stage, could you confirm the employing or contracting entity, work-location permission, expected shared hours, on-call rotation, and compensation currency and structure?' Owner: recruiter for entity and scheduling; hiring manager for operating expectations.
+
+## A useful decision rule
+
+Proceed when the role matches your target and material constraints are understood. Clarify when a missing answer could change the decision. Decline respectfully when a non-negotiable requirement conflicts with your needs. Do not turn a weighted list of preferences into a way of ignoring a hard constraint.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 INTERVIEWRUNWAY VAULT
 Recruiter Screen Notes Template
 Structured notes for capturing role facts and deciding whether to proceed.

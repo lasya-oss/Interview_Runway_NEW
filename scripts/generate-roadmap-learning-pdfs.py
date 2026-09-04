@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import argparse
+import html
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable, Sequence
@@ -13,6 +15,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import (
     BaseDocTemplate,
+    CondPageBreak,
     Flowable,
     Frame,
     KeepTogether,
@@ -105,6 +108,9 @@ class PdfSpec:
     thesis: str
     slug: str
     build_story: Callable[[], list[Flowable]]
+    revision: str = "1.0"
+    compact: bool = False
+    review_required: bool = False
 
 
 class CheckboxMark(Flowable):
@@ -409,21 +415,21 @@ def grid_table(
     return table
 
 
-def worksheet_table(
+def worked_example_table(
     headers: Sequence[str],
-    rows: int,
+    rows: Sequence[Sequence[str]],
     widths: Sequence[float],
-    *,
-    row_height: float = 45,
-    prompts: Sequence[Sequence[str]] | None = None,
-) -> Table:
-    body_rows: list[list[str]] = []
-    for index in range(rows):
-        if prompts and index < len(prompts):
-            body_rows.append(list(prompts[index]))
-        else:
-            body_rows.append(["" for _ in headers])
-    return grid_table(headers, body_rows, widths, font_size=7.1, row_heights=[row_height] * rows)
+) -> list[Flowable]:
+    """Teach the completed reasoning; personal practice belongs in the learner's notes."""
+    if not rows or any(len(row) != len(headers) for row in rows):
+        raise ValueError("Worked examples must have complete, aligned rows")
+    if any(not str(cell).strip() for row in rows for cell in row):
+        raise ValueError("Worked examples cannot contain empty cells")
+    return [
+        p("FICTIONAL WORKED EXAMPLE - ADAPT THE METHOD, NOT THE FACTS", LABEL),
+        grid_table(headers, rows, widths, font_size=8.0),
+        Spacer(1, 8),
+    ]
 
 
 def code_block(lines: Sequence[str]) -> Table:
@@ -551,14 +557,14 @@ def draw_cover(canvas: Canvas, doc: BaseDocTemplate, spec: PdfSpec) -> None:
     metadata_y = divider_y - thesis_h - 55
     canvas.setFillColor(colors.HexColor("#A3B2BC"))
     canvas.setFont("Courier", 6.8)
-    canvas.drawString(MARGIN + 5, metadata_y, "VERSION 1.0")
-    canvas.drawString(MARGIN + 5, metadata_y - 16, "FORMAT GUIDE + WORKSHEET")
-    canvas.drawString(MARGIN + 5, metadata_y - 32, "STATUS LEARNER READY")
+    canvas.drawString(MARGIN + 5, metadata_y, f"VERSION {spec.revision}")
+    canvas.drawString(MARGIN + 5, metadata_y - 16, "FORMAT GUIDE + WORKED EXAMPLES" if spec.compact else "FORMAT GUIDE + WORKSHEET")
+    canvas.drawString(MARGIN + 5, metadata_y - 32, "STATUS HUMAN REVIEW REQUIRED" if spec.review_required else "STATUS LEARNER READY")
     canvas.drawString(MARGIN + 5, metadata_y - 72, spec.slug.upper())
 
     canvas.setFont("Courier", 6.5)
     canvas.setFillColor(ORANGE)
-    canvas.drawString(MARGIN, 27, "LEARNER EDITION")
+    canvas.drawString(MARGIN, 27, "HUMAN REVIEW REQUIRED" if spec.review_required else "LEARNER EDITION")
     canvas.setFillColor(colors.HexColor("#A3B2BC"))
     canvas.drawRightString(PAGE_W - MARGIN, 27, "interviewrunway.com")
     canvas.restoreState()
@@ -578,7 +584,7 @@ def draw_body(canvas: Canvas, doc: BaseDocTemplate, spec: PdfSpec) -> None:
     canvas.line(MARGIN, 34, PAGE_W - MARGIN, 34)
     canvas.setFillColor(ORANGE)
     canvas.setFont("Courier", 6.1)
-    canvas.drawString(MARGIN, 22, "LEARNER EDITION")
+    canvas.drawString(MARGIN, 22, "HUMAN REVIEW REQUIRED" if spec.review_required else "LEARNER EDITION")
     canvas.setFillColor(colors.HexColor("#8796A3"))
     canvas.drawRightString(PAGE_W - MARGIN, 22, f"{doc.page:02d}")
     canvas.restoreState()
@@ -608,7 +614,28 @@ def build_pdf(spec: PdfSpec, output_path: Path) -> None:
         ]
     )
     story: list[Flowable] = [NextPageTemplate("body"), PageBreak()]
-    story.extend(spec.build_story())
+    body = spec.build_story()
+    # Worked-example caption chains stay beside the first table row without
+    # nesting KeepTogether containers, which can strand preceding headings.
+    body = [flowable for item in body for flowable in (item if isinstance(item, list) else [item])]
+    if spec.compact:
+        for item in body:
+            if isinstance(item, Paragraph) and item.style is PAGE_DEK:
+                item.style = ParagraphStyle("IRCompactPageDek", parent=PAGE_DEK, keepWithNext=True)
+        # Let related teaching sections share pages instead of reserving a
+        # nearly empty page for every heading. Keep enough room to begin the
+        # next section, while table headers repeat naturally on continuation.
+        body = [
+            replacement
+            for item in body
+            for replacement in ([Spacer(1, 12), CondPageBreak(160)] if isinstance(item, PageBreak) else [item])
+        ]
+        closing_sections = {"FINISH THE REVIEW", "FINISH BOTH TASKS", "FINISH WEEK 12"}
+        for index, item in enumerate(body):
+            if isinstance(item, Paragraph) and item.style is PAGE_KICKER and item.getPlainText() in closing_sections:
+                body = body[:index] + [KeepTogether(body[index:])]
+                break
+    story.extend(body)
     if story and isinstance(story[-1], PageBreak):
         story.pop()
     doc.build(story)
@@ -720,34 +747,51 @@ def build_target_role_story() -> list[Flowable]:
     s += [callout("Ethical boundary", "Prepare capabilities and decision patterns. Do not collect leaked questions, copy candidate answers, or present anecdotes as guaranteed stages.", warm=True)]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet",
-        "Complete the one-page Target Role and Evidence Map",
-        "Use one row per recurring role requirement. Keep the first version imperfect; its purpose is to choose the next evidence test.",
-    )
-    s += [grid_table(
-        ["Target boundary", "Your current hypothesis"],
-        [
-            ["Role family and level", ""],
-            ["Geography / work model", ""],
-            ["Company shape / domain", ""],
-            ["Interview date or horizon", ""],
-            ["Most uncertain assumption", ""],
-        ],
+    s += page_heading('Worked map', 'Read a completed Target Role and Evidence Map', 'This fictional senior-backend example shows how a target changes preparation. Use its logic, not its career facts; create your own dated map in a notebook.')
+    s += [worked_example_table(
+        ['Target boundary', 'Example hypothesis'],
+        [['Role family and level',
+  'Senior backend engineer: own one service and cross-team interfaces; do not claim staff scope '
+  'without cross-team strategy evidence.'],
+ ['Geography / work model',
+  'India-based remote role with a written three-hour overlap window; confirm employment model with the '
+  'recruiter.'],
+ ['Company shape / domain',
+  'Product company with multi-tenant APIs and reliability ownership; exclude roles dominated by '
+  'frontend implementation.'],
+ ['Interview date or horizon',
+  'Fictional six-week horizon: establish baseline in week 1; spend weeks 2-4 on the first evidence '
+  'gap; rehearse in weeks 5-6.'],
+ ['Most uncertain assumption',
+  'Target-level influence bar. Ask what decisions the engineer is expected to make across teams in the '
+  'first six months.']],
         [145, 348],
-        row_heights=[31, 31, 31, 31, 31],
     ), spacer(12)]
-    s += [worksheet_table(
-        ["Recurring requirement", "Evidence I can show", "Confidence", "Gap / next proof"],
-        4,
+    s += [worked_example_table(
+        ['Recurring requirement', 'Example evidence', 'Confidence', 'Gap / next proof'],
+        [['Own services end to end',
+  'Incident timeline: chose rollback, communicated impact, and added a deployment guard after '
+  'recovery.',
+  'High: owned decision and artifact exist.',
+  'Rehearse a two-minute story; explain why rollback beat a hotfix and which guard prevented '
+  'recurrence.'],
+ ['Design reliable APIs',
+  'Notification design includes idempotency keys, retry limits, and delivery-state transitions.',
+  'Medium: design exists, failure probe untested.',
+  'Run a 35-minute rehearsal; inject a worker crash after provider acceptance and defend duplicate '
+  'handling.'],
+ ['Influence another team',
+  'Versioned API migration adopted by two consuming teams; decision record lists compatibility '
+  'trade-offs.',
+  'Medium: team result is clearer than personal role.',
+  "Separate my proposal, the other team's objection, the change I negotiated, and evidence of "
+  'adoption.'],
+ ['Communicate under constraints',
+  'Timed coding solution is correct, but invariant is first stated after implementation.',
+  'Low: behavior not yet repeatable.',
+  'State the window invariant before the loop on two unfamiliar prompts; retain a timestamp and '
+  'tests.']],
         [126, 155, 70, 142],
-        row_height=57,
-        prompts=[
-            ["1.", "", "H / M / L", ""],
-            ["2.", "", "H / M / L", ""],
-            ["3.", "", "H / M / L", ""],
-            ["4.", "", "H / M / L", ""],
-        ],
     )]
     end_page(s)
 
@@ -769,13 +813,14 @@ def build_target_role_story() -> list[Flowable]:
         "Building a company-specific syllabus from one unverified anecdote.",
         "Polishing resume wording before testing the underlying evidence gap.",
     ], compact=True), spacer(8)]
-    s += [callout("Your next action", "Save the completed map, open the Technical Baseline Scorecard, and test the gap that could most change your preparation order."), spacer(11)]
+    s += [p("Next: save the map, then use the Technical Baseline Scorecard to test the gap most likely to change your preparation order.", BODY_SMALL), spacer(7)]
     s += [p("Completion check", H2), bullet_list([
         "One role family and level are explicit.",
         "Three recurring requirements have evidence or a named gap.",
         "Confidence is separated from wishful certainty.",
         "One next action has a visible completion condition.",
     ], checklist=True, compact=True)]
+    s += [spacer(10), callout("Apply the method to your own evidence", 'In your notebook: write one target boundary, three repeated requirements, one truthful evidence item for each, a confidence label, and the first proof action. If evidence is missing, name the gap rather than invent a result.')]
     return s
 
 
@@ -818,20 +863,32 @@ def build_baseline_story() -> list[Flowable]:
         "Baseline prompt",
         "Given a string, return the length of its longest contiguous substring with no repeated characters. Explain your state and invariant, then test empty input, all-identical characters, and a repeat that occurs after a gap.",
         warm=True,
-    ), spacer(10), grid_table(
-        ["Dimension", "What reliable behavior sounds or looks like", "0 / 1 / 2"],
-        [
-            ["Clarification", "Restates inputs, outputs, constraints, and examples before selecting an approach.", ""],
-            ["Pattern choice", "Connects a prompt cue to an approach and rejects one plausible alternative.", ""],
-            ["State / invariant", "Names what is stored and what remains true after each step.", ""],
-            ["Correctness", "Implements the stated approach without changing the contract silently.", ""],
-            ["Complexity", "Explains time and space from the operations and state actually used.", ""],
-            ["Testing", "Covers empty/minimum, boundary, duplicate, and main-transition cases.", ""],
-            ["Communication", "Keeps decisions audible without narrating every keystroke.", ""],
-        ],
-        [94, 330, 69],
-        font_size=7.25,
-        row_heights=[43] * 7,
+    ), spacer(10), worked_example_table(
+        ['Dimension', 'Observed fictional attempt', 'Score + reason'],
+        [['Clarification',
+  'At 01:10, learner confirms substring means contiguous and returns a length; empty input returns 0.',
+  '2: contract stated unaided.'],
+ ['Pattern choice',
+  'At 03:20, chooses a sliding window because extending right can create a repeat that shrinking left '
+  'repairs.',
+  '2: cue linked to method.'],
+ ['State / invariant',
+  'At 18:00, after a wrong trace, finally says the active window contains no repeated characters.',
+  '1: correct but late.'],
+ ['Correctness',
+  'Changes left = last[c] + 1 to max(left, last[c] + 1) after the abba case moves left backward.',
+  '1: repaired after a failing trace.'],
+ ['Complexity',
+  'Explains one right pass, monotonic left boundary, and a last-seen map: O(n) time and O(min(n, '
+  'alphabet)) space.',
+  '2: bound tied to state.'],
+ ['Testing',
+  'Runs empty, bbbb, and abcabcbb; misses abba until the observer asks about an old duplicate.',
+  '1: key boundary prompted.'],
+ ['Communication',
+  'Approach is audible, but the pointer update is silent until the failed dry run.',
+  '1: decision checkpoint missing.']],
+        [88, 300, 95],
     ), spacer(10)]
     s += [p("Prompt setup", H2), two_cards(
         ("Recommended timing", "5 minutes clarify and choose; 20 minutes implement; 5 minutes test and explain complexity.", "30-minute run"),
@@ -848,20 +905,34 @@ def build_baseline_story() -> list[Flowable]:
         "Baseline prompt",
         "Design a notification-delivery service for product events. Support in-app and email delivery, user preferences, retries without duplicate visible sends, and delivery status. Assume 10 million monthly active users and a peak of 5,000 events per second; clarify any missing product promise before designing.",
         warm=True,
-    ), spacer(10), grid_table(
-        ["Dimension", "What reliable behavior sounds or looks like", "0 / 1 / 2"],
-        [
-            ["Requirements", "Separates critical actions, quality attributes, and explicit non-goals." , ""],
-            ["Scale model", "Uses order-of-magnitude traffic, payload, peak, and retention assumptions." , ""],
-            ["Decision order", "Moves from contract and data flow to components; boxes have stated reasons." , ""],
-            ["Data and state", "Names source of truth, entities, invariants, partitioning, and consistency." , ""],
-            ["Trade-offs", "Compares a credible alternative and ties the choice to a requirement." , ""],
-            ["Failure behavior", "Explains timeout, retry, idempotency, overload, and degraded operation." , ""],
-            ["Operations", "Closes with the first bottleneck, metric, alert, and recovery test." , ""],
-        ],
-        [94, 330, 69],
-        font_size=7.15,
-        row_heights=[43] * 7,
+    ), spacer(10), worked_example_table(
+        ['Dimension', 'Observed fictional attempt', 'Score + reason'],
+        [['Requirements',
+  'At 02:00, separates in-app persistence from email delivery and asks what the user should see after '
+  'a provider timeout.',
+  '2: contract clarified first.'],
+ ['Scale model',
+  'At 06:00, writes 5,000 peak events/s and asks about fan-out; average recipients per event is still '
+  'an estimate.',
+  '2: uncertainty labeled.'],
+ ['Decision order',
+  'Draws queue workers at 08:00 before stating delivery semantics or replay policy.',
+  '1: component precedes reason.'],
+ ['Data and state',
+  'Event store owns accepted work; delivery record keyed by event, recipient, channel tracks each '
+  'attempt.',
+  '2: state meanings visible.'],
+ ['Trade-offs',
+  'Chooses asynchronous delivery for latency isolation and accepts eventual delivery status.',
+  '2: cost stated.'],
+ ['Failure behavior',
+  'Retries described only at 29:00 after a crash probe; external email duplicate prevention is still '
+  'uncertain.',
+  '1: incomplete boundary.'],
+ ['Operations',
+  'Names oldest-event age and provider-error rate, but does not define a replay check for stuck work.',
+  '1: metric without recovery proof.']],
+        [88, 300, 95],
     ), spacer(10)]
     s += [p("Prompt setup", H2), two_cards(
         ("Recommended timing", "5 minutes requirements; 5 scale and API; 15 architecture/data; 10 failure, trade-offs, and close.", "35-minute run"),
@@ -883,7 +954,6 @@ def build_baseline_story() -> list[Flowable]:
         ],
         [94, 101, 171, 127],
         font_size=6.95,
-        row_heights=[88, 88, 88],
     ), spacer(12)]
     s += [callout("Correction rule", "Choose the earliest missing behavior that caused later confusion. A small front-loaded correction is easier to test than a broad promise to 'study more.'"), spacer(10)]
     s += [p("A correction is testable when", H2), bullet_list([
@@ -894,30 +964,38 @@ def build_baseline_story() -> list[Flowable]:
     ], checklist=True, compact=True)]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet",
-        "Record two baseline attempts",
-        "Complete this page immediately after each attempt. Use short quotes and timestamps instead of reconstructing the experience later.",
-    )
-    s += [grid_table(
-        ["Setup", "Coding attempt", "System-design attempt"],
-        [
-            ["Prompt", "", ""],
-            ["Time / tools", "", ""],
-            ["Strongest observable behavior", "", ""],
-            ["First unclear or missing decision", "", ""],
-            ["Quote / timestamp / artifact", "", ""],
-            ["Consequence in the answer", "", ""],
-        ],
+    s += page_heading('Worked baseline record', 'Connect baseline scores to exact evidence', 'The fictional attempts below use the two prompts in this guide. Notice how the selected correction addresses a decision moment rather than labeling the learner.')
+    s += [worked_example_table(
+        ['Setup', 'Coding attempt', 'System-design attempt'],
+        [['Prompt',
+  'Longest substring with no repeated characters; return length.',
+  'Notification delivery: in-app plus email, preferences, retries, and delivery status.'],
+ ['Time / tools',
+  '30 minutes; local editor; no solution lookup; observer only clarifies contract.',
+  '35 minutes; blank canvas; calculator allowed; no architecture hints.'],
+ ['Strongest observable behavior',
+  '03:20: explains why a window can expand and shrink while retaining one scan.',
+  '02:00: separates acceptance, persistence, and downstream delivery guarantees.'],
+ ['First unclear or missing decision',
+  'No explicit no-repeat invariant before code; left moves backward on abba.',
+  'Queue chosen before delivery/retry promise; crash-after-send case unresolved.'],
+ ['Quote / timestamp / artifact',
+  '18:00: "The active window must have no repeats." Saved abba trace and failed test.',
+  '29:00: "If acceptance succeeded but the response was lost, I need provider support or '
+  'reconciliation."'],
+ ['Consequence in the answer',
+  'Late pointer repair compresses testing; sample success initially hides the bug.',
+  'Failure follow-up exposes a gap between at-least-once work and visible email effects.']],
         [122, 185.5, 185.5],
-        font_size=7.2,
-        row_heights=[38, 38, 52, 62, 52, 58],
     ), spacer(12)]
-    s += [worksheet_table(
-        ["Selected first correction (one total)", "Where it must appear", "Evidence of success"],
-        1,
+    s += [worked_example_table(
+        ['Selected first correction (one total)', 'Where it must appear', 'Evidence of success'],
+        [['Before choosing mechanics, state the invariant or user-visible delivery guarantee and one event '
+  'that could break it.',
+  'After contract clarification, before the first loop or component box.',
+  'In a comparable re-test, the learner states the guarantee unaided and uses it to resolve one '
+  'boundary probe without silently changing it.']],
         [205, 132, 156],
-        row_height=78,
     )]
     end_page(s)
 
@@ -947,6 +1025,7 @@ def build_baseline_story() -> list[Flowable]:
         "The earliest important breakdown is named.",
         "One correction and one re-test condition are scheduled.",
     ], checklist=True, compact=True)]
+    s += [spacer(10), callout("Apply the method to your own evidence", 'After your own two attempts: copy the setup labels, preserve one quote or timestamp per score, identify the earliest missing decision, and choose one correction before scheduling a comparable re-test.')]
     return s
 
 
@@ -992,7 +1071,6 @@ def build_company_story() -> list[Flowable]:
         ],
         [104, 126, 160, 103],
         font_size=7.0,
-        row_heights=[72, 72, 72, 72],
     ), spacer(12)]
     s += [two_cards(
         ("What belongs", "Capabilities, public product context, role-level evidence, logistics, current sources, and questions that reduce uncertainty.", "Include"),
@@ -1016,7 +1094,6 @@ def build_company_story() -> list[Flowable]:
         ],
         [145, 155, 62, 131],
         font_size=6.95,
-        row_heights=[72, 72, 72, 72],
     ), spacer(12)]
     s += [p("How the map changes preparation", H2), bullet_list([
         "It adds one failure-recovery follow-up to an existing design rehearsal.",
@@ -1051,59 +1128,100 @@ def build_company_story() -> list[Flowable]:
     s += [callout("Three-gap limit", "Selecting more than three company-specific gaps usually hides priority. Park lower-confidence items until stronger evidence appears.")]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet 1",
-        "Create the company interview-loop map",
-        "Use current public information and date every source. Leave uncertain cells blank rather than filling them with generic assumptions.",
-    )
-    s += [grid_table(
-        ["Target company / role", "Level", "Prepared on", "Interview date"],
-        [["", "", "", ""]],
+    s += page_heading('Worked company map', 'Build a sourced map without pretending certainty', 'Northstar Cloud and all source notes below are fictional. Replace them with real dated public or authorized evidence when you create your own notebook map.')
+    s += [worked_example_table(
+        ['Target company / role', 'Level', 'Prepared on', 'Interview date'],
+        [['Northstar Cloud / backend engineer (fictional)',
+  'Senior, still to verify',
+  'Day 1 of this example',
+  'Day 21 (illustrative)']],
         [170, 90, 116, 117],
-        row_heights=[42],
     ), spacer(11)]
-    s += [worksheet_table(
-        ["Stage / evidence", "Capability", "My evidence", "Action / question", "Confidence"],
-        5,
+    s += [worked_example_table(
+        ['Stage / evidence', 'Capability', 'Example evidence', 'Action / question', 'Confidence'],
+        [['Recruiter screen / example role brief',
+  'Role clarity and scope',
+  '90-second service-ownership summary',
+  'Confirm level, location model, and current round sequence.',
+  'High for written facts; open for process.'],
+ ['Coding / fictional recruiter note',
+  'Correctness and explanation',
+  'Sliding-window invariant and test set',
+  'Ask permitted language and tools; rehearse one unfamiliar prompt.',
+  'High for tool policy in this scenario.'],
+ ['Design / role emphasizes multi-tenant APIs',
+  'Isolation and failure trade-offs',
+  'Notification design with per-tenant limits',
+  'Test a noisy tenant and regional dependency failure.',
+  'Medium: focus inferred from role.'],
+ ['Behavioral / ownership language',
+  'Personal judgment and learning',
+  'Rollback story with decision timeline',
+  'Name alternatives, escalation, measured impact, and prevention.',
+  'Medium: competency plausible, not guaranteed.'],
+ ['Manager / cross-team adoption signal',
+  'Influence beyond service boundary',
+  'Versioned API migration and objections resolved',
+  'Ask how senior scope is calibrated across teams.',
+  'Low: manager emphasis unconfirmed.']],
         [100, 95, 115, 118, 65],
-        row_height=58,
-        prompts=[
-            ["1.", "", "", "", "H/M/L"],
-            ["2.", "", "", "", "H/M/L"],
-            ["3.", "", "", "", "H/M/L"],
-            ["4.", "", "", "", "H/M/L"],
-            ["5.", "", "", "", "H/M/L"],
-        ],
     ), spacer(9)]
-    s += [p("Source ledger", H2), worksheet_table(
-        ["Source / URL or conversation", "Date", "What it supports", "Confidence"],
-        3,
+    s += [p('Illustrative source ledger - replace with real sources', H2), worked_example_table(
+        ['Source / URL or conversation', 'Date', 'What it supports', 'Confidence'],
+        [['Fictional role brief, section "Responsibilities"; no real URL asserted',
+  'Example Day 1',
+  'Explicit API ownership and reliability responsibilities; not interview questions.',
+  'High for example text.'],
+ ['Fictional recruiter conversation notes, retained with permission',
+  'Example Day 2',
+  'Tools and known stages only; unanswered questions remain open.',
+  'High for explicit answers.'],
+ ['Fictional candidate-pattern summary; conflicting stage counts',
+  'Example Day 2',
+  'A question about sequence, not evidence for adding another syllabus.',
+  'Low; verify with recruiter.']],
         [208, 68, 157, 60],
-        row_height=38,
     )]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet 2",
-        "Choose three company-specific gaps",
-        "Write each gap as an observable difference, then rate likelihood, interview impact, and evidence deficit separately as High, Medium, or Low.",
-    )
-    s += [worksheet_table(
-        ["Contextual gap", "Likelihood", "Interview impact", "Evidence deficit", "Proof action", "Completion evidence"],
-        3,
+    s += page_heading('Worked gap selection', 'See which gaps change the next action', 'Each illustrative row connects a role signal to a missing capability and observable proof. A low-confidence signal can remain a recruiter question instead of becoming study work.')
+    s += [worked_example_table(
+        ['Contextual gap',
+ 'Likelihood',
+ 'Interview impact',
+ 'Evidence deficit',
+ 'Proof action',
+ 'Completion evidence'],
+        [['Tenant isolation is mentioned, but my design only has a global queue.',
+  'Medium',
+  'High',
+  'High',
+  'Rehearse per-tenant admission, fair scheduling, and saturation recovery.',
+  'Explain how a hot tenant is contained and name a per-tenant delay metric.'],
+ ['My reliability story describes team action, not my decision boundary.',
+  'Medium',
+  'High',
+  'Medium',
+  'Rewrite the opening around rollback versus hotfix and rehearse one objection.',
+  'Two-minute answer identifies my decision, consequence, and durable prevention.'],
+ ['Cross-team influence is expected but my API migration evidence is untested.',
+  'Low',
+  'Medium',
+  'Medium',
+  'Ask recruiter about level bar; run one adoption-story follow-up if confirmed.',
+  'Either confirm the gap and show negotiated adoption, or park it if role scope differs.']],
         [105, 57, 58, 58, 102, 113],
-        row_height=86,
-        prompts=[
-            ["1.", "H / M / L", "H / M / L", "H / M / L", "", ""],
-            ["2.", "H / M / L", "H / M / L", "H / M / L", "", ""],
-            ["3.", "H / M / L", "H / M / L", "H / M / L", "", ""],
-        ],
     ), spacer(12)]
-    s += [p("Questions for the recruiter", H2), worksheet_table(
-        ["Question that reduces uncertainty", "Why the answer changes preparation"],
-        3,
+    s += [p("Questions for the recruiter", H2), worked_example_table(
+        ['Question that reduces uncertainty', 'Why the answer changes preparation'],
+        [['Which stages and approximate lengths are confirmed for this role now?',
+  'Sets the rehearsal clock; stops stale anecdotes from adding unnecessary rounds.'],
+ ['Does the design stage emphasize product behavior or infrastructure depth?',
+  'Changes the follow-up depth, not the need to clarify requirements and failure behavior.'],
+ ['What differentiates successful senior scope from the next lower level?',
+  'Determines whether cross-team influence evidence needs rehearsal or whether service ownership is '
+  'the main bar.']],
         [245, 248],
-        row_height=40,
     ), spacer(10)]
     s += [callout("Boundary check", "Remove any action based only on a leaked prompt, a copied answer, or a low-confidence detail that would not change the underlying capability you need."), spacer(8)]
     end_page(s)
@@ -1133,6 +1251,7 @@ def build_company_story() -> list[Flowable]:
         "No more than three contextual gaps are active.",
         "Each gap has a proof action and stop condition.",
     ], checklist=True, compact=True)]
+    s += [spacer(10), callout("Apply the method to your own evidence", 'For your actual target: keep a dated source ledger, label each stage fact or inference, choose no more than three gaps, and give each an action plus stop condition. Write unknown and an owner when evidence is missing.')]
     return s
 
 
@@ -1179,7 +1298,6 @@ def build_evidence_story() -> list[Flowable]:
         ],
         [82, 137, 145, 129],
         font_size=6.75,
-        row_heights=[49] * 6,
     ), spacer(12)]
     s += [callout("Scoring discipline", "Use the same 0 / 1 / 2 evidence scale from the Technical Baseline Scorecard, but compare the notes behind each score. The number is an index into evidence, not the conclusion."), spacer(9)]
     s += [p("A useful quote", H2), p("Record enough surrounding context to understand the decision. 'I forgot consistency' is weaker evidence than: 'I selected asynchronous replication, then described read-your-writes only after the interviewer asked what a user sees after an update.'", QUOTE)]
@@ -1200,7 +1318,6 @@ def build_evidence_story() -> list[Flowable]:
         ],
         [111, 135, 133, 114],
         font_size=6.85,
-        row_heights=[70, 70, 70, 70],
     ), spacer(12)]
     s += [p("Root-cause questions", H2), bullet_list([
         "What cue was present before the gap appeared?",
@@ -1226,7 +1343,6 @@ def build_evidence_story() -> list[Flowable]:
         ],
         [48, 104, 212, 129],
         font_size=7.1,
-        row_heights=[65, 65, 65],
     ), spacer(12)]
     s += [two_cards(
         ("Weak conclusion", "I need to learn queues again. This is broad, hides what was already known, and gives no moment to test.", "Too broad"),
@@ -1236,56 +1352,79 @@ def build_evidence_story() -> list[Flowable]:
     s += [p("Re-test condition", H2), p("Use a nearby asynchronous-workflow prompt, the same 35-minute structure, and the same rubric. Success means delivery/retry behavior appears before architecture and remains coherent during one failure follow-up.")]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet 1",
-        "Compare the last three attempts",
-        "Normalize the attempt conditions first. Then score the same six dimensions and attach a short evidence note to every score.",
-    )
-    s += [grid_table(
-        ["Context", "Attempt A", "Attempt B", "Attempt C"],
-        [
-            ["Date / prompt", "", "", ""],
-            ["Type / difficulty", "", "", ""],
-            ["Time / tools / assistance", "", "", ""],
-            ["Rubric used", "", "", ""],
-        ],
+    s += page_heading('Worked comparison', 'Compare three attempts without hiding the evidence', 'These fictional runs use comparable asynchronous-workflow prompts and the same six dimensions. Read each score with its timestamp; the repeated sequence matters more than the totals.')
+    s += [worked_example_table(
+        ['Context', 'Attempt A', 'Attempt B', 'Attempt C'],
+        [['Date / prompt',
+  'Example Day 1: notifications',
+  'Example Day 3: file processing',
+  'Example Day 5: metrics pipeline'],
+ ['Type / difficulty',
+  'Async system design; moderate scope',
+  'Async system design; moderate scope',
+  'Async system design; moderate scope'],
+ ['Time / tools / assistance',
+  '35 min; blank canvas; no hints',
+  '35 min; blank canvas; no hints',
+  '35 min; blank canvas; no hints'],
+ ['Rubric used',
+  'Shared six dimensions; 0/1/2 plus artifacts',
+  'Same dimensions and scoring rule',
+  'Same dimensions and scoring rule']],
         [118, 125, 125, 125],
-        font_size=7.0,
-        row_heights=[36, 36, 42, 36],
     ), spacer(11)]
-    s += [grid_table(
-        ["Shared dimension", "Attempt A: 0/1/2 + evidence", "Attempt B: 0/1/2 + evidence", "Attempt C: 0/1/2 + evidence"],
-        [
-            ["Framing", "", "", ""],
-            ["Decision", "", "", ""],
-            ["Reason", "", "", ""],
-            ["Boundary", "", "", ""],
-            ["Evidence", "", "", ""],
-            ["Communication", "", "", ""],
-        ],
+    s += [worked_example_table(
+        ['Shared dimension',
+ 'Attempt A: 0/1/2 + evidence',
+ 'Attempt B: 0/1/2 + evidence',
+ 'Attempt C: 0/1/2 + evidence'],
+        [['Framing',
+  '2: 02:10 identifies accepted versus delivered.',
+  '2: 02:40 defines upload and processing result.',
+  '2: 03:00 separates ingestion from query freshness.'],
+ ['Decision',
+  '1: 08:00 queue drawn before delivery guarantee.',
+  '1: 09:20 workers drawn before crash behavior.',
+  '1: 08:40 store chosen before delivery semantics.'],
+ ['Reason',
+  '1: retry cost named only after queue choice.',
+  '1: parallelism chosen without poison-message boundary.',
+  '1: throughput discussed; replay cost omitted.'],
+ ['Boundary',
+  '0: crash after email acceptance unresolved.',
+  '1: consumer failure addressed at 27:00 after probe.',
+  '1: duplicates addressed at 28:30 after probe.'],
+ ['Evidence',
+  '1: diagram exists; no duplicate timeline.',
+  '1: retry sketch exists; no dead-letter re-drive test.',
+  '1: retention estimate exists; reconciliation untested.'],
+ ['Communication',
+  '2: major choices audible; assumptions dated.',
+  '2: scope changes explicitly named.',
+  '2: flow remains traceable despite late semantics.']],
         [91, 134, 134, 134],
-        font_size=6.75,
-        row_heights=[48, 48, 48, 48, 48, 48],
     )]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet 1B",
-        "Turn the score grid into evidence",
-        "Totals can hide the moment that matters. Use artifacts and repeated behavior to explain what is stable, what is weak, and what is still uncertain.",
-    )
-    s += [worksheet_table(
-        ["Synthesis", "Evidence across Attempts A / B / C"],
-        5,
+    s += page_heading('Worked synthesis', 'Turn score notes into a defensible pattern', 'The synthesis below uses the same three attempts. It preserves strengths, separates domain differences from the repeated gap, and states what is still uncertain.')
+    s += [worked_example_table(
+        ['Synthesis', 'Evidence across Attempts A / B / C'],
+        [['Strongest repeated behavior',
+  'All three answers clarify user-facing goals early and keep major choices audible. Preserve those '
+  'habits; the correction is not "communicate more."'],
+ ['First repeated weak decision moment',
+  'At about minutes 8-9, the learner draws storage or workers before stating delivery, retry, and '
+  'replay guarantees.'],
+ ['Cue present immediately before it',
+  'The prompt introduces asynchronous work that can be retried after a crash. That cue should trigger '
+  'a semantics checkpoint.'],
+ ['Quote / timestamp / artifact references',
+  'A 08:00 queue sketch; B 09:20 worker sketch and 27:00 failure probe; C 08:40 storage choice and '
+  '28:30 duplicate probe.'],
+ ['What is noise or still uncertain?',
+  'Domains differ, so totals are not directly comparable. The repeated ordering gap is stronger '
+  'evidence than the exact score change; external-provider guarantees still need verification.']],
         [165, 328],
-        row_height=76,
-        prompts=[
-            ["Strongest repeated behavior", ""],
-            ["First repeated weak decision moment", ""],
-            ["Cue present immediately before it", ""],
-            ["Quote / timestamp / artifact references", ""],
-            ["What is noise or still uncertain?", ""],
-        ],
     ), spacer(10)]
     s += [callout(
         "Comparison rule",
@@ -1293,24 +1432,26 @@ def build_evidence_story() -> list[Flowable]:
     )]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet 2",
-        "Select one correction",
-        "Write one line for each step. If the chain cannot be stated clearly, collect better evidence before choosing the correction.",
-    )
-    s += [worksheet_table(
-        ["Step", "Your evidence"],
-        6,
+    s += page_heading('Worked correction', 'Turn the pattern into one observable behavior', 'Follow the chain from the repeated architecture-first moment to a specific checkpoint. In your notebook, repeat this chain using your own quotes and artifacts.')
+    s += [worked_example_table(
+        ['Step', 'Illustrative evidence'],
+        [['Repeated observable moment',
+  'Architecture appears before failure and retry semantics in all three asynchronous-workflow '
+  'attempts.'],
+ ['Cue present before it',
+  'Accepted work can outlive the request and be retried after a worker or dependency failure.'],
+ ['Earliest missing decision',
+  'Define the durable acceptance boundary, duplicate-effect rule, bounded retry policy, and recovery '
+  'owner.'],
+ ['Downstream consequence',
+  'Failure follow-ups force late changes to IDs, state transitions, metrics, and reconciliation.'],
+ ['One correction sentence',
+  'When work becomes asynchronous, I will state delivery and duplicate-effect guarantees before '
+  'drawing workers so retries and recovery follow the same contract.'],
+ ['Evidence that would show improvement',
+  'Checkpoint appears unaided before architecture; crash-after-side-effect probe is answered without '
+  'an unexplained guarantee change.']],
         [145, 348],
-        row_height=52,
-        prompts=[
-            ["Repeated observable moment", ""],
-            ["Cue present before it", ""],
-            ["Earliest missing decision", ""],
-            ["Downstream consequence", ""],
-            ["One correction sentence", ""],
-            ["Evidence that would show improvement", ""],
-        ],
     ), spacer(11)]
     s += [callout("Correction sentence template", "When I notice [cue], I will [observable behavior] before [decision point], so [quality or failure consequence] stays explicit."), spacer(9)]
     s += [p("Keep / change", H2), two_cards(
@@ -1319,33 +1460,37 @@ def build_evidence_story() -> list[Flowable]:
     )]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet 3",
-        "Run the targeted re-test",
-        "Use one 35-minute block: spend 28 minutes replaying the original decision window, then use a seven-minute adjacent transfer probe. The probe is not a second full attempt.",
-    )
-    s += [grid_table(
-        ["Re-test setup", "Your plan"],
-        [
-            ["Phase 1: original lowest-score scenario", ""],
-            ["Same prompt conditions / decision-window time box / tools", ""],
-            ["Correction cue", ""],
-            ["Where the behavior must appear", ""],
-            ["Primary success evidence", ""],
-            ["Phase 2: 7-minute adjacent transfer probe", ""],
-        ],
+    s += page_heading('Worked re-test', 'Repeat the weak decision window, then test transfer', 'This fictional 35-minute block contains 28 minutes on the original weak scenario and a seven-minute adjacent probe. Its evidence is not a new full-length baseline score.')
+    s += [worked_example_table(
+        ['Re-test setup', 'Illustrative plan'],
+        [['Phase 1: original lowest-score scenario',
+  'Repeat notification delivery, the scenario with Boundary = 0; replay the original '
+  'requirements-to-failure decision window.'],
+ ['Same prompt conditions / decision-window time box / tools',
+  '28 minutes; same prompt scope, blank canvas, no hints, and six-dimension evidence rubric. This is a '
+  'focused replay, not a shorter full baseline comparison.'],
+ ['Correction cue', 'A notification is accepted now but may be delivered later and retried.'],
+ ['Where the behavior must appear',
+  'Immediately after requirements, before API persistence or queue-worker boxes.'],
+ ['Primary success evidence',
+  'Record the checkpoint timestamp and a crash-after-provider-acceptance timeline; do not assume the '
+  'provider prevents duplicates.'],
+ ['Phase 2: 7-minute adjacent transfer probe',
+  'Switch to file processing: worker crashes after writing output but before acknowledging work. '
+  'Explain stable job ID, output state, and safe retry.']],
         [158, 335],
-        row_heights=[42, 42, 48, 48, 58, 48],
     ), spacer(12)]
-    s += [worksheet_table(
-        ["Result", "Evidence / quote / timestamp", "Next decision"],
-        2,
+    s += [worked_example_table(
+        ['Result', 'Evidence / quote / timestamp', 'Next decision'],
+        [['Phase 1: same scenario',
+  '04:10: acceptance is durable before acknowledgment; duplicate email effects need provider '
+  'idempotency or reconciliation. At 18:30, failure probe reuses this boundary.',
+  'Keep correction; confirm the provider capability rather than claiming exactly-once delivery.'],
+ ['Phase 2: brief transfer probe',
+  '02:00: output path uses stable job ID; retry checks durable completion before writing again. A '
+  'stale partial object is quarantined.',
+  'Transfer observed once; return to roadmap and check again during the next normal rehearsal.']],
         [92, 255, 146],
-        row_height=63,
-        prompts=[
-            ["Phase 1: same scenario", "", "Keep / adjust / gather evidence"],
-            ["Phase 2: brief transfer probe", "", "Stable / prompt-specific / unclear"],
-        ],
     ), spacer(10)]
     s += [callout("Stop condition", "Return to the main roadmap when the correction appears unaided in the comparable re-test and at least once in a nearby prompt. Do not rehearse until the answer becomes a script.")]
     end_page(s)
@@ -1375,6 +1520,7 @@ def build_evidence_story() -> list[Flowable]:
         "One correction is attached to a cue and decision point.",
         "The comparable re-test and transfer check are defined.",
     ], checklist=True, compact=True)]
+    s += [spacer(10), callout("Apply the method to your own evidence", 'Use your last three artifacts: normalize conditions, attach evidence to the same six dimensions, write one repeated cue-to-consequence chain, and schedule the 28-minute replay plus seven-minute transfer probe.')]
     return s
 
 
@@ -1421,19 +1567,22 @@ def build_timed_rehearsal_story() -> list[Flowable]:
             ["Evidence", "Code and tests; diagram and decision ledger", "Observable result, not a feeling", "Scored immediately with the same rubric"],
         ],
         [70, 158, 126, 139],
-        row_heights=[60, 60, 60, 60],
     ), spacer(12)]
-    s += [p("Setup record", H2), worksheet_table(
-        ["Field", "Coding block", "System-design block"],
-        4,
+    s += [p('Illustrative setup record', H2), worked_example_table(
+        ['Field', 'Coding block', 'System-design block'],
+        [['Prompt / source',
+  'Fictional fresh prompt: longest substring containing at most two distinct characters.',
+  'Fictional fresh notification variant: preserve delivery state while one provider is slow.'],
+ ['Start time / end time',
+  'Example 09:00-09:30; evidence capture 09:30-09:40.',
+  'Example 09:45-10:20; evidence capture 10:20-10:25.'],
+ ['Tools / assistance',
+  'Local editor and tests; no lookup or hints; speak major decisions aloud.',
+  'Blank canvas and calculator; no component suggestions; one neutral failure probe.'],
+ ['Completion evidence',
+  'Code, eceba trace, edge tests, invariant timestamp, complexity, and one missed decision.',
+  'Diagram, three assumption-to-decision rows, failure timeline, metric, and one trade-off.']],
         [94, 199, 200],
-        row_height=40,
-        prompts=[
-            ["Prompt / source", "", ""],
-            ["Start time / end time", "", ""],
-            ["Tools / assistance", "", ""],
-            ["Completion evidence", "", ""],
-        ],
     ), spacer(9)]
     s += [callout("Prompt rule", "Use the Library mock as a prompt source, not as an answer script. If you remember the solution path, choose another prompt and record why.", warm=True)]
     end_page(s)
@@ -1453,7 +1602,6 @@ def build_timed_rehearsal_story() -> list[Flowable]:
             ["30-40 min", "Capture evidence", "Artifacts, scores, quote/timestamp, first missed edge, one correction"],
         ],
         [70, 177, 246],
-        row_heights=[53, 53, 58, 58, 53],
     ), spacer(12)]
     s += [p("If you are stuck", H2), numbered_chain([
         ("Restate", "Say the contract and the exact uncertainty."),
@@ -1464,25 +1612,29 @@ def build_timed_rehearsal_story() -> list[Flowable]:
     s += [callout("Time-pressure rule", "Do not hide. A visible correct baseline plus a named optimization gap is stronger evidence than silent guessing or an unexplained code jump.")]
     end_page(s)
 
-    s += page_heading(
-        "Coding worksheet",
-        "Save the reasoning that produced the code",
-        "Complete the left side during clarification and planning. Complete the evidence rows immediately after the timer ends.",
-    )
-    s += [worksheet_table(
-        ["Artifact", "Your record"],
-        7,
+    s += page_heading('Worked coding record', 'Make a sliding-window solution inspectable', 'This completed example solves a fresh at-most-two-distinct-characters prompt. Use its contract, invariant, trace, and test reasoning as a standard for your own record, not an answer to memorize.')
+    s += [worked_example_table(
+        ['Artifact', 'Illustrative record'],
+        [['Contract and constraints',
+  'Input is a string; return longest contiguous length with at most two distinct characters. Empty '
+  'returns 0; character model must be clarified.'],
+ ['Normal + boundary example', 'eceba -> 3 (ece); empty -> 0; aa -> 2; abaccc -> 4 (accc).'],
+ ['Pattern cue / approach',
+  'A right extension can create a third character; shrink left until at most two remain. Use a sliding '
+  'window, not global frequency counts.'],
+ ['State and invariant',
+  'Counts represent only the current window. After shrinking, it contains at most two distinct '
+  'characters; best is updated only then.'],
+ ['Rejected alternative + reason',
+  'Enumerating every substring is correct but quadratic or worse. Sorting destroys contiguity, so it '
+  'changes the problem.'],
+ ['Time / space complexity',
+  'Both pointers move forward at most n times: O(n). With limit two, the count map has at most three '
+  'keys during repair, so O(1) auxiliary space.'],
+ ['First missed edge + timestamp',
+  'At 18:00, eceba exposes update-before-shrink. At 26:00, abaccc passes after moving best update '
+  'after the shrinking loop.']],
         [139, 354],
-        row_height=44,
-        prompts=[
-            ["Contract and constraints", ""],
-            ["Normal + boundary example", ""],
-            ["Pattern cue / approach", ""],
-            ["State and invariant", ""],
-            ["Rejected alternative + reason", ""],
-            ["Time / space complexity", ""],
-            ["First missed edge + timestamp", ""],
-        ],
     ), spacer(10)]
     s += [grid_table(
         ["Score", "Evidence standard"],
@@ -1492,28 +1644,32 @@ def build_timed_rehearsal_story() -> list[Flowable]:
             ["2 - independent", "The behavior appears at the correct decision point and is supported by an artifact."],
         ],
         [92, 401],
-        row_heights=[36, 40, 40],
     )]
     end_page(s)
 
-    s += page_heading(
-        "Coding evidence",
-        "Score moments, not confidence",
-        "Use one evidence scale across dimensions. A total is useful only when each mark points to something the learner said, wrote, implemented, or tested.",
-    )
-    s += [worksheet_table(
-        ["Dimension", "0 / 1 / 2", "Quote, timestamp, code, or test evidence"],
-        6,
+    s += page_heading('Worked coding evidence', 'Score the attempt behind the code', 'These fictional timestamps refer to the same at-most-two-distinct attempt. Correct final code can still contain late reasoning; the evidence shows what should move earlier.')
+    s += [worked_example_table(
+        ['Dimension', 'Score + evidence', 'Quote, timestamp, code, or test evidence'],
+        [['Clarification / contract',
+  '2',
+  '01:00: distinguishes substring from subsequence and confirms at most two distinct characters.'],
+ ['Approach / decision order',
+  '2',
+  '04:20: expansion may break the constraint; shrinking repairs it without revisiting old starts.'],
+ ['State / invariant',
+  '1',
+  '18:00: invariant first stated after the update-before-shrink bug appears.'],
+ ['Correctness / recovery',
+  '1',
+  '20:30: moves best update after the while loop, then traces counts and boundaries.'],
+ ['Complexity / alternatives',
+  '2',
+  '24:00: each pointer moves at most n; sorting rejected because order matters.'],
+ ['Testing / communication',
+  '1',
+  '26:00: eceba and abaccc pass; empty and aa verified, but the first pointer repair was initially '
+  'silent.']],
         [123, 73, 297],
-        row_height=49,
-        prompts=[
-            ["Clarification / contract", "", ""],
-            ["Approach / decision order", "", ""],
-            ["State / invariant", "", ""],
-            ["Correctness / recovery", "", ""],
-            ["Complexity / alternatives", "", ""],
-            ["Testing / communication", "", ""],
-        ],
     ), spacer(11)]
     s += [p("Worked evidence example", H2), grid_table(
         ["Observed moment", "Cause hypothesis", "Smallest correction"],
@@ -1522,7 +1678,6 @@ def build_timed_rehearsal_story() -> list[Flowable]:
             ["Final duplicate boundary test was missed", "Testing started without a written edge list", "Write four test labels during clarification; run them in the last five minutes"],
         ],
         [171, 159, 163],
-        row_heights=[60, 60],
     ), spacer(9)]
     s += [callout("Do not copy the example", "Use it to separate symptom, cause, and correction. Your correction must attach to your own evidence and decision cue.", warm=True)]
     end_page(s)
@@ -1544,56 +1699,76 @@ def build_timed_rehearsal_story() -> list[Flowable]:
             ["35-40 min", "Capture evidence", "Diagram, three assumptions, decision ledger, score, quote, correction"],
         ],
         [65, 161, 267],
-        row_heights=[44, 44, 49, 49, 49, 49, 44],
     ), spacer(10)]
     s += [callout("Compression rule", "When time is short, reduce breadth and say what is deferred. Never silently skip requirements, a source of truth, the primary bottleneck, or failure handling.")]
     end_page(s)
 
-    s += page_heading(
-        "Design worksheet",
-        "Show what each assumption caused",
-        "The three-row decision ledger is the minimum artifact for the roadmap task. Each row must make a design choice revisitable.",
-    )
-    s += [worksheet_table(
-        ["Assumption", "Decision caused", "Cost / trade-off", "What would change it"],
-        3,
+    s += page_heading('Worked design ledger', 'Connect assumptions to decisions and reversal points', 'The illustrative notification design below makes every assumption revisitable. In your next run, write three comparable rows in a notebook with your actual estimates and guarantees.')
+    s += [worked_example_table(
+        ['Assumption', 'Decision caused', 'Cost / trade-off', 'What would change it'],
+        [['Peak 5,000 events/s; average fan-out of two recipients is an explicit estimate.',
+  'Plan for 10,000 recipient deliveries/s before channel fan-out; separate durable event acceptance '
+  'from delivery workers.',
+  'More queue and status state; capacity depends on real fan-out and provider quotas.',
+  'A hot tenant or fan-out of 100 changes partitioning, admission control, and capacity math.'],
+ ['Product accepts delayed delivery but must not lose accepted events.',
+  'Acknowledge after durable event write; retry delivery asynchronously with bounded backoff.',
+  'Status is eventually updated; backlog and replay ownership must be explicit.',
+  'A strict immediate-send promise requires a separate synchronous path and a different failure '
+  'contract.'],
+ ['A provider timeout may hide a successful send.',
+  'Use stable delivery ID and provider idempotency where supported; otherwise expose uncertainty and '
+  'reconcile.',
+  'Extra state and possible manual resolution; a database flag alone cannot prove external '
+  'exactly-once effects.',
+  'Verified provider semantics or a product-approved duplicate policy changes the retry boundary.']],
         [116, 134, 121, 122],
-        row_height=60,
     ), spacer(11)]
-    s += [worksheet_table(
-        ["Design evidence", "Your record"],
-        4,
+    s += [worked_example_table(
+        ['Design evidence', 'Illustrative record'],
+        [['Source of truth + data flow',
+  'Durable event store -> recipient/channel work -> provider -> delivery-state record. A stable '
+  'event/recipient/channel ID links retries.'],
+ ['Primary bottleneck + limit',
+  'Provider throughput quota, not queue size, bounds drain rate. At peak, compare arrival rate with '
+  'measured service rate by channel.'],
+ ['Failure / recovery / metric',
+  'Provider outage: bounded retries, dead letters, controlled re-drive. Watch oldest-event age and '
+  'failed-delivery rate, then validate recovery on a small batch.'],
+ ['Trade-off to revisit',
+  'Global FIFO is simpler but lets one tenant delay others; add fairness when per-tenant age or load '
+  'evidence justifies it.']],
         [145, 348],
-        row_height=45,
-        prompts=[
-            ["Source of truth + data flow", ""],
-            ["Primary bottleneck + limit", ""],
-            ["Failure / recovery / metric", ""],
-            ["Trade-off to revisit", ""],
-        ],
     ), spacer(10)]
     s += [callout("Decision test", "If an assumption changes, point to the component, data path, or operating policy that changes with it. If nothing changes, the assumption may not be decision-relevant.")]
     end_page(s)
 
-    s += page_heading(
-        "Design evidence",
-        "Score the answer and test one pivot",
-        "Use the same 0 / 1 / 2 evidence scale. Then introduce one nearby requirement change and observe whether the learner updates only the affected decisions.",
-    )
-    s += [worksheet_table(
-        ["Dimension", "0 / 1 / 2", "Quote, timestamp, diagram, or decision evidence"],
-        7,
+    s += page_heading('Worked design evidence', 'Use a failure probe to expose the remaining uncertainty', 'The fictional score record continues the same notification scenario. Scores cite decisions; an unresolved external guarantee remains a named question rather than a confident claim.')
+    s += [worked_example_table(
+        ['Dimension', 'Score + evidence', 'Quote, timestamp, diagram, or decision evidence'],
+        [['Requirements / non-goals',
+  '2',
+  '03:00: accepted work must survive; immediate email completion is excluded from the response '
+  'promise.'],
+ ['Scale / capacity',
+  '2',
+  '07:00: 5,000 events/s x two recipients = 10,000 deliveries/s before channel fan-out.'],
+ ['Decision order / data flow',
+  '2',
+  '12:00: durable acceptance and delivery state precede component detail.'],
+ ['Architecture / bottleneck',
+  '1',
+  '24:00: provider quota identified late after the worker count was chosen.'],
+ ['Trade-off clarity',
+  '2',
+  '30:00: asynchronous delivery reduces request coupling but requires visible eventual status.'],
+ ['Failure / recovery / metrics',
+  '1',
+  '28:00: oldest-event age named; crash-after-send outcome still needs provider verification.'],
+ ['Communication / recovery',
+  '2',
+  '31:00: labels the unresolved guarantee and updates only retry behavior during the pivot.']],
         [126, 73, 294],
-        row_height=42,
-        prompts=[
-            ["Requirements / non-goals", "", ""],
-            ["Scale / capacity", "", ""],
-            ["Decision order / data flow", "", ""],
-            ["Architecture / bottleneck", "", ""],
-            ["Trade-off clarity", "", ""],
-            ["Failure / recovery / metrics", "", ""],
-            ["Communication / recovery", "", ""],
-        ],
     ), spacer(10)]
     s += [p("Worked pivot", H2), grid_table(
         ["Requirement change", "What changes", "What stays stable"],
@@ -1603,7 +1778,6 @@ def build_timed_rehearsal_story() -> list[Flowable]:
             "The product contract, source of truth, and unrelated read path remain unchanged",
         ]],
         [149, 188, 156],
-        row_heights=[66],
     ), spacer(8)]
     s += [callout("Neutral observer prompts", "Use: What assumption drives that? What fails first? Which decision changes if the requirement changes? Avoid suggesting the component or answer.", warm=True)]
     end_page(s)
@@ -1620,7 +1794,6 @@ def build_timed_rehearsal_story() -> list[Flowable]:
             ["Timed system-design rehearsal", "Prompt, three assumptions and caused decisions, diagram, trade-off to revisit", "One quote/timestamp and a rubric score tied to the decision ledger"],
         ],
         [121, 230, 142],
-        row_heights=[74, 74],
     ), spacer(11)]
     s += [p("Common mistakes", H2), bullet_list([
         "Starting implementation or architecture before clarifying the contract.",
@@ -1637,6 +1810,7 @@ def build_timed_rehearsal_story() -> list[Flowable]:
         "Scores cite observable evidence.",
         "Only one correction is active for the next test.",
     ], checklist=True, compact=True)]
+    s += [spacer(10), callout("Apply the method to your own evidence", 'For a fresh prompt: save contract, examples, invariant, approach, rejected alternative, tests, complexity, and first missed decision. For design: save three assumption-to-decision rows, failure timeline, metric, and a reversal condition.')]
     return s
 
 
@@ -1669,22 +1843,30 @@ def build_final_loop_story() -> list[Flowable]:
     ], checklist=True, compact=True)]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet 1",
-        "Assemble a representative loop",
-        "Choose segments that reflect the target role and the corrected gap. Each segment needs a capability, evidence cue, time box, and stop condition.",
-    )
-    s += [worksheet_table(
-        ["Segment", "Capability", "Prompt / source", "Evidence cue", "Time / stop"],
-        4,
+    s += page_heading('Worked loop plan', 'Choose four segments with observable stopping points', 'This illustrative plan fits the existing 60-minute clock. Select your own fresh, authorized prompts and truthful story; keep the capability, evidence cue, and stop condition explicit.')
+    s += [worked_example_table(
+        ['Segment', 'Capability', 'Prompt / source', 'Evidence cue', 'Time / stop'],
+        [['Coding',
+  'Invariant plus boundary test',
+  'Own fresh mini-prompt: maximum unique-character substring length.',
+  'Say no-repeat invariant before code; trace abba without moving left backward.',
+  '18 min; approach, implementation, boundary, complexity.'],
+ ['System design',
+  'Requirement-led reliability trade-off',
+  'Mini-design: accept and deliver a notification when provider is slow.',
+  'State acceptance and retry guarantee before queue; explain one timeout timeline.',
+  '18 min; main flow, one failure, metric, trade-off.'],
+ ['Behavioral',
+  'Owned judgment under pressure',
+  'Own incident story: rollback versus hotfix, using only recorded facts.',
+  'Name personal decision, rejected alternative, result, and prevention.',
+  '10 min; story plus one evidence probe.'],
+ ['Follow-up pivot',
+  'Adapt without contradicting contract',
+  'Change notification request: one tenant now creates half of all work.',
+  'Update fairness and admission limits; retain unrelated event semantics.',
+  '6 min; affected decision and one cost.']],
         [76, 99, 134, 104, 80],
-        row_height=74,
-        prompts=[
-            ["Coding", "", "", "", "18 min"],
-            ["System design", "", "", "", "18 min"],
-            ["Behavioral", "", "", "", "10 min"],
-            ["Follow-up pivot", "", "", "", "6 min"],
-        ],
     ), spacer(11)]
     s += [p("Selection rules", H2), bullet_list([
         "Coding: use a prompt that requires a visible invariant or boundary decision.",
@@ -1714,7 +1896,6 @@ def build_final_loop_story() -> list[Flowable]:
             ["58-60", "Capture", "Write strongest skill, remaining risk, and one action before the real loop"],
         ],
         [61, 96, 336],
-        row_heights=[38, 47, 43, 50, 43, 47, 47, 43],
     ), spacer(10)]
     s += [callout("Compressed-prompt rule", "If a segment cannot reach its main decision inside the time box, shorten the prompt before the rehearsal. Do not create artificial speed by skipping the contract or evidence.")]
     end_page(s)
@@ -1738,40 +1919,63 @@ def build_final_loop_story() -> list[Flowable]:
             ["A prior answer felt weak", "I have one note for later. The next contract starts now.", "First clarification arrives without re-litigating the old answer"],
         ],
         [137, 221, 135],
-        row_heights=[66, 66, 58],
     ), spacer(10)]
-    s += [p("Transition evidence", H2), worksheet_table(
-        ["Reset", "What I released", "First new contract / clarification"],
-        2,
+    s += [p('Illustrative transition evidence', H2), worked_example_table(
+        ['Reset', 'What I released', 'First new contract / clarification'],
+        [['Coding -> design',
+  'Noted the missed duplicate test for later; closed editor and released pointer state.',
+  'For notifications, does acceptance mean stored safely or delivered to every channel?'],
+ ['Design -> behavioral',
+  'Parked the unresolved provider capability; did not borrow fictional traffic for the story.',
+  'I will use the actual rollback event and distinguish my decision from team execution.']],
         [80, 172, 241],
-        row_height=47,
-        prompts=[["Coding -> design", "", ""], ["Design -> behavioral", "", ""]],
     )]
     end_page(s)
 
-    s += page_heading(
-        "Worksheet 2",
-        "Score the full loop with evidence",
-        "Use 0 for absent, 1 for prompted or late, and 2 for independent at the correct decision point. Add a quote, timestamp, artifact, or observer note.",
-    )
-    s += [worksheet_table(
-        ["Segment", "Opening contract", "Decision quality", "Boundary / failure", "Communication / recovery", "Close"],
-        4,
+    s += page_heading('Worked loop score', 'See recovery evidence without averaging away risk', 'These fictional observations follow the plan on the earlier page. Every score contains a reason; a missing boundary stays visible even when the rest of the segment is strong.')
+    s += [worked_example_table(
+        ['Segment',
+ 'Opening contract',
+ 'Decision quality',
+ 'Boundary / failure',
+ 'Communication / recovery',
+ 'Close'],
+        [['Coding',
+  '2: output and empty case at 00:50.',
+  '2: invariant before loop.',
+  '1: duplicate test prompted.',
+  '2: repair explained without hiding it.',
+  '2: bound and remaining check named.'],
+ ['Design',
+  '2: acceptance versus delivery clarified.',
+  '2: durable state before workers.',
+  '1: provider timeout uncertain.',
+  '2: uncertainty labeled, not guessed.',
+  '2: age metric and next check.'],
+ ['Behavioral',
+  '2: scope and stakes in first 30 sec.',
+  '2: rollback choice and alternative.',
+  '2: failure and prevention factual.',
+  '2: personal role clear; no invented metric.',
+  '2: result and learning separated.'],
+ ['Follow-up',
+  '2: new tenant load restated.',
+  '2: fairness decision updated.',
+  '2: noisy-tenant containment.',
+  '2: unrelated guarantees preserved.',
+  '1: no final cost summary.']],
         [78, 80, 83, 85, 92, 75],
-        row_height=55,
-        prompts=[
-            ["Coding", "", "", "", "", ""],
-            ["Design", "", "", "", "", ""],
-            ["Behavioral", "", "", "", "", ""],
-            ["Follow-up", "", "", "", "", ""],
-        ],
     ), spacer(12)]
-    s += [worksheet_table(
-        ["Transition", "0 / 1 / 2", "Quote, timestamp, or observer evidence"],
-        2,
+    s += [worked_example_table(
+        ['Transition', 'Score + evidence', 'Quote, timestamp, or observer evidence'],
+        [['Coding -> design',
+  '2',
+  'At 20:25, asks the new acceptance question instead of apologizing for the missed coding test.'],
+ ['Design -> behavioral',
+  '2',
+  'At 40:30, opens the incident story with actual scope and owned rollback decision; no design '
+  'assumptions carried over.']],
         [123, 78, 292],
-        row_height=55,
-        prompts=[["Coding -> design", "", ""], ["Design -> behavioral", "", ""]],
     ), spacer(11)]
     s += [callout("Evidence rule", "Do not average away a missing contract or unsafe failure decision. Record the specific moment, then decide whether it is a remaining risk or normal performance noise.")]
     end_page(s)
@@ -1789,17 +1993,18 @@ def build_final_loop_story() -> list[Flowable]:
             ["Behavioral result lacks one metric", "Learner invents precision during follow-up", "States what was measured and what was not; asks which result layer matters", "Follow-up stays accurate and distinguishes fact from estimate"],
         ],
         [119, 132, 146, 96],
-        row_heights=[79, 79, 79],
     ), spacer(12)]
     s += [two_cards(
         ("Recovery", "The next segment regains its contract, evidence, and decision order without needing a rescue.", "Useful signal"),
         ("Masking", "The learner rushes, apologizes repeatedly, invents evidence, or silently imports the prior answer.", "Risk signal"),
     ), spacer(10)]
-    s += [p("Your recovery note", H2), worksheet_table(
-        ["Imperfect moment", "Reset action", "Evidence that the next segment recovered"],
-        1,
+    s += [p('Completed recovery note', H2), worked_example_table(
+        ['Imperfect moment', 'Reset action', 'Evidence that the next segment recovered'],
+        [['Missed duplicate-input test in coding; urge to explain it again during design.',
+  'Wrote one factual note, closed editor, took water, and asked the new contract question.',
+  'Design opened within 25 seconds with acceptance versus delivery; the prior error did not consume '
+  'the next segment.']],
         [144, 155, 194],
-        row_height=64,
     )]
     end_page(s)
 
@@ -1808,17 +2013,21 @@ def build_final_loop_story() -> list[Flowable]:
         "Keep three strengths and one remaining risk",
         "Use the final evidence to reduce work. A taper protects retrieval, sleep, and decision clarity; it does not reopen every weak topic.",
     )
-    s += [worksheet_table(
-        ["Final evidence", "Quote, artifact, or observed moment", "What to carry forward"],
-        4,
+    s += [worked_example_table(
+        ['Final evidence', 'Quote, artifact, or observed moment', 'What to carry forward'],
+        [['Stable strength 1',
+  'Coding invariant stated before implementation in the last two comparable runs.',
+  'Keep one invariant checkpoint; do not add a second framework.'],
+ ['Stable strength 2',
+  'Both resets establish the next contract within 30 seconds without rescue.',
+  'Use close, clear, contract, clarify between rounds.'],
+ ['Stable strength 3',
+  'Incident story separates personal judgment, team execution, measured result, and learning.',
+  'Use three factual story labels rather than memorize full answers.'],
+ ['One remaining risk',
+  'Timeout-after-send answer still jumps from retry to guaranteed no duplicates.',
+  'Rehearse one honest boundary sentence and ask what external guarantee exists.']],
         [112, 229, 152],
-        row_height=58,
-        prompts=[
-            ["Stable strength 1", "", ""],
-            ["Stable strength 2", "", ""],
-            ["Stable strength 3", "", ""],
-            ["One remaining risk", "", ""],
-        ],
     ), spacer(11)]
     s += [grid_table(
         ["Time horizon", "Do", "Avoid"],
@@ -1828,7 +2037,6 @@ def build_final_loop_story() -> list[Flowable]:
             ["Last 2 hours", "Protect energy, equipment, water, quiet, and arrival time", "Score analysis, forum browsing, or another full rehearsal"],
         ],
         [84, 212, 197],
-        row_heights=[58, 58, 58],
     ), spacer(9)]
     s += [callout("Final action", "Rehearse one exact sentence or decision once more only if it addresses the remaining risk. Stop when it appears unaided; do not rehearse until it becomes a brittle script.", warm=True)]
     end_page(s)
@@ -1848,7 +2056,6 @@ def build_final_loop_story() -> list[Flowable]:
             ["Questions", "Two role- and team-relevant questions with one follow-up each", "Questions already answered in the interview or public role brief"],
         ],
         [94, 233, 166],
-        row_heights=[57, 61, 57, 57, 61],
     ), spacer(12)]
     s += [p("Carry only useful evidence", H2), bullet_list([
         "One target-role and level sentence.",
@@ -1898,13 +2105,22 @@ def build_final_loop_story() -> list[Flowable]:
             ["2-3", "Reopen", "One question and one adjustment for the next round's contract"],
         ],
         [70, 182, 241],
-        row_heights=[55, 55, 55],
     ), spacer(12)]
-    s += [worksheet_table(
-        ["Round", "One fact", "One question", "One adjustment"],
-        3,
+    s += [worked_example_table(
+        ['Round', 'One fact', 'One question', 'One adjustment'],
+        [['After coding',
+  'Invariant was clear; one duplicate test was prompted.',
+  'What does acceptance promise in the next design?',
+  'Start from the new contract, not the old score.'],
+ ['After design',
+  'Provider timeout guarantee remained uncertain.',
+  'Which owned decision best answers the next story question?',
+  'Use actual incident facts; do not invent a metric.'],
+ ['After behavioral',
+  'Rollback alternative and prevention were explicit.',
+  'Which part of the role has the most ambiguous ownership?',
+  'Ask a role-relevant question and listen before adding examples.']],
         [72, 142, 142, 137],
-        row_height=52,
     ), spacer(11)]
     s += [grid_table(
         ["Situation", "Recovery script"],
@@ -1915,39 +2131,46 @@ def build_final_loop_story() -> list[Flowable]:
             ["Prior round felt weak", "I have one note for later. I will start the next contract without carrying a verdict."],
         ],
         [135, 358],
-        row_heights=[42, 42, 42, 48],
     )]
     end_page(s)
 
-    s += page_heading(
-        "Printable runbook",
-        "Finish the operating sheet",
-        "Complete this page in 15 minutes after the rehearsal. Keep a digital backup, but use only the format permitted in the real interview.",
-    )
-    s += [worksheet_table(
-        ["Runbook field", "Your final record"],
-        7,
+    s += page_heading('Completed runbook example', 'Read a compact operating sheet that supports listening', 'This illustrative record models the level of detail to keep. Copy your real private logistics into your own notes; do not treat example times, events, or contacts as yours.')
+    s += [worked_example_table(
+        ['Runbook field', 'Illustrative final record'],
+        [['Schedule / timezone / links',
+  'Fictional practice: 09:00-10:00 IST (UTC+05:30). In a real runbook, copy the actual date, zone, and '
+  'approved link from the invite; test the link privately.'],
+ ['Contact / interruption path',
+  'Use the recruiter contact from the invite. If disconnected: reconnect once, then send a brief '
+  'factual update through the agreed channel. Do not put credentials here.'],
+ ['Backup connection / device',
+  'Charged laptop and phone hotspot tested before the loop; charger connected. Confirm the backup is '
+  'allowed and available in the interview location.'],
+ ['Target role + two evidence cues',
+  'Senior backend: reliable service ownership; cross-team API migration. Cues: rollback judgment and '
+  'backwards-compatible adoption.'],
+ ['Three story labels',
+  'Rollback: bounded risk; API migration: influence; review mechanism: repeatable team leverage. Use '
+  'only truthful events from your own work.'],
+ ['Technical reset cues',
+  'Coding: contract -> invariant -> boundary. Design: guarantee -> state -> failure -> trade-off. When '
+  'stuck, shrink the case and name the uncertainty.'],
+ ['Two questions to ask',
+  'Which decisions should this engineer own in the first six months? What reliability trade-off '
+  'currently causes the team the most recurring work?']],
         [143, 350],
-        row_height=45,
-        prompts=[
-            ["Schedule / timezone / links", ""],
-            ["Contact / interruption path", ""],
-            ["Backup connection / device", ""],
-            ["Target role + two evidence cues", ""],
-            ["Three story labels", ""],
-            ["Technical reset cues", ""],
-            ["Two questions to ask", ""],
-        ],
     ), spacer(10)]
-    s += [grid_table(
-        ["Final summary", "Your evidence"],
-        [
-            ["Three stable strengths", ""],
-            ["One remaining risk", ""],
-            ["One next action before the loop", ""],
-        ],
+    s += [worked_example_table(
+        ['Final summary', 'Illustrative evidence'],
+        [['Three stable strengths',
+  'Invariant before code; reset to each new contract; factual incident ownership with a clear '
+  'alternative.'],
+ ['One remaining risk',
+  'External-send timeout handling still tempts an unsupported exactly-once claim.'],
+ ['One next action before the loop',
+  'Rehearse the provider-boundary sentence once, verify logistics, then stop adding content and '
+  'protect normal rest.']],
         [143, 350],
-        row_heights=[44, 44, 44],
     )]
     end_page(s)
 
@@ -1963,7 +2186,6 @@ def build_final_loop_story() -> list[Flowable]:
             ["Finish the interview-day runbook", "One-page schedule, logistics, evidence cues, reset ritual, backup path, questions", "The sheet can be used in under one minute without reading answer scripts"],
         ],
         [126, 226, 141],
-        row_heights=[76, 76],
     ), spacer(12)]
     s += [p("Common mistakes", H2), bullet_list([
         "Using full-length prompts that cannot reach the intended decision in the compressed clock.",
@@ -1980,6 +2202,7 @@ def build_final_loop_story() -> list[Flowable]:
         "The logistics and backup path are confirmed.",
         "The three-minute reset and ethical boundaries are visible.",
     ], checklist=True, compact=True)]
+    s += [spacer(10), callout("Apply the method to your own evidence", 'Build your own one-page private runbook: verified logistics, backup path, three truthful story labels, two technical cues, two questions, three evidenced strengths, one risk, and one action. Keep scripts and credentials out.')]
     return s
 
 
@@ -2499,7 +2722,7 @@ def build_remote_compensation_offer_story() -> list[Flowable]:
     s += [code_block([
         "Guaranteed annual cash = fixed pay + guaranteed allowances",
         "Probable annual cash   = guaranteed cash + (target bonus x confidence)",
-        "Contractor net before tax = invoice revenue - unpaid time - business costs - payment and FX costs",
+        'Contractor planning cash = expected receipts - business costs - payment/FX costs',
         "Planning INR value = USD cash x chosen planning rate",
     ]), spacer(11)]
     s += [grid_table(
@@ -2540,12 +2763,12 @@ def build_remote_compensation_offer_story() -> list[Flowable]:
         font_size=7.2,
     ), spacer(10)]
     s += [p("Convert unpaid days carefully", H2), code_block([
-        "Illustrative daily planning rate = annual contract value / planned billable days",
-        "Unpaid-time cost = daily planning rate x planned non-billable days",
-        "Replacement-cost view = quoted contract value - unpaid time - recurring business costs",
+        'Day-billed expected receipts = written day rate x expected paid days',
+        'If quoting full-capacity annual value: day rate = value / capacity days',
+        'Subtract non-billable days only if the starting value includes those days',
     ]), spacer(9)]
     s += [two_cards(
-        ("Avoid double counting", "If your annual contract value already assumes eleven billed months, do not subtract the same leave again.", "Check"),
+        ("Avoid double counting", 'If B is a guaranteed annual retainer paid regardless of leave, or USD90,000 already represents expected receipts after time off, do not subtract the same days again. Derive revenue from the written billing model before comparing.', "Check"),
         ("Value access, not labels", "A benefit name has zero decision value until you confirm eligibility, coverage, start date, and practical use.", "Check"),
     ), spacer(9)]
     s += [callout("Personalize", "Replacement cost depends on dependants, health needs, existing cover, savings, and risk tolerance. Record your source and range instead of copying someone else's contractor uplift.")]
@@ -2562,15 +2785,26 @@ def build_remote_compensation_offer_story() -> list[Flowable]:
         ("Friction", "Separate provider spread, transfer fee, receiving fee, and conversion timing."),
         ("Control", "Decide which party bears late-payment and currency-conversion choices."),
     ]), spacer(12)]
-    s += [grid_table(
-        ["Scenario", "USD annual cash", "Planning rate", "Gross INR view", "What it tests"],
-        [
-            ["Stronger INR", "[ ]", "[lower case]", "USD x rate", "How much INR value falls when the rupee strengthens."],
-            ["Planning", "[ ]", "[anchor]", "USD x rate", "The common comparison case used for both offers."],
-            ["Weaker INR", "[ ]", "[higher case]", "USD x rate", "Upside that should not be treated as guaranteed."],
-        ],
+    s += [worked_example_table(
+        ['Scenario', 'USD annual cash', 'Planning rate', 'Gross INR view', 'What it tests'],
+        [['Stronger INR',
+  'USD 72,000',
+  'INR 80 / USD',
+  'INR 5,760,000',
+  'Lower rupee value for the same USD cash.'],
+ ['Planning',
+  'USD 72,000',
+  'INR 85 / USD',
+  'INR 6,120,000',
+  'Common illustrative anchor; not a current market quote.'],
+ ['Weaker INR',
+  'USD 72,000',
+  'INR 90 / USD',
+  'INR 6,480,000',
+  'Upside scenario, not guaranteed income.']],
         [78, 86, 78, 93, 148],
     ), spacer(10)]
+    s += [p("These hypothetical rates apply only to USD-exposed cash. Offer A's fixed INR payroll does not move with this sensitivity; its USD equivalent is only a comparison anchor.", BODY_SMALL), spacer(8)]
     s += [p("Payment-path checklist", H2), bullet_list([
         "Invoice currency, due date, acceptance condition, and late-payment remedy are written.",
         "Transfer platform, bank fees, FX spread, intermediary deductions, and who pays each cost are known.",
@@ -2643,43 +2877,73 @@ def build_remote_compensation_offer_story() -> list[Flowable]:
         "Use gates before weights",
         "A weighted score can make an unacceptable offer look attractive. Remove or escalate any offer that fails a must-have condition before assigning preference weights.",
     )
-    s += [p("Gate worksheet", H2), worksheet_table(
-        ["Must-have condition", "Evidence or clause", "A", "B", "Action if unclear"],
-        5,
+    s += [p('Worked must-have checks', H2), worked_example_table(
+        ['Must-have condition', 'Evidence or clause', 'A', 'B', 'Action if unclear'],
+        [['Legal engagement and payer are clear',
+  'A: local EOR contract. B: services agreement and named payer.',
+  'Pass',
+  'Pass',
+  'Verify entity, authority, and payment owner before signing.'],
+ ['Minimum cash and pay timing',
+  'A: USD72k equivalent on written INR payroll. B: day-rate capacity; no annual minimum.',
+  'Pass',
+  'Review',
+  'Confirm billable-day basis and payment trigger, not headline alone.'],
+ ['Sustainable overlap and on-call',
+  'A: three protected hours. B: five hours and unclear incident availability.',
+  'Pass',
+  'Hold',
+  'Require a written sustainable schedule and escalation boundary.'],
+ ['Acceptable termination and downside',
+  'A: verified notice. B: 14-day termination.',
+  'Pass',
+  'Hold',
+  'Request longer notice or a funded exit buffer acceptable to the learner.'],
+ ['IP and restrictions acceptable',
+  'A: review complete in this fictional case. B: background-IP clause unresolved.',
+  'Pass',
+  'Hold',
+  'Route clause to qualified adviser; do not let a high score override it.']],
         [142, 151, 42, 42, 106],
-        row_height=43,
-        prompts=[
-            ["Legal engagement and payer are clear", "", "", "", ""],
-            ["Minimum guaranteed cash and pay timing", "", "", "", ""],
-            ["Sustainable overlap and on-call boundary", "", "", "", ""],
-            ["Acceptable termination and downside", "", "", "", ""],
-            ["No unresolved IP, restriction, or safety issue", "", "", "", ""],
-        ],
     ), spacer(11)]
-    s += [p("Preference score", H2), grid_table(
-        ["Dimension", "Weight 1-5", "Offer A 1-5", "Offer B 1-5", "Evidence and confidence"],
-        [
-            ["Guaranteed and probable cash", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
-            ["Benefits and replacement costs", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
-            ["Operating sustainability", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
-            ["Contract and payment risk", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
-            ["Role scope and career value", "[ ]", "[ ]", "[ ]", "[source / high-medium-low]"],
-        ],
+    s += [p('Provisional preference comparison', H2), worked_example_table(
+        ['Dimension', 'Weight 1-5', 'Offer A 1-5', 'Offer B 1-5', 'Evidence and confidence'],
+        [['Normalized cash',
+  '5',
+  '3',
+  '3',
+  'A72k vs B72.6k in 30-day base case: near tie, not B headline win. Medium confidence.'],
+ ['Benefit certainty / access',
+  '3',
+  '4',
+  '2',
+  'Coverage access, eligibility and continuity: A verified; B policy not secured. Cost is already in cash. Medium.'],
+ ['Operating sustainability',
+  '5',
+  '4',
+  '2',
+  'Three protected versus five unclear overlap hours. B cannot pass gate yet.'],
+ ['Contract / payment risk',
+  '5',
+  '4',
+  '2',
+  'B short notice and no annual minimum; source is sample contract terms.'],
+ ['Role scope / career value',
+  '3',
+  '3',
+  '4',
+  'B architecture scope attractive; manager and review path still unconfirmed. Low.']],
         [132, 70, 70, 70, 141],
-        font_size=7.25,
     ), spacer(9)]
+    s += [p("Multiply each rating by its weight and add: A = 76/105; B = 53/105 (maximum 5 x 21). These are subjective preferences, not probabilities or market benchmarks. Cash already deducts B's estimated benefit replacement cost; the benefit row assesses access and certainty, not that cost twice. B's unresolved gates still prevent acceptance regardless of its score.", BODY_SMALL), spacer(8)]
     s += [callout("Scoring rule", "Write the evidence before the score. If two offers are within the uncertainty range, call the result close and prioritize the missing facts instead of pretending the decimal total decides.")]
     end_page(s)
 
-    s += page_heading(
-        "Worked example",
-        "Watch the conclusion change when assumptions change",
-        "This fictional comparison teaches the method. The figures are examples only; they are not market benchmarks, forecasts, or personal advice.",
-    )
+    s += page_heading("Worked example", 'Calculate the difference, then test what could reverse it', 'Fictional A is a USD72,000-equivalent EOR salary. B is USD90,000 gross capacity at 260 day-billed days, not a guaranteed retainer. All amounts below are before personal tax and FX; A benefits are considered separately.')
     s += [grid_table(
         ["Input", "Offer A: EOR employee", "Offer B: contractor"],
         [
-            ["Written fixed cash", "USD 72,000 equivalent, locally paid", "USD 90,000 invoiced"],
+            ["Written fixed cash", 'USD 72,000 equivalent on fixed INR payroll in this example', 'USD 90,000 capacity at 260 day-billed days; no guaranteed minimum'],
             ["Paid time", "20 leave days plus stated holidays", "No paid time; learner plans 30 non-billable days"],
             ["Benefits", "Medical cover and employer retirement contribution; eligibility verified", "Learner estimates USD 4,000 replacement cost"],
             ["Business and payment cost", "No separate estimate", "USD 3,000 administration, tools, and payment friction"],
@@ -2690,15 +2954,15 @@ def build_remote_compensation_offer_story() -> list[Flowable]:
         [123, 180, 180],
         font_size=7.15,
     ), spacer(9)]
-    s += [code_block([
-        "Offer B planning view before personal tax:",
-        "90,000 invoice value - 4,000 benefits - 3,000 business/payment costs",
-        "- value of 30 planned non-billable days = comparable planning cash",
-        "Then test FX rate, payment delay, and an earlier termination case separately.",
-    ]), spacer(9)]
+    s += [code_block(['B day rate = 90,000 / 260 = USD 346.1538',
+ '30 non-billable days = 30 x 346.1538 = USD 10,384.62',
+ 'B base = 90,000 - 10,384.62 - 4,000 - 3,000 = USD 72,615.38',
+ 'A fixed salary = USD 72,000 equivalent; B cash difference = USD 615.38',
+ '45 non-billable days: B = 90,000 - 15,576.92 - 7,000 = USD 67,423.08',
+ 'Stress-case B minus A = -USD 4,576.92']), spacer(9)]
     s += [two_cards(
-        ("Base case", "B may lead on normalized cash and architecture scope, but its termination, hours, and manager unknowns remain material.", "Provisional"),
-        ("Stress case", "If non-billable time, delayed payment, or early termination rises, A can become the stronger risk-adjusted choice without its headline changing.", "Sensitivity"),
+        ("Base case", 'The apparent USD18,000 headline premium shrinks to USD615 after the stated unpaid days and replacement costs. Treat this as close: small estimate changes outweigh the difference. B remains on hold while schedule, termination, and IP questions are unresolved.', "Provisional"),
+        ("Stress case", 'At 45 non-billable days, B falls below A on this planning cash view. This is a sensitivity assumption, not a prediction. A payment delay changes liquidity and buffer needs; do not count it as lost income unless there is an actual loss assumption.', "Sensitivity"),
     ), spacer(9)]
     s += [callout("Lesson", "The correct output is not EOR always wins or contractor always wins. It is: here is the current choice, the assumptions holding it up, and the exact fact that could reverse it.", warm=True)]
     end_page(s)
@@ -2720,43 +2984,70 @@ def build_remote_compensation_offer_story() -> list[Flowable]:
         [105, 128, 130, 120],
         font_size=7.15,
     ), spacer(10)]
-    s += [p("Prepare target, rationale, and fallback", H2), worksheet_table(
-        ["Priority", "Target", "Evidence-based rationale", "Fallback", "Walk-away boundary"],
-        3,
+    s += [p('Worked negotiation priorities', H2), worked_example_table(
+        ['Priority', 'Target', 'Evidence-based rationale', 'Fallback', 'Walk-away boundary'],
+        [['1: hours',
+  'Three protected overlap hours',
+  "Five hours plus undefined incidents exceeds this fictional learner's sustainable schedule.",
+  'Rotating late meeting plus a defined incident rota.',
+  'No open-ended daily availability.'],
+ ['2: continuity',
+  '30-day notice or equivalent termination payment',
+  "14 days is below this learner's planned transition buffer.",
+  'Short initial term with funded notice on early exit.',
+  'No unbounded interruption without a realistic cash buffer.'],
+ ['3: package',
+  'Higher day rate or paid closure days',
+  'At 30 unpaid days, B normalizes to USD72,615 before personal tax; premium over A nearly disappears.',
+  'Contracted minimum billable days or explicit paid closure allowance.',
+  'Do not count non-guaranteed work as annual guaranteed cash.']],
         [80, 82, 160, 82, 79],
-        row_height=51,
-        prompts=[
-            ["1", "", "", "", ""],
-            ["2", "", "", "", ""],
-            ["3", "", "", "", ""],
-        ],
     ), spacer(9)]
-    s += [callout("Talk track", "I am excited about [specific role evidence]. After comparing the full package, the main gap is [term] because [verified effect]. Could we move to [target]? If that is constrained, [fallback] would address the same issue.", warm=True)]
+    s += [callout("Talk track", 'Fictional negotiation: I am interested in owning the architecture work. Five overlap hours plus an undefined incident window is not sustainable for me. Could we agree on three protected hours and a written incident rota? A rotating late meeting could be an alternative.', warm=True)]
     end_page(s)
 
-    s += page_heading(
-        "One-page worksheet",
-        "Build the comparable record",
-        "Complete this page only after collecting the source documents. Use ranges for uncertain values and write unknown rather than filling the cell with a guess.",
-    )
-    s += [worksheet_table(
-        ["Decision input", "Offer A", "Offer B", "Source / confidence / next check"],
-        9,
-        [146, 92, 92, 153],
-        row_height=48,
-        prompts=[
-            ["Engagement model and signing entity", "", "", ""],
-            ["Guaranteed annual cash", "", "", ""],
-            ["Variable cash and probability", "", "", ""],
-            ["Equity scenario, kept separate", "", "", ""],
-            ["Paid time and replacement costs", "", "", ""],
-            ["FX and payment-friction cases", "", "", ""],
-            ["Termination and contract downside", "", "", ""],
-            ["Overlap, on-call, and sustainability", "", "", ""],
-            ["Scope, manager, and career evidence", "", "", ""],
-        ],
+    s += page_heading('Completed comparison', 'Read the whole offer on one evidence page', 'This fictional comparison carries the same A and B offers through cash, costs, risk, working reality, and uncertainty. It is an example of method, not a recommended offer or personal advice.')
+    s += [worked_example_table(
+        ['Decision input', 'Offer A', 'Offer B', 'Source / confidence / next check'],
+        [['Engagement / signing entity',
+  'Local EOR employee; written model verified.',
+  'Independent contractor; named services-agreement payer.',
+  'Fictional contracts; verify classification for real facts.'],
+ ['Annual cash basis',
+  'USD72,000 equivalent on fixed local payroll.',
+  'USD90,000 gross capacity at 260 day-billed days; not a guarantee.',
+  'Offer and rate schedule; confirm minimum billable days.'],
+ ['Variable cash',
+  'No bonus counted in example.',
+  'No bonus counted in example.',
+  'Keep any real target payout separate from fixed cash.'],
+ ['Equity',
+  'Excluded from cash comparison.',
+  'Excluded from cash comparison.',
+  'If offered, obtain grant terms and model separately.'],
+ ['Time / replacement cost',
+  '20 paid leave days; eligibility verified.',
+  '30 non-billable days + USD4k benefits + USD3k operating costs.',
+  'B estimates; collect quotes and avoid subtracting leave twice.'],
+ ['FX / payment cases',
+  'INR payroll fixed by written offer; USD figure is comparison anchor.',
+  'USD invoices exposed to conversion and collection delay.',
+  'Use actual payment terms; hypothetical rates are not forecasts.'],
+ ['Termination / contract',
+  'Notice terms verified in this example.',
+  '14-day exit and unresolved background-IP clause.',
+  'B on hold pending written terms and qualified review.'],
+ ['Hours / sustainability',
+  'Three protected overlap hours.',
+  'Five hours plus unclear incident expectation.',
+  'Written rota and exception policy needed for B.'],
+ ['Scope / career evidence',
+  'Own one service; manager and review path clear.',
+  'Broader architecture scope; review path uncertain.',
+  'Ask for first-90-day decisions and success evidence.']],
+        [104, 119, 130, 130],
     ), spacer(10)]
-    s += [callout("Provisional decision", "I currently prefer [offer] because [three evidence-backed reasons]. This choice assumes [top assumptions]. It would change if [reversal condition]. Before signing, I still need [named verification].")]
+    s += [callout("Provisional decision", 'In this fictional case A is provisionally preferred for predictable cash and working hours. Reopen B only after its schedule and contract gates clear and its normalized package remains stronger under realistic time-off assumptions.')]
     end_page(s)
 
     s += page_heading(
@@ -2764,18 +3055,27 @@ def build_remote_compensation_offer_story() -> list[Flowable]:
         "Close with evidence, uncertainty, and action",
         "A useful decision memo is short enough to reread before signing and specific enough to show what you verified, what remains uncertain, and why the choice still makes sense.",
     )
-    s += [grid_table(
-        ["Memo field", "Write"],
-        [
-            ["Decision", "I choose [offer] on [date], subject to [written condition]."],
-            ["Why", "The strongest evidence is [cash], [operating reality], and [career or risk factor]."],
-            ["Trade-off accepted", "I am knowingly accepting [downside] because [reason and control]."],
-            ["Uncertainty", "The largest estimate is [input, range, source, confidence]."],
-            ["Reversal condition", "I would reopen the decision if [specific clause, fact, or scenario]."],
-            ["Next action", "By [date], [owner] will provide or verify [document or answer]."],
-        ],
+    s += [worked_example_table(
+        ['Memo field', 'Completed example'],
+        [['Decision',
+  'In this fictional comparison, choose A provisionally; do not accept B while its must-have schedule '
+  'and contract questions remain unresolved.'],
+ ['Why',
+  "A has a written salary, verified operating boundary, and clear manager. B's normalized base-case "
+  'cash advantage is only USD615 before personal tax and FX.'],
+ ['Trade-off accepted',
+  'Accept narrower architecture scope in exchange for a more predictable operating and payment '
+  'arrangement; seek growth evidence in the first-90-day plan.'],
+ ['Uncertainty',
+  "B's 30 non-billable days, USD4k benefit replacement, and USD3k operating cost are estimates. At 45 "
+  'days its planning cash falls below A.'],
+ ['Reversal condition',
+  'Reopen B if sustainable hours, acceptable exit/IP terms, a clear manager, and a reliably higher '
+  'normalized package are documented. A higher headline alone is insufficient.'],
+ ['Next action',
+  'Before a real decision, obtain final authorized documents, current cost quotes, and qualified '
+  'advice on personal tax, classification, and contract implications.']],
         [126, 357],
-        font_size=7.55,
     ), spacer(11)]
     s += [p("Before you sign", H2), bullet_list([
         "The signing entity, engagement model, payment path, start date, and first payment date agree across documents.",
@@ -2817,10 +3117,58 @@ def build_remote_compensation_offer_story() -> list[Flowable]:
         ("Choice", "Name the decision, trade-off, reversal condition, and next action."),
     ]), spacer(10)]
     s += [callout("Final takeaway", "The best offer is not the one with the largest converted number. It is the one whose verified value, working reality, downside, and career path best fit your decision boundary - and whose uncertainty you can explain honestly.")]
+    s += [spacer(10), callout("Apply the method to your own evidence", 'Using actual written offers: label every input verified, estimated, or unknown; normalize cash on a stated billing basis; run a time-off and FX sensitivity; resolve must-have gates; then write the decision and what would reverse it.')]
     return s
 
 
+def build_behavioral_bank_story() -> list[Flowable]:
+    source = (Path(__file__).parent / "learning-materials" / "behavioral-question-bank.md").read_text(encoding="utf-8")
+    story: list[Flowable] = []
+    question: list[Flowable] = []
+
+    def flush_question() -> None:
+        if question:
+            story.append(KeepTogether(question[:]))
+            question.clear()
+
+    for block in source.strip().split("\n\n"):
+        block = block.strip()
+        if block.startswith("# ") or block.startswith("## InterviewRunway /"):
+            continue
+        if block.startswith("## "):
+            flush_question()
+            story += [CondPageBreak(150), spacer(7), p(html.escape(block[3:]), H2)]
+        elif block.startswith("### "):
+            flush_question()
+            title = block[4:]
+            heading = p(html.escape(title), H3)
+            if title.split(".", 1)[0].isdigit() or title == "A completed evidence card":
+                question.append(heading)
+            else:
+                story += [CondPageBreak(90), heading]
+        elif block.startswith("- "):
+            flush_question()
+            story += [bullet_list([html.escape(line[2:]) for line in block.splitlines() if line.startswith("- ")], checklist=True), spacer(8)]
+        else:
+            content = [p(html.escape(block.replace("\n", " ")), BODY), spacer(7)]
+            (question if question else story).extend(content)
+    flush_question()
+    return story
+
+
 SPECS = [
+    PdfSpec(
+        filename="behavioral_question-bank.pdf",
+        category="Behavioral reference",
+        title="50 Behavioral Questions",
+        subtitle="Fifty distinct decision prompts, specific evidence and follow-up probes, two worked answers, and a practical self-review loop.",
+        thesis="Prepare truthful evidence of judgment, ownership, and learning - not fifty memorized scripts.",
+        slug="behavioral / question-bank",
+        build_story=build_behavioral_bank_story,
+        revision="1.1",
+        compact=True,
+        review_required=True,
+    ),
     PdfSpec(
         filename="remote_compensation-and-offer-decision-workbook.pdf",
         category="Remote career workbook",
@@ -2829,6 +3177,8 @@ SPECS = [
         thesis="Normalize what can be compared, keep uncertainty visible, stress-test the assumptions, and negotiate the few gaps that can change the decision.",
         slug="remote / compensation-and-offer-decision",
         build_story=build_remote_compensation_offer_story,
+        revision="1.1",
+        compact=True,
     ),
     PdfSpec(
         filename="dsa_traversal-decision-practice-workbook.pdf",
@@ -2843,10 +3193,12 @@ SPECS = [
         filename="career_target-role-evidence-map.pdf",
         category="Career profile guide",
         title="Target Role and Evidence Map",
-        subtitle="A practical guide and printable worksheet for defining the role, level, evidence bar, and first preparation gap.",
+        subtitle="A practical guide and completed evidence map for defining the role, level, evidence bar, and first preparation gap.",
         thesis="Turn a broad job goal into a testable target and a preparation sequence grounded in observable evidence.",
         slug="career / target-role-evidence-map",
         build_story=build_target_role_story,
+        revision="1.1",
+        compact=True,
     ),
     PdfSpec(
         filename="operations_technical-baseline-scorecard.pdf",
@@ -2856,6 +3208,8 @@ SPECS = [
         thesis="Measure observable interview behavior under consistent conditions without turning one attempt into a readiness verdict.",
         slug="operations / technical-baseline-scorecard",
         build_story=build_baseline_story,
+        revision="1.1",
+        compact=True,
     ),
     PdfSpec(
         filename="company_interview-loop-gap-map.pdf",
@@ -2865,6 +3219,8 @@ SPECS = [
         thesis="Use current public evidence to focus preparation while keeping uncertainty, ethics, and source quality visible.",
         slug="company / interview-loop-gap-map",
         build_story=build_company_story,
+        revision="1.1",
+        compact=True,
     ),
     PdfSpec(
         filename="operations_evidence-comparison-correction-workbook.pdf",
@@ -2874,15 +3230,19 @@ SPECS = [
         thesis="Find the repeated decision moment behind the score, change one behavior, and require evidence of transfer.",
         slug="operations / evidence-comparison-correction",
         build_story=build_evidence_story,
+        revision="1.1",
+        compact=True,
     ),
     PdfSpec(
         filename="operations_timed-technical-rehearsal-workbook.pdf",
         category="Operations workbook",
         title="Timed Coding and System Design Rehearsal Workbook",
-        subtitle="Two controlled, interview-shaped practice blocks with protected decision clocks, evidence rubrics, worksheets, and debriefs.",
+        subtitle="Two controlled, interview-shaped practice blocks with protected decision clocks, completed evidence records, and practical debriefs.",
         thesis="Use time pressure to test decision order while protecting clarification, invariants, testing, trade-offs, and failure handling.",
         slug="operations / timed-technical-rehearsal",
         build_story=build_timed_rehearsal_story,
+        revision="1.1",
+        compact=True,
     ),
     PdfSpec(
         filename="operations_final-loop-interview-day-runbook.pdf",
@@ -2892,14 +3252,21 @@ SPECS = [
         thesis="Consolidate proven skills, protect recovery between rounds, and remove avoidable interview-day friction.",
         slug="operations / final-loop-interview-day-runbook",
         build_story=build_final_loop_story,
+        revision="1.1",
+        compact=True,
     ),
 ]
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Build selected InterviewRunway learning PDFs")
+    parser.add_argument("--only", nargs="+", choices=[spec.filename for spec in SPECS])
+    args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     output_dir = root / "output" / "pdf"
     for spec in SPECS:
+        if args.only and spec.filename not in args.only:
+            continue
         output_path = output_dir / spec.filename
         build_pdf(spec, output_path)
         print(output_path)

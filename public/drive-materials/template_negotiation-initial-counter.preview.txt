@@ -1,3 +1,29 @@
+## Make a focused, evidence-led counter
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Ask about one or two important package components using clear units, a supported rationale, and a real decision timeline.
+
+## Prepare the request first
+
+Separate fixed pay, variable pay, equity, benefits, and one-time payments before comparing packages. Establish which engagement model, currency, and pay period the offer uses. Choose a target and fallback that you can explain from role scope, relevant experience, verified alternatives, and your own priorities. This template does not establish market value or give individualized financial advice.
+
+## Worked email - fictional amounts, not a benchmark
+
+Subject: Backend engineer offer - compensation discussion
+
+Hi Riya, thank you for the offer and the conversations with the team. I am excited about owning delivery reliability and the recovery path. Given that scope and my experience implementing idempotent delivery and operational tests, could we explore increasing annual fixed gross compensation from USD 72,000 to USD 78,000 under the same engagement model? Fixed compensation is my first priority; if that is constrained, I would appreciate discussing the available alternatives. I can make a decision by 18 September once the package and remaining operating details are clear. Best, Nila.
+
+## Why this is easier to answer
+
+The request names the component, currency, annual unit, and proposed change. It does not mix equity with guaranteed cash or promise acceptance before all important terms are known. In your own message, use a target you can support; the fictional numbers are not a recommended range.
+
+When a response arrives, restate the complete revised package and confirm which written document controls. If the request is declined, evaluate your actual fallback rather than escalating with a fabricated competing offer.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 INTERVIEWRUNWAY VAULT
 Initial Counter-Offer Email
 Evidence-led initial counter-offer email with scope, package, and decision timing.

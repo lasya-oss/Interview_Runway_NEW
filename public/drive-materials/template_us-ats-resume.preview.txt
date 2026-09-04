@@ -1,3 +1,33 @@
+## Build evidence-first resume bullets
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Convert real engineering work into concise, readable evidence that matches a target role without inventing scope, metrics, seniority, or keywords.
+
+## How to fill the template
+
+Start with one target job description. Identify the three responsibilities you can support with your own work. For each, choose one example with a clear action, technical decision, scope, and result. Use ordinary section names and a consistent reading order. Copy the finished resume into a plain-text editor to check that dates, titles, bullets, and contact details remain understandable.
+
+A bullet is strongest when it answers what changed, what you personally did, and why the change mattered. Keep your official employment title accurate; add a brief functional explanation only when needed. Remove skills that you cannot discuss or use in an interview. No document format can guarantee selection or parsing by every recruitment system.
+
+## Worked rewrite - fictional
+
+Weak: 'Responsible for APIs and performance improvements.' Stronger: 'Reduced the order-history endpoint's p95 latency from 820 ms to 310 ms by replacing repeated item queries with one batched lookup; verified the result under the same load profile and preserved tenant authorization checks.'
+
+Why this works: it identifies the endpoint, the measured change, the engineering decision, and a quality constraint. The candidate would still need to explain the test, their own contribution, and possible confounding changes. A number alone is not evidence of causation.
+
+When no reliable metric exists, use observable evidence: 'Replaced manual release checks with a versioned checklist and rollback test used by both service teams during the next two releases.' Do not retrofit a percentage from memory. Adoption, reduced ambiguity, a verified failure fix, or a durable operating mechanism can be useful evidence.
+
+## Before you submit
+
+Check every date, URL, title, and claim against your records. Ensure the newest relevant experience is easiest to find. Remove empty sections and instructions from the final resume. Do not include client secrets, private incident identifiers, or fictional details from this supplement.
+
+Read each bullet as an interviewer: could you explain the starting condition, rejected alternative, test, outcome, and your exact role? If not, simplify the claim or choose a stronger example. Save a role-specific copy and keep the editable master unchanged.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 [FIRST LAST]
 [City, India] | [+91 phone] | [email] | [LinkedIn URL] | [GitHub/portfolio URL]
 PROFESSIONAL SUMMARY

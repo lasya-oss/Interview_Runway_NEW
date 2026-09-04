@@ -1,3 +1,29 @@
+## Make a cover letter earn its space
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Connect one defensible engineering example to a particular role and show concrete remote-working behavior without repeating the resume.
+
+## Build a three-part argument
+
+Explain why this product or problem interests you, show one relevant example, and connect that example to two responsibilities in the role. Remote readiness should be behavioral evidence: written handoffs, explicit decisions, planned overlap, or reliable ownership. 'Excellent communicator' is a claim, not an example.
+
+## Worked letter - fictional
+
+Dear OrbitDesk engineering team, I am applying for the backend engineer role because the team's work on reliable account notifications matches the problems I enjoy solving. In my recent role, I owned the retry path for an internal notification service. After duplicate deliveries were observed, I introduced a stable request key and a reconciliation report, then verified recovery with provider-timeout tests.
+
+Your emphasis on failure handling and clear operational ownership is particularly relevant to that experience. I documented the rollout decision, the fallback behavior, and the evidence required to proceed so teammates in another time zone could review the change without a meeting. I also kept one named owner and a next-update time on unresolved issues.
+
+I would welcome a conversation about how those habits could support your delivery pipeline. Thank you for considering my application. Regards, Nila Rao.
+
+## Before sending
+
+Confirm that each company detail came from a reliable role or product source. Replace the example with your own evidence. Do not infer permitted location or work authorization from the word 'remote'; state your own situation accurately when asked. Remove sentences that could apply unchanged to every employer.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 INTERVIEWRUNWAY VAULT
 Remote Role Cover Letter
 Short remote-role cover letter that earns attention without repeating the resume.

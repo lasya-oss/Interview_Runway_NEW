@@ -1,3 +1,35 @@
+## Build an evidence bank, not eight scripts
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Capture real decisions and consequences in a form that can answer different behavioral prompts without inventing a separate story for every question.
+
+## Choose stories with a decision point
+
+Start with a small set covering ownership, failure, disagreement, ambiguity, collaboration, and learning. One story can support more than one competency if the prompt genuinely fits. A useful record distinguishes your decisions from shared work, gives the other side a reasonable constraint, and preserves an uncomfortable detail that makes the learning credible.
+
+Write the headline last if necessary. It should name the problem, your choice, and the result. Keep context short enough that the listener reaches the decision quickly. A story bank stores evidence and follow-up depth; it is not a set of word-for-word speeches.
+
+## Worked story card - fictional
+
+Headline: 'I shipped an incomplete cache invalidation change, helped contain stale account limits, and changed how the team reviewed mutation paths.' Competencies: ownership, failure, reliability, written communication.
+
+Situation and constraint: the service had two writers, but the change was tested against only one. Stale limits appeared after release. My decision: acknowledge the incomplete test coverage, pause the rollout, and use the approved fallback while the incident owner coordinated communications. Shared work: another engineer verified affected records; support handled customer questions.
+
+Actions and communication: listed both mutation paths, tested the missed path, separated containment from the longer-term repair, and kept the incident note current with impact, owner, and next update. Result and evidence: the incident was contained; the follow-up test reproduced the missed path and prevented the same regression in the next release. Do not add a percentage or duration unless records support it.
+
+Learning and later reuse: require a writer inventory before changing cached state and make freshness observable. Safe-to-share boundary: omit customer identities, proprietary limits, incident links, and sensitive architecture detail. The example demonstrates answer structure, not an event the learner should claim.
+
+## Prepare follow-up depth
+
+Answer five probes from memory: What exactly did you decide? What did someone else do? Which assumption was wrong? Which alternative did you reject and why? What changed in later behavior? If any answer requires invention, narrow the claim or choose another story.
+
+Record a two-minute version and ask a reviewer to identify your decision, consequence, and learning. If most sentences describe the company or team rather than your action, shorten the setup. Use the eight existing blank story cards for your own evidence; leave unused cards unused rather than filling them with weak or fictional stories.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 INTERVIEWRUNWAY VAULT
 Behavioral Story Bank Template
 Eight-story evidence bank with reusable competency mapping and follow-up depth.
