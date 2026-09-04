@@ -1,3 +1,29 @@
+## Follow up with context and one request
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Ask for an update without creating duplicate threads, implying an entitlement to immediate feedback, or losing track of the agreed timeline.
+
+## Use the existing timeline
+
+Check the recruiter's stated update date and any communication instructions before sending. Reply in the existing thread when practical. Identify the role and previous conversation so the recipient can locate the process quickly. One concise request is more useful than a long account of why you are waiting.
+
+## Worked message - fictional
+
+Subject: Follow-up - backend engineer interview
+
+Hi Riya, I am following up on the backend engineer conversation on 8 September. You mentioned that an update might be available this week. I remain interested in the notification team's reliability work. Please let me know if there is a revised timeline or anything else I can provide. Thank you, Nila.
+
+## Handle uncertainty professionally
+
+The message recalls the timeline without presenting it as a broken promise. If you have a real external deadline, state the date calmly and ask whether an update is possible; do not invent urgency. If there is still no response after a reasonable final follow-up, continue with other opportunities rather than contacting many employees about the same status request.
+
+Keep a simple contact log with role, date, channel, promised next step, and your last message. This prevents accidental repetition and makes the next action deliberate.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 INTERVIEWRUNWAY VAULT
 Recruiter Follow-Up Message
 Concise follow-up after an application, screen, or expected update date.

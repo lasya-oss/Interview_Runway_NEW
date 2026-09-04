@@ -1,3 +1,35 @@
+## Fill the canvas with decisions, not component names
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Build a defensible system-design answer by connecting requirements, rough estimates, data invariants, request paths, and failure behavior.
+
+## Use the canvas in order
+
+Clarify user actions and non-goals before estimating or drawing. Each number should influence a decision. Each component should have one job, an owner of truth, and a failure behavior. Do not fill a box with a technology name until you can explain why the requirement needs it.
+
+## Worked canvas - fictional notification service
+
+Problem frame: accept account-alert requests and deliver email or push according to the user's preferences. Non-goals: marketing campaigns and a full customer-support inbox. Quality priorities: do not lose accepted intent; isolate provider failure so healthy channels continue.
+
+Capacity: assume one million intents per day, approximately 12 per second on average, and a tenfold peak of about 120 per second. At an assumed 1 KB per intent, raw intent data is approximately 1 GB per day before indexes, replication, and delivery-attempt records. These estimates justify asynchronous processing; actual retention and provider quotas must be clarified.
+
+API and data: POST /notifications accepts a caller-owned idempotency key, recipient, template, and parameters. An intent record stores the accepted request; a delivery record stores channel, attempt count, status, and provider reference. Repeated requests with the same valid key should not create another logical intent. Authorization checks that the caller may notify that recipient.
+
+Architecture: validate the request, record the intent durably, and return an acceptance identifier. Workers choose eligible channels, enforce preferences and provider limits, and record outcomes. Use a transactional outbox or an equivalent reliable handoff so a database write cannot silently succeed without making work discoverable.
+
+Failure drill: a provider timeout is ambiguous, not proof of failure. Use a stable deduplication key where supported, a bounded retry policy, and a reconciliation path. Isolate retry traffic from fresh urgent alerts. When capacity is exhausted, reject before claiming acceptance or preserve already accepted work in a bounded, observable backlog.
+
+Close: the central tradeoff is asynchronous acceptance versus immediate delivery confirmation. Track oldest pending age, provider error rate, and duplicate effects. Start with one region if requirements permit; add regions only after defining routing, ownership, and failover semantics.
+
+## How to judge your own canvas
+
+Trace one accepted request through normal delivery, one retry, and one permanent failure. Can you state exactly what the user is promised at each point? Identify the first bottleneck and one cheaper alternative. In your personal copy, replace the example assumptions with the interview's requirements; do not memorize this architecture for unrelated prompts.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 INTERVIEWRUNWAY VAULT
 System Design Answer Canvas
 Reusable answer canvas for requirements, estimates, architecture, data, and failure analysis.

@@ -1,3 +1,31 @@
+## Translate scope without upgrading your title
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Make unfamiliar titles and company structures legible through concrete responsibilities while preserving the official employment record.
+
+## The distinction that matters
+
+A title is an employer's label. Scope is the work, decisions, and operating responsibility behind that label. Explain both instead of replacing the official title with a more senior one. Separate the employer, client, and product owner when they are different organizations.
+
+Translate abbreviations only when they affect understanding. One sentence about the product and users is usually enough. Then explain what you owned independently, what required approval, and what the team delivered together.
+
+## Worked translation - fictional
+
+Official title: Senior Systems Engineer at Meridian Services. Functional explanation: backend engineer on the account-notification service for a retail client. Company context: Meridian is a technology-services firm; the client owned the product and roadmap. Scope: one service used by four product teams, with responsibility for implementation, tests, release readiness, and incident follow-up.
+
+Decision authority: the engineer chose the retry implementation and proposed the rollout plan; the staff engineer approved the cross-service interface. Evidence: introduced idempotency keys and a reconciliation report after duplicate notifications were found. People management: none; the engineer reviewed changes and helped two teammates learn the service.
+
+Interview version: 'My official title was Senior Systems Engineer. Functionally, I was a backend engineer responsible for the notification service's delivery and reliability. I owned implementation and release evidence, while cross-service interface decisions were reviewed by the staff engineer.' This explains scope without claiming staff-level authority or formal management.
+
+## Your final check
+
+Can the listener distinguish what you proposed, approved, implemented, and operated? Are scale claims supportable? Is client work described without implying employment by the client? Ask someone unfamiliar with the title ladder to restate your responsibilities; revise anything they misunderstand.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 INTERVIEWRUNWAY VAULT
 Indian-to-US Title Translation Workbook
 Workbook for translating Indian titles, company context, and scope into globally legible evidence.

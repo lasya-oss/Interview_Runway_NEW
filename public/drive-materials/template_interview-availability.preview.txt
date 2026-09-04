@@ -1,3 +1,27 @@
+## Remove scheduling ambiguity
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Offer usable interview windows with exact dates, a named time zone, and enough information to confirm duration and format.
+
+## Give windows, not just free days
+
+Check the calendar before proposing two or three options. State the date, start and end time, and time zone for every window. Use a named zone and its date-appropriate offset where helpful. Avoid abbreviations that can refer to more than one region. Do not assume the interview duration or that the organizer shares your time zone.
+
+## Worked message - fictional
+
+Hi Leena, thank you for the invitation. I can offer the following windows in Asia/Kolkata (UTC+05:30): 14 September 2026, 18:00-19:30; 15 September 2026, 18:30-20:00; or 17 September 2026, 17:00-18:30. Please confirm the interview duration, format, participants, and meeting platform. I can provide additional options if needed. Best, Nila.
+
+## Confirm the invitation
+
+Open the calendar invitation and verify the date and displayed local time rather than trusting an email conversion. Check the expected duration, video link, coding environment, and any preparation instructions. If the interviewer uses daylight-saving time, verify the conversion for the actual interview date.
+
+Raise a genuine accommodation or scheduling constraint through the designated channel early. If you must change an accepted slot, offer alternatives promptly and confirm that the old invitation is no longer active.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
 INTERVIEWRUNWAY VAULT
 Interview Availability Email
 Availability email that prevents time-zone and scheduling ambiguity.

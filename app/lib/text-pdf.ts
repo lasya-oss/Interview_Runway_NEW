@@ -43,8 +43,7 @@ type PdfLine = {
 };
 
 function pdfContentLines(source: string): PdfLine[] {
-  return pdfSafeText(source)
-    .replace(/\r\n?/g, "\n")
+  return pdfSafeText(source.replace(/\r\n?/g, "\n"))
     .split("\n")
     .flatMap((line): PdfLine[] => {
       const trimmed = line.trimEnd();
@@ -99,19 +98,32 @@ export function createTextPdf(title: string, filename: string, source: string) {
   let page: PdfLine[] = [];
   let usedHeight = 0;
   const pushPage = () => {
+    while (page.at(-1)?.kind === "blank") page.pop();
     if (page.length) pages.push(page);
     page = [];
     usedHeight = 0;
   };
 
-  for (const line of lines.length ? lines : [{ kind: "blank", text: "" } as PdfLine]) {
+  for (const [index, line] of lines.entries()) {
+    if (line.kind === "blank" && !page.length) continue;
     const { leading } = pdfLineMetrics(line);
     const pageHeight = pages.length === 0 ? 518 : 626;
-    if (page.length && usedHeight + leading > pageHeight) pushPage();
+    let requiredHeight = leading;
+    if (line.kind === "heading") {
+      // Keep a wrapped heading and its first body line on the same page.
+      for (const following of lines.slice(index + 1)) {
+        requiredHeight += pdfLineMetrics(following).leading;
+        if (following.kind !== "blank" && following.kind !== "heading") break;
+      }
+    }
+    if (page.length && usedHeight + requiredHeight > pageHeight) pushPage();
+    if (line.kind === "blank" && !page.length) continue;
     page.push(line);
     usedHeight += leading;
   }
   pushPage();
+  // Keep the existing valid one-page result for an explicitly empty input.
+  if (!pages.length) pages.push([]);
 
   const objects: string[] = [
     "<< /Type /Catalog /Pages 2 0 R >>",
