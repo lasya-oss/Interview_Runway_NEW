@@ -1520,6 +1520,18 @@ test("member demo typography has an explicit legibility floor", async () => {
   assert.match(styles, /\.member-material-card p\s*\{\s*font-size:\s*var\(--member-body\)/);
 });
 
+test("Vault and Second Seat reuse only Human Calibration's existing page background", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(
+    styles,
+    /\.member-shell\[data-member-tier="foundation"\],\s*\.member-shell\[data-member-tier="practice"\],\s*\.member-shell\[data-member-tier="premium"\]\s*\{\s*background:\s*#e9e7e0;\s*\}/,
+  );
+  assert.match(
+    styles,
+    /\.member-shell\[data-member-tier="premium"\] \.readiness-dial::before\s*\{\s*background:\s*#e9e7e0;\s*\}/,
+  );
+});
+
 test("Second Seat keeps the learner profile anchored at the bottom of the sidebar", async () => {
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 

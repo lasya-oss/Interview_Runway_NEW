@@ -6604,6 +6604,8 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 /* Premium room: quieter, warmer, more tactile */
 
+.member-shell[data-member-tier="foundation"],
+.member-shell[data-member-tier="practice"],
 .member-shell[data-member-tier="premium"] { background: #e9e7e0; }
 .member-shell[data-member-tier="premium"] .readiness-dial::before { background: #e9e7e0; }
 .coaching-heading h1 em { color: #8d7967; font-style: normal; }
