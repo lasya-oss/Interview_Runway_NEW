@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cacheForRequest } from "vinext/cache";
 import { findDemoById, type DemoProfile, type DemoTier } from "./demo-data";
 import { getChatGPTUser, requireChatGPTUser } from "@/app/chatgpt-auth";
 import {
@@ -97,7 +98,7 @@ type WorkspaceProfileState = {
 // Do not memoize this lookup outside the request lifecycle. The active plan is
 // a browser cookie that changes when the QA selector is used; a long-lived edge
 // worker must never reuse a previous request's selected profile.
-async function resolveWorkspaceProfile(): Promise<WorkspaceProfileState> {
+const resolveWorkspaceProfile = cacheForRequest(async (): Promise<WorkspaceProfileState> => {
   const [profile, user] = await Promise.all([getDemoProfile(), getChatGPTUser()]);
   if (!user) {
     return {
@@ -145,7 +146,7 @@ async function resolveWorkspaceProfile(): Promise<WorkspaceProfileState> {
     secondSeatAccess: access.secondSeat,
     humanCalibrationAccess: access.humanCalibration,
   };
-}
+});
 
 async function getActivePlanPreference(): Promise<DemoTier | null> {
   const value = (await cookies()).get(ACTIVE_LEARNER_PLAN_COOKIE)?.value;

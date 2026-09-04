@@ -247,7 +247,7 @@ export function RoadmapChecklist({
                           <span aria-hidden="true" />
                         </label>
                         {libraryHref ? (
-                          <Link className="roadmap-task-learning" href={libraryHref}>
+                          <Link className="roadmap-task-learning" href={libraryHref} prefetch={true}>
                             {taskCopy}
                             <span className="roadmap-task-library-button">View in Library <span aria-hidden="true">↗</span></span>
                           </Link>

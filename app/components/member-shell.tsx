@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import Link, { useLinkStatus } from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, type ReactNode } from "react";
 import type { DemoProfile } from "@/app/lib/demo-data";
 import { CurrentAccessCard } from "./current-access-card";
 import { RoadmapProgressProvider, RoadmapTrackLabel } from "@/app/learn/roadmap/learner-progress-client";
@@ -44,6 +44,14 @@ export function MemberShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  useEffect(() => {
+    if (!profile.access.library) return;
+    // Vinext's native prefetch is source-route-specific. The persistent
+    // sidebar's one-shot viewport observer cannot warm a new return journey.
+    if (pathname?.startsWith("/learn/library") || pathname?.startsWith("/learn/material")) router.prefetch("/learn/roadmap");
+    else if (pathname === "/learn/roadmap") router.prefetch("/learn/library");
+  }, [pathname, profile.access.library, router]);
   const currentSection = sectionForPathname(pathname) ?? active ?? "today";
   const isLive = profile.isLive === true;
   const isFreshLearner = profile.progress === 0 && (profile.completedTaskIds?.length ?? 0) === 0;
@@ -90,7 +98,7 @@ export function MemberShell({
             const unlocked = profile.access[item.access];
             return (
               <Link className={`${currentSection === item.key ? "is-active" : ""} ${unlocked ? "" : "is-locked"}`} href={item.href} key={item.key}>
-                <span>{item.mark}</span><b>{item.key === "today" && showDashboardLabel ? "Dashboard" : item.label}</b>{unlocked ? null : <small>Upgrade</small>}
+                <span>{item.mark}</span><MemberNavigationLabel>{item.key === "today" && showDashboardLabel ? "Dashboard" : item.label}</MemberNavigationLabel>{unlocked ? null : <small>Upgrade</small>}
               </Link>
             );
           })}
@@ -160,6 +168,11 @@ export function MemberShell({
       </RoadmapProgressProvider>
     </div>
   );
+}
+
+function MemberNavigationLabel({ children }: { children: ReactNode }) {
+  const { pending } = useLinkStatus();
+  return <b data-navigation-pending={pending || undefined} aria-busy={pending}>{children}</b>;
 }
 
 function sectionForPathname(pathname: string | null): (typeof MEMBER_NAV)[number]["key"] | null {

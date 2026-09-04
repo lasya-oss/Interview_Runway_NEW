@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { MaterialViewer } from "./material-viewer";
 import type { LibraryMaterialViewerSource } from "./library-material-source";
+import { canWarmMaterial, isPdfAsset, nativePreviewSlots, previewInputForMaterial, previewKey, warmMaterialPreview } from "./material-preview-cache";
 
 export function LibraryMaterialDialog({
   source,
@@ -36,8 +37,45 @@ export function LibraryMaterialDialog({
   const viewerRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const previewInput = useMemo(() => previewInputForMaterial(source), [source]);
   const titleId = useId();
   const descriptionId = useId();
+  const nativePdf = !!previewInput && previewInput.source === undefined && isPdfAsset(previewInput.filename, previewInput.mimeType);
+  const nativeKey = nativePdf ? previewKey(previewInput!) : null;
+  const [retention, setRetention] = useState({ sourceKey: nativeKey, retained: initialOpen && nativeKey !== null });
+  // A changed source must not inherit the old reader's lease, including A ->
+  // B -> A changes while closed. Adjust only this component's derived state.
+  if (retention.sourceKey !== nativeKey) setRetention({ sourceKey: nativeKey, retained: open && nativeKey !== null });
+  const retainNative = nativeKey !== null && retention.sourceKey === nativeKey && retention.retained;
+  const preparePreview = useCallback((intent = false, active = false) => {
+    if (!active && !canWarmMaterial()) return;
+    if (nativeKey) {
+      if (nativePreviewSlots.acquire(titleId, () => setRetention({ sourceKey: nativeKey, retained: false }), active, intent || active)) {
+        setRetention((current) => current.sourceKey === nativeKey && current.retained ? current : { sourceKey: nativeKey, retained: true });
+      }
+    } else {
+      warmMaterialPreview(previewInput);
+    }
+  }, [nativeKey, previewInput, titleId]);
+
+  useEffect(() => () => nativePreviewSlots.release(titleId), [nativeKey, titleId]);
+  useEffect(() => {
+    if (open && nativeKey) nativePreviewSlots.acquire(titleId, () => setRetention({ sourceKey: nativeKey, retained: false }), true, true);
+    else nativePreviewSlots.close(titleId);
+  }, [nativeKey, open, titleId]);
+
+  useEffect(() => {
+    const button = buttonRef.current;
+    if (open || retainNative || !button || !previewInput || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      preparePreview();
+      observer.disconnect();
+    });
+    observer.observe(button);
+    return () => observer.disconnect();
+  }, [open, preparePreview, previewInput, retainNative]);
 
   const closeViewer = useCallback(() => {
     if (document.fullscreenElement === viewerRef.current) {
@@ -114,9 +152,13 @@ export function LibraryMaterialDialog({
   return (
     <>
       <button
+        ref={buttonRef}
         className={buttonClassName}
         type="button"
+        onPointerEnter={() => preparePreview(true)}
+        onFocus={() => preparePreview(true)}
         onClick={(event) => {
+          preparePreview(true, true);
           returnFocusRef.current = event.currentTarget;
           setIsFullscreen(false);
           setOpen(true);
@@ -127,8 +169,10 @@ export function LibraryMaterialDialog({
         {buttonLabel} <span aria-hidden="true">↗</span>
       </button>
 
-      {open ? (
+      {open || retainNative ? (
         <div
+          hidden={!open}
+          style={open ? undefined : { display: "none" }}
           className={`library-material-dialog${isFullscreen ? " is-fullscreen" : ""}`}
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeViewer();

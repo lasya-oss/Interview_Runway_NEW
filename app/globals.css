@@ -4943,6 +4943,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .member-nav a > small { font-family: var(--font-mono); font-size: 6px; letter-spacing: .06em; text-transform: uppercase; }
 .member-nav a:hover { color: #dce6e9; background: rgba(255,255,255,.035); }
 .member-nav a.is-active { color: #f4f7f8; background: rgba(207,225,232,.08); box-shadow: inset 2px 0 var(--afterburner); }
+.member-nav a:has([data-navigation-pending="true"]) { color: #f4f7f8; background: rgba(207,225,232,.08); box-shadow: inset 2px 0 var(--afterburner); }
 .member-nav a.is-locked { opacity: .62; }
 .member-plan-card { margin-top: auto; padding: 17px; border: 1px solid rgba(211,226,232,.13); border-radius: 15px; background: rgba(3,10,15,.25); }
 .member-plan-card > span { color: #6d828d; font-family: var(--font-mono); font-size: 7px; letter-spacing: .09em; text-transform: uppercase; }
@@ -6603,6 +6604,8 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 
 /* Premium room: quieter, warmer, more tactile */
 
+.member-shell[data-member-tier="foundation"],
+.member-shell[data-member-tier="practice"],
 .member-shell[data-member-tier="premium"] { background: #e9e7e0; }
 .member-shell[data-member-tier="premium"] .readiness-dial::before { background: #e9e7e0; }
 .coaching-heading h1 em { color: #8d7967; font-style: normal; }

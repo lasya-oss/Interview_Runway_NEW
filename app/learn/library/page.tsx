@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { isActivePdfFilename } from "@/app/lib/active-library-selection";
 import { requireDemoProfile } from "@/app/lib/demo-session";
-import { getLibraryCategorySummary } from "./library-catalog";
+import { getLibraryCategorySummary, getLibraryCatalog } from "./library-catalog";
 import { LibraryClient } from "./library-client";
 
 export const dynamic = "force-dynamic";
@@ -31,6 +31,7 @@ export default async function LibraryPage({
         loginHint={profile.email}
         categorySummary={getLibraryCategorySummary(isLive, profile.id)}
         initialPdfFilename={initialPdfFilename}
+        initialCatalog={initialPdfFilename ? getLibraryCatalog(isLive, profile.id) : null}
       />
     </div>
   );

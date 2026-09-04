@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DriveReplayPlayer } from "../practice/replays/drive-replay-player";
-import { createTextPdf } from "@/app/lib/text-pdf";
+import { isPdfAsset, materialPreviewCache, previewKey } from "./material-preview-cache";
 
 function isTextMaterial(filename: string, mimeType: string) {
   return (
@@ -17,10 +17,6 @@ function materialDisplayKind(filename: string, mimeType: string) {
   if (/^video\//i.test(mimeType) || /\.mp4$/i.test(filename)) return "video" as const;
   if (/^audio\//i.test(mimeType) || /\.(m4a|mp3|wav|ogg)$/i.test(filename)) return "audio" as const;
   return "document" as const;
-}
-
-function isPdfAsset(filename: string, mimeType: string) {
-  return /^application\/pdf$/i.test(mimeType) || /\.pdf$/i.test(filename);
 }
 
 function isMediaKind(kind: ReturnType<typeof materialDisplayKind>): kind is "video" | "audio" {
@@ -51,7 +47,7 @@ export function MaterialViewer({
   const displayKind = materialDisplayKind(filename, mimeType);
 
   if (content !== null && content !== undefined) {
-    return <PdfMaterialPreview fileId={fileId} filename={filename} source={content} title={title} />;
+    return <PdfMaterialPreview key={previewKey({ filename, source: content, title })} fileId={fileId} filename={filename} source={content} title={title} />;
   }
 
   if (assetUrl && displayKind === "video") {
@@ -87,7 +83,7 @@ export function MaterialViewer({
     : fallbackAssetUrl ?? (isTextMaterial(filename, mimeType) ? assetUrl : null);
 
   if (pdfSourceUrl && (fallbackAssetUrl || isTextMaterial(filename, mimeType) || isPdfAsset(filename, mimeType))) {
-    return <PdfMaterialPreview assetUrl={pdfSourceUrl} fileId={fileId} filename={filename} mimeType={mimeType} title={title} />;
+    return <PdfMaterialPreview key={previewKey({ assetUrl: pdfSourceUrl, filename, mimeType, title })} assetUrl={pdfSourceUrl} fileId={fileId} filename={filename} mimeType={mimeType} title={title} />;
   }
 
   return (
@@ -114,57 +110,38 @@ function PdfMaterialPreview({
   source?: string;
   title: string;
 }) {
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [error, setError] = useState(false);
+  const key = previewKey({ assetUrl, filename, mimeType, source, title });
+  const [prepared, setPrepared] = useState<{ key: string; url: string } | null>(null);
+  const [failedKey, setFailedKey] = useState<string | null>(null);
+  // Original PDFs always use their real URL and native progressive reader.
+  // The dialog retains a bounded number of these readers between opens.
+  const directUrl = source === undefined && assetUrl && isPdfAsset(filename, mimeType) ? assetUrl : null;
+  const pdfUrl = prepared?.key === key ? prepared.url : directUrl;
+  const error = failedKey === key;
 
   useEffect(() => {
     let objectUrl: string | null = null;
     let cancelled = false;
-    const controller = new AbortController();
-    const makePdf = (value: string) => {
-      const nextObjectUrl = URL.createObjectURL(new Blob([createTextPdf(title, filename, value)], { type: "application/pdf" }));
-      if (cancelled) {
-        URL.revokeObjectURL(nextObjectUrl);
-        return;
-      }
-      objectUrl = nextObjectUrl;
-      setPdfUrl(nextObjectUrl);
-    };
-
-    if (source !== undefined) {
-      queueMicrotask(() => makePdf(source));
-    } else if (assetUrl && isPdfAsset(filename, mimeType ?? "")) {
-      queueMicrotask(() => {
-        if (!cancelled) setPdfUrl(assetUrl);
+    if (directUrl) return;
+    void materialPreviewCache.prepare({ assetUrl, filename, mimeType, source, title })
+      .then((blob) => {
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setPrepared({ key, url: objectUrl });
+      }).catch(() => {
+        if (!cancelled) setFailedKey(key);
       });
-    } else if (assetUrl) {
-      void fetch(assetUrl, { signal: controller.signal })
-        .then((response) => {
-          if (!response.ok) throw new Error("Material unavailable");
-          return response.text();
-        })
-        .then(makePdf)
-        .catch((reason: unknown) => {
-          if (reason instanceof DOMException && reason.name === "AbortError") return;
-          if (!cancelled) setError(true);
-        });
-    } else {
-      queueMicrotask(() => {
-        if (!cancelled) setError(true);
-      });
-    }
 
     return () => {
       cancelled = true;
-      controller.abort();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [assetUrl, filename, mimeType, source, title]);
+  }, [assetUrl, directUrl, filename, key, mimeType, source, title]);
 
-  if (pdfUrl) {
+  if (pdfUrl || (!error && source === undefined && assetUrl && isPdfAsset(filename, mimeType))) {
     return (
       <div className="library-material-pdf-frame">
-        <iframe src={pdfUrl} title={`PDF preview for ${title}`} allow="fullscreen" allowFullScreen />
+        <iframe key={pdfUrl ?? "pending"} src={pdfUrl ?? undefined} title={`PDF preview for ${title}`} allow="fullscreen" allowFullScreen />
       </div>
     );
   }
