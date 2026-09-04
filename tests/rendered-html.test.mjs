@@ -1886,6 +1886,14 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(practice, /candidate\.turns\[0\]\.prompt/);
   assert.match(practice, /feedbackHref\(session\.id, isLive\)/);
   assert.match(practice, /feedbackHref\(sessionId, isLive\)/);
+  assert.match(practice, /MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS/);
+  assert.match(practice, /MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS/);
+  assert.match(practice, /id="practice-response-error" role="alert"/);
+  assert.match(practice, /aria-describedby=\{error \? "practice-response-guidance practice-response-error"/);
+  assert.ok(
+    practice.indexOf('id="practice-response-error"') > practice.indexOf('onClick={() => void submit()}'),
+    "the submit warning should render immediately after the submit action",
+  );
   assert.doesNotMatch(practice, /fixed three-turn sequence|No AI evaluation occurred|Use a sample response/i);
   assert.match(feedback, /getLatestCompletedSecondSeatSession/);
   assert.match(feedback, /getSecondSeatSession/);

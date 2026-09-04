@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import {
   evaluateSecondSeatSession,
   findSecondSeatMock,
+  MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS,
   MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS,
   SECOND_SEAT_MOCKS,
   type SecondSeatEvaluation,
@@ -309,7 +310,8 @@ export function PracticeClient({
         <aside className="practice-response-panel">
           <div><span>Your response</span><b>{isLive ? "Saved on submit" : "Preview only"}</b></div>
           <textarea
-            aria-describedby="practice-response-guidance"
+            aria-describedby={error ? "practice-response-guidance practice-response-error" : "practice-response-guidance"}
+            aria-invalid={Boolean(error)}
             value={draft}
             onChange={(event) => {
               setDraft(event.target.value);
@@ -318,12 +320,12 @@ export function PracticeClient({
             placeholder="Write a complete answer with the decision and evidence you would say aloud…"
             rows={11}
             minLength={MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS}
-            maxLength={5000}
+            maxLength={MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS}
           />
-          <small className="practice-response-count" id="practice-response-guidance">{MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS} character minimum · {draft.length} / 5000</small>
+          <small className="practice-response-count" id="practice-response-guidance">{MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS} character minimum · {draft.length} / {MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS}</small>
           <button className="member-primary-button" type="button" onClick={() => void submit()} disabled={!draft.trim() || saving}>{saving ? "Saving response…" : step === mock.turns.length - 1 ? "Finish and score" : "Submit and continue"} <span aria-hidden="true">↗</span></button>
+          {error ? <p className="practice-inline-error" id="practice-response-error" role="alert">{error}</p> : null}
           <p>Your transcript is evaluated against the round rubric after the final turn. The score explains what to practise next.</p>
-          {error ? <p className="practice-inline-error" role="alert">{error}</p> : null}
         </aside>
       </div>
     </div>
