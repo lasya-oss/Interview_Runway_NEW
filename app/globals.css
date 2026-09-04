@@ -6397,7 +6397,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .practice-history a > span, .practice-history a > small { color: #788b93; font-family: var(--font-mono); font-size: 7px; text-transform: uppercase; }
 .practice-history a > strong { font-size: 11px; font-weight: 650; }
 .practice-history a > b { color: #9b3d1c; font-size: 9px; white-space: nowrap; }
-.practice-inline-error { margin: 14px 0 0; padding: 11px 14px; border: 1px solid rgba(165,61,30,.25); border-radius: 8px; color: #8e351b; background: rgba(255,107,44,.06); font-size: 11px; }
+.practice-inline-error { margin: 14px 0 0; padding: 0; color: #a6421d; background: none; font-size: 11px; font-weight: 650; line-height: 1.45; }
 .practice-response-count { margin-top: 6px; align-self: flex-end; color: #738892; font-family: var(--font-mono); font-size: 7px; }
 .practice-session { overflow: hidden; border: 1px solid rgba(208,225,232,.13); border-radius: 21px; color: #eef3f5; background: #08151e; box-shadow: 0 35px 100px rgba(28,59,72,.25); }
 .practice-session-header { min-height: 64px; padding: 0 24px; display: grid; grid-template-columns: 1fr auto auto; gap: 30px; align-items: center; border-bottom: 1px solid rgba(208,225,232,.12); font-family: var(--font-mono); }
@@ -6425,6 +6425,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .practice-response-panel textarea:focus { border-color: var(--afterburner); }
 .practice-sample-answer { margin-top: 12px; padding: 0; align-self: flex-start; border: 0; color: #8fa3ac; background: none; font-size: 8px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
 .practice-response-panel .member-primary-button { width: 100%; margin-top: auto; color: #fff; background: linear-gradient(135deg, #ff6b2c, #e65b26); }
+.practice-response-panel .practice-inline-error { color: #ff9a70; }
 .practice-response-panel > p { color: #6f8590; font-size: 8px; }
 .practice-complete > section { min-height: 430px; padding: 48px; display: flex; align-items: flex-start; flex-direction: column; justify-content: center; border: 1px solid rgba(31,65,78,.14); border-radius: 21px; background: rgba(255,255,255,.52); }
 .practice-complete-mark { color: #a6421d; font-family: var(--font-mono); font-size: 32px; }
