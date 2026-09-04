@@ -5,8 +5,10 @@ import { useMemo, useState } from "react";
 import {
   evaluateSecondSeatSession,
   findSecondSeatMock,
+  MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS,
   SECOND_SEAT_MOCKS,
   type SecondSeatEvaluation,
+  validateSecondSeatAnswer,
 } from "@/app/lib/second-seat-engine";
 import type { SecondSeatSession } from "@/app/lib/second-seat-store";
 
@@ -95,6 +97,13 @@ export function PracticeClient({
   const submit = async () => {
     const answer = draft.trim();
     if (!answer || saving) return;
+    const currentTurn = mock.turns[step];
+    if (!currentTurn) return;
+    const validation = validateSecondSeatAnswer(currentTurn, answer);
+    if (!validation.ok) {
+      setError(validation.error);
+      return;
+    }
     const nextAnswers = [...answers, answer];
     setError(null);
     setSaving(true);
@@ -299,8 +308,19 @@ export function PracticeClient({
 
         <aside className="practice-response-panel">
           <div><span>Your response</span><b>{isLive ? "Saved on submit" : "Preview only"}</b></div>
-          <textarea value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write the answer you would say aloud…" rows={11} maxLength={5000} />
-          <small className="practice-response-count">{draft.length} / 5000</small>
+          <textarea
+            aria-describedby="practice-response-guidance"
+            value={draft}
+            onChange={(event) => {
+              setDraft(event.target.value);
+              if (error) setError(null);
+            }}
+            placeholder="Write a complete answer with the decision and evidence you would say aloud…"
+            rows={11}
+            minLength={MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS}
+            maxLength={5000}
+          />
+          <small className="practice-response-count" id="practice-response-guidance">{MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS} character minimum · {draft.length} / 5000</small>
           <button className="member-primary-button" type="button" onClick={() => void submit()} disabled={!draft.trim() || saving}>{saving ? "Saving response…" : step === mock.turns.length - 1 ? "Finish and score" : "Submit and continue"} <span aria-hidden="true">↗</span></button>
           <p>Your transcript is evaluated against the round rubric after the final turn. The score explains what to practise next.</p>
           {error ? <p className="practice-inline-error" role="alert">{error}</p> : null}

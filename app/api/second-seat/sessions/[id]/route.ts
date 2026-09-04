@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { hasSecondSeatAccess } from "@/app/lib/paid-access";
-import { findSecondSeatMock } from "@/app/lib/second-seat-engine";
+import {
+  MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS,
+  findSecondSeatMock,
+  validateSecondSeatAnswer,
+} from "@/app/lib/second-seat-engine";
 import {
   getSecondSeatSession,
   saveSecondSeatAnswers,
@@ -54,9 +58,21 @@ export async function PUT(
   const answers = body.answers as string[];
   if (
     answers.length > mock.turns.length ||
-    answers.some((answer) => answer.trim().length < 1 || answer.length > 5000)
+    answers.some((answer) => answer.length > MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS)
   ) {
     return json({ error: "Invalid practice answers" }, 400);
+  }
+
+  const invalidAnswer = answers
+    .map((answer, index) => {
+      const turn = mock.turns[index];
+      return turn
+        ? validateSecondSeatAnswer(turn, answer)
+        : { ok: false as const, error: "Invalid practice answers", matchedSignals: [] };
+    })
+    .find((validation) => !validation.ok);
+  if (invalidAnswer && !invalidAnswer.ok) {
+    return json({ error: invalidAnswer.error }, 400);
   }
 
   try {

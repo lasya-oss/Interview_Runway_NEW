@@ -52,6 +52,13 @@ export type SecondSeatEvaluation = {
   }[];
 };
 
+export const MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS = 40;
+export const MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS = 5000;
+
+export type SecondSeatAnswerValidation =
+  | { ok: true; matchedSignals: readonly string[] }
+  | { ok: false; error: string; matchedSignals: readonly string[] };
+
 export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
   {
     id: "notification-service",
@@ -171,21 +178,67 @@ export function findSecondSeatMock(mockId: string) {
   return SECOND_SEAT_MOCKS.find((mock) => mock.id === mockId) ?? null;
 }
 
+export function validateSecondSeatAnswer(
+  turn: SecondSeatTurn,
+  answer: string,
+): SecondSeatAnswerValidation {
+  const trimmed = answer.trim();
+  if (trimmed.length < MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS) {
+    return {
+      ok: false,
+      error: `Please answer in at least ${MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS} characters.`,
+      matchedSignals: [],
+    };
+  }
+  if (trimmed.length > MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS) {
+    return {
+      ok: false,
+      error: `Keep each response under ${MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS} characters.`,
+      matchedSignals: [],
+    };
+  }
+
+  const normalized = trimmed.toLowerCase();
+  const wordCount = normalized.match(/[\p{L}\p{N}]+/gu)?.length ?? 0;
+  if (wordCount < 5) {
+    return {
+      ok: false,
+      error: "Please write a complete answer with enough detail to evaluate.",
+      matchedSignals: [],
+    };
+  }
+
+  const matchedSignals = turn.signals.filter((signal) =>
+    answerContainsSignal(normalized, signal),
+  );
+  if (matchedSignals.length === 0) {
+    return {
+      ok: false,
+      error: "Please answer the current interview question with at least one relevant detail.",
+      matchedSignals,
+    };
+  }
+
+  return { ok: true, matchedSignals };
+}
+
 export function evaluateSecondSeatSession(
   mock: SecondSeatMock,
   answers: readonly string[],
 ): SecondSeatEvaluation {
   const totals = new Map<SecondSeatDimensionKey, { score: number; count: number }>();
-  for (const dimension of DIMENSIONS) totals.set(dimension.key, { score: 38, count: 1 });
+  for (const dimension of DIMENSIONS) totals.set(dimension.key, { score: 0, count: 0 });
 
   const evidence = mock.turns.map((turn, index) => {
     const answer = answers[index]?.trim() ?? "";
-    const normalized = answer.toLowerCase();
-    const matchedSignals = turn.signals.filter((signal) => normalized.includes(signal));
-    const completeness = answer.length >= 80 ? 14 : answer.length >= 35 ? 8 : answer.length > 0 ? 3 : 0;
+    const validation = validateSecondSeatAnswer(turn, answer);
+    const matchedSignals = validation.matchedSignals;
+    const completeness = answer.length >= 80 ? 14 : answer.length >= 60 ? 8 : 3;
     const coverage = Math.min(35, matchedSignals.length * 6);
     const structure = /because|so that|however|trade-?off|first|then|finally|measure/i.test(answer) ? 10 : 0;
-    const turnScore = Math.min(96, 35 + completeness + coverage + structure);
+    const turnScore = validation.ok
+      ? Math.min(96, 35 + completeness + coverage + structure)
+      : 0;
 
     for (const key of turn.dimensions) {
       const current = totals.get(key);
@@ -195,16 +248,24 @@ export function evaluateSecondSeatSession(
       }
     }
 
-    const isStrong = turnScore >= 70;
-    const signal = isStrong ? `${turn.label} · evidence present` : `${turn.label} · strengthen next time`;
+    const isStrong = validation.ok && turnScore >= 70;
+    const signal = isStrong
+      ? `${turn.label} · evidence present`
+      : validation.ok
+        ? `${turn.label} · strengthen next time`
+        : `${turn.label} · no relevant evidence`;
     const observation = answer
-      ? isStrong
-        ? `Your response made ${matchedSignals.slice(0, 3).join(", ") || "the decision"} visible before moving on.`
-        : "The response started the decision, but the constraint, consequence, or operating proof stayed implicit."
+      ? !validation.ok
+        ? "This response did not contain enough turn-relevant evidence, so it is not used as positive scoring evidence."
+        : isStrong
+          ? `Your response made ${matchedSignals.slice(0, 3).join(", ") || "the decision"} visible before moving on.`
+          : "The response started the decision, but the constraint, consequence, or operating proof stayed implicit."
       : "No response was recorded for this turn, so there is no evidence to score yet.";
-    const correction = isStrong
-      ? "Keep the same order: constraint, decision, consequence, then the signal you would watch."
-      : `Name one concrete ${turn.dimensions.includes("tradeoffClarity") ? "trade-off and its user consequence" : "constraint and observable result"} before adding more detail.`;
+    const correction = !validation.ok
+      ? validation.error
+      : isStrong
+        ? "Keep the same order: constraint, decision, consequence, then the signal you would watch."
+        : `Name one concrete ${turn.dimensions.includes("tradeoffClarity") ? "trade-off and its user consequence" : "constraint and observable result"} before adding more detail.`;
 
     return {
       turn: turn.label,
@@ -216,13 +277,13 @@ export function evaluateSecondSeatSession(
   });
 
   const dimensions = DIMENSIONS.map(({ key, label }) => {
-    const total = totals.get(key) ?? { score: 38, count: 1 };
-    const score = Math.round(total.score / total.count);
+    const total = totals.get(key) ?? { score: 0, count: 0 };
+    const score = total.count > 0 ? Math.round(total.score / total.count) : 0;
     return {
       key,
       label,
       score,
-      delta: score >= 70 ? "+evidence" : "focus next",
+      delta: score >= 70 ? "+evidence" : score > 0 ? "focus next" : "no evidence",
       note: dimensionNote(key, score),
     };
   });
@@ -277,4 +338,17 @@ function dimensionNote(key: SecondSeatDimensionKey, score: number) {
       : key === "tradeoffClarity"
         ? "Name what the choice gives up and who sees that consequence."
         : "Use shorter sentences with one decision and one proof point each.";
+}
+
+function answerContainsSignal(normalizedAnswer: string, signal: string) {
+  const normalizedSignal = signal.toLowerCase().trim();
+  if (!normalizedSignal) return false;
+  if (normalizedSignal.includes(" ")) {
+    return normalizedAnswer.includes(normalizedSignal);
+  }
+  return new RegExp(`\\b${escapeRegExp(normalizedSignal)}`, "i").test(normalizedAnswer);
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
