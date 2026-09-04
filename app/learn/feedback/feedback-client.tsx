@@ -6,7 +6,7 @@ import { trackEvent } from "@/app/lib/analytics";
 
 type FeedbackTab = "summary" | "evidence" | "actions";
 type Dimension = { key: string; label: string; score: number; delta: string; note: string };
-type Evidence = { time: string; dimensionKeys: readonly string[]; signal: string; excerpt: string; observation: string; correction: string };
+type Evidence = { time: string; dimensionKeys: readonly string[]; question?: string; relevance?: "irrelevant" | "partial" | "relevant"; signal: string; excerpt: string; observation: string; correction: string };
 type Action = { number: string; title: string; body: string; meta: string; href: string; what?: string; why?: string; next?: string };
 
 const TABS: readonly { key: FeedbackTab; number: string; label: string; description: string }[] = [
@@ -247,6 +247,7 @@ function SecondSeatFeedbackExperience({
                         ))}
                       </div>
                     ) : null}
+                    {item.question ? <p className="feedback-evidence-question"><span>Question evaluated</span>{item.question}</p> : null}
                     <blockquote>“{item.excerpt}”</blockquote>
                     <dl><div><dt>Observed</dt><dd>{item.observation}</dd></div><div><dt>Correction</dt><dd>{item.correction}</dd></div></dl>
                     <p className="feedback-evidence-improvement"><span>Improvement area</span>{linkedDimensions.length ? linkedDimensions.map((dimension) => `${dimension.label}: ${dimension.note}`).join(" ") : "This moment is retained, but no dimension mapping is available yet."}</p>

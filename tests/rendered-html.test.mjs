@@ -1865,10 +1865,14 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   const schema = await readFile(new URL("../db/schema.ts", import.meta.url), "utf8");
   const practice = await readFile(new URL("../app/learn/practice/practice-client.tsx", import.meta.url), "utf8");
   const feedback = await readFile(new URL("../app/learn/feedback/page.tsx", import.meta.url), "utf8");
+  const feedbackClient = await readFile(new URL("../app/learn/feedback/feedback-client.tsx", import.meta.url), "utf8");
   const sessionRoute = await readFile(new URL("../app/api/second-seat/sessions/[id]/route.ts", import.meta.url), "utf8");
 
   assert.match(engine, /SECOND_SEAT_MOCKS/);
   assert.match(engine, /evaluateSecondSeatSession/);
+  assert.match(engine, /assessSecondSeatAnswer/);
+  assert.match(engine, /minimumConcepts/);
+  assert.match(engine, /irrelevant response/);
   assert.match(engine, /isQuestionEcho/);
   assert.match(engine, /repeating the interview question is not enough to score/i);
   assert.match(engine, /problemFraming|technicalDepth|tradeoffClarity|communication/);
@@ -1902,6 +1906,7 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(feedback, /requestedSessionId/);
   assert.match(feedback, /selectedSession\?\.status === "completed"/);
   assert.match(feedback, /findSecondSeatMock\(feedbackSession\.mockId\)/);
+  assert.match(feedbackClient, /Question evaluated/);
   assert.match(feedback, /feedback-empty/);
   assert.match(feedback, /const isLiveLearner = profile\.isLive === true/);
   assert.match(feedback, /if \(isLiveLearner && !liveEvaluation\)/);

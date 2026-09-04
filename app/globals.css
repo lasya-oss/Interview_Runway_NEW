@@ -6588,6 +6588,8 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .feedback-workspace--second-seat .feedback-evidence-score-link > b { color: #a6421d; font-size: 8px; font-weight: 700; text-align: right; }
 .feedback-workspace--second-seat .feedback-evidence-improvement { margin: 18px 0 0; padding: 13px 15px; border-left: 2px solid var(--afterburner); color: #586d76; font-size: 10px; line-height: 1.55; background: rgba(255,107,44,.045); }
 .feedback-workspace--second-seat .feedback-evidence-improvement > span { display: block; margin-bottom: 5px; color: #a6421d; font-family: var(--font-mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; }
+.feedback-workspace--second-seat .feedback-evidence-question { max-width: 800px; margin: 17px 0 0; padding-left: 13px; border-left: 2px solid rgba(31,65,78,.18); color: #657a82; font-size: 10px; line-height: 1.55; }
+.feedback-workspace--second-seat .feedback-evidence-question > span { display: block; margin-bottom: 5px; color: #748790; font-family: var(--font-mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; }
 .feedback-workspace--second-seat .feedback-action-list article { min-height: 0; }
 .feedback-workspace--second-seat .feedback-action-copy { min-width: 0; }
 .feedback-workspace--second-seat .feedback-action-what { margin-top: 9px; }

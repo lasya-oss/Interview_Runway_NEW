@@ -11,6 +11,18 @@ export type SecondSeatTurn = {
   probe: string;
   dimensions: readonly SecondSeatDimensionKey[];
   signals: readonly string[];
+  relevance: SecondSeatRelevanceRule;
+};
+
+export type SecondSeatRelevance = "irrelevant" | "partial" | "relevant";
+
+export type SecondSeatRelevanceRule = {
+  concepts: readonly {
+    label: string;
+    signals: readonly string[];
+  }[];
+  minimumConcepts: number;
+  minimumSignals: number;
 };
 
 export type SecondSeatMock = {
@@ -25,6 +37,8 @@ export type SecondSeatMock = {
 
 export type SecondSeatEvidence = {
   turn: string;
+  question: string;
+  relevance: SecondSeatRelevance;
   signal: string;
   excerpt: string;
   observation: string;
@@ -75,6 +89,14 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
         probe: "The product requires email, push, and SMS. Transactional notifications should arrive within 30 seconds; marketing messages may take 15 minutes. How does that change your first design commitment?",
         dimensions: ["problemFraming", "communication"],
         signals: ["latency", "volume", "preference", "transactional", "marketing", "ordering"],
+        relevance: {
+          concepts: [
+            { label: "requirements and workload constraints", signals: ["latency", "volume", "preference", "transactional", "marketing"] },
+            { label: "architecture-changing decision", signals: ["clarify", "architecture", "ordering", "priority", "channel", "provider", "separate"] },
+          ],
+          minimumConcepts: 2,
+          minimumSignals: 3,
+        },
       },
       {
         id: "semantics",
@@ -83,6 +105,15 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
         probe: "Assume one SMS provider times out after accepting a request. You cannot know whether it sent the message. Where does idempotency live, and what do you record?",
         dimensions: ["technicalDepth", "tradeoffClarity"],
         signals: ["at-least-once", "idempot", "ledger", "timeout", "duplicate", "provider", "retry"],
+        relevance: {
+          concepts: [
+            { label: "delivery semantics", signals: ["at-least-once", "exactly-once", "delivery", "guarantee", "process", "event", "retry"] },
+            { label: "duplicate and provider failure handling", signals: ["idempot", "ledger", "timeout", "duplicate", "provider", "dedupe", "record"] },
+            { label: "user-visible consequence", signals: ["user", "experience", "sent", "send"] },
+          ],
+          minimumConcepts: 2,
+          minimumSignals: 3,
+        },
       },
       {
         id: "failure",
@@ -91,6 +122,15 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
         probe: "Final follow-up: which lower-priority work would you shed first, and how would you prevent recovery traffic from causing another collapse?",
         dimensions: ["technicalDepth", "tradeoffClarity", "communication"],
         signals: ["backpressure", "retry", "jitter", "priority", "dead-letter", "queue age", "recovery", "marketing"],
+        relevance: {
+          concepts: [
+            { label: "overload control", signals: ["backpressure", "queue", "grow", "lag", "priority", "shed"] },
+            { label: "bounded retry behaviour", signals: ["retry", "jitter", "dead-letter", "bound", "provider"] },
+            { label: "recovery signal", signals: ["queue age", "recovery", "metric", "throughput", "oldest", "signal", "monitor"] },
+          ],
+          minimumConcepts: 2,
+          minimumSignals: 3,
+        },
       },
     ],
   },
@@ -109,6 +149,15 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
         probe: "A single customer has interactive requests and batch traffic. What policy separates those workloads without allowing a noisy batch job to starve the interactive path?",
         dimensions: ["problemFraming", "communication"],
         signals: ["identity", "quota", "window", "burst", "interactive", "batch", "priority", "429"],
+        relevance: {
+          concepts: [
+            { label: "identity and quota", signals: ["identity", "client", "customer", "quota", "limit"] },
+            { label: "window and burst policy", signals: ["window", "burst", "token", "request"] },
+            { label: "workload separation", signals: ["interactive", "batch", "priority", "starve", "429"] },
+          ],
+          minimumConcepts: 2,
+          minimumSignals: 3,
+        },
       },
       {
         id: "enforcement",
@@ -117,6 +166,15 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
         probe: "The counter store is briefly unavailable. Do you fail open, fail closed, or use a bounded local fallback? State the user and business consequence.",
         dimensions: ["technicalDepth", "tradeoffClarity"],
         signals: ["token bucket", "sliding", "counter", "redis", "distributed", "atomic", "fail open", "fail closed", "fallback"],
+        relevance: {
+          concepts: [
+            { label: "limiting algorithm and counter", signals: ["token bucket", "fixed-window", "sliding-window", "sliding", "counter"] },
+            { label: "distributed enforcement", signals: ["redis", "distributed", "instance", "atomic", "shared", "many"] },
+            { label: "dependency failure policy", signals: ["fail open", "fail closed", "fallback", "unavailable", "dependency"] },
+          ],
+          minimumConcepts: 2,
+          minimumSignals: 3,
+        },
       },
       {
         id: "operations",
@@ -125,6 +183,15 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
         probe: "Which metric distinguishes a correct limit from a broken dependency, and how would you prevent a configuration change from causing a global incident?",
         dimensions: ["technicalDepth", "tradeoffClarity", "communication"],
         signals: ["rejection", "latency", "error", "region", "canary", "rollback", "saturation", "alert", "dependency"],
+        relevance: {
+          concepts: [
+            { label: "incident symptoms and telemetry", signals: ["traffic", "rejection", "latency", "error", "region", "saturation", "metric", "alert"] },
+            { label: "recovery plan", signals: ["recovery", "recover", "rollback", "canary", "throughput"] },
+            { label: "rollout and dependency guardrails", signals: ["canary", "rollback", "guardrail", "configuration", "global", "dependency"] },
+          ],
+          minimumConcepts: 2,
+          minimumSignals: 3,
+        },
       },
     ],
   },
@@ -143,6 +210,15 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
         probe: "What would have happened if you had made the opposite decision, and why was the trade-off worth taking?",
         dimensions: ["problemFraming", "communication"],
         signals: ["context", "constraint", "decision", "risk", "personally", "impact", "outcome"],
+        relevance: {
+          concepts: [
+            { label: "delivery context and risk", signals: ["context", "constraint", "risk", "delivery", "incident"] },
+            { label: "personal decision", signals: ["personally", "decision", "decided", "chose", "owned", "action"] },
+            { label: "consequence and outcome", signals: ["impact", "outcome", "result", "metric", "consequence"] },
+          ],
+          minimumConcepts: 2,
+          minimumSignals: 3,
+        },
       },
       {
         id: "influence",
@@ -151,6 +227,15 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
         probe: "Who changed their mind, what evidence moved the discussion, and what did you do when alignment did not arrive immediately?",
         dimensions: ["technicalDepth", "tradeoffClarity", "communication"],
         signals: ["stakeholder", "alignment", "disagreement", "evidence", "influence", "trade-off", "decision", "changed"],
+        relevance: {
+          concepts: [
+            { label: "people and competing incentives", signals: ["stakeholder", "alignment", "disagreement", "incentive", "influence", "team"] },
+            { label: "evidence and decision", signals: ["evidence", "data", "metric", "trade-off", "decision", "changed"] },
+            { label: "alignment action", signals: ["resolve", "aligned", "changed", "mind", "persuade"] },
+          ],
+          minimumConcepts: 2,
+          minimumSignals: 3,
+        },
       },
       {
         id: "learning",
@@ -159,6 +244,15 @@ export const SECOND_SEAT_MOCKS: readonly SecondSeatMock[] = [
         probe: "What would your teammate say you now do differently, and what part of the original approach would you keep?",
         dimensions: ["technicalDepth", "tradeoffClarity", "communication"],
         signals: ["changed", "measurable", "metric", "result", "feedback", "process", "kept", "learning", "proof"],
+        relevance: {
+          concepts: [
+            { label: "behaviour or process change", signals: ["changed", "behaviour", "process", "learning", "feedback", "different"] },
+            { label: "measurable proof", signals: ["measurable", "metric", "result", "proof", "observable", "lasted"] },
+            { label: "retained practice", signals: ["kept", "keep", "teammate", "now", "approach"] },
+          ],
+          minimumConcepts: 2,
+          minimumSignals: 3,
+        },
       },
     ],
   },
@@ -219,15 +313,58 @@ export function validateSecondSeatAnswer(
   const matchedSignals = turn.signals.filter((signal) =>
     answerContainsSignal(normalized, signal),
   );
-  if (matchedSignals.length === 0) {
+  // Relevance is intentionally evaluated after submission, not used as a
+  // keyword-only input gate. A long unrelated answer must reach the debrief so
+  // the learner sees a zero/low score and answer-specific correction.
+  return { ok: true, matchedSignals };
+}
+
+export type SecondSeatRelevanceAssessment = {
+  level: SecondSeatRelevance;
+  matchedSignals: readonly string[];
+  matchedConcepts: readonly string[];
+  missingConcepts: readonly string[];
+  hasAnswerConnection: boolean;
+};
+
+export function assessSecondSeatAnswer(
+  turn: SecondSeatTurn,
+  answer: string,
+): SecondSeatRelevanceAssessment {
+  const trimmed = answer.trim();
+  const matchedSignals = turn.signals.filter((signal) =>
+    answerContainsSignal(trimmed, signal),
+  );
+  const matchedConcepts = turn.relevance.concepts
+    .filter((concept) => concept.signals.some((signal) => answerContainsSignal(trimmed, signal)))
+    .map((concept) => concept.label);
+  const missingConcepts = turn.relevance.concepts
+    .filter((concept) => !concept.signals.some((signal) => answerContainsSignal(trimmed, signal)))
+    .map((concept) => concept.label);
+  const hasAnswerConnection = hasDecisionConnection(trimmed);
+  const isEcho = isQuestionEcho(turn.prompt, trimmed);
+
+  if (!trimmed || isEcho || matchedConcepts.length === 0 || !hasAnswerConnection) {
     return {
-      ok: false,
-      error: "Please answer the current interview question with at least one relevant detail.",
+      level: "irrelevant",
       matchedSignals,
+      matchedConcepts,
+      missingConcepts,
+      hasAnswerConnection,
     };
   }
 
-  return { ok: true, matchedSignals };
+  const isRelevant =
+    matchedConcepts.length >= turn.relevance.minimumConcepts &&
+    matchedSignals.length >= turn.relevance.minimumSignals;
+
+  return {
+    level: isRelevant ? "relevant" : "partial",
+    matchedSignals,
+    matchedConcepts,
+    missingConcepts,
+    hasAnswerConnection,
+  };
 }
 
 export function evaluateSecondSeatSession(
@@ -239,14 +376,20 @@ export function evaluateSecondSeatSession(
 
   const evidence = mock.turns.map((turn, index) => {
     const answer = answers[index]?.trim() ?? "";
+    const relevance = assessSecondSeatAnswer(turn, answer);
     const validation = validateSecondSeatAnswer(turn, answer);
-    const matchedSignals = validation.matchedSignals;
-    const completeness = answer.length >= 80 ? 14 : answer.length >= 60 ? 8 : 3;
-    const coverage = Math.min(35, matchedSignals.length * 6);
-    const structure = /because|so that|however|trade-?off|first|then|finally|measure/i.test(answer) ? 10 : 0;
-    const turnScore = validation.ok
-      ? Math.min(96, 35 + completeness + coverage + structure)
-      : 0;
+    const isEcho = isQuestionEcho(turn.prompt, answer);
+    const matchedSignals = relevance.matchedSignals;
+    let turnScore = 0;
+    if (validation.ok && relevance.level !== "irrelevant") {
+      const completeness = answer.length >= 80 ? 14 : answer.length >= 60 ? 8 : 3;
+      const coverage = Math.min(35, matchedSignals.length * 6);
+      const structure = /because|so that|however|trade-?off|first|then|finally|measure/i.test(answer) ? 10 : 0;
+      const qualityScore = Math.min(96, 35 + completeness + coverage + structure);
+      turnScore = relevance.level === "relevant"
+        ? qualityScore
+        : Math.min(49, 10 + Math.min(16, matchedSignals.length * 4) + structure);
+    }
 
     for (const key of turn.dimensions) {
       const current = totals.get(key);
@@ -256,27 +399,41 @@ export function evaluateSecondSeatSession(
       }
     }
 
-    const isStrong = validation.ok && turnScore >= 70;
-    const signal = isStrong
+    const isStrong = relevance.level === "relevant" && turnScore >= 70;
+    const signal = relevance.level === "irrelevant"
+      ? `${turn.label} · irrelevant response`
+      : relevance.level === "partial"
+        ? `${turn.label} · partially relevant`
+        : isStrong
       ? `${turn.label} · evidence present`
       : validation.ok
         ? `${turn.label} · strengthen next time`
         : `${turn.label} · no relevant evidence`;
     const observation = answer
       ? !validation.ok
-        ? "This response did not contain enough turn-relevant evidence, so it is not used as positive scoring evidence."
-        : isStrong
+        ? "This response could not be evaluated because it did not meet the response requirements."
+        : relevance.level === "irrelevant"
+          ? `Your submitted answer did not answer this question: “${turn.prompt}” It was not used for positive quality scoring because it ${isEcho ? "repeated the question instead of answering it" : "did not connect a decision to the question's required concepts"}.`
+          : relevance.level === "partial"
+            ? `Your submitted answer addressed ${matchedSignals.slice(0, 3).join(", ") || "one part of the topic"}, but only partially answered “${turn.prompt}” Missing focus: ${relevance.missingConcepts.slice(0, 2).join(" and ") || "a complete decision and consequence"}.`
+            : isStrong
           ? `Your response made ${matchedSignals.slice(0, 3).join(", ") || "the decision"} visible before moving on.`
           : "The response started the decision, but the constraint, consequence, or operating proof stayed implicit."
       : "No response was recorded for this turn, so there is no evidence to score yet.";
     const correction = !validation.ok
       ? validation.error
+      : relevance.level === "irrelevant"
+        ? `Answer the question directly—“${turn.prompt}” Then name one concrete decision and its consequence. Unrelated writing will remain at zero.`
+        : relevance.level === "partial"
+          ? `Keep the part of your submitted answer that addressed ${matchedSignals.slice(0, 2).join(" and ") || "the question"}, then add ${relevance.missingConcepts.slice(0, 2).join(" and ") || "the missing decision and consequence"}.`
       : isStrong
         ? "Keep the same order: constraint, decision, consequence, then the signal you would watch."
         : `Name one concrete ${turn.dimensions.includes("tradeoffClarity") ? "trade-off and its user consequence" : "constraint and observable result"} before adding more detail.`;
 
     return {
       turn: turn.label,
+      question: turn.prompt,
+      relevance: relevance.level,
       signal,
       excerpt: answer ? answer.slice(0, 280) : "No answer recorded.",
       observation,
@@ -298,14 +455,20 @@ export function evaluateSecondSeatSession(
   const lowest = [...dimensions].sort((left, right) => left.score - right.score)[0];
   const overall = Math.round(dimensions.reduce((sum, dimension) => sum + dimension.score, 0) / dimensions.length);
   const mockAction = mock.category === "Behavioural" ? "/learn/material/scope-stories" : "/learn/material/notification-mock";
+  const hasIrrelevantAnswer = evidence.some((item) => item.signal.includes("irrelevant response"));
+  const hasPartialAnswer = evidence.some((item) => item.signal.includes("partially relevant"));
 
   return {
     overall,
     dimensions,
     evidence,
     insightTitle: lowest ? `Make ${lowest.label.toLowerCase()} visible earlier.` : "Make the decision easy to follow.",
-    insightBody: lowest
-      ? `${lowest.label} is the next useful correction from this transcript. Rehearse the same decision once more, then test whether the evidence appears without an interviewer prompt.`
+    insightBody: hasIrrelevantAnswer
+      ? "At least one submitted answer did not address its actual question, so unrelated writing received no positive quality score. Rehearse each question as a direct decision before adding supporting detail."
+      : hasPartialAnswer
+        ? "At least one submitted answer addressed only part of its question. Keep the relevant point, then add the missing decision, consequence, or operating proof before the next rehearsal."
+        : lowest
+          ? `${lowest.label} is the next useful correction from this transcript. Rehearse the same decision once more, then test whether the evidence appears without an interviewer prompt.`
       : "Your transcript has enough evidence to choose a focused next rehearsal.",
     nextActions: [
       {
@@ -355,6 +518,10 @@ function answerContainsSignal(normalizedAnswer: string, signal: string) {
     return normalizedAnswer.includes(normalizedSignal);
   }
   return new RegExp(`\\b${escapeRegExp(normalizedSignal)}`, "i").test(normalizedAnswer);
+}
+
+function hasDecisionConnection(answer: string) {
+  return /\b(i|we|my|our|would|should|choose|use|clarif\w*|decid\w*|priorit\w*|separat\w*|measure\w*|explain\w*|describe\w*|state|name|because|therefore|however|if|when|then|to avoid|which means|trade-?off|consequence)\b/i.test(answer);
 }
 
 function isQuestionEcho(prompt: string, answer: string) {
