@@ -1666,9 +1666,9 @@ test("live workspace headers use plan names instead of prices for active access"
   const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 
-  assert.match(shell, /isLive \? "Vault Active" : "Demo workspace"/);
-  assert.match(shell, /isLive \? "Second Seat Active" : "Demo workspace"/);
-  assert.match(shell, /isLive \? "Human Calibration Active" : "Demo workspace"/);
+  assert.match(shell, /isLive \? "Vault Plan Active" : "Demo workspace"/);
+  assert.match(shell, /isLive \? "Second Seat Plan Active" : "Demo workspace"/);
+  assert.match(shell, /isLive \? "Human Calibration Plan Active" : "Demo workspace"/);
   assert.doesNotMatch(shell, /₹799 access active|₹2,499 access active|Human Calibration access active/);
   assert.match(styles, /\.member-account-status \{[^}]*text-transform: none;/);
 });
