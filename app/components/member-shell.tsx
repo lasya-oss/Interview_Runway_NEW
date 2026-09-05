@@ -19,6 +19,8 @@ const MEMBER_NAV = [
   { key: "meeting-copilot", href: "/learn/meeting-copilot", label: "Meeting Copilot", mark: "07", access: "practice" },
 ] as const;
 
+const MEETING_COPILOT_URL = "http://127.0.0.1:8123/";
+
 const VAULT_SECTION_LABELS: Record<(typeof MEMBER_NAV)[number]["key"], string> = {
   today: "Dashboard",
   roadmap: "Roadmap",
@@ -100,7 +102,12 @@ export function MemberShell({
             if (item.key === "meeting-copilot" && !profile.access.practice) return null;
             const unlocked = profile.access[item.access];
             return (
-              <Link className={`${currentSection === item.key ? "is-active" : ""} ${unlocked ? "" : "is-locked"}`} href={item.href} key={item.key}>
+              <Link
+                className={`${currentSection === item.key ? "is-active" : ""} ${unlocked ? "" : "is-locked"}`}
+                href={item.href}
+                key={item.key}
+                onClick={item.key === "meeting-copilot" && unlocked ? openMeetingCopilot : undefined}
+              >
                 <span>{item.mark}</span><MemberNavigationLabel>{item.key === "today" && showDashboardLabel ? "Dashboard" : item.label}</MemberNavigationLabel>{unlocked ? null : <small>Upgrade</small>}
               </Link>
             );
@@ -187,6 +194,10 @@ function sectionForPathname(pathname: string | null): (typeof MEMBER_NAV)[number
   if (pathname.startsWith("/learn/coaching")) return "coaching";
   if (pathname.startsWith("/learn/meeting-copilot")) return "meeting-copilot";
   return null;
+}
+
+function openMeetingCopilot() {
+  window.open(MEETING_COPILOT_URL, "_blank", "noopener,noreferrer");
 }
 
 function Brand() {

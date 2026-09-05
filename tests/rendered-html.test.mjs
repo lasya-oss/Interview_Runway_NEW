@@ -846,7 +846,8 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const meetingCopilotHtml = await meetingCopilot.text();
   assert.match(visibleText(meetingCopilotHtml), /Second Seat\s*\/\s*Meeting Copilot/i);
   assert.match(meetingCopilotHtml, /<a\b(?=[^>]*href=["']\/learn\/meeting-copilot["'])(?=[^>]*class=["'][^"']*is-active)[^>]*>/i);
-  assert.match(meetingCopilotHtml, /<iframe[^>]+src=["']http:\/\/127\.0\.0\.1:8123\/["'][^>]+title=["']Meeting Copilot["'][^>]+allow=["']display-capture["']/i);
+  assert.match(meetingCopilotHtml, /<a\b(?=[^>]*data-meeting-copilot-launch)(?=[^>]*href=["']http:\/\/127\.0\.0\.1:8123\/["'])(?=[^>]*target=["']_blank["'])[^>]*>/i);
+  assert.doesNotMatch(meetingCopilotHtml, /<iframe/i);
 
   const library = await request("/learn/library", {
     headers: { accept: "text/html", cookie: sessionCookie },
