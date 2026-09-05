@@ -1734,7 +1734,10 @@ test("Foundation demo starts Today with a clean learner state", async () => {
   assert.match(todayDashboard, /isFreshLearner\s*\?\s*`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/);
   assert.match(todayDashboard, /const weekProgress = roadmap\.weekProgress/);
   assert.match(todayDashboard, /const totalPlanTasks = roadmap\.totalTaskCount;/);
-  assert.match(todayDashboard, /Build your first readiness score from your own work/);
+  assert.doesNotMatch(todayDashboard, /Skill progress/);
+  assert.doesNotMatch(todayDashboard, /Continue learning/);
+  assert.doesNotMatch(todayDashboard, /Your progress and next focus/);
+  assert.doesNotMatch(todayDashboard, /Materials placed in context/);
   assert.match(memberShell, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
   assert.match(memberShell, /event: isFreshLearner \? "First study step"/);
   assert.match(roadmapClient, /roadmapStorageKey\(profileId\)/);
