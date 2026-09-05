@@ -16,6 +16,7 @@ const MEMBER_NAV = [
   { key: "practice", href: "/learn/practice", label: "Practice", mark: "04", access: "practice" },
   { key: "feedback", href: "/learn/feedback", label: "Feedback", mark: "05", access: "feedback" },
   { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "06", access: "coaching" },
+  { key: "meeting-copilot", href: "/learn/meeting-copilot", label: "Meeting Copilot", mark: "07", access: "practice" },
 ] as const;
 
 const VAULT_SECTION_LABELS: Record<(typeof MEMBER_NAV)[number]["key"], string> = {
@@ -25,6 +26,7 @@ const VAULT_SECTION_LABELS: Record<(typeof MEMBER_NAV)[number]["key"], string> =
   practice: "Practice",
   feedback: "Feedback",
   coaching: "Coach room",
+  "meeting-copilot": "Meeting Copilot",
 };
 
 type WorkspaceState = {
@@ -95,6 +97,7 @@ export function MemberShell({
 
         <nav className="member-nav" aria-label="Learner workspace">
           {MEMBER_NAV.map((item) => {
+            if (item.key === "meeting-copilot" && !profile.access.practice) return null;
             const unlocked = profile.access[item.access];
             return (
               <Link className={`${currentSection === item.key ? "is-active" : ""} ${unlocked ? "" : "is-locked"}`} href={item.href} key={item.key}>
@@ -182,6 +185,7 @@ function sectionForPathname(pathname: string | null): (typeof MEMBER_NAV)[number
   if (pathname.startsWith("/learn/practice")) return "practice";
   if (pathname.startsWith("/learn/feedback")) return "feedback";
   if (pathname.startsWith("/learn/coaching")) return "coaching";
+  if (pathname.startsWith("/learn/meeting-copilot")) return "meeting-copilot";
   return null;
 }
 

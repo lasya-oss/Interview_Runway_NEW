@@ -221,9 +221,11 @@ test("www traffic uses the Google-enabled apex domain", async () => {
 });
 
 test("application pages stay protected", async () => {
-  const protectedPage = await request("/learn/practice", {}, false);
-  assert.equal(protectedPage.status, 307);
-  assert.match(protectedPage.headers.get("location") ?? "", /\/sign-in\?/i);
+  for (const pathname of ["/learn/practice", "/learn/meeting-copilot"]) {
+    const protectedPage = await request(pathname, {}, false);
+    assert.equal(protectedPage.status, 307, pathname);
+    assert.match(protectedPage.headers.get("location") ?? "", /\/sign-in\?/i, pathname);
+  }
 });
 
 test("internal full access matches only the exact configured email domain", async () => {
@@ -832,8 +834,19 @@ test("demo sign-in issues a protected session and opens the learner product", as
 
   const secondSeatSidebar = dashboardHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
   assert.doesNotMatch(secondSeatSidebar, /member-plan-card|Current access/i);
+  assert.match(secondSeatSidebar, /href=["']\/learn\/meeting-copilot["'][^>]*>[\s\S]*?Meeting Copilot/i);
+  assert.doesNotMatch(secondSeatSidebar, /is-locked[^>]*href=["']\/learn\/meeting-copilot/i);
   assert.match(dashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
   assert.equal((dashboardHtml.match(/<div\b[^>]*class=["'][^"']*member-plan-card member-plan-card-status["']/gi) ?? []).length, 1);
+
+  const meetingCopilot = await request("/learn/meeting-copilot", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(meetingCopilot.status, 200);
+  const meetingCopilotHtml = await meetingCopilot.text();
+  assert.match(visibleText(meetingCopilotHtml), /Second Seat\s*\/\s*Meeting Copilot/i);
+  assert.match(meetingCopilotHtml, /<a\b(?=[^>]*href=["']\/learn\/meeting-copilot["'])(?=[^>]*class=["'][^"']*is-active)[^>]*>/i);
+  assert.match(meetingCopilotHtml, /<iframe[^>]+src=["']http:\/\/127\.0\.0\.1:8123\/["'][^>]+title=["']Meeting Copilot["'][^>]+allow=["']display-capture["']/i);
 
   const library = await request("/learn/library", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1162,9 +1175,16 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal((vaultWeekStrip.match(/week-progress-item--upcoming/g) ?? []).length, 11);
   const vaultSidebar = vaultDashboardHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
   assert.doesNotMatch(vaultSidebar, /member-plan-card|Current access/i);
+  assert.doesNotMatch(vaultSidebar, /Meeting Copilot|\/learn\/meeting-copilot/i);
   assert.doesNotMatch(vaultDashboardHtml, /Current tasks/i);
   assert.match(vaultDashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
   assert.equal((vaultDashboardHtml.match(/<div\b[^>]*class=["']member-plan-card member-plan-card-status["']/gi) ?? []).length, 1);
+
+  const lockedMeetingCopilot = await request("/learn/meeting-copilot", {
+    headers: { accept: "text/html", cookie: vaultCookie },
+  });
+  assert.equal(lockedMeetingCopilot.status, 200);
+  assert.match(visibleText(await lockedMeetingCopilot.text()), /Meeting Copilot is available to learners with active Second Seat access/i);
 
   for (const [pathname, section] of [
     ["/learn/roadmap", "Roadmap"],
