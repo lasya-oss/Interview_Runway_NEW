@@ -836,6 +836,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(secondSeatSidebar, /member-plan-card|Current access/i);
   assert.match(secondSeatSidebar, /href=["']\/learn\/meeting-copilot["'][^>]*>[\s\S]*?Meeting Copilot/i);
   assert.doesNotMatch(secondSeatSidebar, /is-locked[^>]*href=["']\/learn\/meeting-copilot/i);
+  assert.match(visibleText(secondSeatSidebar), /05\s*Feedback\s*06\s*Meeting Copilot\s*07\s*Coach room\s*Upgrade/i);
   assert.match(dashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
   assert.equal((dashboardHtml.match(/<div\b[^>]*class=["'][^"']*member-plan-card member-plan-card-status["']/gi) ?? []).length, 1);
 
@@ -1177,6 +1178,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const vaultSidebar = vaultDashboardHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
   assert.doesNotMatch(vaultSidebar, /member-plan-card|Current access/i);
   assert.doesNotMatch(vaultSidebar, /Meeting Copilot|\/learn\/meeting-copilot/i);
+  assert.match(visibleText(vaultSidebar), /05\s*Feedback\s*Upgrade\s*06\s*Coach room\s*Upgrade/i);
   assert.doesNotMatch(vaultDashboardHtml, /Current tasks/i);
   assert.match(vaultDashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
   assert.equal((vaultDashboardHtml.match(/<div\b[^>]*class=["']member-plan-card member-plan-card-status["']/gi) ?? []).length, 1);
