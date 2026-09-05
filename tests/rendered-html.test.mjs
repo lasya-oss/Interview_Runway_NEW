@@ -221,7 +221,7 @@ test("www traffic uses the Google-enabled apex domain", async () => {
 });
 
 test("application pages stay protected", async () => {
-  for (const pathname of ["/learn/practice", "/learn/meeting-copilot"]) {
+  for (const pathname of ["/learn/practice", "/learn/meeting-copilot", "/learn/whatsapp-support"]) {
     const protectedPage = await request(pathname, {}, false);
     assert.equal(protectedPage.status, 307, pathname);
     assert.match(protectedPage.headers.get("location") ?? "", /\/sign-in\?/i, pathname);
@@ -836,7 +836,9 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(secondSeatSidebar, /member-plan-card|Current access/i);
   assert.match(secondSeatSidebar, /href=["']\/learn\/meeting-copilot["'][^>]*>[\s\S]*?Meeting Copilot/i);
   assert.doesNotMatch(secondSeatSidebar, /is-locked[^>]*href=["']\/learn\/meeting-copilot/i);
-  assert.match(visibleText(secondSeatSidebar), /05\s*Feedback\s*06\s*Meeting Copilot\s*07\s*Coach room\s*Upgrade/i);
+  assert.match(secondSeatSidebar, /href=["']\/learn\/whatsapp-support["'][^>]*>[\s\S]*?WhatsApp Support/i);
+  assert.doesNotMatch(secondSeatSidebar, /is-locked[^>]*href=["']\/learn\/whatsapp-support/i);
+  assert.match(visibleText(secondSeatSidebar), /05\s*Feedback\s*06\s*Meeting Copilot\s*07\s*WhatsApp Support\s*08\s*Coach room\s*Upgrade/i);
   assert.match(dashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
   assert.equal((dashboardHtml.match(/<div\b[^>]*class=["'][^"']*member-plan-card member-plan-card-status["']/gi) ?? []).length, 1);
 
@@ -849,6 +851,19 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(meetingCopilotHtml, /<a\b(?=[^>]*href=["']\/learn\/meeting-copilot["'])(?=[^>]*class=["'][^"']*is-active)[^>]*>/i);
   assert.match(meetingCopilotHtml, /<a\b(?=[^>]*data-meeting-copilot-launch)(?=[^>]*href=["']http:\/\/127\.0\.0\.1:8123\/["'])(?=[^>]*target=["']_blank["'])[^>]*>/i);
   assert.doesNotMatch(meetingCopilotHtml, /<iframe/i);
+
+  const whatsappSupport = await request("/learn/whatsapp-support", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(whatsappSupport.status, 200);
+  const whatsappSupportHtml = await whatsappSupport.text();
+  const whatsappSupportText = visibleText(whatsappSupportHtml);
+  assert.match(whatsappSupportText, /Second Seat\s*\/\s*WhatsApp Support/i);
+  assert.match(whatsappSupportHtml, /<a\b(?=[^>]*href=["']\/learn\/whatsapp-support["'])(?=[^>]*class=["'][^"']*is-active)[^>]*>/i);
+  assert.match(whatsappSupportText, /Need help using Interview Runway\?/i);
+  assert.match(whatsappSupportText, /Using Interview Runway[\s\S]*Meeting Copilot guidance[\s\S]*Plugins and Plugin Core[\s\S]*Feature-related questions[\s\S]*Troubleshooting and usage issues[\s\S]*General product guidance/i);
+  assert.match(whatsappSupportText, /In preparation[\s\S]*available soon/i);
+  assert.doesNotMatch(whatsappSupportHtml, /wa\.me|api\.whatsapp\.com|tel:|data-whatsapp-support-launch|<form\b/i);
 
   const library = await request("/learn/library", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1177,7 +1192,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal((vaultWeekStrip.match(/week-progress-item--upcoming/g) ?? []).length, 11);
   const vaultSidebar = vaultDashboardHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
   assert.doesNotMatch(vaultSidebar, /member-plan-card|Current access/i);
-  assert.doesNotMatch(vaultSidebar, /Meeting Copilot|\/learn\/meeting-copilot/i);
+  assert.doesNotMatch(vaultSidebar, /Meeting Copilot|WhatsApp Support|\/learn\/(?:meeting-copilot|whatsapp-support)/i);
   assert.match(visibleText(vaultSidebar), /05\s*Feedback\s*Upgrade\s*06\s*Coach room\s*Upgrade/i);
   assert.doesNotMatch(vaultDashboardHtml, /Current tasks/i);
   assert.match(vaultDashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
@@ -1188,6 +1203,35 @@ test("demo sign-in issues a protected session and opens the learner product", as
   });
   assert.equal(lockedMeetingCopilot.status, 200);
   assert.match(visibleText(await lockedMeetingCopilot.text()), /Meeting Copilot is available to learners with active Second Seat access/i);
+
+  const lockedWhatsAppSupport = await request("/learn/whatsapp-support", {
+    headers: { accept: "text/html", cookie: vaultCookie },
+  });
+  assert.equal(lockedWhatsAppSupport.status, 200);
+  assert.match(visibleText(await lockedWhatsAppSupport.text()), /WhatsApp Support is available to learners with active Second Seat access/i);
+
+  const premiumPreview = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "premium" }),
+  });
+  assert.equal(premiumPreview.status, 200);
+  const premiumCookie = (premiumPreview.headers.get("set-cookie") ?? "").split(";")[0];
+  const premiumWhatsAppSupport = await request("/learn/whatsapp-support", {
+    headers: { accept: "text/html", cookie: premiumCookie },
+  });
+  assert.equal(premiumWhatsAppSupport.status, 200);
+  const premiumWhatsAppSupportHtml = await premiumWhatsAppSupport.text();
+  const premiumWhatsAppSupportText = visibleText(premiumWhatsAppSupportHtml);
+  const premiumSidebar = premiumWhatsAppSupportHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+  assert.match(premiumWhatsAppSupportText, /Human Calibration\s*\/\s*WhatsApp Support/i);
+  assert.match(premiumWhatsAppSupportText, /Need help using Interview Runway\?/i);
+  assert.match(visibleText(premiumSidebar), /06\s*Meeting Copilot\s*07\s*WhatsApp Support\s*08\s*Coach room/i);
+  assert.doesNotMatch(premiumSidebar, /is-locked[^>]*href=["']\/learn\/whatsapp-support/i);
 
   for (const [pathname, section] of [
     ["/learn/roadmap", "Roadmap"],

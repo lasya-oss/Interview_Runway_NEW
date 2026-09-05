@@ -16,7 +16,8 @@ const MEMBER_NAV = [
   { key: "practice", href: "/learn/practice", label: "Practice", mark: "04", access: "practice" },
   { key: "feedback", href: "/learn/feedback", label: "Feedback", mark: "05", access: "feedback" },
   { key: "meeting-copilot", href: "/learn/meeting-copilot", label: "Meeting Copilot", mark: "06", access: "practice" },
-  { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "07", access: "coaching" },
+  { key: "whatsapp-support", href: "/learn/whatsapp-support", label: "WhatsApp Support", mark: "07", access: "practice" },
+  { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "08", access: "coaching" },
 ] as const;
 
 const MEETING_COPILOT_URL = "http://127.0.0.1:8123/";
@@ -29,6 +30,7 @@ const VAULT_SECTION_LABELS: Record<(typeof MEMBER_NAV)[number]["key"], string> =
   feedback: "Feedback",
   coaching: "Coach room",
   "meeting-copilot": "Meeting Copilot",
+  "whatsapp-support": "WhatsApp Support",
 };
 
 type WorkspaceState = {
@@ -80,7 +82,9 @@ export function MemberShell({
   const workspaceTitle = isVaultWorkspace ? "Foundation workspace" : isSecondSeatWorkspace ? "The Second Seat workspace" : "Human Calibration workspace";
   const workspaceSubtitle = isLive ? "Signed-in learner view" : "Preview learner view";
   const accessLabel = isVaultWorkspace ? (isLive ? "₹799 access active" : "Demo workspace") : isSecondSeatWorkspace ? (isLive ? "₹2,499 access active" : "Demo workspace") : (isLive ? "Human Calibration access active" : "Demo workspace");
-  const memberNav = MEMBER_NAV.filter((item) => item.key !== "meeting-copilot" || profile.access.practice);
+  const memberNav = MEMBER_NAV.filter((item) => (
+    (item.key !== "meeting-copilot" && item.key !== "whatsapp-support") || profile.access.practice
+  ));
 
   return (
     <div className="member-shell" data-member-tier={profile.id} data-member-layout={isVaultWorkspace ? "vault" : isSecondSeatWorkspace ? "second-seat" : "calibration"}>
@@ -193,6 +197,7 @@ function sectionForPathname(pathname: string | null): (typeof MEMBER_NAV)[number
   if (pathname.startsWith("/learn/feedback")) return "feedback";
   if (pathname.startsWith("/learn/coaching")) return "coaching";
   if (pathname.startsWith("/learn/meeting-copilot")) return "meeting-copilot";
+  if (pathname.startsWith("/learn/whatsapp-support")) return "whatsapp-support";
   return null;
 }
 
