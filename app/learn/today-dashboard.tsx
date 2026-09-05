@@ -7,7 +7,6 @@ import {
   DEMO_REVIEW_MATERIALS,
   LEARNING_MATERIALS,
   MOCK_HISTORY,
-  SCORE_DIMENSIONS,
   type DemoProfileView,
   type DemoReviewMaterial,
 } from "@/app/lib/demo-data";
@@ -33,34 +32,9 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
     : activeWeek
       ? `${completedWeeks} of ${profile.roadmapWeeks} weeks complete · W${activeWeek.week} active · ${activeWeek.progressPercent}% this week`
       : "Plan progress not available";
-  const scoreKey = profile.id;
-  const continuedMaterials = profile.id === "foundation"
-    ? LEARNING_MATERIALS.filter((material) => material.tier === "foundation").slice(0, 3)
-    : profile.id === "practice"
-      ? [
-          ...LEARNING_MATERIALS.filter((material) => material.tier === "practice"),
-          ...LEARNING_MATERIALS.filter((material) => material.tier === "foundation"),
-        ].slice(0, 4)
-      : [
-          ...LEARNING_MATERIALS.filter((material) => material.tier === "premium"),
-          ...LEARNING_MATERIALS.filter((material) => material.tier === "practice"),
-        ].slice(0, 4);
   const reviewMaterials = DEMO_REVIEW_MATERIALS
     .filter((material) => material.profiles.includes(profile.id))
     .slice(0, 3);
-  const emptySignalTitle = profile.id === "foundation"
-    ? "Build your first readiness score from your own work."
-    : profile.id === "practice"
-      ? "Your first practice score is waiting."
-      : "Your first calibration review is waiting.";
-  const emptySignalBody = profile.id === "foundation"
-    ? "Complete the next Foundation step to turn your study work into a result you can review."
-    : profile.id === "practice"
-      ? "Complete one practice round to create a score you can review. Until then, this workspace keeps readiness separate from sample data."
-      : "Open the Coach room to review the named gap and calibration agenda. This workspace keeps human coaching evidence distinct from practice scores.";
-  const emptySignalLink = profile.id === "foundation" ? "/pricing" : profile.id === "practice" ? "/learn/practice" : "/learn/coaching";
-  const emptySignalLinkLabel = profile.id === "foundation" ? "See how AI practice builds your score" : profile.id === "practice" ? "Start your first practice round" : "Open the Coach room";
-  const signalLabel = profile.id === "foundation" ? "Foundation progress" : profile.id === "practice" ? "Second Seat progress" : "Human Calibration status";
   const nextTask = isTracked && !isFreshLearner ? roadmap.nextTask : null;
   const nextAction = nextTask?.title ?? profile.nextAction;
   const nextActionMeta = nextTask?.meta ?? profile.nextActionMeta;
@@ -133,32 +107,6 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
 
       <ReviewMaterials profile={profile} materials={reviewMaterials} />
 
-      <section className="member-section">
-        <div className="member-section-heading"><div><p className="member-kicker">Skill progress</p><h2>Your progress and next focus.</h2></div><Link className="member-section-action" href="/learn/feedback">Open full feedback <span aria-hidden="true">↗</span></Link></div>
-        <div className="signal-grid">
-          {profile.id === "foundation" || isFreshLearner || profile.isLive ? (
-            <article className="foundation-baseline-panel">
-              <span>STARTING SCORE / NOT SET</span>
-              <div className="baseline-radar" aria-hidden="true"><i /><i /><i /><b>?</b></div>
-              <h3>{profile.id === "foundation" ? "No readiness score yet." : "No practice score yet."}</h3>
-              <p>{profile.id === "foundation" ? "Your lesson completion is tracked, but a readiness score appears only after a scored practice session. Until then, the product keeps those concepts separate." : "Your practice access is ready, but a readiness score appears only after a scored transcript. Until then, the product keeps your starting state clean."}</p>
-              <Link className="member-action-button" href={emptySignalLink}>{emptySignalLinkLabel} <span aria-hidden="true">↗</span></Link>
-            </article>
-          ) : (
-            <article className="signal-bars">
-              {SCORE_DIMENSIONS.map((dimension) => (
-                <div key={dimension.label}><span>{dimension.label}</span><div><i style={{ width: `${dimension[scoreKey]}%` }} /></div><b>{dimension[scoreKey]}</b></div>
-              ))}
-            </article>
-          )}
-          <article className={`tier-insight tier-insight-${profile.id}`}>
-            <span>{isFreshLearner || profile.isLive ? signalLabel : profile.id === "foundation" ? "Foundation progress" : profile.id === "practice" ? "Adaptive plan update" : "Coach observation"}</span>
-            <h3>{isFreshLearner || profile.isLive ? emptySignalTitle : profile.id === "foundation" ? "Explanation quality is ahead of trade-off depth." : profile.id === "practice" ? "Move consistency decisions to minute five." : "Your scope is senior; your story still sounds team-local."}</h3>
-            <p>{isFreshLearner || profile.isLive ? emptySignalBody : profile.id === "foundation" ? "Finish the rate-limit and caching decision guides before adding timed practice." : profile.id === "practice" ? "The next two mocks will probe consistency before scale so the choice becomes automatic." : "Thursday’s session will rebuild one project story around influence, decision cost, and measurable outcome."}</p>
-          </article>
-        </div>
-      </section>
-
       {profile.access.practice && !profile.isLive && !isFreshLearner ? (
         <section className="member-section">
           <div className="member-section-heading"><div><p className="member-kicker">Recent practice</p><h2>Every attempt leaves evidence.</h2></div><Link className="member-section-action" href="/learn/practice">Start another mock <span aria-hidden="true">↗</span></Link></div>
@@ -167,17 +115,6 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
           </div>
         </section>
       ) : null}
-
-      <section className="member-section">
-        <div className="member-section-heading"><div><p className="member-kicker">Continue learning</p><h2>Materials placed in context.</h2></div><Link className="member-section-action" href="/learn/library">View the library <span aria-hidden="true">↗</span></Link></div>
-        <div className="member-material-row">
-          {continuedMaterials.map((material) => (
-            <Link href={`/learn/material/${material.slug}`} className="member-material-card" key={material.slug}>
-              <span>{material.number}</span><small>{material.category} · {material.duration}</small><h3>{material.title}</h3><p>{material.description}</p><b className="member-card-action">{material.format} <span aria-hidden="true">↗</span></b>
-            </Link>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
