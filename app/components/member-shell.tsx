@@ -81,7 +81,11 @@ export function MemberShell({
   const workspaceRoot = isVaultWorkspace ? "Vault" : isSecondSeatWorkspace ? "Second Seat" : "Human Calibration";
   const workspaceTitle = isVaultWorkspace ? "Foundation workspace" : isSecondSeatWorkspace ? "The Second Seat workspace" : "Human Calibration workspace";
   const workspaceSubtitle = isLive ? "Signed-in learner view" : "Preview learner view";
-  const accessLabel = isVaultWorkspace ? (isLive ? "₹799 access active" : "Demo workspace") : isSecondSeatWorkspace ? (isLive ? "₹2,499 access active" : "Demo workspace") : (isLive ? "Human Calibration access active" : "Demo workspace");
+  const accessLabel = isVaultWorkspace
+    ? (isLive ? "Vault Active" : "Demo workspace")
+    : isSecondSeatWorkspace
+      ? (isLive ? "Second Seat Active" : "Demo workspace")
+      : (isLive ? "Human Calibration Active" : "Demo workspace");
   const memberNav = MEMBER_NAV.filter((item) => (
     (item.key !== "meeting-copilot" && item.key !== "whatsapp-support") || profile.access.practice
   ));

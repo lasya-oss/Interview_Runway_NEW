@@ -1662,6 +1662,17 @@ test("live Second Seat access selects its own workspace and roadmap", async () =
   assert.match(materialPage, /roadmapPlanForWeeks\(profile\.roadmapWeeks\)/);
 });
 
+test("live workspace headers use plan names instead of prices for active access", async () => {
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(shell, /isLive \? "Vault Active" : "Demo workspace"/);
+  assert.match(shell, /isLive \? "Second Seat Active" : "Demo workspace"/);
+  assert.match(shell, /isLive \? "Human Calibration Active" : "Demo workspace"/);
+  assert.doesNotMatch(shell, /₹799 access active|₹2,499 access active|Human Calibration access active/);
+  assert.match(styles, /\.member-account-status \{[^}]*text-transform: none;/);
+});
+
 test("the configured internal domain receives live Human Calibration full access", async () => {
   const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
   const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");

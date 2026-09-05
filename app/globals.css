@@ -5039,7 +5039,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .member-plan-switcher option { color: #17323f; background: #fff; }
 .member-plan-switcher > small { color: #ffe0d1; font-size: 8px; }
 .member-topbar-vault .member-vault-header-actions > .member-account-status { color: rgba(255,239,232,.86); }
-.member-account-status { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.member-account-status { display: inline-flex; align-items: center; gap: 7px; text-transform: none; white-space: nowrap; }
 .member-account-status i { width: 6px; height: 6px; border-radius: 50%; background: #2ca56f; box-shadow: 0 0 9px rgba(44,165,111,.45); }
 .member-topbar-vault .member-vault-header-actions > a { color: #ffd0b9; font-size: 10px; font-weight: 760; white-space: nowrap; }
 
