@@ -122,14 +122,6 @@ export function MemberShell({
           })}
         </nav>
 
-        {!isVaultWorkspace && !isSecondSeatWorkspace ? (
-          <CurrentAccessCard
-            plan={profile.plan}
-            fallbackProgress={profile.progress}
-            fallbackWeek={profile.week}
-          />
-        ) : null}
-
         <div className="member-profile-card">
           <span className="member-avatar">{profile.initials}</span>
           <div><strong>{profile.name}</strong><small>{profile.role}</small></div>

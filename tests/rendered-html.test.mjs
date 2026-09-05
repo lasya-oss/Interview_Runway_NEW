@@ -785,6 +785,37 @@ test("all three one-click demos issue protected tier sessions", async () => {
   }
 });
 
+test("Human Calibration renders Current access only in the status drawer", async () => {
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "premium" }),
+  });
+  assert.equal(login.status, 200);
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+
+  const response = await request("/learn", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /data-member-layout=["']calibration["']/i);
+
+  const sidebar = html.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+  assert.ok(sidebar, "Human Calibration sidebar should render");
+  assert.doesNotMatch(sidebar, /member-plan-card|Current access/i);
+
+  const statusAccess = html.match(/<section\b[^>]*ops-current-access[^>]*>[\s\S]*?<\/section>/i)?.[0] ?? "";
+  assert.ok(statusAccess, "status drawer Current access section should render");
+  assert.match(statusAccess, /member-plan-card member-plan-card-status/i);
+  assert.match(visibleText(statusAccess), /Current access\s+Human Calibration\s*·\s*Qualified/i);
+  assert.equal((html.match(/member-plan-card member-plan-card-status/gi) ?? []).length, 1);
+});
+
 test("demo sign-in issues a protected session and opens the learner product", async () => {
   const login = await request("/api/demo-session", {
     method: "POST",
