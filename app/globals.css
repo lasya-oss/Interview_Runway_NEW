@@ -6667,13 +6667,14 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .coaching-prework dt { color: #8a7e73; }
 .coaching-prework dd { margin: 0; }
 .coaching-prework button { margin-top: auto; }
+.coaching-prework .coaching-prework-report-action { width: 100%; margin-top: auto; }
 .coaching-demo-boundary { margin-top: 20px; padding: 18px 22px; display: grid; grid-template-columns: 110px 1fr; gap: 20px; border: 1px solid rgba(74,65,57,.13); border-radius: 12px; color: #84796f; background: rgba(255,255,255,.28); font-size: 8px; }
 .coaching-demo-boundary strong { color: #9c3e1d; text-transform: uppercase; }
 .coaching-demo-boundary p { margin: 0; }
 
 /* Human Calibration: authorized Vivid Labs user-history reporting */
 
-.user-history-report { margin-top: 22px; padding: clamp(28px, 4vw, 42px); border: 1px solid rgba(74,65,57,.15); border-radius: 20px; background: #f7f3eb; box-shadow: 0 24px 70px rgba(70,61,51,.07), inset 0 1px #fff; }
+.user-history-report { margin-top: 22px; padding: clamp(28px, 4vw, 42px); scroll-margin-top: 150px; border: 1px solid rgba(74,65,57,.15); border-radius: 20px; background: #f7f3eb; box-shadow: 0 24px 70px rgba(70,61,51,.07), inset 0 1px #fff; }
 .user-history-report > header { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, .36fr); gap: 36px; align-items: end; }
 .user-history-report > header h2 { margin: 10px 0 0; color: #243b45; font-family: var(--font-display); font-size: clamp(2.2rem, 4vw, 4rem); font-weight: 570; line-height: 1; letter-spacing: -.052em; }
 .user-history-report > header > div:first-child > p:last-child { max-width: 720px; margin: 17px 0 0; color: #665f57; font-size: 15px; line-height: 1.65; }
@@ -6720,6 +6721,10 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .user-history-report__workflow { grid-template-columns: 1fr 1fr; }
   .user-history-report__confirm { grid-column: 1 / -1; min-height: 180px; }
   .user-history-report__confirm > .member-primary-button { width: max-content; margin-top: 24px; }
+}
+
+@media (max-width: 900px) {
+  .user-history-report { scroll-margin-top: 24px; }
 }
 
 @media (max-width: 700px) {

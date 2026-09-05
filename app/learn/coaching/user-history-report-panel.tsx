@@ -112,7 +112,7 @@ export function UserHistoryReportPanel() {
   };
 
   return (
-    <section className="user-history-report" aria-labelledby="user-history-report-title">
+    <section id="user-history-report" className="user-history-report" aria-labelledby="user-history-report-title">
       <header>
         <div>
           <p className="member-kicker">Vivid Labs internal reporting</p>

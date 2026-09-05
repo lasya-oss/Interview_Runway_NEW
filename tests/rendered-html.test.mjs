@@ -300,12 +300,26 @@ test("premium demo learners never receive the internal report controls", async (
   });
   assert.equal(preview.status, 200);
   const demoCookie = (preview.headers.get("set-cookie") ?? "").split(";")[0];
-  const coaching = await request("/learn/coaching", {
-    headers: { accept: "text/html", cookie: demoCookie },
-  });
+  const coaching = await request(
+    "/learn/coaching",
+    { headers: { accept: "text/html", cookie: demoCookie } },
+    true,
+    { INTERNAL_FULL_ACCESS_DOMAIN: "internal.example" },
+  );
   assert.equal(coaching.status, 200);
   const coachingHtml = await coaching.text();
-  assert.doesNotMatch(coachingHtml, /user-history-report-title|Generate Report|Vivid Labs internal reporting/i);
+  assert.doesNotMatch(coachingHtml, /user-history-report-title|#user-history-report|Generate (?:User History )?Report|Vivid Labs internal reporting/i);
+  assert.match(coachingHtml, /<button[^>]*disabled[^>]*>Submission disabled in demo<\/button>/i);
+});
+
+test("authorized company users receive an enabled report action in the existing Human Calibration card", async () => {
+  const coachingPage = await readFile(new URL("../app/learn/coaching/page.tsx", import.meta.url), "utf8");
+  const reportPanel = await readFile(new URL("../app/learn/coaching/user-history-report-panel.tsx", import.meta.url), "utf8");
+  assert.match(coachingPage, /const canGenerateUserHistoryReport = profile\.isLive && isInternalFullAccessEmail\(profile\.email\)/);
+  const internalCard = coachingPage.match(/<aside className="coaching-prework">\s*\{canGenerateUserHistoryReport \? \(\s*<>\s*([\s\S]*?)\s*<\/>\s*\) : \(/)?.[1] ?? "";
+  assert.match(internalCard, /href="#user-history-report"[\s\S]*Generate User History Report/);
+  assert.doesNotMatch(internalCard, /disabled/i);
+  assert.match(reportPanel, /<section id="user-history-report"[^>]*aria-labelledby="user-history-report-title"/);
 });
 
 test("internal full access matches only the exact configured email domain", async () => {

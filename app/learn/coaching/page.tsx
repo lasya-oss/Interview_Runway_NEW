@@ -42,6 +42,8 @@ export default async function CoachingPage() {
     );
   }
 
+  const canGenerateUserHistoryReport = profile.isLive && isInternalFullAccessEmail(profile.email);
+
   return (
       <div className="member-page coaching-workspace">
         <section className="coaching-heading">
@@ -53,7 +55,7 @@ export default async function CoachingPage() {
           <div className="coaching-status"><i /><span>Example engagement</span><strong>02 / 03</strong><small>sample session path</small></div>
         </section>
 
-        {profile.isLive && isInternalFullAccessEmail(profile.email) ? <UserHistoryReportPanel /> : null}
+        {canGenerateUserHistoryReport ? <UserHistoryReportPanel /> : null}
 
         <section className="coaching-command-grid">
           <article className="coaching-next-session">
@@ -101,11 +103,25 @@ export default async function CoachingPage() {
             ))}
           </div>
           <aside className="coaching-prework">
-            <p className="member-kicker">Due before session 02</p>
-            <h2>Bring two influence stories.</h2>
-            <p>Each should identify the competing constraint, the decision you changed, who needed alignment, and the measurable result six weeks later.</p>
-            <dl><div><dt>Preparation</dt><dd>25 min</dd></div><div><dt>Sample due</dt><dd>22 Jul · 18:30</dd></div></dl>
-            <button type="button" disabled>Submission disabled in demo</button>
+            {canGenerateUserHistoryReport ? (
+              <>
+                <p className="member-kicker">Vivid Labs internal reporting</p>
+                <h2>User History Report.</h2>
+                <p>Choose a stored learner account and generate a private PDF of the Interview Runway history currently recorded for that user.</p>
+                <dl><div><dt>Source</dt><dd>Stored history only</dd></div><div><dt>Delivery</dt><dd>Secure PDF download</dd></div></dl>
+                <Link className="member-primary-button coaching-prework-report-action" href="#user-history-report">
+                  Generate User History Report <span aria-hidden="true">&#8599;</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="member-kicker">Due before session 02</p>
+                <h2>Bring two influence stories.</h2>
+                <p>Each should identify the competing constraint, the decision you changed, who needed alignment, and the measurable result six weeks later.</p>
+                <dl><div><dt>Preparation</dt><dd>25 min</dd></div><div><dt>Sample due</dt><dd>22 Jul · 18:30</dd></div></dl>
+                <button type="button" disabled>Submission disabled in demo</button>
+              </>
+            )}
           </aside>
         </section>
 
