@@ -6708,7 +6708,12 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .user-history-report__confirm { display: flex; flex-direction: column; }
 .user-history-report__confirm > strong { margin-top: 19px; color: #243b45; font-size: 15px; overflow-wrap: anywhere; }
 .user-history-report__confirm > small { margin-top: 7px; color: #665f57; font-size: 12px; line-height: 1.45; }
+.user-history-report__delivery { margin: 18px 0; padding: 12px 13px; display: grid; gap: 4px; border: 1px solid rgba(43,161,110,.2); border-radius: 10px; background: rgba(43,161,110,.055); }
+.user-history-report__delivery > span { color: #286c50; font-family: var(--font-mono); font-size: 9px; font-weight: 650; letter-spacing: .07em; text-transform: uppercase; }
+.user-history-report__delivery > strong { color: #243b45; font-size: 13px; overflow-wrap: anywhere; }
+.user-history-report__delivery > small { color: #5e7169; font-size: 11px; }
 .user-history-report__confirm > .member-primary-button { width: 100%; margin-top: auto; }
+.user-history-report__confirm > .user-history-report__gmail-note { margin-top: 9px; color: #716961; font-size: 11px; line-height: 1.45; }
 .user-history-report__error { margin: 14px 0 0; padding: 13px 15px; border-left: 3px solid #b84029; color: #7c2b20; background: rgba(184,64,41,.07); font-size: 13px; line-height: 1.5; }
 .user-history-report__success { margin-top: 14px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border: 1px solid rgba(43,161,110,.22); border-radius: 13px; background: rgba(43,161,110,.06); }
 .user-history-report__success > div:first-child { display: grid; grid-template-columns: 12px 1fr; gap: 4px 8px; }
