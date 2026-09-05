@@ -38,7 +38,7 @@ async function getWorkspaceSessionCookie() {
   return workspaceSessionCookie;
 }
 
-async function request(pathname = "/", init = {}, authenticated = true) {
+async function request(pathname = "/", init = {}, authenticated = true, runtimeEnv = {}) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set(
     "test",
@@ -120,6 +120,7 @@ async function request(pathname = "/", init = {}, authenticated = true) {
       AUTH_SESSION_SECRET: testAuthSessionSecret,
       DEMO_SESSION_SECRET: testSessionSecret,
       GOOGLE_CLIENT_ID: testGoogleClientId,
+      ...runtimeEnv,
     },
     {
       waitUntil() {},
@@ -226,6 +227,85 @@ test("application pages stay protected", async () => {
     assert.equal(protectedPage.status, 307, pathname);
     assert.match(protectedPage.headers.get("location") ?? "", /\/sign-in\?/i, pathname);
   }
+});
+
+test("user history reporting rejects unauthorized, cross-origin, and oversized requests", async (context) => {
+  const originalInternalDomain = process.env.INTERNAL_FULL_ACCESS_DOMAIN;
+  context.after(() => {
+    if (originalInternalDomain === undefined) delete process.env.INTERNAL_FULL_ACCESS_DOMAIN;
+    else process.env.INTERNAL_FULL_ACCESS_DOMAIN = originalInternalDomain;
+  });
+  const requestInit = {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ learnerEmail: "learner@vividlabsai.com" }),
+  };
+
+  const anonymous = await request("/api/admin/user-history/report", requestInit, false);
+  assert.equal(anonymous.status, 401);
+
+  const searchInit = {
+    method: "POST",
+    headers: { accept: "application/json", "content-type": "application/json", origin: "http://localhost" },
+    body: JSON.stringify({ query: "learner@" }),
+  };
+  const anonymousSearch = await request("/api/admin/user-history/learners", searchInit, false);
+  assert.equal(anonymousSearch.status, 401);
+
+  process.env.INTERNAL_FULL_ACCESS_DOMAIN = "internal.example";
+  const ordinaryLearner = await request("/api/admin/user-history/report", requestInit, true, {
+    INTERNAL_FULL_ACCESS_DOMAIN: "internal.example",
+  });
+  assert.equal(ordinaryLearner.status, 403);
+  assert.match((await ordinaryLearner.json()).error, /Vivid Labs reporting access required/i);
+  const ordinarySearch = await request("/api/admin/user-history/learners", searchInit, true, {
+    INTERNAL_FULL_ACCESS_DOMAIN: "internal.example",
+  });
+  assert.equal(ordinarySearch.status, 403);
+
+  const crossOrigin = await request(
+    "/api/admin/user-history/report",
+    { ...requestInit, headers: { ...requestInit.headers, origin: "https://untrusted.example" } },
+    true,
+    { INTERNAL_FULL_ACCESS_DOMAIN: "vividlabsai.com" },
+  );
+  assert.equal(crossOrigin.status, 403);
+  const crossOriginSearch = await request(
+    "/api/admin/user-history/learners",
+    { ...searchInit, headers: { ...searchInit.headers, origin: "https://untrusted.example" } },
+    true,
+    { INTERNAL_FULL_ACCESS_DOMAIN: "vividlabsai.com" },
+  );
+  assert.equal(crossOriginSearch.status, 403);
+
+  process.env.INTERNAL_FULL_ACCESS_DOMAIN = "vividlabsai.com";
+  const oversizedSearch = await request(
+    "/api/admin/user-history/learners",
+    { ...searchInit, body: JSON.stringify({ query: "x".repeat(2_000) }) },
+    true,
+    { INTERNAL_FULL_ACCESS_DOMAIN: "vividlabsai.com" },
+  );
+  assert.equal(oversizedSearch.status, 413);
+});
+
+test("premium demo learners never receive the internal report controls", async () => {
+  const preview = await request("/api/demo-session", {
+    method: "POST",
+    headers: { accept: "application/json", "content-type": "application/json", origin: "http://localhost" },
+    body: JSON.stringify({ preview: "premium" }),
+  });
+  assert.equal(preview.status, 200);
+  const demoCookie = (preview.headers.get("set-cookie") ?? "").split(";")[0];
+  const coaching = await request("/learn/coaching", {
+    headers: { accept: "text/html", cookie: demoCookie },
+  });
+  assert.equal(coaching.status, 200);
+  const coachingHtml = await coaching.text();
+  assert.doesNotMatch(coachingHtml, /user-history-report-title|Generate Report|Vivid Labs internal reporting/i);
 });
 
 test("internal full access matches only the exact configured email domain", async () => {

@@ -6671,6 +6671,74 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .coaching-demo-boundary strong { color: #9c3e1d; text-transform: uppercase; }
 .coaching-demo-boundary p { margin: 0; }
 
+/* Human Calibration: authorized Vivid Labs user-history reporting */
+
+.user-history-report { margin-top: 22px; padding: clamp(28px, 4vw, 42px); border: 1px solid rgba(74,65,57,.15); border-radius: 20px; background: #f7f3eb; box-shadow: 0 24px 70px rgba(70,61,51,.07), inset 0 1px #fff; }
+.user-history-report > header { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, .36fr); gap: 36px; align-items: end; }
+.user-history-report > header h2 { margin: 10px 0 0; color: #243b45; font-family: var(--font-display); font-size: clamp(2.2rem, 4vw, 4rem); font-weight: 570; line-height: 1; letter-spacing: -.052em; }
+.user-history-report > header > div:first-child > p:last-child { max-width: 720px; margin: 17px 0 0; color: #665f57; font-size: 15px; line-height: 1.65; }
+.user-history-report__privacy { min-height: 118px; padding: 20px; display: grid; grid-template-columns: 11px 1fr; gap: 6px 10px; align-content: center; border-radius: 14px; color: #edf2f3; background: linear-gradient(145deg, #19343d, #0a1a21); }
+.user-history-report__privacy i { width: 7px; height: 7px; margin-top: 4px; border-radius: 50%; background: #2ba16e; box-shadow: 0 0 10px rgba(43,161,110,.45); }
+.user-history-report__privacy span { font-family: var(--font-display); font-size: 16px; font-weight: 570; letter-spacing: -.02em; }
+.user-history-report__privacy small { grid-column: 2; color: #a9bac0; font-size: 12px; line-height: 1.45; }
+.user-history-report__workflow { margin-top: 30px; padding-top: 26px; display: grid; grid-template-columns: minmax(240px, .9fr) minmax(260px, 1.1fr) minmax(230px, .8fr); gap: 12px; border-top: 1px solid rgba(74,65,57,.14); }
+.user-history-report__search,
+.user-history-report__results,
+.user-history-report__confirm { min-width: 0; min-height: 232px; padding: 21px; border: 1px solid rgba(74,65,57,.13); border-radius: 15px; background: rgba(255,255,255,.42); }
+.user-history-report__search > label,
+.user-history-report__results > span,
+.user-history-report__confirm > span { display: block; color: #9e3f1e; font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.user-history-report__search > div { margin-top: 13px; display: flex; gap: 8px; }
+.user-history-report__search input { min-width: 0; width: 100%; min-height: 42px; padding: 0 13px; border: 1px solid rgba(74,65,57,.2); border-radius: 9px; color: #243b45; background: rgba(255,255,255,.72); font: inherit; font-size: 14px; outline: none; }
+.user-history-report__search input:focus { border-color: rgba(255,107,44,.72); box-shadow: 0 0 0 3px rgba(255,107,44,.1); }
+.user-history-report__search input:focus-visible { outline: 2px solid #9e3f1e; outline-offset: 2px; }
+.user-history-report__search > small { display: block; margin-top: 12px; color: #665f57; font-size: 12px; line-height: 1.5; }
+.user-history-report__results > p,
+.user-history-report__confirm > p { margin: 18px 0 0; color: #7a7169; font-size: 13px; line-height: 1.55; }
+.user-history-report__results > ul { max-height: 230px; margin: 12px 0 0; padding: 0; display: grid; gap: 7px; overflow-y: auto; list-style: none; }
+.user-history-report__results button { width: 100%; min-height: 61px; padding: 10px 12px; display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; border: 1px solid rgba(74,65,57,.14); border-radius: 10px; color: #243b45; background: rgba(255,255,255,.54); text-align: left; cursor: pointer; }
+.user-history-report__results button:hover,
+.user-history-report__results button:focus-visible,
+.user-history-report__results button.is-selected { border-color: rgba(255,107,44,.55); background: rgba(255,241,234,.84); outline: none; }
+.user-history-report__results button:focus-visible { outline: 2px solid #9e3f1e; outline-offset: 2px; }
+.user-history-report__results button span { min-width: 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 700; }
+.user-history-report__results button small { grid-column: 1; color: #665f57; font-size: 11px; }
+.user-history-report__results button b { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: #a6421d; font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; }
+.user-history-report__confirm { display: flex; flex-direction: column; }
+.user-history-report__confirm > strong { margin-top: 19px; color: #243b45; font-size: 15px; overflow-wrap: anywhere; }
+.user-history-report__confirm > small { margin-top: 7px; color: #665f57; font-size: 12px; line-height: 1.45; }
+.user-history-report__confirm > .member-primary-button { width: 100%; margin-top: auto; }
+.user-history-report__error { margin: 14px 0 0; padding: 13px 15px; border-left: 3px solid #b84029; color: #7c2b20; background: rgba(184,64,41,.07); font-size: 13px; line-height: 1.5; }
+.user-history-report__success { margin-top: 14px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border: 1px solid rgba(43,161,110,.22); border-radius: 13px; background: rgba(43,161,110,.06); }
+.user-history-report__success > div:first-child { display: grid; grid-template-columns: 12px 1fr; gap: 4px 8px; }
+.user-history-report__success > div:first-child i { width: 7px; height: 7px; margin-top: 5px; border-radius: 50%; background: #2ba16e; }
+.user-history-report__success > div:first-child span { color: #286c50; font-size: 14px; font-weight: 750; }
+.user-history-report__success > div:first-child p { grid-column: 2; margin: 0; color: #5e7169; font-size: 12px; line-height: 1.45; }
+.user-history-report__success > div:last-child { display: flex; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 1100px) {
+  .user-history-report__workflow { grid-template-columns: 1fr 1fr; }
+  .user-history-report__confirm { grid-column: 1 / -1; min-height: 180px; }
+  .user-history-report__confirm > .member-primary-button { width: max-content; margin-top: 24px; }
+}
+
+@media (max-width: 700px) {
+  .user-history-report { padding: 24px 18px; }
+  .user-history-report > header,
+  .user-history-report__workflow { grid-template-columns: 1fr; }
+  .user-history-report__privacy { min-height: 104px; }
+  .user-history-report__search,
+  .user-history-report__results,
+  .user-history-report__confirm { min-height: 0; padding: 18px; }
+  .user-history-report__search > div { align-items: stretch; flex-direction: column; }
+  .user-history-report__search .member-secondary-button { width: 100%; }
+  .user-history-report__confirm { grid-column: auto; }
+  .user-history-report__confirm > .member-primary-button { width: 100%; }
+  .user-history-report__success { align-items: flex-start; flex-direction: column; }
+  .user-history-report__success > div:last-child,
+  .user-history-report__success a { width: 100%; }
+}
+
 /* Second Seat WhatsApp Support */
 
 .whatsapp-support-page { display: grid; gap: 14px; }

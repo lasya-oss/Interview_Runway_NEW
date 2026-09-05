@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { isInternalFullAccessEmail } from "@/app/lib/internal-access";
+import { UserHistoryReportPanel } from "./user-history-report-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +52,8 @@ export default async function CoachingPage() {
           </div>
           <div className="coaching-status"><i /><span>Example engagement</span><strong>02 / 03</strong><small>sample session path</small></div>
         </section>
+
+        {profile.isLive && isInternalFullAccessEmail(profile.email) ? <UserHistoryReportPanel /> : null}
 
         <section className="coaching-command-grid">
           <article className="coaching-next-session">
