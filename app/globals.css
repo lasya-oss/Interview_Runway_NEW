@@ -6671,6 +6671,44 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .coaching-demo-boundary strong { color: #9c3e1d; text-transform: uppercase; }
 .coaching-demo-boundary p { margin: 0; }
 
+/* Private company-admin learner history export */
+.coaching-admin-panel { margin-top: 14px; padding: 34px; border: 1px solid rgba(74,65,57,.15); border-radius: 18px; background: #f7f3eb; box-shadow: inset 0 1px #fff, 0 20px 60px rgba(70,61,51,.05); }
+.coaching-admin-intro { display: grid; grid-template-columns: 1fr auto; gap: 35px; align-items: start; }
+.coaching-admin-intro h2 { max-width: 680px; margin: 11px 0 0; font-family: var(--font-display); font-size: clamp(2.1rem, 4vw, 4rem); font-weight: 570; line-height: 1.02; letter-spacing: -.055em; }
+.coaching-admin-intro > div:first-child > p:last-child { max-width: 760px; margin: 17px 0 0; color: #6f645b; font-size: 10px; line-height: 1.65; }
+.coaching-admin-badge { width: 112px; min-height: 112px; padding: 18px; display: grid; place-content: center; border: 1px solid rgba(74,65,57,.15); border-radius: 50%; text-align: center; background: rgba(255,255,255,.48); }
+.coaching-admin-badge span, .coaching-admin-badge small { color: #8b7d70; font-family: var(--font-mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; }
+.coaching-admin-badge strong { margin: 6px 0; color: #9e3f1e; font-family: var(--font-mono); font-size: 25px; font-weight: 500; }
+.coaching-admin-search { margin-top: 31px; padding-top: 25px; border-top: 1px solid rgba(74,65,57,.13); }
+.coaching-admin-search label { display: block; color: #8b7d70; font-family: var(--font-mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; }
+.coaching-admin-search > div { margin-top: 10px; display: grid; grid-template-columns: 1fr auto; gap: 9px; }
+.coaching-admin-search input { min-height: 43px; padding: 0 14px; border: 1px solid rgba(74,65,57,.17); border-radius: 8px; color: #334851; background: rgba(255,255,255,.72); font: inherit; font-size: 10px; outline: none; }
+.coaching-admin-search input:focus { border-color: rgba(255,107,44,.72); box-shadow: 0 0 0 3px rgba(255,107,44,.1); }
+.coaching-admin-search button { min-width: 100px; min-height: 43px; padding: 0 17px; border: 1px solid #f36a32; border-radius: 8px; color: #fff; background: linear-gradient(135deg, #ff6b2c, #e65b26); font-size: 8px; font-weight: 700; cursor: pointer; }
+.coaching-admin-search button:disabled, .coaching-admin-action-row button:disabled { cursor: wait; opacity: .58; }
+.coaching-admin-results { margin-top: 20px; border: 1px solid rgba(74,65,57,.13); border-radius: 12px; background: rgba(255,255,255,.38); }
+.coaching-admin-results-heading { min-height: 42px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(74,65,57,.12); color: #9e3f1e; font-family: var(--font-mono); font-size: 7px; letter-spacing: .06em; text-transform: uppercase; }
+.coaching-admin-results-heading small { color: #8b7d70; font-size: 7px; letter-spacing: 0; text-transform: none; }
+.coaching-admin-results ul { margin: 0; padding: 0; list-style: none; }
+.coaching-admin-results li + li { border-top: 1px solid rgba(74,65,57,.1); }
+.coaching-admin-results li button { width: 100%; min-height: 66px; padding: 9px 14px; display: grid; grid-template-columns: 35px 1fr auto; gap: 12px; align-items: center; border: 0; color: #344b55; background: transparent; text-align: left; cursor: pointer; }
+.coaching-admin-results li button:hover, .coaching-admin-results li button.is-selected { background: rgba(255,107,44,.07); }
+.coaching-admin-results li button:focus-visible { outline: 2px solid #ff6b2c; outline-offset: -2px; }
+.coaching-admin-result-mark { width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid rgba(74,65,57,.16); border-radius: 50%; color: #9e3f1e; font-family: var(--font-mono); font-size: 7px; }
+.coaching-admin-results li button.is-selected .coaching-admin-result-mark { color: #fff; border-color: #ff6b2c; background: #ff6b2c; }
+.coaching-admin-results li button > span:nth-child(2) { min-width: 0; display: grid; gap: 5px; }
+.coaching-admin-results li strong { overflow: hidden; color: #344b55; font-family: var(--font-mono); font-size: 9px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.coaching-admin-results li small { color: #8b7d70; font-size: 8px; }
+.coaching-admin-results li em { color: #8b7d70; font-size: 8px; font-style: normal; white-space: nowrap; }
+.coaching-admin-empty { margin: 0; padding: 20px 14px; color: #786e64; font-size: 9px; }
+.coaching-admin-action-row { margin-top: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.coaching-admin-action-row p { margin: 0; color: #786e64; font-size: 9px; }
+.coaching-admin-action-row p strong { color: #9e3f1e; font-family: var(--font-mono); font-size: 7px; letter-spacing: .06em; text-transform: uppercase; }
+.coaching-admin-action-row .member-primary-button { margin: 0; white-space: nowrap; }
+.coaching-admin-feedback { margin: 14px 0 0; color: #287953; font-size: 9px; }
+.coaching-admin-feedback.is-error { color: #a6421d; }
+.coaching-admin-boundary { margin: 20px 0 0; padding-top: 17px; border-top: 1px solid rgba(74,65,57,.12); color: #8b7d70; font-size: 8px; line-height: 1.55; }
+
 @media (max-width: 900px) {
   .roadmap-overview, .library-heading, .practice-heading, .feedback-heading, .coaching-heading, .material-header, .practice-replay-heading, .practice-replay-header { grid-template-columns: 1fr; }
   .roadmap-completion, .library-index, .practice-orbit, .feedback-score, .coaching-status { width: 130px; height: auto; min-height: 130px; }
@@ -6686,6 +6724,12 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .feedback-dimensions { grid-template-columns: 1fr 1fr; }
   .coaching-path > div:last-child { grid-template-columns: 1fr; gap: 8px; }
   .coaching-path-step, .coaching-path-step:first-child, .coaching-path-step:last-child { min-height: 220px; border-radius: 16px; }
+  .coaching-admin-intro { grid-template-columns: 1fr; }
+  .coaching-admin-badge { width: 85px; min-height: 85px; }
+  .coaching-admin-action-row { align-items: flex-start; flex-direction: column; }
+  .coaching-admin-action-row .member-primary-button { width: 100%; }
+  .coaching-admin-results li button { grid-template-columns: 30px 1fr; }
+  .coaching-admin-results li em { grid-column: 2; }
   .practice-replay-card { grid-template-columns: 45px 1fr; }
   .practice-replay-card-action { grid-column: 2; min-height: 0; align-items: flex-start; text-align: left; }
   .practice-replay-card-action a { margin-top: 20px; }

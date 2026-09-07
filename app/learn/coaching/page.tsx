@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { UserHistoryReportPanel } from "./user-history-report-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,8 @@ export default async function CoachingPage() {
             <Link className="member-action-button member-action-button--dark" href="/about">Review the verification standard <span aria-hidden="true">↗</span></Link>
           </aside>
         </section>
+
+        {profile.isLive ? <UserHistoryReportPanel /> : null}
 
         <section className="coaching-note" aria-labelledby="coach-note-title">
           <div><span>Private sample note</span><b>17 JUL · 09:10 IST</b></div>
