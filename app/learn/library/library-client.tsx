@@ -115,6 +115,7 @@ export function LibraryClient({
   // Plan cards remain available for switching among the plans this profile can use.
   const [selectedPlan, setSelectedPlan] = useState<DemoTier | null>(profileId);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
+  const hasSearchQuery = deferredQuery.length > 0;
   const entitledPlans = useMemo(
     () => new Set(availablePlans.length ? availablePlans : LIBRARY_PLANS
       .filter((plan) => TIER_ORDER[plan.id] <= TIER_ORDER[profileId])
@@ -212,9 +213,10 @@ export function LibraryClient({
 
   const openSearchResults = (value: string) => {
     setQuery(value);
-    // Search is scoped to the selected plan. Opening the synthetic All category
-    // keeps filtered records visible while preserving the plan-first hierarchy.
-    setCategory((current) => current ?? "All");
+    // Search is scoped to the selected plan and always searches across its
+    // categories. Keeping results in a dedicated view prevents them from being
+    // hidden below Start Here and the plan picker while a learner is typing.
+    setCategory(value.trim() ? "All" : null);
   };
 
   const renderResults = (showSummary: boolean) => (
@@ -352,7 +354,22 @@ export function LibraryClient({
             </div>
           </section>
 
-          {selectedPlan === profileId ? (
+          {hasSearchQuery ? (
+            <section className="library-search-results" aria-label="Search results">
+              <div className="library-category-view__header">
+                <div>
+                  <p className="member-kicker">Search results</p>
+                  <h2>Matches in {accessLabel(selectedPlan)}</h2>
+                  <p>Showing materials that match “{query.trim()}” across this plan.</p>
+                </div>
+                <div className="library-category-view__count">
+                  <strong>{resultCount.toLocaleString("en-IN")}</strong>
+                  <span>matching<br />materials</span>
+                </div>
+              </div>
+              {renderResults(true)}
+            </section>
+          ) : selectedPlan === profileId ? (
             <VaultStartHere
               catalog={catalog}
               isLive={isLive}
@@ -408,7 +425,7 @@ export function LibraryClient({
         </div>
       </section>
 
-      {selectedPlan && category ? (
+      {selectedPlan && !hasSearchQuery && category ? (
         <section id="library-category-results" className="library-category-view" aria-label={`${category} category view`}>
           <header className="library-category-view__header">
             <button className="library-category-back" type="button" onClick={() => setCategory(null)}>
@@ -426,7 +443,7 @@ export function LibraryClient({
           </header>
           <div className="library-category-view__records">{renderResults(false)}</div>
         </section>
-      ) : selectedPlan ? (
+      ) : selectedPlan && !hasSearchQuery ? (
         <>
           <div className="library-category-grid" aria-label="Material categories">
             {categories.map((item) => (

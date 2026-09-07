@@ -539,6 +539,9 @@ test("Library opens on the authenticated plan and presents plan cards as a switc
   assert.match(libraryClient, /Your current plan is selected automatically/i);
   assert.doesNotMatch(libraryClient, /Choose your plan library/i);
   assert.doesNotMatch(libraryClient, /Start with the plan that contains your material/i);
+  assert.match(libraryClient, /const hasSearchQuery = deferredQuery\.length > 0/i);
+  assert.match(libraryClient, /aria-label="Search results"/i);
+  assert.match(libraryClient, /setCategory\(value\.trim\(\) \? "All" : null\)/i);
 
   const searchPosition = libraryClient.indexOf('aria-label="Library search"');
   const startHerePosition = libraryClient.indexOf("<VaultStartHere");
