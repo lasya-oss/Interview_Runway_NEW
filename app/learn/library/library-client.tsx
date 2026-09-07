@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   driveMaterialCategory,
@@ -23,6 +22,32 @@ const EMPTY_MATERIALS: readonly LearningMaterial[] = [];
 const EMPTY_PDF_GUIDES: readonly DrivePdfGuide[] = [];
 const EMPTY_DRIVE_MATERIALS: readonly DriveMaterial[] = [];
 
+const LIBRARY_PLANS: readonly {
+  id: DemoTier;
+  label: string;
+  detail: string;
+  description: string;
+}[] = [
+  {
+    id: "foundation",
+    label: "Vault",
+    detail: "Foundation library",
+    description: "Build the core interview patterns, evidence, and role materials.",
+  },
+  {
+    id: "practice",
+    label: "Second Seat",
+    detail: "Vault + practice library",
+    description: "Add interview-shaped rounds, replays, and correction material.",
+  },
+  {
+    id: "premium",
+    label: "Human Calibration",
+    detail: "Complete library",
+    description: "Bring the full preparation, practice, and calibration material together.",
+  },
+];
+
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   All: "Browse all materials",
   "System design": "Architecture choices and trade-offs",
@@ -43,35 +68,30 @@ const CATEGORY_DESCRIPTIONS: Record<string, string> = {
 };
 
 function accessLabel(tier: DemoTier) {
-  if (tier === "foundation") return "Vault";
-  if (tier === "practice") return "The Second Seat";
-  return "Human Calibration";
+  return LIBRARY_PLANS.find((plan) => plan.id === tier)?.label ?? "Library";
 }
 
-function materialAccessLabel(material: LearningMaterial, unlocked: boolean, isLive: boolean) {
-  if (!unlocked) return `Requires ${accessLabel(material.tier)}`;
-  if (isLive && material.tier === "foundation") {
-    return material.availability === "included"
-      ? "Included with Vault"
-      : "Vault preview · review pending";
-  }
-  return `Included with ${accessLabel(material.tier)}`;
+function materialAccessLabel(plan: DemoTier) {
+  return `Available in ${accessLabel(plan)}`;
 }
 
-function materialOpenLabel(unlocked: boolean) {
-  if (!unlocked) return "Compare access";
-  return LIBRARY_OPEN_LABEL;
+function isMaterialInPlan(material: LearningMaterial, plan: DemoTier, isLive: boolean) {
+  if (TIER_ORDER[material.tier] > TIER_ORDER[plan]) return false;
+  // Live learners see the same released records as the existing catalogue.
+  // Unreleased Vault previews stay out of every plan's live view.
+  return !(isLive && material.tier === "foundation" && material.availability !== "included");
 }
 
-function isPreviewContentUnavailable(material: LearningMaterial, unlocked: boolean, isLive: boolean) {
+function isPreviewContentUnavailable(material: LearningMaterial, isLive: boolean) {
   // Live Library actions must never send an entitled learner to the generic
   // decision-lab shell when the catalog has no supplied source asset. Demo
   // profiles still use that shell as their representative sample experience.
-  return unlocked && isLive && !material.demoAsset;
+  return isLive && !material.demoAsset;
 }
 
 export function LibraryClient({
   profileId,
+  availablePlans = [],
   isLive = false,
   googleClientId = "",
   loginHint = null,
@@ -80,6 +100,7 @@ export function LibraryClient({
   initialCatalog = null,
 }: {
   profileId: DemoTier;
+  availablePlans?: readonly DemoTier[];
   isLive?: boolean;
   googleClientId?: string;
   loginHint?: string | null;
@@ -90,12 +111,14 @@ export function LibraryClient({
   const [catalog, setCatalog] = useState<LibraryCatalog | null>(initialCatalog);
   const [query, setQuery] = useState(initialPdfFilename ?? "");
   const [category, setCategory] = useState<string | null>(initialPdfFilename ? "All" : null);
-  const [scope, setScope] = useState<"all" | "included" | "locked">("all");
+  const [selectedPlan, setSelectedPlan] = useState<DemoTier | null>(initialPdfFilename ? profileId : null);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
-  const materials = catalog?.materials ?? EMPTY_MATERIALS;
-  const pdfGuides = catalog?.pdfGuides ?? EMPTY_PDF_GUIDES;
-  const driveMaterials = catalog?.driveMaterials ?? EMPTY_DRIVE_MATERIALS;
-  const categories = categorySummary.categories;
+  const entitledPlans = useMemo(
+    () => new Set(availablePlans.length ? availablePlans : LIBRARY_PLANS
+      .filter((plan) => TIER_ORDER[plan.id] <= TIER_ORDER[profileId])
+      .map((plan) => plan.id)),
+    [availablePlans, profileId],
+  );
   const totalResourceCount = categorySummary.total;
   const resourceCountLabel = totalResourceCount >= 100
     ? "100+"
@@ -116,29 +139,60 @@ export function LibraryClient({
     };
   }, [initialCatalog, isLive, profileId]);
 
-  const categoryCounts = categorySummary.counts;
+  const planCatalogs = useMemo(() => {
+    const source = catalog ?? {
+      materials: EMPTY_MATERIALS,
+      pdfGuides: EMPTY_PDF_GUIDES,
+      driveMaterials: EMPTY_DRIVE_MATERIALS,
+    };
+    return Object.fromEntries(LIBRARY_PLANS.map((plan) => [
+      plan.id,
+      {
+        materials: source.materials.filter((material) => isMaterialInPlan(material, plan.id, isLive)),
+        pdfGuides: source.pdfGuides,
+        driveMaterials: source.driveMaterials,
+      },
+    ])) as Record<DemoTier, LibraryCatalog>;
+  }, [catalog, isLive]);
+
+  const selectedCatalog = selectedPlan ? planCatalogs[selectedPlan] : null;
+  const materials = selectedCatalog?.materials ?? EMPTY_MATERIALS;
+  const pdfGuides = selectedCatalog?.pdfGuides ?? EMPTY_PDF_GUIDES;
+  const driveMaterials = selectedCatalog?.driveMaterials ?? EMPTY_DRIVE_MATERIALS;
+
+  const selectedCategorySummary = useMemo<LibraryCategorySummary>(() => {
+    if (!selectedCatalog) return categorySummary;
+    const counts = new Map<string, number>();
+    const add = (value: string) => counts.set(value, (counts.get(value) ?? 0) + 1);
+    selectedCatalog.materials.forEach((material) => add(material.category));
+    selectedCatalog.pdfGuides.forEach((guide) => add(drivePdfCategory(guide.filename)));
+    selectedCatalog.driveMaterials.forEach((material) => add(driveMaterialCategory(material.filename)));
+    return {
+      categories: ["All", ...counts.keys()],
+      counts: Object.fromEntries(counts),
+      total: selectedCatalog.materials.length + selectedCatalog.pdfGuides.length + selectedCatalog.driveMaterials.length,
+    };
+  }, [categorySummary, selectedCatalog]);
+
+  const categories = selectedCategorySummary.categories;
+  const categoryCounts = selectedCategorySummary.counts;
 
   const results = useMemo(() => materials.filter((material) => {
-    const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
-    const included = unlocked && (!isLive || material.tier !== "foundation" || material.availability === "included");
-    const matchesScope = scope === "all" || (scope === "included" ? included : !unlocked);
     const matchesCategory = !category || category === "All" || material.category === category;
     const haystack = `${material.title} ${material.description} ${material.category} ${material.format} ${material.tags.join(" ")}`.toLowerCase();
-    return matchesScope && matchesCategory && (!deferredQuery || haystack.includes(deferredQuery));
-  }), [category, deferredQuery, isLive, materials, profileId, scope]);
+    return matchesCategory && (!deferredQuery || haystack.includes(deferredQuery));
+  }), [category, deferredQuery, materials]);
 
   const pdfResults = useMemo(() => {
-    if (scope === "locked") return [];
     return pdfGuides.filter((guide) => {
       const title = drivePdfTitle(guide.filename);
       const guideCategory = drivePdfCategory(guide.filename);
       const haystack = `${title} ${guide.filename} ${guideCategory} PDF guide`.toLowerCase();
       return (!category || category === "All" || guideCategory === category) && (!deferredQuery || haystack.includes(deferredQuery));
     });
-  }, [category, deferredQuery, pdfGuides, scope]);
+  }, [category, deferredQuery, pdfGuides]);
 
   const driveResults = useMemo(() => {
-    if (scope === "locked") return [];
     return driveMaterials.filter((material) => {
       const title = driveMaterialTitle(material.filename);
       const materialCategory = driveMaterialCategory(material.filename);
@@ -146,20 +200,18 @@ export function LibraryClient({
       const haystack = `${title} ${material.filename} ${material.collection} ${materialCategory} ${kind}`.toLowerCase();
       return (!category || category === "All" || materialCategory === category) && (!deferredQuery || haystack.includes(deferredQuery));
     });
-  }, [category, deferredQuery, driveMaterials, scope]);
+  }, [category, deferredQuery, driveMaterials]);
 
   const resultCount = results.length + pdfResults.length + driveResults.length;
   const clearFilters = () => {
     setQuery("");
     setCategory(null);
-    setScope("all");
   };
 
   const openSearchResults = (value: string) => {
     setQuery(value);
-    // Search and access scopes are global Library views when no category is open.
-    // Opening the synthetic All category keeps the filtered records visible and
-    // means clearing a query restores the complete result set.
+    // Search is scoped to the selected plan. Opening the synthetic All category
+    // keeps filtered records visible while preserving the plan-first hierarchy.
     setCategory((current) => current ?? "All");
   };
 
@@ -179,11 +231,10 @@ export function LibraryClient({
       ) : results.length ? (
         <div className="library-record-list">
           {results.map((material) => {
-            const unlocked = TIER_ORDER[profileId] >= TIER_ORDER[material.tier];
-            const hasDirectAsset = unlocked ? material.demoAsset : null;
-            const contentUnavailable = isPreviewContentUnavailable(material, unlocked, isLive);
+            const hasDirectAsset = material.demoAsset;
+            const contentUnavailable = isPreviewContentUnavailable(material, isLive);
             return (
-              <article className={`library-record ${unlocked ? "is-unlocked" : "is-locked"}`} key={material.slug}>
+              <article className="library-record is-unlocked" key={material.slug}>
                 <span className="library-record-number">{material.number}</span>
                 <div className="library-record-copy">
                   <small>{material.category} · {material.format}</small>
@@ -194,8 +245,8 @@ export function LibraryClient({
                 <div className="library-record-meta">
                   <span>{material.duration} · {material.level}</span>
                   <small>{material.reviewed}<br />{material.roadmap}</small>
-                  <b>{materialAccessLabel(material, unlocked, isLive)}</b>
-                  {unlocked && material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
+                  <b>{materialAccessLabel(selectedPlan ?? profileId)}</b>
+                  {material.progress > 0 && !isLive ? <i aria-label={`${material.progress}% sample progress`}><span style={{ width: `${material.progress}%` }} /></i> : null}
                   {contentUnavailable ? (
                     <div
                       className="library-record-content-unavailable"
@@ -216,25 +267,21 @@ export function LibraryClient({
                       loginHint={loginHint}
                     />
                   ) : (
-                    unlocked ? (
-                      <LibraryMaterialDialog
-                        source={null}
-                        title={material.title}
-                        eyebrow={`${material.category} · ${material.format}`}
-                        description="This representative sample opens inside InterviewRunway."
-                        buttonLabel={materialOpenLabel(unlocked)}
-                        googleClientId={googleClientId}
-                        loginHint={loginHint}
-                        emptyState={
-                          <div className="library-material-state library-material-content-unavailable" role="status">
-                            <strong>Sample preview</strong>
-                            <p>This representative material does not have a supplied source file.</p>
-                          </div>
-                        }
-                      />
-                    ) : (
-                      <Link className="library-record-action-button" href="/pricing">{materialOpenLabel(unlocked)} <span aria-hidden="true">↗</span></Link>
-                    )
+                    <LibraryMaterialDialog
+                      source={null}
+                      title={material.title}
+                      eyebrow={`${material.category} · ${material.format}`}
+                      description="This representative sample opens inside InterviewRunway."
+                      buttonLabel={LIBRARY_OPEN_LABEL}
+                      googleClientId={googleClientId}
+                      loginHint={loginHint}
+                      emptyState={
+                        <div className="library-material-state library-material-content-unavailable" role="status">
+                          <strong>Sample preview</strong>
+                          <p>This representative material does not have a supplied source file.</p>
+                        </div>
+                      }
+                    />
                   )}
                 </div>
               </article>
@@ -290,39 +337,76 @@ export function LibraryClient({
         </div>
       </section>
 
-      <section className="library-controls" aria-label="Library filters">
-        <label className="library-search">
-          <span>Search materials</span>
-          <input value={query} onChange={(event) => openSearchResults(event.target.value)} type="search" placeholder="Try “trade-offs” or “behavioural”" />
-        </label>
-        <div className="library-scope" aria-label="Access filter">
-          {(["all", "included", "locked"] as const).map((value) => (
-            <button
-              className={scope === value ? "is-active" : ""}
-              type="button"
-              onClick={() => {
-                setScope(value);
-                setCategory(value === "all" ? "All" : (current) => current ?? "All");
-              }}
-              key={value}
-            >
-              {value === "all" ? "All materials" : value === "included" ? "Included" : "Higher plans"}
-            </button>
-          ))}
+      <section className="library-plan-picker" aria-labelledby="library-plan-picker-title">
+        <div className="library-plan-picker__intro">
+          <div>
+            <p className="member-kicker">Choose your plan library</p>
+            <h2 id="library-plan-picker-title">Start with the plan that contains your material.</h2>
+            <p>Plans come first. Open one to browse its categories and the materials included in that plan.</p>
+          </div>
+          <span className="library-plan-picker__inventory">All {resourceCountLabel}<br />catalogued resources</span>
+        </div>
+        <div className="library-plan-grid">
+          {LIBRARY_PLANS.map((plan) => {
+            const isAvailable = entitledPlans.has(plan.id);
+            const isSelected = selectedPlan === plan.id;
+            const planCatalog = planCatalogs[plan.id];
+            const planCount = planCatalog.materials.length + planCatalog.pdfGuides.length + planCatalog.driveMaterials.length;
+            return (
+              <button
+                className={`library-plan-card${isSelected ? " is-selected" : ""}${isAvailable ? "" : " is-unavailable"}`}
+                type="button"
+                onClick={() => {
+                  if (!isAvailable) return;
+                  setSelectedPlan(plan.id);
+                  setCategory(null);
+                  setQuery("");
+                }}
+                aria-pressed={isSelected}
+                aria-disabled={!isAvailable}
+                disabled={!isAvailable}
+                key={plan.id}
+              >
+                <span className="library-plan-card__index">0{plan.id === "foundation" ? 1 : plan.id === "practice" ? 2 : 3}</span>
+                <span className="library-plan-card__label">{plan.label}</span>
+                <strong>{plan.detail}</strong>
+                <p>{plan.description}</p>
+                <span className="library-plan-card__footer">
+                  {isAvailable ? `${planCount.toLocaleString("en-IN")} materials` : "Not active on this profile"}
+                  <b aria-hidden="true">{isSelected ? "✓" : "↗"}</b>
+                </span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      {profileId === "foundation" || profileId === "practice" ? (
-        <VaultStartHere
-          catalog={catalog}
-          isLive={isLive}
-          plan={profileId === "practice" ? "second-seat" : "vault"}
-          googleClientId={googleClientId}
-          loginHint={loginHint}
-        />
+      {selectedPlan ? (
+        <>
+          <section className="library-controls" aria-label="Library search">
+            <label className="library-search">
+              <span>Search {accessLabel(selectedPlan)} materials</span>
+              <input value={query} onChange={(event) => openSearchResults(event.target.value)} type="search" placeholder="Try “trade-offs” or “behavioural”" />
+            </label>
+            <div className="library-controls__context">
+              <span>Plan library</span>
+              <strong>{accessLabel(selectedPlan)}</strong>
+            </div>
+          </section>
+
+          {selectedPlan === profileId && (profileId === "foundation" || profileId === "practice") ? (
+            <VaultStartHere
+              catalog={catalog}
+              isLive={isLive}
+              plan={profileId === "practice" ? "second-seat" : "vault"}
+              googleClientId={googleClientId}
+              loginHint={loginHint}
+            />
+          ) : null}
+        </>
       ) : null}
 
-      {category ? (
+      {selectedPlan && category ? (
         <section id="library-category-results" className="library-category-view" aria-label={`${category} category view`}>
           <header className="library-category-view__header">
             <button className="library-category-back" type="button" onClick={() => setCategory(null)}>
@@ -340,7 +424,7 @@ export function LibraryClient({
           </header>
           <div className="library-category-view__records">{renderResults(false)}</div>
         </section>
-      ) : (
+      ) : selectedPlan ? (
         <>
           <div className="library-category-grid" aria-label="Material categories">
             {categories.map((item) => (
@@ -369,6 +453,13 @@ export function LibraryClient({
             </div>
           </section>
         </>
+      ) : (
+        <section id="library-category-results" className="library-category-results library-category-results--plan-first" aria-label="Plan-first Library guidance">
+          <div className="library-category-prompt">
+            <strong>Choose a plan to open its categories.</strong>
+            <span>Then choose a category to view its materials.</span>
+          </div>
+        </section>
       )}
     </div>
   );

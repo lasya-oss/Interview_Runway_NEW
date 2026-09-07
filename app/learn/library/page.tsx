@@ -26,6 +26,7 @@ export default async function LibraryPage({
     <div className="member-page">
       <LibraryClient
         profileId={profile.id}
+        availablePlans={profile.availablePlans}
         isLive={isLive}
         googleClientId={process.env.GOOGLE_CLIENT_ID ?? ""}
         loginHint={profile.email}
