@@ -87,7 +87,8 @@ export function MemberShell({
       ? (isLive ? "Second Seat Plan Active" : "Demo workspace")
       : (isLive ? "Human Calibration Plan Active" : "Demo workspace");
   const memberNav = MEMBER_NAV.filter((item) => (
-    (item.key !== "meeting-copilot" && item.key !== "whatsapp-support") || profile.access.practice
+    (item.key !== "meeting-copilot" && item.key !== "whatsapp-support")
+      || (isSecondSeatWorkspace && profile.access.practice)
   ));
 
   return (

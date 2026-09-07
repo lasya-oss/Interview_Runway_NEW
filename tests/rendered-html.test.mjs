@@ -785,7 +785,7 @@ test("all three one-click demos issue protected tier sessions", async () => {
   }
 });
 
-test("Human Calibration renders Current access only in the status drawer", async () => {
+test("Human Calibration keeps Current access in the status drawer and omits Second Seat-only navigation", async () => {
   const login = await request("/api/demo-session", {
     method: "POST",
     headers: {
@@ -808,12 +808,51 @@ test("Human Calibration renders Current access only in the status drawer", async
   const sidebar = html.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
   assert.ok(sidebar, "Human Calibration sidebar should render");
   assert.doesNotMatch(sidebar, /member-plan-card|Current access/i);
+  assert.doesNotMatch(visibleText(sidebar), /Meeting Copilot|WhatsApp Support/i);
+  assert.doesNotMatch(sidebar, /href=["']\/learn\/(?:meeting-copilot|whatsapp-support)["']/i);
 
   const statusAccess = html.match(/<section\b[^>]*ops-current-access[^>]*>[\s\S]*?<\/section>/i)?.[0] ?? "";
   assert.ok(statusAccess, "status drawer Current access section should render");
   assert.match(statusAccess, /member-plan-card member-plan-card-status/i);
   assert.match(visibleText(statusAccess), /Current access\s+Human Calibration\s*·\s*Qualified/i);
   assert.equal((html.match(/member-plan-card member-plan-card-status/gi) ?? []).length, 1);
+});
+
+test("Meeting Copilot and WhatsApp Support remain Second Seat navigation sections", async () => {
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "practice" }),
+  });
+  assert.equal(login.status, 200);
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+
+  const response = await request("/learn", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /data-member-layout=["']second-seat["']/i);
+
+  const sidebar = html.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+  assert.ok(sidebar, "Second Seat sidebar should render");
+  const sidebarText = visibleText(sidebar);
+  assert.match(sidebarText, /Meeting Copilot/i);
+  assert.match(sidebarText, /WhatsApp Support/i);
+  assert.match(sidebar, /href=["']\/learn\/meeting-copilot["']/i);
+  assert.match(sidebar, /href=["']\/learn\/whatsapp-support["']/i);
+  assert.ok(
+    sidebarText.indexOf("Meeting Copilot") < sidebarText.indexOf("WhatsApp Support"),
+    "WhatsApp Support should remain directly below Meeting Copilot",
+  );
+  assert.ok(
+    sidebarText.indexOf("WhatsApp Support") < sidebarText.indexOf("Coach room"),
+    "Coach room should remain after the Second Seat support sections",
+  );
 });
 
 test("demo sign-in issues a protected session and opens the learner product", async () => {
