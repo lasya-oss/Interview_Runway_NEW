@@ -528,6 +528,25 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(driveReplayPlayer, /<audio className="library-material-audio-player"/i);
 });
 
+test("Library opens on the authenticated plan and presents plan cards as a switcher", async () => {
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(libraryClient, /useState<DemoTier \| null>\(profileId\)/i);
+  assert.match(libraryClient, /<p className="member-kicker">Your Library<\/p>/i);
+  assert.match(libraryClient, /Your current plan is selected automatically/i);
+  assert.doesNotMatch(libraryClient, /Choose your plan library/i);
+  assert.doesNotMatch(libraryClient, /Start with the plan that contains your material/i);
+
+  const searchPosition = libraryClient.indexOf('aria-label="Library search"');
+  const startHerePosition = libraryClient.indexOf("<VaultStartHere");
+  const planPosition = libraryClient.indexOf('aria-labelledby="library-plan-picker-title"');
+  assert.ok(searchPosition >= 0 && searchPosition < startHerePosition, "search should precede Start Here");
+  assert.ok(startHerePosition >= 0 && startHerePosition < planPosition, "Start Here should precede Your Library");
+});
+
 test("Start Here is shared by Vault and Second Seat with plan-scoped material", async () => {
   const libraryClient = await readFile(
     new URL("../app/learn/library/library-client.tsx", import.meta.url),

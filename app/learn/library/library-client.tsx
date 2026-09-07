@@ -111,7 +111,9 @@ export function LibraryClient({
   const [catalog, setCatalog] = useState<LibraryCatalog | null>(initialCatalog);
   const [query, setQuery] = useState(initialPdfFilename ?? "");
   const [category, setCategory] = useState<string | null>(initialPdfFilename ? "All" : null);
-  const [selectedPlan, setSelectedPlan] = useState<DemoTier | null>(initialPdfFilename ? profileId : null);
+  // The authenticated profile already tells us which library should open first.
+  // Plan cards remain available for switching among the plans this profile can use.
+  const [selectedPlan, setSelectedPlan] = useState<DemoTier | null>(profileId);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
   const entitledPlans = useMemo(
     () => new Set(availablePlans.length ? availablePlans : LIBRARY_PLANS
@@ -337,12 +339,37 @@ export function LibraryClient({
         </div>
       </section>
 
+      {selectedPlan ? (
+        <>
+          <section className="library-controls" aria-label="Library search">
+            <label className="library-search">
+              <span>Search materials</span>
+              <input value={query} onChange={(event) => openSearchResults(event.target.value)} type="search" placeholder="Try “trade-offs” or “behavioural”" />
+            </label>
+            <div className="library-controls__context">
+              <span>Plan library</span>
+              <strong>{accessLabel(selectedPlan)}</strong>
+            </div>
+          </section>
+
+          {selectedPlan === profileId && (profileId === "foundation" || profileId === "practice") ? (
+            <VaultStartHere
+              catalog={catalog}
+              isLive={isLive}
+              plan={profileId === "practice" ? "second-seat" : "vault"}
+              googleClientId={googleClientId}
+              loginHint={loginHint}
+            />
+          ) : null}
+        </>
+      ) : null}
+
       <section className="library-plan-picker" aria-labelledby="library-plan-picker-title">
         <div className="library-plan-picker__intro">
           <div>
-            <p className="member-kicker">Choose your plan library</p>
-            <h2 id="library-plan-picker-title">Start with the plan that contains your material.</h2>
-            <p>Plans come first. Open one to browse its categories and the materials included in that plan.</p>
+            <p className="member-kicker">Your Library</p>
+            <h2 id="library-plan-picker-title">Switch between your plan libraries.</h2>
+            <p>Your current plan is selected automatically. Use these library views to browse the categories and materials available to this account.</p>
           </div>
           <span className="library-plan-picker__inventory">All {resourceCountLabel}<br />catalogued resources</span>
         </div>
@@ -380,31 +407,6 @@ export function LibraryClient({
           })}
         </div>
       </section>
-
-      {selectedPlan ? (
-        <>
-          <section className="library-controls" aria-label="Library search">
-            <label className="library-search">
-              <span>Search {accessLabel(selectedPlan)} materials</span>
-              <input value={query} onChange={(event) => openSearchResults(event.target.value)} type="search" placeholder="Try “trade-offs” or “behavioural”" />
-            </label>
-            <div className="library-controls__context">
-              <span>Plan library</span>
-              <strong>{accessLabel(selectedPlan)}</strong>
-            </div>
-          </section>
-
-          {selectedPlan === profileId && (profileId === "foundation" || profileId === "practice") ? (
-            <VaultStartHere
-              catalog={catalog}
-              isLive={isLive}
-              plan={profileId === "practice" ? "second-seat" : "vault"}
-              googleClientId={googleClientId}
-              loginHint={loginHint}
-            />
-          ) : null}
-        </>
-      ) : null}
 
       {selectedPlan && category ? (
         <section id="library-category-results" className="library-category-view" aria-label={`${category} category view`}>
