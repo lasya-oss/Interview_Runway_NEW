@@ -63,7 +63,7 @@ export const VAULT_START_HERE_DOMAINS = [
 
 type StartHereDomain = (typeof VAULT_START_HERE_DOMAINS)[number]["id"];
 type StartHereLevel = "basics" | "intermediate" | "advanced";
-export type StartHerePlan = "vault" | "second-seat";
+export type StartHerePlan = "vault" | "second-seat" | "human-calibration";
 
 const START_HERE_COPY: Record<StartHerePlan, {
   eyebrow: string;
@@ -97,6 +97,17 @@ const START_HERE_COPY: Record<StartHerePlan, {
     selectionPrompt: "Select a focus to see the directly relevant Second Seat materials.",
     levelPrompt: "Choose a level to view only its relevant Second Seat materials.",
     empty: "No matching Second Seat material at this level.",
+  },
+  "human-calibration": {
+    eyebrow: "A guided calibration start",
+    title: "New to interview preparation?",
+    intro: "Not sure where to start? Build your preparation from the right foundation.",
+    panelEyebrow: "Choose your calibration focus",
+    panelDescription: "These guided paths combine the Vault foundation, Second Seat practice, and Human Calibration material. Each focus shows material directly related to your next round.",
+    loading: "Loading the Human Calibration starting paths…",
+    selectionPrompt: "Select a focus to see the directly relevant Human Calibration materials.",
+    levelPrompt: "Choose a level to view only its relevant Human Calibration materials.",
+    empty: "No matching Human Calibration material at this level.",
   },
 };
 
@@ -218,7 +229,9 @@ function buildStartHereRecords(catalog: LibraryCatalog, isLive: boolean, plan: S
   const records: StartHereRecord[] = [];
 
   catalog.materials.forEach((material) => {
-    const belongsToPlan = material.tier === "foundation" || (plan === "second-seat" && material.tier === "practice");
+    const belongsToPlan = plan === "human-calibration"
+      || material.tier === "foundation"
+      || (plan === "second-seat" && material.tier === "practice");
     if (!belongsToPlan || (isLive && material.tier === "foundation" && material.availability !== "included")) return;
     const record = recordFromLearningMaterial(material);
     if (record) records.push(record);

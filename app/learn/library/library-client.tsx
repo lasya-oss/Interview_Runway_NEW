@@ -352,11 +352,11 @@ export function LibraryClient({
             </div>
           </section>
 
-          {selectedPlan === profileId && (profileId === "foundation" || profileId === "practice") ? (
+          {selectedPlan === profileId ? (
             <VaultStartHere
               catalog={catalog}
               isLive={isLive}
-              plan={profileId === "practice" ? "second-seat" : "vault"}
+              plan={profileId === "premium" ? "human-calibration" : profileId === "practice" ? "second-seat" : "vault"}
               googleClientId={googleClientId}
               loginHint={loginHint}
             />

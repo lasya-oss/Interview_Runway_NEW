@@ -547,7 +547,7 @@ test("Library opens on the authenticated plan and presents plan cards as a switc
   assert.ok(startHerePosition >= 0 && startHerePosition < planPosition, "Start Here should precede Your Library");
 });
 
-test("Start Here is shared by Vault and Second Seat with plan-scoped material", async () => {
+test("Start Here is shared by all three plans with plan-scoped material", async () => {
   const libraryClient = await readFile(
     new URL("../app/learn/library/library-client.tsx", import.meta.url),
     "utf8",
@@ -557,11 +557,13 @@ test("Start Here is shared by Vault and Second Seat with plan-scoped material", 
     "utf8",
   );
 
-  assert.match(libraryClient, /profileId === "foundation" \|\| profileId === "practice"/);
-  assert.match(libraryClient, /plan=\{profileId === "practice" \? "second-seat" : "vault"\}/);
-  assert.match(libraryStartHere, /export type StartHerePlan = "vault" \| "second-seat"/);
+  assert.match(libraryClient, /selectedPlan === profileId/);
+  assert.match(libraryClient, /profileId === "premium" \? "human-calibration"/);
+  assert.match(libraryStartHere, /export type StartHerePlan = "vault" \| "second-seat" \| "human-calibration"/);
   assert.match(libraryStartHere, /plan === "second-seat" && material\.tier === "practice"/);
+  assert.match(libraryStartHere, /plan === "human-calibration"/);
   assert.match(libraryStartHere, /Second Seat’s existing practice material/i);
+  assert.match(libraryStartHere, /Human Calibration starting paths/i);
   assert.match(libraryStartHere, /normalizedCategory === "ai practice"/i);
   assert.match(libraryStartHere, /className="library-start-here__toggle"/i);
 });
