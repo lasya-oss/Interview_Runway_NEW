@@ -6,14 +6,14 @@ export type DrivePdfGuide = {
 };
 
 export const DRIVE_PDF_GUIDES: readonly DrivePdfGuide[] = [
-  { id: "local-career-target-role-evidence-map", filename: "career_target-role-evidence-map.pdf" },
-  { id: "local-company-interview-loop-gap-map", filename: "company_interview-loop-gap-map.pdf" },
-  { id: "local-dsa-traversal-decision-practice-workbook", filename: "dsa_traversal-decision-practice-workbook.pdf" },
-  { id: "local-operations-evidence-comparison-correction-workbook", filename: "operations_evidence-comparison-correction-workbook.pdf" },
-  { id: "local-operations-final-loop-interview-day-runbook", filename: "operations_final-loop-interview-day-runbook.pdf" },
-  { id: "local-operations-technical-baseline-scorecard", filename: "operations_technical-baseline-scorecard.pdf" },
-  { id: "local-operations-timed-technical-rehearsal-workbook", filename: "operations_timed-technical-rehearsal-workbook.pdf" },
-  { id: "local-remote-compensation-and-offer-decision-workbook", filename: "remote_compensation-and-offer-decision-workbook.pdf" },
+  { id: "1Z-OYVfkA3HYvUdgCcZmZgaBYVYa-OqEj", filename: "career_target-role-evidence-map.pdf" },
+  { id: "1zOV1tkhXgQR0hztch-yrcV3_9TTn9on4", filename: "company_interview-loop-gap-map.pdf" },
+  { id: "1Qdfvy6dOJUwCuTR5ray0aoUPArr2svZ3", filename: "dsa_traversal-decision-practice-workbook.pdf" },
+  { id: "1wkLfncPUjfis20978fo9qmLSy8yfoB_G", filename: "operations_evidence-comparison-correction-workbook.pdf" },
+  { id: "1-O9JvRbcM17MSKeSrgBwaTBbygHDwNQR", filename: "operations_final-loop-interview-day-runbook.pdf" },
+  { id: "1eiUMhu61tJcAv0dcD3DEZPxzQHTqSVcQ", filename: "operations_technical-baseline-scorecard.pdf" },
+  { id: "1XRINkBkNNLEhY0B_C7jhn-n9qp0jkV0M", filename: "operations_timed-technical-rehearsal-workbook.pdf" },
+  { id: "1njZbRCuOBlVlm7g-2rC6VOlSc1NaeokC", filename: "remote_compensation-and-offer-decision-workbook.pdf" },
   { id: "1s2Jdj-GBoQ8JW9w4n6CmFBZ4Z6f5fQLO", filename: "sysdesign_url-shortener-walkthrough.pdf" },
   { id: "1ne88LVY1wF7ZWPbB31oo9eTeIPkajRR0", filename: "sysdesign_url-shortener-follow-up-bank.pdf" },
   { id: "1eVxZg3ZBSLdmQY9itOVgLfeke1CD3T-D", filename: "sysdesign_url-shortener-capacity-workbook.pdf" },
