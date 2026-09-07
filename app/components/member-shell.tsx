@@ -7,7 +7,6 @@ import type { DemoProfile } from "@/app/lib/demo-data";
 import { CurrentAccessCard } from "./current-access-card";
 import { RoadmapProgressProvider, RoadmapTrackLabel } from "@/app/learn/roadmap/learner-progress-client";
 import { FocusTimeTracker } from "@/app/learn/focus-time-tracker";
-import { MEETING_COPILOT_RELEASE } from "@/app/lib/meeting-copilot-release";
 import { DemoLogoutButton, LiveLogoutButton, LivePlanSwitcher } from "./member-actions";
 
 const MEMBER_NAV = [
@@ -114,7 +113,6 @@ export function MemberShell({
                 className={`${currentSection === item.key ? "is-active" : ""} ${unlocked ? "" : "is-locked"}`}
                 href={item.href}
                 key={item.key}
-                onClick={item.key === "meeting-copilot" && unlocked ? openMeetingCopilot : undefined}
               >
                 <span>{String(index + 1).padStart(2, "0")}</span><MemberNavigationLabel>{item.key === "today" && showDashboardLabel ? "Dashboard" : item.label}</MemberNavigationLabel>{unlocked ? null : <small>Upgrade</small>}
               </Link>
@@ -195,10 +193,6 @@ function sectionForPathname(pathname: string | null): (typeof MEMBER_NAV)[number
   if (pathname.startsWith("/learn/meeting-copilot")) return "meeting-copilot";
   if (pathname.startsWith("/learn/whatsapp-support")) return "whatsapp-support";
   return null;
-}
-
-function openMeetingCopilot() {
-  window.open(MEETING_COPILOT_RELEASE.launchUrl, "_blank", "noopener,noreferrer");
 }
 
 function Brand() {

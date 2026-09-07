@@ -879,7 +879,7 @@ test("Meeting Copilot and WhatsApp Support remain Second Seat navigation section
   );
 });
 
-test("Second Seat launches only the pinned validated Meeting Copilot release", async () => {
+test("Second Seat Meeting Copilot page alone launches the pinned validated release", async () => {
   const release = await readFile(new URL("../app/lib/meeting-copilot-release.ts", import.meta.url), "utf8");
   const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
   const pageSource = await readFile(new URL("../app/learn/meeting-copilot/page.tsx", import.meta.url), "utf8");
@@ -889,7 +889,10 @@ test("Second Seat launches only the pinned validated Meeting Copilot release", a
   assert.match(release, /commit: "1411f4d870c264d5827043e0c4dc61520254528a"/);
   assert.match(release, /uiVersion: "20260905-clue-coaching-v1"/);
   assert.match(release, /launchUrl: "http:\/\/127\.0\.0\.1:8123\/"/);
-  assert.match(shell, /MEETING_COPILOT_RELEASE\.launchUrl/);
+  assert.doesNotMatch(shell, /MEETING_COPILOT_RELEASE/);
+  assert.doesNotMatch(shell, /openMeetingCopilot|window\.open/);
+  assert.doesNotMatch(shell, /127\.0\.0\.1:8123/);
+  assert.doesNotMatch(shell, /onClick=\{item\.key === "meeting-copilot"/);
   assert.match(pageSource, /MEETING_COPILOT_RELEASE\.launchUrl/);
   assert.doesNotMatch(shell, /const MEETING_COPILOT_URL/);
   assert.doesNotMatch(pageSource, /const MEETING_COPILOT_URL/);
