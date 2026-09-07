@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { MEETING_COPILOT_RELEASE } from "@/app/lib/meeting-copilot-release";
 
 export const dynamic = "force-dynamic";
 
@@ -8,8 +9,6 @@ export const metadata: Metadata = {
   title: "Meeting Copilot | Learner workspace",
   robots: { index: false, follow: false },
 };
-
-const MEETING_COPILOT_URL = "http://127.0.0.1:8123/";
 
 export default async function MeetingCopilotPage() {
   const profile = await requireDemoProfile("/learn/meeting-copilot");
@@ -28,7 +27,12 @@ export default async function MeetingCopilotPage() {
 
   return (
     <div className="member-page">
-      <section className="member-locked-panel">
+      <section
+        className="member-locked-panel"
+        data-meeting-copilot-source-branch={MEETING_COPILOT_RELEASE.branch}
+        data-meeting-copilot-source-commit={MEETING_COPILOT_RELEASE.commit}
+        data-meeting-copilot-ui-version={MEETING_COPILOT_RELEASE.uiVersion}
+      >
         <p className="member-kicker">Second Seat companion</p>
         <h1>Meeting Copilot</h1>
         <p>
@@ -39,7 +43,7 @@ export default async function MeetingCopilotPage() {
         <a
           className="member-primary-button"
           data-meeting-copilot-launch
-          href={MEETING_COPILOT_URL}
+          href={MEETING_COPILOT_RELEASE.launchUrl}
           target="_blank"
           rel="noreferrer"
         >

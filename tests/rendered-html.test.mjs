@@ -879,6 +879,71 @@ test("Meeting Copilot and WhatsApp Support remain Second Seat navigation section
   );
 });
 
+test("Second Seat launches only the pinned validated Meeting Copilot release", async () => {
+  const release = await readFile(new URL("../app/lib/meeting-copilot-release.ts", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const pageSource = await readFile(new URL("../app/learn/meeting-copilot/page.tsx", import.meta.url), "utf8");
+
+  assert.match(release, /https:\/\/github\.com\/vividlabsai\/meeting-copilot/);
+  assert.match(release, /branch: "codex\/interview-profile-context"/);
+  assert.match(release, /commit: "1411f4d870c264d5827043e0c4dc61520254528a"/);
+  assert.match(release, /uiVersion: "20260905-clue-coaching-v1"/);
+  assert.match(release, /launchUrl: "http:\/\/127\.0\.0\.1:8123\/"/);
+  assert.match(shell, /MEETING_COPILOT_RELEASE\.launchUrl/);
+  assert.match(pageSource, /MEETING_COPILOT_RELEASE\.launchUrl/);
+  assert.doesNotMatch(shell, /const MEETING_COPILOT_URL/);
+  assert.doesNotMatch(pageSource, /const MEETING_COPILOT_URL/);
+
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "practice" }),
+  });
+  assert.equal(login.status, 200);
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+
+  const response = await request("/learn/meeting-copilot", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /data-member-layout=["']second-seat["']/i);
+  assert.match(html, /data-meeting-copilot-source-branch=["']codex\/interview-profile-context["']/i);
+  assert.match(html, /data-meeting-copilot-source-commit=["']1411f4d870c264d5827043e0c4dc61520254528a["']/i);
+  assert.match(html, /data-meeting-copilot-ui-version=["']20260905-clue-coaching-v1["']/i);
+  assert.match(html, /data-meeting-copilot-launch=["']true["']/i);
+  assert.match(html, /href=["']http:\/\/127\.0\.0\.1:8123\/["']/i);
+  assert.match(html, /target=["']_blank["']/i);
+  assert.doesNotMatch(html, /<iframe\b/i);
+});
+
+test("Vault cannot launch the pinned Meeting Copilot companion", async () => {
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "foundation" }),
+  });
+  assert.equal(login.status, 200);
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+
+  const response = await request("/learn/meeting-copilot", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Meeting Copilot joins you in the Second Seat/i);
+  assert.doesNotMatch(html, /data-meeting-copilot-launch/i);
+  assert.doesNotMatch(html, /href=["']http:\/\/127\.0\.0\.1:8123\/["']/i);
+});
+
 test("demo sign-in issues a protected session and opens the learner product", async () => {
   const login = await request("/api/demo-session", {
     method: "POST",

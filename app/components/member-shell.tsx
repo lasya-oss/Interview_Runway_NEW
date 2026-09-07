@@ -7,6 +7,7 @@ import type { DemoProfile } from "@/app/lib/demo-data";
 import { CurrentAccessCard } from "./current-access-card";
 import { RoadmapProgressProvider, RoadmapTrackLabel } from "@/app/learn/roadmap/learner-progress-client";
 import { FocusTimeTracker } from "@/app/learn/focus-time-tracker";
+import { MEETING_COPILOT_RELEASE } from "@/app/lib/meeting-copilot-release";
 import { DemoLogoutButton, LiveLogoutButton, LivePlanSwitcher } from "./member-actions";
 
 const MEMBER_NAV = [
@@ -19,8 +20,6 @@ const MEMBER_NAV = [
   { key: "whatsapp-support", href: "/learn/whatsapp-support", label: "WhatsApp Support", mark: "07", access: "practice" },
   { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "08", access: "coaching" },
 ] as const;
-
-const MEETING_COPILOT_URL = "http://127.0.0.1:8123/";
 
 const VAULT_SECTION_LABELS: Record<(typeof MEMBER_NAV)[number]["key"], string> = {
   today: "Dashboard",
@@ -199,7 +198,7 @@ function sectionForPathname(pathname: string | null): (typeof MEMBER_NAV)[number
 }
 
 function openMeetingCopilot() {
-  window.open(MEETING_COPILOT_URL, "_blank", "noopener,noreferrer");
+  window.open(MEETING_COPILOT_RELEASE.launchUrl, "_blank", "noopener,noreferrer");
 }
 
 function Brand() {
