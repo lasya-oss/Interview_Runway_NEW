@@ -10,6 +10,7 @@ import {
   type SecondSeatDimensionKey,
   type SecondSeatEvaluation,
 } from "@/app/lib/second-seat-engine";
+import { parseStoredSecondSeatEvaluation } from "@/app/lib/second-seat-ai-evaluator";
 import {
   FOUR_WEEK_PLAN,
   SECOND_SEAT_PLAN,
@@ -68,6 +69,7 @@ export type PracticeSessionRecord = {
   mockId: string;
   status: string;
   answers: string;
+  evaluation: string | null;
   startedAt: string;
   completedAt: string | null;
   updatedAt: string;
@@ -265,6 +267,7 @@ type PracticeRow = {
   mock_id: string;
   status: string;
   answers: string;
+  evaluation: string | null;
   started_at: string;
   completed_at: string | null;
   updated_at: string;
@@ -353,7 +356,7 @@ export async function loadUserHistorySources({
       .bind(email),
     database
       .prepare(
-        `SELECT id, mock_id, status, answers, started_at, completed_at, updated_at
+        `SELECT id, mock_id, status, answers, evaluation, started_at, completed_at, updated_at
          FROM second_seat_sessions WHERE lower(user_email) = ? ORDER BY started_at ASC`,
       )
       .bind(email),
@@ -404,6 +407,7 @@ export async function loadUserHistorySources({
     mockId: record.mock_id,
     status: record.status,
     answers: record.answers,
+    evaluation: record.evaluation,
     startedAt: record.started_at,
     completedAt: record.completed_at,
     updatedAt: record.updated_at,
@@ -452,7 +456,7 @@ export function buildUserHistoryReport(source: UserHistorySourceRecords): UserHi
     .map((session) => ({
       id: `feedback:${session.id}`,
       date: session.completedAt,
-      source: "Second Seat deterministic transcript evaluation",
+      source: "Second Seat stored assessment evaluation",
       relatedActivity: session.title,
       score: session.overallScore,
       strengths: session.strengths,
@@ -672,7 +676,8 @@ function buildPracticeHistory(records: readonly PracticeSessionRecord[]): Practi
     const mock = findSecondSeatMock(record.mockId);
     const completed = record.status === "completed" && Boolean(record.completedAt);
     const evaluation = completed && mock && answers.length === mock.turns.length
-      ? evaluateSecondSeatSession(mock, answers)
+      ? parseStoredSecondSeatEvaluation(record.evaluation, mock, answers)
+        ?? evaluateSecondSeatSession(mock, answers)
       : null;
     const sortedDimensions = evaluation
       ? [...evaluation.dimensions].sort((left, right) => right.score - left.score)
@@ -865,7 +870,7 @@ function buildTimeline({
               improvement ? `Primary improvement: ${improvement}` : null,
               recommendation ? `Recommended next action: ${recommendation}` : null,
             ].filter(Boolean).join(" "),
-        source: "second_seat_sessions + deterministic evaluation",
+        source: "second_seat_sessions + stored assessment evaluation",
       });
     }
   }

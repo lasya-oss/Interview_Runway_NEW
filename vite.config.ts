@@ -38,6 +38,10 @@ const localBindingConfig = {
     INTERNAL_FULL_ACCESS_DOMAIN: process.env.INTERNAL_FULL_ACCESS_DOMAIN ?? "",
     TEST_FOUNDATION_EMAILS: process.env.TEST_FOUNDATION_EMAILS ?? "",
     TEST_SECOND_SEAT_EMAILS: process.env.TEST_SECOND_SEAT_EMAILS ?? "",
+    CEREBRAS_API_KEY: process.env.CEREBRAS_API_KEY ?? "",
+    CEREBRAS_MODEL: process.env.CEREBRAS_MODEL ?? "gpt-oss-120b",
+    GROQ_API_KEY: process.env.GROQ_API_KEY ?? "",
+    GROQ_BRAIN_MODEL: process.env.GROQ_BRAIN_MODEL ?? "openai/gpt-oss-120b",
   },
 };
 

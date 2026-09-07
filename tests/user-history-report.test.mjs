@@ -422,7 +422,7 @@ test("the report consolidates real records, recomputes progress, and keeps missi
   assert.equal(report.feedbackHistory.length, 2);
   assert.equal(report.feedbackHistory[1].scoreChange, 0);
   assert.equal(report.feedbackHistory[0].date, "2026-07-04T09:30:00.000Z");
-  assert.match(report.feedbackHistory[0].source, /deterministic transcript evaluation/i);
+  assert.match(report.feedbackHistory[0].source, /stored assessment evaluation/i);
   assert.match(report.humanCalibration.sessionHistoryStatus, /^No recorded activity/i);
   assert.match(report.meetingCopilot.status, /^No recorded activity/i);
   assert.match(report.apiAndShowcase.status, /^No recorded activity/i);

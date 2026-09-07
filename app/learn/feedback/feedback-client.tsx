@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/app/lib/analytics";
+import type {
+  SecondSeatAnswerFeedback,
+  SecondSeatRubricScore,
+} from "@/app/lib/second-seat-engine";
 
 type FeedbackTab = "summary" | "evidence" | "actions";
 type Dimension = { key: string; label: string; score: number; delta: string; note: string };
@@ -11,7 +15,7 @@ type Action = { number: string; title: string; body: string; meta: string; href:
 
 const TABS: readonly { key: FeedbackTab; number: string; label: string; description: string }[] = [
   { key: "summary", number: "01", label: "Summary", description: "Scores + pattern" },
-  { key: "evidence", number: "02", label: "Transcript evidence", description: "Moments + scores" },
+  { key: "evidence", number: "02", label: "Answer review", description: "Original + improved" },
   { key: "actions", number: "03", label: "Plan changes", description: "What · why · next" },
 ];
 
@@ -26,6 +30,11 @@ export function FeedbackClient({
   mockTitle,
   insightTitle,
   insightBody,
+  scoreReason,
+  rubricScores,
+  answerFeedback,
+  evaluationSource,
+  evaluationNotice,
 }: {
   overall: number;
   dimensions: readonly Dimension[];
@@ -37,6 +46,11 @@ export function FeedbackClient({
   mockTitle: string;
   insightTitle?: string;
   insightBody?: string;
+  scoreReason?: string;
+  rubricScores?: readonly SecondSeatRubricScore[];
+  answerFeedback?: readonly SecondSeatAnswerFeedback[];
+  evaluationSource?: "ai" | "rubric_fallback";
+  evaluationNotice?: string;
 }) {
   const [tab, setTab] = useState<FeedbackTab>("summary");
   const [focusedDimension, setFocusedDimension] = useState<string | null>(null);
@@ -57,6 +71,11 @@ export function FeedbackClient({
         mockTitle={mockTitle}
         insightTitle={insightTitle}
         insightBody={insightBody}
+        scoreReason={scoreReason}
+        rubricScores={rubricScores}
+        answerFeedback={answerFeedback}
+        evaluationSource={evaluationSource}
+        evaluationNotice={evaluationNotice}
         tab={tab}
         onTabChange={setTab}
         focusedDimension={focusedDimension}
@@ -155,6 +174,11 @@ function SecondSeatFeedbackExperience({
   mockTitle,
   insightTitle,
   insightBody,
+  scoreReason,
+  rubricScores,
+  answerFeedback,
+  evaluationSource,
+  evaluationNotice,
   tab,
   onTabChange,
   focusedDimension,
@@ -169,6 +193,11 @@ function SecondSeatFeedbackExperience({
   mockTitle: string;
   insightTitle?: string;
   insightBody?: string;
+  scoreReason?: string;
+  rubricScores?: readonly SecondSeatRubricScore[];
+  answerFeedback?: readonly SecondSeatAnswerFeedback[];
+  evaluationSource?: "ai" | "rubric_fallback";
+  evaluationNotice?: string;
   tab: FeedbackTab;
   onTabChange: (tab: FeedbackTab) => void;
   focusedDimension: string | null;
@@ -195,6 +224,13 @@ function SecondSeatFeedbackExperience({
         </div>
       </section>
 
+      {evaluationNotice ? (
+        <div className="feedback-evaluation-notice" role="status">
+          <strong>{evaluationSource === "rubric_fallback" ? "Transcript saved · standard rubric used" : "Assessment note"}</strong>
+          <span>{evaluationNotice}</span>
+        </div>
+      ) : null}
+
       <SecondSeatFeedbackTabs tab={tab} onChange={onTabChange} />
 
       {tab === "summary" ? (
@@ -215,6 +251,23 @@ function SecondSeatFeedbackExperience({
                 <p>{dimension.note}</p>
               </article>
             ))}
+            {rubricScores?.length ? (
+              <section className="feedback-rubric" aria-labelledby="feedback-rubric-title">
+                <div className="feedback-rubric-heading">
+                  <div><p className="member-kicker">Evaluation rubric</p><h2 id="feedback-rubric-title">Why this score</h2></div>
+                  <p>{scoreReason ?? "Each category reflects evidence in the answers from this round."}</p>
+                </div>
+                <div className="feedback-rubric-grid">
+                  {rubricScores.map((rubric) => (
+                    <article key={rubric.key}>
+                      <div><strong>{rubric.label}</strong><b>{rubric.score}<small>/100</small></b></div>
+                      <i role="progressbar" aria-label={`${rubric.label} score`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={rubric.score}><b style={{ width: `${Math.max(0, Math.min(100, rubric.score))}%` }} /></i>
+                      <p>{rubric.reason}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
           <aside className="feedback-primary-insight">
             <span>Adaptive plan change</span>
@@ -227,7 +280,40 @@ function SecondSeatFeedbackExperience({
 
       {tab === "evidence" ? (
         <section id="feedback-panel-evidence" className="feedback-evidence" role="tabpanel" aria-labelledby="feedback-tab-evidence" tabIndex={0}>
-          <div className="feedback-evidence-intro"><p className="member-kicker">Traceable observations</p><h2>Every correction points back to a moment.</h2><p>{live ? "Your transcript observations are linked to the dimensions they can improve. Select a score to return to its summary." : "Each preview excerpt is connected to the practice score it is meant to improve."}</p></div>
+          <div className="feedback-evidence-intro"><p className="member-kicker">Traceable answer review</p><h2>See what worked, what was missing, and how to improve it.</h2><p>{live ? "Your original answers stay beside each correction and improved version, so every score is explainable." : "Each preview excerpt is connected to the practice score it is meant to improve."}</p></div>
+          {answerFeedback?.length ? (
+            <div className="feedback-answer-list">
+              {answerFeedback.map((answer, index) => (
+                <article className="feedback-answer-card" key={answer.turnId}>
+                  <header>
+                    <div><span>Answer {String(index + 1).padStart(2, "0")}</span><strong>{verdictText(answer.verdict)}</strong></div>
+                    <b>{answer.score}<small>/100</small></b>
+                  </header>
+                  <div className="feedback-answer-question"><span>Question</span><h3>{answer.question}</h3></div>
+                  <section className="feedback-original-answer"><span>Your original answer</span><blockquote>“{answer.originalAnswer}”</blockquote></section>
+                  <p className="feedback-answer-score-reason"><span>Why this score</span>{answer.scoreReason}</p>
+                  <div className="feedback-answer-rubric" aria-label={`Rubric scores for answer ${index + 1}`}>
+                    {answer.rubricScores.map((rubric) => (
+                      <div key={rubric.key}><span>{rubric.label}</span><strong>{rubric.score}<small>/100</small></strong><p>{rubric.reason}</p></div>
+                    ))}
+                  </div>
+                  <div className="feedback-learning-grid">
+                    <LearningList title="What you did well" items={uniqueItems(answer.strengths, answer.correctPoints)} tone="positive" />
+                    <LearningList title="What is incorrect" items={answer.incorrectPoints} tone="correction" />
+                    <LearningList title="What is missing" items={answer.missingPoints} tone="neutral" />
+                    <LearningList title="How to improve" items={uniqueItems(answer.weaknesses, answer.improvementActions)} tone="action" />
+                  </div>
+                  <div className="feedback-quality-notes">
+                    <div><span>Relevance</span><p>{answer.relevanceFeedback}</p></div>
+                    <div><span>Clarity</span><p>{answer.clarityFeedback}</p></div>
+                    <div><span>Technical accuracy</span><p>{answer.technicalAccuracyFeedback}</p></div>
+                    <div><span>Interview quality</span><p>{answer.interviewQualityFeedback}</p></div>
+                  </div>
+                  <section className="feedback-improved-answer"><span>Improved answer</span><blockquote>“{answer.improvedAnswer}”</blockquote><div><strong>Why this would score higher</strong><p>{answer.whyImprovedAnswerIsBetter}</p></div></section>
+                </article>
+              ))}
+            </div>
+          ) : (
           <div className="feedback-evidence-list">
             {evidence.map((item, index) => {
               const linkedDimensions = item.dimensionKeys
@@ -256,6 +342,7 @@ function SecondSeatFeedbackExperience({
               );
             })}
           </div>
+          )}
         </section>
       ) : null}
 
@@ -311,6 +398,46 @@ function SecondSeatFeedbackTabs({ tab, onChange }: { tab: FeedbackTab; onChange:
       ))}
     </div>
   );
+}
+
+function LearningList({
+  title,
+  items,
+  tone,
+}: {
+  title: string;
+  items: readonly string[];
+  tone: "positive" | "correction" | "neutral" | "action";
+}) {
+  const fallback = title === "What you did well"
+    ? "No clear strength was identified in this answer yet."
+    : title === "What is incorrect"
+      ? "No major factual errors were identified."
+      : title === "What is missing"
+        ? "No important missing points were identified."
+        : "Keep the correct content and make the reasoning more explicit.";
+  return (
+    <section className="feedback-learning-card" data-tone={tone}>
+      <h4>{title}</h4>
+      <ul>{(items.length ? items : [fallback]).map((item, index) => <li key={`${title}-${index}`}>{item}</li>)}</ul>
+    </section>
+  );
+}
+
+function uniqueItems(...groups: readonly (readonly string[])[]) {
+  const seen = new Set<string>();
+  return groups.flatMap((items) => items).filter((item) => {
+    const key = item.trim().toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function verdictText(verdict: SecondSeatAnswerFeedback["verdict"]) {
+  if (verdict === "off-topic") return "Off-topic answer";
+  if (verdict === "misconception") return "Misconception found";
+  return `${verdict[0].toUpperCase()}${verdict.slice(1)} answer`;
 }
 
 function actionDetails(action: Action, index: number, dimensions: readonly Dimension[], live: boolean) {

@@ -134,6 +134,11 @@ export default async function FeedbackPage({
         mockTitle={feedbackSession ? findSecondSeatMock(feedbackSession.mockId)?.title ?? "Your practice round" : isLiveLearner ? "Your practice round" : "Design a metrics pipeline"}
         insightTitle={liveEvaluation?.insightTitle}
         insightBody={liveEvaluation?.insightBody}
+        scoreReason={liveEvaluation?.scoreReason}
+        rubricScores={liveEvaluation?.rubricScores}
+        answerFeedback={liveEvaluation?.answerFeedback}
+        evaluationSource={liveEvaluation?.evaluationSource}
+        evaluationNotice={liveEvaluation?.evaluationNotice}
       />
     </div>
   );

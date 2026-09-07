@@ -106,6 +106,7 @@ export function PracticeClient({
       return;
     }
     const nextAnswers = [...answers, answer];
+    let savedAnswers = nextAnswers;
     setError(null);
     setSaving(true);
     try {
@@ -126,23 +127,50 @@ export function PracticeClient({
         if (!response.ok || !result.session) {
           throw new Error(result.error ?? "Your response could not be saved");
         }
+        savedAnswers = result.session.answers;
         nextEvaluation = result.session.evaluation;
       } else if (nextAnswers.length === mock.turns.length) {
         nextEvaluation = evaluateSecondSeatSession(mock, nextAnswers);
       }
 
-      setAnswers(nextAnswers);
+      setAnswers(savedAnswers);
       setDraft("");
-      if (nextAnswers.length === mock.turns.length) {
+      if (savedAnswers.length === mock.turns.length) {
         setEvaluation(nextEvaluation);
         setState("complete");
       } else {
-        setStep(nextAnswers.length);
+        setStep(savedAnswers.length);
       }
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "Your response could not be saved",
       );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const retryDetailedEvaluation = async () => {
+    if (!isLive || !sessionId || saving) return;
+    setError(null);
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/second-seat/sessions/${sessionId}`, {
+        body: JSON.stringify({ answers }),
+        headers: { "content-type": "application/json" },
+        method: "PUT",
+      });
+      const result = (await response.json()) as { session?: SecondSeatSession; error?: string };
+      if (!response.ok || !result.session?.evaluation) {
+        throw new Error(result.error ?? "Detailed feedback could not be retried");
+      }
+      setAnswers(result.session.answers);
+      setEvaluation(result.session.evaluation);
+      if (result.session.evaluation.evaluationSource !== "ai") {
+        setError("Detailed AI feedback is still unavailable. Your answers and standard rubric feedback remain saved.");
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Detailed feedback could not be retried");
     } finally {
       setSaving(false);
     }
@@ -258,14 +286,20 @@ export function PracticeClient({
     return (
       <div className="practice-workspace practice-complete">
         <section>
-          <p className="member-kicker">Practice score saved</p>
+          <p className="member-kicker">{evaluation.evaluationSource === "ai" ? "Structured feedback saved" : "Practice score saved"}</p>
           <span className="practice-complete-mark">{evaluation.overall} / 100</span>
           <h1>Your transcript has a next move.</h1>
           <p>{evaluation.insightBody}</p>
           <div className="practice-complete-actions">
             <Link className="member-primary-button" href={feedbackHref(sessionId, isLive)}>Open your feedback <span aria-hidden="true">↗</span></Link>
+            {evaluation.aiEvaluationRetryAvailable ? (
+              <button className="member-secondary-button" type="button" onClick={() => void retryDetailedEvaluation()} disabled={saving}>
+                {saving ? "Retrying detailed feedback…" : "Retry detailed feedback"}
+              </button>
+            ) : null}
             <button className="member-secondary-button" type="button" onClick={() => { setState("briefing"); setEvaluation(null); }}>Run another round</button>
           </div>
+          {error ? <p className="practice-inline-error" role="alert">{error}</p> : null}
         </section>
         <div className="practice-transcript-summary">
           {answers.map((answer, index) => (
@@ -323,9 +357,9 @@ export function PracticeClient({
             maxLength={MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS}
           />
           <small className="practice-response-count" id="practice-response-guidance">{MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS} character minimum · {draft.length} / {MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS}</small>
-          <button className="member-primary-button" type="button" onClick={() => void submit()} disabled={!draft.trim() || saving}>{saving ? "Saving response…" : step === mock.turns.length - 1 ? "Finish and score" : "Submit and continue"} <span aria-hidden="true">↗</span></button>
+          <button className="member-primary-button" type="button" onClick={() => void submit()} disabled={!draft.trim() || saving}>{saving ? (step === mock.turns.length - 1 ? "Evaluating your answers…" : "Saving response…") : step === mock.turns.length - 1 ? "Finish and get feedback" : "Submit and continue"} <span aria-hidden="true">↗</span></button>
           {error ? <p className="practice-inline-error" id="practice-response-error" role="alert">{error}</p> : null}
-          <p>Your transcript is evaluated against the round rubric after the final turn. The score explains what to practise next.</p>
+          <p>{isLive ? "After the final turn, your answers are securely reviewed for correctness, relevance, completeness, technical accuracy, clarity, and interview quality." : "This preview uses the standard round rubric. Live Second Seat rounds add a detailed answer-by-answer review."}</p>
         </aside>
       </div>
     </div>

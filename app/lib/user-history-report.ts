@@ -7,6 +7,7 @@ import {
   secondSeatSessions,
 } from "@/db/schema";
 import { evaluateSecondSeatSession, findSecondSeatMock, type SecondSeatEvaluation } from "@/app/lib/second-seat-engine";
+import { parseStoredSecondSeatEvaluation } from "@/app/lib/second-seat-ai-evaluator";
 import { isInternalFullAccessEmail } from "@/app/lib/internal-access";
 import { roadmapPlanForWeeks, roadmapProgressFor, type RoadmapProgressSnapshot } from "@/app/lib/learner-progress";
 import { createTextPdf } from "@/app/lib/text-pdf";
@@ -387,7 +388,8 @@ function sessionSummary(record: SecondSeatSessionRecord): UserHistoryReport["sec
   const mock = findSecondSeatMock(record.mockId);
   const answers = parseStringArray(record.answers);
   const evaluation = record.status === "completed" && mock && answers.length === mock.turns.length
-    ? evaluateSecondSeatSession(mock, answers)
+    ? parseStoredSecondSeatEvaluation(record.evaluation, mock, answers)
+      ?? evaluateSecondSeatSession(mock, answers)
     : null;
   return {
     id: record.id,

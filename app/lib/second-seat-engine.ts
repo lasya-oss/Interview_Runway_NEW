@@ -51,6 +51,58 @@ export type SecondSeatEvidence = {
   correction: string;
 };
 
+export type SecondSeatRubricKey =
+  | "correctness"
+  | "relevance"
+  | "completeness"
+  | "technicalAccuracy"
+  | "clarity"
+  | "interviewQuality";
+
+export type SecondSeatRubricScore = {
+  key: SecondSeatRubricKey;
+  label: string;
+  score: number;
+  reason: string;
+};
+
+export type SecondSeatAnswerVerdict =
+  | "strong"
+  | "sound"
+  | "partial"
+  | "incorrect"
+  | "misconception"
+  | "off-topic";
+
+export type SecondSeatAnswerFeedback = {
+  turnId: string;
+  question: string;
+  originalAnswer: string;
+  score: number;
+  scoreReason: string;
+  verdict: SecondSeatAnswerVerdict;
+  rubricScores: readonly SecondSeatRubricScore[];
+  strengths: readonly string[];
+  correctPoints: readonly string[];
+  weaknesses: readonly string[];
+  incorrectPoints: readonly string[];
+  missingPoints: readonly string[];
+  relevanceFeedback: string;
+  clarityFeedback: string;
+  technicalAccuracyFeedback: string;
+  interviewQualityFeedback: string;
+  improvementActions: readonly string[];
+  improvedAnswer: string;
+  whyImprovedAnswerIsBetter: string;
+};
+
+export type SecondSeatEvaluationProvider = {
+  name: "cerebras" | "groq";
+  model: string;
+  promptVersion: string;
+  generatedAt: string;
+};
+
 export type SecondSeatEvaluation = {
   overall: number;
   dimensions: readonly {
@@ -70,6 +122,19 @@ export type SecondSeatEvaluation = {
     meta: string;
     href: string;
   }[];
+  /** Version 1 is the original deterministic rubric; version 2 is AI-enriched. */
+  schemaVersion?: 1 | 2;
+  evaluationSource?: "ai" | "rubric_fallback";
+  scoreReason?: string;
+  rubricScores?: readonly SecondSeatRubricScore[];
+  answerFeedback?: readonly SecondSeatAnswerFeedback[];
+  provider?: SecondSeatEvaluationProvider;
+  evaluationNotice?: string;
+  assessmentFingerprint?: string;
+  /** Server-managed provider attempts for a fallback evaluation. */
+  aiEvaluationAttempts?: number;
+  /** True only while another bounded provider attempt may be requested. */
+  aiEvaluationRetryAvailable?: boolean;
 };
 
 export const MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS = 40;
@@ -482,6 +547,10 @@ export function evaluateSecondSeatSession(
     overall,
     dimensions,
     evidence,
+    schemaVersion: 1,
+    evaluationSource: "rubric_fallback",
+    scoreReason: "This score uses the original Interview Runway signal-coverage rubric across the completed transcript.",
+    evaluationNotice: "Detailed AI coaching was unavailable for this assessment, so your saved answers were evaluated with the original Interview Runway rubric.",
     insightTitle: lowest ? `Make ${lowest.label.toLowerCase()} visible earlier.` : "Make the decision easy to follow.",
     insightBody: hasIrrelevantAnswer
       ? "At least one submitted answer did not address its actual question, so unrelated writing received no positive quality score. Rehearse each question as a direct decision before adding supporting detail."

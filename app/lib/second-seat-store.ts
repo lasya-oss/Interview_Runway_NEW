@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { getDb } from "@/db";
 import {
   evaluateSecondSeatSession,
@@ -6,6 +6,7 @@ import {
   type SecondSeatEvaluation,
   type SecondSeatMock,
 } from "./second-seat-engine";
+import { parseStoredSecondSeatEvaluation } from "./second-seat-ai-evaluator";
 import { secondSeatSessions } from "@/db/schema";
 
 export type SecondSeatSession = {
@@ -18,6 +19,14 @@ export type SecondSeatSession = {
   completedAt: string | null;
   updatedAt: string;
 };
+
+export type SecondSeatEvaluationClaim = {
+  attempt: number;
+  marker: string;
+};
+
+const MAXIMUM_AI_EVALUATION_ATTEMPTS = 2;
+const STALE_AI_EVALUATION_CLAIM_MS = 30_000;
 
 export async function createSecondSeatSession(
   email: string,
@@ -115,6 +124,101 @@ export async function saveSecondSeatAnswers(
   return getSecondSeatSession(email, id);
 }
 
+export async function saveSecondSeatEvaluation(
+  email: string,
+  id: string,
+  answers: readonly string[],
+  claim: SecondSeatEvaluationClaim,
+  evaluation: SecondSeatEvaluation,
+) {
+  const now = new Date().toISOString();
+  const storedEvaluation = evaluation.evaluationSource === "ai"
+    ? evaluation
+    : {
+        ...evaluation,
+        aiEvaluationAttempts: claim.attempt,
+        aiEvaluationRetryAvailable: claim.attempt < MAXIMUM_AI_EVALUATION_ATTEMPTS,
+      };
+  await (await getDb())
+    .update(secondSeatSessions)
+    .set({ evaluation: JSON.stringify(storedEvaluation), updatedAt: now })
+    .where(
+      and(
+        eq(secondSeatSessions.id, id),
+        eq(secondSeatSessions.userEmail, normalizeEmail(email)),
+        eq(secondSeatSessions.status, "completed"),
+        eq(secondSeatSessions.answers, JSON.stringify(answers)),
+        eq(secondSeatSessions.evaluation, claim.marker),
+      ),
+    );
+  return getSecondSeatSession(email, id);
+}
+
+/**
+ * Atomically claims the remote evaluation for one immutable transcript.
+ *
+ * The claim lives inside the existing evaluation JSON column, avoiding a new
+ * persistence model while ensuring concurrent final PUTs cannot double-spend
+ * provider calls. A stale interrupted claim may be recovered once; each
+ * session is capped at two provider attempts.
+ */
+export async function claimSecondSeatEvaluation(
+  email: string,
+  id: string,
+  answers: readonly string[],
+): Promise<SecondSeatEvaluationClaim | null> {
+  const database = await getDb();
+  const normalizedEmail = normalizeEmail(email);
+  const [record] = await database
+    .select()
+    .from(secondSeatSessions)
+    .where(
+      and(
+        eq(secondSeatSessions.id, id),
+        eq(secondSeatSessions.userEmail, normalizedEmail),
+        eq(secondSeatSessions.status, "completed"),
+      ),
+    )
+    .limit(1);
+  if (!record || !sameAnswers(parseAnswers(record.answers), answers)) return null;
+
+  const mock = findSecondSeatMock(record.mockId);
+  if (!mock || parseStoredSecondSeatEvaluation(record.evaluation, mock, answers)) return null;
+
+  const state = evaluationAttemptState(record.evaluation);
+  if (state.pending && !state.stale) return null;
+  if (state.attempts >= MAXIMUM_AI_EVALUATION_ATTEMPTS) return null;
+
+  const claim: SecondSeatEvaluationClaim = {
+    attempt: state.attempts + 1,
+    marker: "",
+  };
+  claim.marker = JSON.stringify({
+    schemaVersion: 2,
+    evaluationSource: "ai_pending",
+    claimId: crypto.randomUUID(),
+    attempt: claim.attempt,
+    startedAt: new Date().toISOString(),
+  });
+  const currentEvaluationCondition = record.evaluation === null
+    ? isNull(secondSeatSessions.evaluation)
+    : eq(secondSeatSessions.evaluation, record.evaluation);
+  const claimed = await database
+    .update(secondSeatSessions)
+    .set({ evaluation: claim.marker, updatedAt: new Date().toISOString() })
+    .where(
+      and(
+        eq(secondSeatSessions.id, id),
+        eq(secondSeatSessions.userEmail, normalizedEmail),
+        eq(secondSeatSessions.status, "completed"),
+        eq(secondSeatSessions.answers, JSON.stringify(answers)),
+        currentEvaluationCondition,
+      ),
+    )
+    .returning({ id: secondSeatSessions.id });
+  return claimed.length === 1 ? claim : null;
+}
+
 function toSession(
   record: typeof secondSeatSessions.$inferSelect | typeof secondSeatSessions.$inferInsert,
 ): SecondSeatSession {
@@ -151,10 +255,48 @@ function evaluationFromAnswers(
   const mock = findSecondSeatMock(record.mockId);
   if (!mock || answers.length !== mock.turns.length) return null;
 
-  // The transcript is the source of truth on reads. Recompute the deterministic
-  // evaluation from the persisted answers so stale or missing JSON cannot make a
-  // completed attempt display another attempt's feedback.
-  return evaluateSecondSeatSession(mock, answers);
+  const persisted = parseStoredSecondSeatEvaluation(record.evaluation, mock, answers);
+  if (persisted) return persisted;
+
+  // Version 1 rows predate immutable AI feedback. Recompute their deterministic
+  // rubric from the transcript, while version 2 rows retain the exact validated
+  // provider result that the learner received when the round was completed.
+  const fallback = evaluateSecondSeatSession(mock, answers);
+  const state = evaluationAttemptState(record.evaluation);
+  return {
+    ...fallback,
+    aiEvaluationAttempts: state.attempts,
+    aiEvaluationRetryAvailable:
+      !state.pending && state.attempts < MAXIMUM_AI_EVALUATION_ATTEMPTS,
+  };
+}
+
+function evaluationAttemptState(value: string | null | undefined) {
+  try {
+    const parsed = value ? JSON.parse(value) as Record<string, unknown> : null;
+    if (!parsed || typeof parsed !== "object") {
+      return { attempts: 0, pending: false, stale: false };
+    }
+    if (parsed.evaluationSource === "ai_pending") {
+      const attempts = Number.isInteger(parsed.attempt) ? Number(parsed.attempt) : 0;
+      const startedAt = typeof parsed.startedAt === "string" ? Date.parse(parsed.startedAt) : Number.NaN;
+      return {
+        attempts,
+        pending: true,
+        stale: !Number.isFinite(startedAt) || Date.now() - startedAt >= STALE_AI_EVALUATION_CLAIM_MS,
+      };
+    }
+    const attempts = Number.isInteger(parsed.aiEvaluationAttempts)
+      ? Number(parsed.aiEvaluationAttempts)
+      : 0;
+    return { attempts, pending: false, stale: false };
+  } catch {
+    return { attempts: 0, pending: false, stale: false };
+  }
+}
+
+function sameAnswers(left: readonly string[], right: readonly string[]) {
+  return left.length === right.length && left.every((answer, index) => answer === right[index]);
 }
 
 function normalizeEmail(value: string) {
