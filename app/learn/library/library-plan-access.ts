@@ -13,18 +13,22 @@ const LIBRARY_PLAN_RANK: Readonly<Record<DemoTier, number>> = {
 };
 
 /**
- * Library access is cumulative even when an upstream access list contains
- * only the highest entitled plan.
+ * Library access is cumulative up to the active plan. The upstream access
+ * list remains a server-side ceiling so a stale profile cannot unlock more
+ * than the account is entitled to use.
  */
 export function entitledLibraryPlans(
   profileId: DemoTier,
   availablePlans: readonly DemoTier[] = [],
 ): DemoTier[] {
   const candidates = availablePlans.length ? availablePlans : [profileId];
-  const highestPlan = candidates.reduce<DemoTier>(
+  const highestAvailablePlan = candidates.reduce<DemoTier>(
     (highest, plan) => LIBRARY_PLAN_RANK[plan] > LIBRARY_PLAN_RANK[highest] ? plan : highest,
     "foundation",
   );
-  const highestRank = LIBRARY_PLAN_RANK[highestPlan];
+  const highestRank = Math.min(
+    LIBRARY_PLAN_RANK[profileId],
+    LIBRARY_PLAN_RANK[highestAvailablePlan],
+  );
   return LIBRARY_PLAN_ORDER.filter((plan) => LIBRARY_PLAN_RANK[plan] <= highestRank);
 }

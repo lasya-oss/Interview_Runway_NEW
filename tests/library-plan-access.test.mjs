@@ -28,3 +28,10 @@ test("a highest-only access list still unlocks its lower Library plans", () => {
 test("a stale profile cannot make an unentitled Library plan selected", () => {
   assert.deepEqual(entitledLibraryPlans("premium", ["foundation"]), ["foundation"]);
 });
+
+test("the active Vault plan cannot expose higher plan cards", () => {
+  assert.deepEqual(
+    entitledLibraryPlans("foundation", ["foundation", "practice", "premium"]),
+    ["foundation"],
+  );
+});
