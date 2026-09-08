@@ -594,7 +594,8 @@ test("Library plan cards expose cumulative locked and unlocked states", async ()
   assert.match(libraryClient, /const defaultPlan = entitledPlanIds\.includes\(profileId\)/i);
   assert.match(libraryClient, /data-access-state=\{isAvailable \? "unlocked" : "locked"\}/i);
   assert.match(libraryClient, /aria-label=\{`\$\{plan\.label\} plan — \$\{isAvailable \? "unlocked" : "locked"\}`\}/i);
-  assert.match(libraryClient, /isAvailable \? `\$\{planCount\.toLocaleString\("en-IN"\)\} materials` : "🔒 Locked"/i);
+  assert.match(libraryClient, /isAvailable \? `\$\{planCount\.toLocaleString\("en-IN"\)\} materials` : <span className="library-plan-card__lock-status"><LockIcon \/> Locked<\/span>/i);
+  assert.doesNotMatch(libraryClient, /🔒/u);
   assert.match(libraryClient, /disabled=\{!isAvailable\}/i);
 });
 

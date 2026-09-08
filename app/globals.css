@@ -6147,6 +6147,9 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .library-plan-card > p { margin: 9px 0 0; color: #63757e; font-size: 10px; line-height: 1.5; }
 .library-plan-card__footer { width: 100%; margin-top: auto; padding-top: 17px; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #a6421d; font-family: var(--font-mono); font-size: 7px; letter-spacing: .07em; text-transform: uppercase; }
 .library-plan-card__footer b { color: var(--afterburner); font-size: 15px; line-height: 1; }
+.library-plan-card__lock-status { display: inline-flex; align-items: center; gap: 5px; color: #6d828d; }
+.library-plan-card__lock-icon { width: 14px; height: 14px; flex: 0 0 auto; }
+.library-plan-card__footer > b .library-plan-card__lock-icon { width: 16px; height: 16px; }
 .library-category-results--plan-first { margin-top: 18px; }
 .library-search-results { margin-top: 18px; }
 .library-start-here { margin-top: 18px; overflow: hidden; border: 1px solid rgba(255,107,44,.28); border-radius: 16px; background: linear-gradient(135deg, rgba(255,250,247,.86), rgba(255,255,255,.5)); box-shadow: inset 0 1px rgba(255,255,255,.82); }

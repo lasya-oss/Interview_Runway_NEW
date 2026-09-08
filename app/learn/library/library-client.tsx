@@ -72,6 +72,16 @@ function accessLabel(tier: DemoTier) {
   return LIBRARY_PLANS.find((plan) => plan.id === tier)?.label ?? "Library";
 }
 
+function LockIcon() {
+  return (
+    <svg className="library-plan-card__lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="10" width="14" height="10" rx="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+      <path d="M12 14v2" />
+    </svg>
+  );
+}
+
 function materialAccessLabel(plan: DemoTier) {
   return `Available in ${accessLabel(plan)}`;
 }
@@ -422,8 +432,8 @@ export function LibraryClient({
                 <strong>{plan.detail}</strong>
                 <p>{plan.description}</p>
                 <span className="library-plan-card__footer">
-                  {isAvailable ? `${planCount.toLocaleString("en-IN")} materials` : "🔒 Locked"}
-                  <b aria-hidden="true">{isSelected ? "✓" : isAvailable ? "↗" : "🔒"}</b>
+                  {isAvailable ? `${planCount.toLocaleString("en-IN")} materials` : <span className="library-plan-card__lock-status"><LockIcon /> Locked</span>}
+                  <b aria-hidden="true">{isSelected ? "✓" : isAvailable ? "↗" : <LockIcon />}</b>
                 </span>
               </button>
             );
