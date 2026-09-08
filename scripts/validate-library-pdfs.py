@@ -18,7 +18,7 @@ SOURCE = ROOT / "scripts/generate-roadmap-learning-pdfs.py"
 tree = ast.parse(SOURCE.read_text(encoding="utf-8"))
 calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call)
          and isinstance(node.func, ast.Name) and node.func.id == "worked_example_table"]
-assert len(calls) == 48, "Expected all 48 completed teaching tables"
+assert len(calls) == 56, "Expected all 56 completed teaching tables"
 cells = 0
 for call in calls:
     headers, rows, widths = [ast.literal_eval(arg) for arg in call.args]
@@ -136,9 +136,77 @@ for spec in module.SPECS:
                        for c in page.chars), f"Out-of-bounds text: {path.name}"
         coach_results.append({"filename": path.name, "pages": len(pdf.pages)})
 assert len(coach_results) == len(coach_requirements)
+
+practice_requirements = {
+    "second-seat_metrics-pipeline-scored-replay.pdf": {
+        "minimum_pages": 7,
+        "phrases": [
+            "Design a Metrics Pipeline - Scored Mock Replay",
+            "The 38-minute interview contract",
+            "Annotated scored replay",
+            "Explain the representative score",
+            "A stronger 90-second opening",
+        ],
+    },
+    "second-seat_queue-backlog-debugging-replay.pdf": {
+        "minimum_pages": 7,
+        "phrases": [
+            "Debug a Queue Backlog - Production Debugging Replay",
+            "The 31-minute incident conversation",
+            "Contain before you scale",
+            "Treat retries and dead letters as product behavior",
+            "Explain the 71",
+        ],
+    },
+    "second-seat_resume-profile-role-alignment-lab.pdf": {
+        "minimum_pages": 7,
+        "phrases": [
+            "Resume Profile Lab",
+            "The 25-minute guided lab",
+            "Use the same 0-2 rubric",
+            "Compare revisions one variable at a time",
+            "Final save checklist",
+        ],
+    },
+    "second-seat_compensation-conversation-rehearsal.pdf": {
+        "minimum_pages": 7,
+        "phrases": [
+            "Compensation Conversation Rehearsal",
+            "The 20-minute rehearsal",
+            "Respond to location-based pushback calmly",
+            "A branching conversation prevents rehearsed monologues",
+            "Close without creating a false agreement",
+        ],
+    },
+}
+practice_results = []
+for spec in module.SPECS:
+    requirement = practice_requirements.get(spec.filename)
+    if not requirement:
+        continue
+    path = directory / spec.filename
+    assert path.read_bytes().startswith(b"%PDF-")
+    with pdfplumber.open(path) as pdf:
+        texts = [page.extract_text() or "" for page in pdf.pages]
+        assert len(texts) >= requirement["minimum_pages"], f"Too few pages: {path.name}"
+        assert all(len(text.strip()) >= 240 for text in texts), f"Sparse page: {path.name}"
+        assert len(set(texts)) == len(texts), f"Duplicate page: {path.name}"
+        full_text = " ".join(texts)
+        normalized_text = re.sub(r"\s+", " ", full_text).casefold()
+        assert "ai practice" in normalized_text, f"Wrong edition: {path.name}"
+        assert "fictional worked example" in normalized_text, f"Missing example boundary: {path.name}"
+        assert not re.search(r"\b(?:TODO|TBD|LOREM IPSUM)\b|Source material not supplied yet|_{4,}", full_text, re.I), path.name
+        assert all(re.sub(r"\s+", " ", phrase).casefold() in normalized_text for phrase in requirement["phrases"]), path.name
+        for page in pdf.pages:
+            assert all(0 <= c["x0"] <= c["x1"] <= page.width + 0.5
+                       and 0 <= c["top"] <= c["bottom"] <= page.height + 0.5
+                       for c in page.chars), f"Out-of-bounds text: {path.name}"
+        practice_results.append({"filename": path.name, "pages": len(pdf.pages)})
+assert len(practice_results) == len(practice_requirements)
 print(json.dumps({
     "worked_tables": len(calls),
     "populated_cells": cells,
     "repaired_pdfs": results,
     "human_calibration_pdfs": coach_results,
+    "practice_replay_pdfs": practice_results,
 }, indent=2))

@@ -749,6 +749,40 @@ test("Human Calibration coach-room records open three distinct first-party PDFs"
   assert.equal(new Set(hrefs).size, expected.size);
 });
 
+test("Human Calibration cumulative practice records open four distinct first-party PDFs", async () => {
+  const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const selection = await readFile(new URL("../app/lib/active-library-selection.ts", import.meta.url), "utf8");
+  const pdfManifest = await readFile(new URL("../app/lib/drive-pdf-guides.ts", import.meta.url), "utf8");
+  const libraryCatalog = await readFile(new URL("../app/learn/library/library-catalog.ts", import.meta.url), "utf8");
+  const records = [...data.matchAll(/\{\s*slug: "([^"]+)"[\s\S]*?\n  \},/g)].map((match) => ({
+    slug: match[1],
+    source: match[0],
+  }));
+  const expected = new Map([
+    ["metrics-pipeline-mock", "/pdf-guides/second-seat_metrics-pipeline-scored-replay.pdf"],
+    ["queue-backlog-mock", "/pdf-guides/second-seat_queue-backlog-debugging-replay.pdf"],
+    ["resume-signal-lab", "/pdf-guides/second-seat_resume-profile-role-alignment-lab.pdf"],
+    ["negotiation-rehearsal", "/pdf-guides/second-seat_compensation-conversation-rehearsal.pdf"],
+  ]);
+
+  const hrefs = [];
+  for (const [slug, href] of expected) {
+    const record = records.find((candidate) => candidate.slug === slug);
+    assert.ok(record, slug);
+    assert.match(record.source, /tier: "practice"/, `${slug}: preserve owning tier`);
+    assert.match(record.source, new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), slug);
+    const filename = href.split("/").at(-1);
+    assert.doesNotMatch(selection, new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `${slug}: avoid duplicate PDF-shelf record`);
+    assert.doesNotMatch(pdfManifest, new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `${slug}: keep canonical LearningMaterial card`);
+    assert.match(libraryCatalog, new RegExp(`"${slug}"`), `${slug}: preserve existing Second Seat catalog suppression`);
+    const pdf = await readFile(new URL(`../public${href}`, import.meta.url));
+    assert.equal(pdf.subarray(0, 5).toString(), "%PDF-", slug);
+    assert.ok(pdf.length > 20_000, `${slug}: substantive PDF`);
+    hrefs.push(href);
+  }
+  assert.equal(new Set(hrefs).size, expected.size);
+});
+
 test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable", async () => {
   const filenames = [
     "career_target-role-evidence-map.pdf",

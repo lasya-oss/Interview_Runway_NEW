@@ -407,6 +407,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Intermediate",
     roadmap: "Practice loop",
     progress: 100,
+    demoAsset: { href: "/pdf-guides/second-seat_metrics-pipeline-scored-replay.pdf", label: "Open the metrics-pipeline scored replay" },
   },
   {
     slug: "queue-backlog-mock",
@@ -423,6 +424,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Intermediate",
     roadmap: "Practice loop",
     progress: 100,
+    demoAsset: { href: "/pdf-guides/second-seat_queue-backlog-debugging-replay.pdf", label: "Open the queue-backlog debugging replay" },
   },
   {
     slug: "resume-signal-lab",
@@ -439,6 +441,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Practice loop",
     progress: 35,
+    demoAsset: { href: "/pdf-guides/second-seat_resume-profile-role-alignment-lab.pdf", label: "Open the resume profile lab" },
   },
   {
     slug: "negotiation-rehearsal",
@@ -455,6 +458,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Practice loop",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/second-seat_compensation-conversation-rehearsal.pdf", label: "Open the compensation conversation rehearsal" },
   },
   {
     slug: "architecture-narrative",
