@@ -471,6 +471,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Senior → Staff",
     roadmap: "Coach assigned",
     progress: 60,
+    demoAsset: { href: "/pdf-guides/coaching_architecture-narrative-worksheet.pdf", label: "Open the architecture narrative worksheet" },
   },
   {
     slug: "target-company-brief",
@@ -487,6 +488,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Senior → Staff",
     roadmap: "Interview week",
     progress: 80,
+    demoAsset: { href: "/pdf-guides/coaching_target-company-preparation-guide.pdf", label: "Open the target-company preparation guide" },
   },
   {
     slug: "interview-day-run-sheet",
@@ -503,6 +505,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Interview day",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/coaching_interview-day-run-sheet.pdf", label: "Open the interview-day run sheet" },
   },
 ] as const;
 
