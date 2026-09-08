@@ -78,7 +78,7 @@ export default async function WhatsAppSupportPage() {
               <path d="M20 29c1.2 1.5 2.5 2.2 4 2.2s2.8-.7 4-2.2" />
             </svg>
           </div>
-          <span>Vivid Labs support channel</span>
+          <span>Support channel</span>
           <strong>In preparation</strong>
           <p>WhatsApp Support is being prepared and will be available soon.</p>
         </aside>
