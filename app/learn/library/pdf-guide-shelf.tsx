@@ -6,7 +6,7 @@ import {
   type DrivePdfGuide,
 } from "@/app/lib/drive-pdf-guides";
 import { LibraryMaterialDialog } from "./library-material-dialog";
-import { LIBRARY_OPEN_LABEL } from "./library-copy";
+import { formatLibraryRecordNumber, LIBRARY_OPEN_LABEL } from "./library-copy";
 import { drivePdfViewerSource } from "./library-material-source";
 
 export function PdfGuideShelf({
@@ -26,7 +26,7 @@ export function PdfGuideShelf({
 
           return (
             <article className="library-record library-pdf-record" key={guide.id}>
-              <span className="library-record-number">{String(startNumber + index).padStart(2, "0")}</span>
+              <span className="library-record-number">{formatLibraryRecordNumber(startNumber + index)}</span>
               <div className="library-record-copy">
                 <small>{category} · PDF guide</small>
                 <h2>{title}</h2>

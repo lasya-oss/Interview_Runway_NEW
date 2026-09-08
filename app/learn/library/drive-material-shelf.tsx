@@ -8,7 +8,7 @@ import {
   type DriveMaterial,
 } from "@/app/lib/drive-materials";
 import { LibraryMaterialDialog } from "./library-material-dialog";
-import { LIBRARY_OPEN_LABEL } from "./library-copy";
+import { formatLibraryRecordNumber, LIBRARY_OPEN_LABEL } from "./library-copy";
 import { driveMaterialViewerSource } from "./library-material-source";
 
 export function DriveMaterialShelf({
@@ -43,7 +43,7 @@ export function DriveMaterialShelf({
 
           return (
             <article className="library-record library-drive-record" key={material.id}>
-              <span className="library-record-number">{String(startNumber + index).padStart(3, "0")}</span>
+              <span className="library-record-number">{formatLibraryRecordNumber(startNumber + index)}</span>
               <div className="library-record-copy">
                 <small>{category} · {kind}</small>
                 <h2>{title}</h2>

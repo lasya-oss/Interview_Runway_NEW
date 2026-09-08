@@ -12,7 +12,7 @@ import type { DriveMaterial } from "@/app/lib/drive-materials";
 import type { LibraryCategorySummary, LibraryCatalog } from "./library-catalog";
 import { DriveMaterialShelf } from "./drive-material-shelf";
 import { LibraryMaterialDialog } from "./library-material-dialog";
-import { LIBRARY_OPEN_LABEL } from "./library-copy";
+import { formatLibraryRecordNumber, LIBRARY_OPEN_LABEL } from "./library-copy";
 import { learningMaterialViewerSource } from "./library-material-source";
 import { VaultStartHere } from "./library-start-here";
 import { PdfGuideShelf } from "./pdf-guide-shelf";
@@ -234,12 +234,12 @@ export function LibraryClient({
         </div>
       ) : results.length ? (
         <div className="library-record-list">
-          {results.map((material) => {
+          {results.map((material, index) => {
             const hasDirectAsset = material.demoAsset;
             const contentUnavailable = isPreviewContentUnavailable(material, isLive);
             return (
               <article className="library-record is-unlocked" key={material.slug}>
-                <span className="library-record-number">{material.number}</span>
+                <span className="library-record-number">{formatLibraryRecordNumber(index + 1)}</span>
                 <div className="library-record-copy">
                   <small>{material.category} · {material.format}</small>
                   <h2>{material.title}</h2>
@@ -310,7 +310,7 @@ export function LibraryClient({
           </div>
           <PdfGuideShelf
             guides={pdfResults}
-            startNumber={materials.length + 1}
+            startNumber={results.length + 1}
             initialFilename={initialPdfFilename}
           />
         </section>
@@ -319,7 +319,7 @@ export function LibraryClient({
       {driveResults.length ? (
         <DriveMaterialShelf
           materials={driveResults}
-          startNumber={materials.length + pdfGuides.length + 1}
+          startNumber={results.length + pdfResults.length + 1}
           googleClientId={googleClientId}
           loginHint={loginHint}
         />

@@ -528,6 +528,34 @@ test("Library categories expose filtered records and real content viewers", asyn
   assert.match(driveReplayPlayer, /<audio className="library-material-audio-player"/i);
 });
 
+test("Library record serials follow the rendered order without gaps or repeats", async () => {
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+  const libraryCopy = await readFile(
+    new URL("../app/learn/library/library-copy.ts", import.meta.url),
+    "utf8",
+  );
+  const pdfShelf = await readFile(
+    new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+  const driveShelf = await readFile(
+    new URL("../app/learn/library/drive-material-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(libraryClient, /results\.map\(\(material, index\) =>/i);
+  assert.match(libraryClient, /formatLibraryRecordNumber\(index \+ 1\)/i);
+  assert.doesNotMatch(libraryClient, /material\.number/i);
+  assert.match(libraryClient, /startNumber=\{results\.length \+ 1\}/i);
+  assert.match(libraryClient, /startNumber=\{results\.length \+ pdfResults\.length \+ 1\}/i);
+  assert.match(libraryCopy, /String\(number\)\.padStart\(2, "0"\)/i);
+  assert.match(pdfShelf, /formatLibraryRecordNumber\(startNumber \+ index\)/i);
+  assert.match(driveShelf, /formatLibraryRecordNumber\(startNumber \+ index\)/i);
+});
+
 test("Library opens on the authenticated plan and presents plan cards as a switcher", async () => {
   const libraryClient = await readFile(
     new URL("../app/learn/library/library-client.tsx", import.meta.url),
