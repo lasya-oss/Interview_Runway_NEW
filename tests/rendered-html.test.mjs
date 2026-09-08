@@ -562,7 +562,8 @@ test("Library opens on the authenticated plan and presents plan cards as a switc
     "utf8",
   );
 
-  assert.match(libraryClient, /useState<DemoTier \| null>\(profileId\)/i);
+  assert.match(libraryClient, /const defaultPlan = entitledPlanIds\.includes\(profileId\)/i);
+  assert.match(libraryClient, /useState<DemoTier \| null>\(\(\) => defaultPlan\)/i);
   assert.match(libraryClient, /<p className="member-kicker">Your Library<\/p>/i);
   assert.match(libraryClient, /Your current plan is selected automatically/i);
   assert.doesNotMatch(libraryClient, /Choose your plan library/i);
@@ -576,6 +577,25 @@ test("Library opens on the authenticated plan and presents plan cards as a switc
   const planPosition = libraryClient.indexOf('aria-labelledby="library-plan-picker-title"');
   assert.ok(searchPosition >= 0 && searchPosition < startHerePosition, "search should precede Start Here");
   assert.ok(startHerePosition >= 0 && startHerePosition < planPosition, "Start Here should precede Your Library");
+});
+
+test("Library plan cards expose cumulative locked and unlocked states", async () => {
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+  const planAccess = await readFile(
+    new URL("../app/learn/library/library-plan-access.ts", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(planAccess, /availablePlans\.length \? availablePlans : \[profileId\]/i);
+  assert.match(planAccess, /LIBRARY_PLAN_ORDER\.filter\(\(plan\) => LIBRARY_PLAN_RANK\[plan\] <= highestRank\)/i);
+  assert.match(libraryClient, /const defaultPlan = entitledPlanIds\.includes\(profileId\)/i);
+  assert.match(libraryClient, /data-access-state=\{isAvailable \? "unlocked" : "locked"\}/i);
+  assert.match(libraryClient, /aria-label=\{`\$\{plan\.label\} plan — \$\{isAvailable \? "unlocked" : "locked"\}`\}/i);
+  assert.match(libraryClient, /isAvailable \? `\$\{planCount\.toLocaleString\("en-IN"\)\} materials` : "🔒 Locked"/i);
+  assert.match(libraryClient, /disabled=\{!isAvailable\}/i);
 });
 
 test("Start Here is shared by all three plans with plan-scoped material", async () => {

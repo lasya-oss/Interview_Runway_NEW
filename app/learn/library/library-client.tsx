@@ -14,6 +14,7 @@ import { DriveMaterialShelf } from "./drive-material-shelf";
 import { LibraryMaterialDialog } from "./library-material-dialog";
 import { formatLibraryRecordNumber, LIBRARY_OPEN_LABEL } from "./library-copy";
 import { learningMaterialViewerSource } from "./library-material-source";
+import { entitledLibraryPlans } from "./library-plan-access";
 import { VaultStartHere } from "./library-start-here";
 import { PdfGuideShelf } from "./pdf-guide-shelf";
 
@@ -111,17 +112,19 @@ export function LibraryClient({
   const [catalog, setCatalog] = useState<LibraryCatalog | null>(initialCatalog);
   const [query, setQuery] = useState(initialPdfFilename ?? "");
   const [category, setCategory] = useState<string | null>(initialPdfFilename ? "All" : null);
-  // The authenticated profile already tells us which library should open first.
-  // Plan cards remain available for switching among the plans this profile can use.
-  const [selectedPlan, setSelectedPlan] = useState<DemoTier | null>(profileId);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
   const hasSearchQuery = deferredQuery.length > 0;
-  const entitledPlans = useMemo(
-    () => new Set(availablePlans.length ? availablePlans : LIBRARY_PLANS
-      .filter((plan) => TIER_ORDER[plan.id] <= TIER_ORDER[profileId])
-      .map((plan) => plan.id)),
+  const entitledPlanIds = useMemo(
+    () => entitledLibraryPlans(profileId, availablePlans),
     [availablePlans, profileId],
   );
+  const entitledPlans = useMemo(() => new Set(entitledPlanIds), [entitledPlanIds]);
+  // The authenticated profile normally is entitled, but fail closed if an
+  // inconsistent/stale profile ever arrives with a narrower access list.
+  const defaultPlan = entitledPlanIds.includes(profileId)
+    ? profileId
+    : entitledPlanIds.at(-1) ?? null;
+  const [selectedPlan, setSelectedPlan] = useState<DemoTier | null>(() => defaultPlan);
   const totalResourceCount = categorySummary.total;
   const resourceCountLabel = totalResourceCount >= 100
     ? "100+"
@@ -408,6 +411,9 @@ export function LibraryClient({
                 }}
                 aria-pressed={isSelected}
                 aria-disabled={!isAvailable}
+                aria-label={`${plan.label} plan — ${isAvailable ? "unlocked" : "locked"}`}
+                data-library-plan={plan.id}
+                data-access-state={isAvailable ? "unlocked" : "locked"}
                 disabled={!isAvailable}
                 key={plan.id}
               >
@@ -416,8 +422,8 @@ export function LibraryClient({
                 <strong>{plan.detail}</strong>
                 <p>{plan.description}</p>
                 <span className="library-plan-card__footer">
-                  {isAvailable ? `${planCount.toLocaleString("en-IN")} materials` : "Not active on this profile"}
-                  <b aria-hidden="true">{isSelected ? "✓" : "↗"}</b>
+                  {isAvailable ? `${planCount.toLocaleString("en-IN")} materials` : "🔒 Locked"}
+                  <b aria-hidden="true">{isSelected ? "✓" : isAvailable ? "↗" : "🔒"}</b>
                 </span>
               </button>
             );
