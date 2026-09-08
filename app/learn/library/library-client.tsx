@@ -432,7 +432,7 @@ export function LibraryClient({
                 <strong>{plan.detail}</strong>
                 <p>{plan.description}</p>
                 <span className="library-plan-card__footer">
-                  {isAvailable ? `${planCount.toLocaleString("en-IN")} materials` : <span className="library-plan-card__lock-status"><LockIcon /> Locked</span>}
+                  {isAvailable ? `${planCount.toLocaleString("en-IN")} materials` : <span className="library-plan-card__lock-status"><LockIcon /> Upgrade to unlock</span>}
                   <b aria-hidden="true">{isSelected ? "✓" : isAvailable ? "↗" : <LockIcon />}</b>
                 </span>
               </button>
