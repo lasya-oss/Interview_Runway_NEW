@@ -9,7 +9,7 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs tests/library-content-quality.test.mjs && node --require ./tests/node-platform-shim.cjs --import tsx --test tests/second-seat-engine.test.mjs tests/second-seat-ai-evaluator.test.mjs tests/second-seat-ai-live.test.mjs tests/second-seat-http-e2e.test.mjs tests/learning-performance.test.mjs tests/user-history-report.test.mjs",
+    "test": "npm run build && node --test tests/rendered-html.test.mjs tests/library-content-quality.test.mjs && node --require ./tests/node-platform-shim.cjs --import tsx --test tests/second-seat-engine.test.mjs tests/second-seat-ai-evaluator.test.mjs tests/second-seat-ai-live.test.mjs tests/second-seat-http-e2e.test.mjs tests/learning-performance.test.mjs tests/user-history-report.test.mjs tests/meeting-copilot-profile-copy.test.mjs tests/meeting-copilot-bridge-session.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },

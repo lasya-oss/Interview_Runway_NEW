@@ -2,8 +2,30 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { registerHooks } from "node:module";
 import test from "node:test";
 import { SignJWT } from "jose";
+
+const cloudflareEnvironmentProperty = "__interviewRunwayRenderedTestEnvironment";
+const cloudflareWorkersTestModule = `data:text/javascript,${encodeURIComponent(`
+  export const env = new Proxy({}, {
+    get(_target, property) {
+      return globalThis.${cloudflareEnvironmentProperty}?.[property];
+    },
+  });
+`)}`;
+
+// The production runtime provides this virtual module. The rendered tests run
+// under Node, so expose the same request-scoped binding shape without copying
+// any binding values into module source or test output.
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier === "cloudflare:workers") {
+      return { shortCircuit: true, url: cloudflareWorkersTestModule };
+    }
+    return nextResolve(specifier, context);
+  },
+});
 
 let renderSequence = 0;
 const testSessionSecret = "interviewrunway-test-session-secret-2026-07-17";
@@ -38,7 +60,7 @@ async function getWorkspaceSessionCookie() {
   return workspaceSessionCookie;
 }
 
-async function request(pathname = "/", init = {}, authenticated = true) {
+async function request(pathname = "/", init = {}, authenticated = true, environment = {}) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set(
     "test",
@@ -57,12 +79,7 @@ async function request(pathname = "/", init = {}, authenticated = true) {
     }
   }
 
-  return worker.fetch(
-    new Request(new URL(pathname, "http://localhost"), {
-      ...init,
-      headers,
-    }),
-    {
+  const workerEnvironment = {
       ASSETS: {
         fetch: async (assetRequest) => {
           const assetPath = new URL(assetRequest.url).pathname;
@@ -120,12 +137,61 @@ async function request(pathname = "/", init = {}, authenticated = true) {
       AUTH_SESSION_SECRET: testAuthSessionSecret,
       DEMO_SESSION_SECRET: testSessionSecret,
       GOOGLE_CLIENT_ID: testGoogleClientId,
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
+      ...environment,
+  };
+  const previousEnvironment = globalThis[cloudflareEnvironmentProperty];
+  globalThis[cloudflareEnvironmentProperty] = workerEnvironment;
+  try {
+    return await worker.fetch(
+      new Request(new URL(pathname, "http://localhost"), {
+        ...init,
+        headers,
+      }),
+      workerEnvironment,
+      {
+        waitUntil() {},
+        passThroughOnException() {},
+      },
+    );
+  } finally {
+    if (previousEnvironment === undefined) {
+      delete globalThis[cloudflareEnvironmentProperty];
+    } else {
+      globalThis[cloudflareEnvironmentProperty] = previousEnvironment;
+    }
+  }
+}
+
+async function withEnvironment(environment, action) {
+  const previous = new Map(
+    Object.keys(environment).map((name) => [name, process.env[name]]),
   );
+  for (const [name, value] of Object.entries(environment)) {
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  }
+  try {
+    return await action();
+  } finally {
+    for (const [name, value] of previous) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+}
+
+function emptyD1Database() {
+  return {
+    prepare() {
+      return {
+        bind() { return this; },
+        async all() { return { results: [], success: true }; },
+        async first() { return null; },
+        async raw() { return []; },
+        async run() { return { meta: { changes: 0 }, success: true }; },
+      };
+    },
+  };
 }
 
 async function render(pathname = "/", init = {}) {
@@ -994,17 +1060,26 @@ test("Second Seat Meeting Copilot page alone launches the pinned validated relea
   const release = await readFile(new URL("../app/lib/meeting-copilot-release.ts", import.meta.url), "utf8");
   const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
   const pageSource = await readFile(new URL("../app/learn/meeting-copilot/page.tsx", import.meta.url), "utf8");
+  const launchRoute = await readFile(new URL("../app/api/meeting-copilot/launch/route.ts", import.meta.url), "utf8");
 
   assert.match(release, /https:\/\/github\.com\/vividlabsai\/meeting-copilot/);
   assert.match(release, /branch: "codex\/interview-profile-context"/);
-  assert.match(release, /commit: "1411f4d870c264d5827043e0c4dc61520254528a"/);
-  assert.match(release, /uiVersion: "20260905-clue-coaching-v1"/);
+  assert.match(release, /commit: "6c0b0498c3ac8b651dd8d4c46ab23ab0392e9c1b"/);
+  assert.match(release, /uiVersion: "20260909-profile-copy-v1"/);
   assert.match(release, /launchUrl: "http:\/\/127\.0\.0\.1:8123\/"/);
   assert.doesNotMatch(shell, /MEETING_COPILOT_RELEASE/);
   assert.doesNotMatch(shell, /openMeetingCopilot|window\.open/);
   assert.doesNotMatch(shell, /127\.0\.0\.1:8123/);
   assert.doesNotMatch(shell, /onClick=\{item\.key === "meeting-copilot"/);
   assert.match(pageSource, /MEETING_COPILOT_RELEASE\.launchUrl/);
+  assert.match(pageSource, /profile\.isLive === true && profile\.id === "practice"/);
+  assert.match(pageSource, /"\/api\/meeting-copilot\/launch"/);
+  assert.doesNotMatch(pageSource, /issueMeetingCopilotBridgeSession|ir_profile_copy/);
+  assert.match(launchRoute, /await issueMeetingCopilotBridgeSession\(\)/);
+  assert.doesNotMatch(launchRoute, /issueMeetingCopilotBridgeSession\(\)\.catch\(\(\) => null\)/);
+  assert.match(launchRoute, /#ir_profile_copy=\$\{encodeURIComponent\(bridgeSession\.token\)\}/);
+  assert.doesNotMatch(launchRoute, /PUBLIC_ROUTES/);
+  assert.doesNotMatch(pageSource, /[?&]ir_profile_copy=/);
   assert.doesNotMatch(shell, /const MEETING_COPILOT_URL/);
   assert.doesNotMatch(pageSource, /const MEETING_COPILOT_URL/);
 
@@ -1027,12 +1102,157 @@ test("Second Seat Meeting Copilot page alone launches the pinned validated relea
   const html = await response.text();
   assert.match(html, /data-member-layout=["']second-seat["']/i);
   assert.match(html, /data-meeting-copilot-source-branch=["']codex\/interview-profile-context["']/i);
-  assert.match(html, /data-meeting-copilot-source-commit=["']1411f4d870c264d5827043e0c4dc61520254528a["']/i);
-  assert.match(html, /data-meeting-copilot-ui-version=["']20260905-clue-coaching-v1["']/i);
+  assert.match(html, /data-meeting-copilot-source-commit=["']6c0b0498c3ac8b651dd8d4c46ab23ab0392e9c1b["']/i);
+  assert.match(html, /data-meeting-copilot-ui-version=["']20260909-profile-copy-v1["']/i);
   assert.match(html, /data-meeting-copilot-launch=["']true["']/i);
   assert.match(html, /href=["']http:\/\/127\.0\.0\.1:8123\/["']/i);
+  assert.doesNotMatch(html, /ir_profile_copy=/i);
   assert.match(html, /target=["']_blank["']/i);
   assert.doesNotMatch(html, /<iframe\b/i);
+});
+
+test("live Second Seat creates its short-lived profile token only on the protected launch click", async () => {
+  const pageResponse = await withEnvironment(
+    {
+      MEETING_COPILOT_BRIDGE_SECRET: "meeting-copilot-bridge-test-secret-2026-09-09",
+      TEST_SECOND_SEAT_EMAILS: "pratheep@vividlabsai.com",
+    },
+    () => request(
+      "/learn/meeting-copilot",
+      { headers: { accept: "text/html" } },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(pageResponse.status, 200, pageResponse.headers.get("location") ?? "no redirect location");
+  const html = await pageResponse.text();
+  assert.match(html, /href=["']\/api\/meeting-copilot\/launch["']/i);
+  assert.doesNotMatch(html, /ir_profile_copy=|meeting-copilot-bridge-test-secret/i);
+
+  const launchResponse = await withEnvironment(
+    {
+      MEETING_COPILOT_BRIDGE_SECRET: "meeting-copilot-bridge-test-secret-2026-09-09",
+      TEST_SECOND_SEAT_EMAILS: "pratheep@vividlabsai.com",
+    },
+    () => request(
+      "/api/meeting-copilot/launch",
+      { headers: { accept: "text/html" }, redirect: "manual" },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(launchResponse.status, 302);
+  assert.match(launchResponse.headers.get("cache-control") ?? "", /private, no-store/i);
+  assert.equal(launchResponse.headers.get("referrer-policy"), "no-referrer");
+  const launchUrl = new URL(launchResponse.headers.get("location"));
+  assert.equal(launchUrl.origin, "http://127.0.0.1:8123");
+  assert.equal(launchUrl.pathname, "/");
+  assert.equal(launchUrl.search, "");
+  assert.ok(launchUrl.hash.startsWith("#ir_profile_copy="));
+  const token = decodeURIComponent(launchUrl.hash.slice("#ir_profile_copy=".length));
+  assert.ok(token.length >= 64, "Bridge token should be opaque and non-trivial");
+
+  const unauthorized = await request(
+    "/api/meeting-copilot/launch",
+    { headers: { accept: "application/json" }, redirect: "manual" },
+    false,
+  );
+  assert.equal(unauthorized.status, 401);
+  assert.doesNotMatch(unauthorized.headers.get("location") ?? "", /ir_profile_copy=/i);
+});
+
+test("live Meeting Copilot launch fails closed without bridge configuration and never bridges Human Calibration", async () => {
+  const unconfiguredSecondSeat = await withEnvironment(
+    {
+      MEETING_COPILOT_BRIDGE_SECRET: undefined,
+      TEST_SECOND_SEAT_EMAILS: "pratheep@vividlabsai.com",
+    },
+    () => request(
+      "/learn/meeting-copilot",
+      { headers: { accept: "text/html" } },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(
+    unconfiguredSecondSeat.status,
+    200,
+    unconfiguredSecondSeat.headers.get("location") ?? "no redirect location",
+  );
+  const unconfiguredHtml = await unconfiguredSecondSeat.text();
+  assert.match(unconfiguredHtml, /href=["']\/api\/meeting-copilot\/launch["']/i);
+  assert.doesNotMatch(unconfiguredHtml, /ir_profile_copy=/i);
+
+  const unconfiguredLaunch = await withEnvironment(
+    {
+      MEETING_COPILOT_BRIDGE_SECRET: undefined,
+      TEST_SECOND_SEAT_EMAILS: "pratheep@vividlabsai.com",
+    },
+    () => request(
+      "/api/meeting-copilot/launch",
+      { headers: { accept: "text/html" }, redirect: "manual" },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(unconfiguredLaunch.status, 503);
+  assert.equal(unconfiguredLaunch.headers.get("location"), null);
+  assert.doesNotMatch(unconfiguredLaunch.headers.get("location") ?? "", /ir_profile_copy=/i);
+
+  const humanCalibration = await withEnvironment(
+    {
+      INTERNAL_FULL_ACCESS_DOMAIN: "vividlabsai.com",
+      MEETING_COPILOT_BRIDGE_SECRET: "meeting-copilot-bridge-test-secret-2026-09-09",
+    },
+    () => request(
+      "/learn/meeting-copilot",
+      { headers: { accept: "text/html" } },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(humanCalibration.status, 200);
+  const humanCalibrationHtml = await humanCalibration.text();
+  assert.match(humanCalibrationHtml, /href=["']http:\/\/127\.0\.0\.1:8123\/["']/i);
+  assert.doesNotMatch(humanCalibrationHtml, /ir_profile_copy=/i);
+
+  const humanCalibrationLaunch = await withEnvironment(
+    {
+      INTERNAL_FULL_ACCESS_DOMAIN: "vividlabsai.com",
+      MEETING_COPILOT_BRIDGE_SECRET: "meeting-copilot-bridge-test-secret-2026-09-09",
+    },
+    () => request(
+      "/api/meeting-copilot/launch",
+      { headers: { accept: "application/json" }, redirect: "manual" },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(humanCalibrationLaunch.status, 403);
+  assert.doesNotMatch(humanCalibrationLaunch.headers.get("location") ?? "", /ir_profile_copy=/i);
+});
+
+test("Meeting Copilot profile-copy configuration stays server-only and environment-driven", async () => {
+  const environmentExample = await readFile(new URL("../.env.example", import.meta.url), "utf8");
+  const viteConfig = await readFile(new URL("../vite.config.ts", import.meta.url), "utf8");
+  const variableNames = [
+    "MEETING_COPILOT_BRIDGE_SECRET",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_GMAIL_REFRESH_TOKEN",
+    "GOOGLE_GMAIL_SENDER_EMAIL",
+    "MEETING_COPILOT_PROFILE_RECIPIENTS",
+  ];
+
+  for (const variableName of variableNames) {
+    assert.match(environmentExample, new RegExp(`^${variableName}=`, "m"));
+    assert.doesNotMatch(
+      viteConfig,
+      new RegExp(`${variableName}: process\\.env\\.${variableName}`),
+      `${variableName} must be injected through Sites runtime bindings, not copied into the build artifact`,
+    );
+  }
+  assert.doesNotMatch(environmentExample, /NEXT_PUBLIC_(?:MEETING_COPILOT|GOOGLE_(?:CLIENT_SECRET|GMAIL))/);
+  assert.doesNotMatch(viteConfig, /NEXT_PUBLIC_(?:MEETING_COPILOT|GOOGLE_(?:CLIENT_SECRET|GMAIL))/);
 });
 
 test("Vault cannot launch the pinned Meeting Copilot companion", async () => {

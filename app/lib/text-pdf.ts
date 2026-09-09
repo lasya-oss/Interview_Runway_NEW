@@ -92,7 +92,24 @@ function concatBytes(chunks: readonly Uint8Array[]) {
   return result;
 }
 
-export function createTextPdf(title: string, filename: string, source: string) {
+export type TextPdfPresentation = {
+  headerLabel?: string;
+  subtitle?: string;
+  sourceLabel?: string | null;
+  footerLabel?: string;
+};
+
+export function createTextPdf(
+  title: string,
+  filename: string,
+  source: string,
+  presentation: TextPdfPresentation = {},
+) {
+  const headerLabel = presentation.headerLabel ?? "SUPPORTING MATERIAL";
+  const headerX = presentation.headerLabel === undefined ? 430 : 400;
+  const subtitle = presentation.subtitle ?? "PDF preview · readable inside InterviewRunway";
+  const sourceLabel = presentation.sourceLabel === undefined ? `SOURCE · ${filename}` : presentation.sourceLabel;
+  const footerLabel = presentation.footerLabel ?? "INTERVIEWRUNWAY";
   const lines = pdfContentLines(source);
   const pages: PdfLine[][] = [];
   let page: PdfLine[] = [];
@@ -146,7 +163,7 @@ export function createTextPdf(title: string, filename: string, source: string) {
       "0.96 0.98 0.99 rg",
       "0.42 0.65 0.71 rg",
       pdfText("F2", 8.5, PDF_MARGIN, 754, "0.96 0.98 0.99", "INTERVIEWRUNWAY"),
-      pdfText("F1", 7.5, 430, 754, "0.42 0.65 0.71", "SUPPORTING MATERIAL"),
+      pdfText("F1", 7.5, headerX, 754, "0.42 0.65 0.71", headerLabel),
       "1 0.42 0.17 rg",
       `46 736 ${PDF_WIDTH - PDF_MARGIN * 2} 2 re`,
       "f",
@@ -156,10 +173,12 @@ export function createTextPdf(title: string, filename: string, source: string) {
     if (pageIndex === 0) {
       commands.push(
         pdfText("F2", 24, PDF_MARGIN, 690, "0.96 0.98 0.99", title),
-        pdfText("F1", 9, PDF_MARGIN, 654, "0.62 0.72 0.76", "PDF preview · readable inside InterviewRunway"),
-        pdfText("F1", 7.5, PDF_MARGIN, 633, "0.42 0.65 0.71", `SOURCE · ${filename}`),
+        pdfText("F1", 9, PDF_MARGIN, 654, "0.62 0.72 0.76", subtitle),
       );
-      y = 594;
+      if (sourceLabel) {
+        commands.push(pdfText("F1", 7.5, PDF_MARGIN, 633, "0.42 0.65 0.71", sourceLabel));
+      }
+      y = sourceLabel ? 594 : 615;
     } else {
       commands.push(pdfText("F2", 16, PDF_MARGIN, 704, "0.96 0.98 0.99", title));
       y = 670;
@@ -177,7 +196,7 @@ export function createTextPdf(title: string, filename: string, source: string) {
       "0.18 0.32 0.38 rg",
       `46 40 ${PDF_WIDTH - PDF_MARGIN * 2} 1 re`,
       "f",
-      pdfText("F1", 7, PDF_MARGIN, 25, "0.42 0.65 0.71", `INTERVIEWRUNWAY · PAGE ${pageIndex + 1} / ${pages.length}`),
+      pdfText("F1", 7, PDF_MARGIN, 25, "0.42 0.65 0.71", `${footerLabel} · PAGE ${pageIndex + 1} / ${pages.length}`),
     );
 
     const stream = commands.join("\n");
