@@ -2,7 +2,10 @@ import { isInternalFullAccessEmail } from "@/app/lib/internal-access";
 
 export const USER_HISTORY_GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.send";
 
-const GOOGLE_USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo";
+const GOOGLE_USERINFO_URLS = [
+  "https://openidconnect.googleapis.com/v1/userinfo",
+  "https://www.googleapis.com/oauth2/v3/userinfo",
+] as const;
 const GMAIL_SEND_URL = "https://gmail.googleapis.com/upload/gmail/v1/users/me/messages/send?uploadType=media";
 const MAX_ACCESS_TOKEN_LENGTH = 8_192;
 const MAX_PDF_ATTACHMENT_BYTES = 3_000_000;
@@ -127,7 +130,7 @@ export async function deliverUserHistoryReportWithGmail(
 
   let response: Response;
   try {
-    response = await dependencies.fetch(GMAIL_SEND_URL, {
+    response = await fetchWithTimeout(dependencies.fetch, GMAIL_SEND_URL, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -136,8 +139,7 @@ export async function deliverUserHistoryReportWithGmail(
       },
       body: message,
       redirect: "error",
-      signal: AbortSignal.timeout(15_000),
-    });
+    }, 15_000);
   } catch {
     throw new GmailDeliveryIndeterminateError();
   }
@@ -256,57 +258,71 @@ export function createGmailReportMessage({
 }
 
 async function readGoogleIdentity(fetchImpl: typeof fetch, accessToken: string) {
-  for (let attempt = 1; attempt <= GOOGLE_IDENTITY_ATTEMPTS; attempt += 1) {
-    let response: Response;
-    try {
-      response = await fetchImpl(GOOGLE_USERINFO_URL, {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${accessToken}`,
-          "Cache-Control": "no-store",
-        },
-        redirect: "error",
-        signal: AbortSignal.timeout(8_000),
-      });
-    } catch {
-      if (attempt < GOOGLE_IDENTITY_ATTEMPTS) {
-        await waitForGoogleIdentityRetry();
-        continue;
+  for (const userInfoUrl of GOOGLE_USERINFO_URLS) {
+    for (let attempt = 1; attempt <= GOOGLE_IDENTITY_ATTEMPTS; attempt += 1) {
+      let response: Response;
+      try {
+        response = await fetchWithTimeout(fetchImpl, userInfoUrl, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${accessToken}`,
+            "Cache-Control": "no-store",
+          },
+          redirect: "error",
+        }, 8_000);
+      } catch {
+        if (attempt < GOOGLE_IDENTITY_ATTEMPTS) {
+          await waitForGoogleIdentityRetry();
+          continue;
+        }
+        break;
       }
-      throw new GmailProviderUnavailableError();
-    }
 
-    if (response.status === 401 || response.status === 403) throw new GmailAuthorizationError();
-    if (response.status === 408 || response.status === 429 || response.status >= 500) {
-      if (attempt < GOOGLE_IDENTITY_ATTEMPTS) {
-        await waitForGoogleIdentityRetry();
-        continue;
+      if (response.status === 401 || response.status === 403) throw new GmailAuthorizationError();
+      if (response.status === 408 || response.status === 429 || response.status >= 500) {
+        if (attempt < GOOGLE_IDENTITY_ATTEMPTS) {
+          await waitForGoogleIdentityRetry();
+          continue;
+        }
+        break;
       }
-      throw new GmailProviderUnavailableError();
-    }
-    if (!response.ok) throw new GmailDeliveryError(`Google identity verification returned status ${response.status}`);
-    if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
-      throw new GmailProviderUnavailableError();
-    }
+      if (!response.ok) throw new GmailDeliveryError(`Google identity verification returned status ${response.status}`);
+      if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) break;
 
-    const body = await response.json().catch(() => null) as {
-      email?: unknown;
-      email_verified?: unknown;
-      hd?: unknown;
-      sub?: unknown;
-    } | null;
-    if (!body || typeof body.email !== "string" || typeof body.hd !== "string") {
-      throw new GmailAuthorizationError();
+      const body = await response.json().catch(() => null) as {
+        email?: unknown;
+        email_verified?: unknown;
+        hd?: unknown;
+        sub?: unknown;
+      } | null;
+      if (!body || typeof body.email !== "string" || typeof body.hd !== "string") {
+        throw new GmailAuthorizationError();
+      }
+      return {
+        email: body.email,
+        emailVerified: body.email_verified === true,
+        hostedDomain: body.hd,
+        subject: typeof body.sub === "string" ? body.sub : "",
+      };
     }
-    return {
-      email: body.email,
-      emailVerified: body.email_verified === true,
-      hostedDomain: body.hd,
-      subject: typeof body.sub === "string" ? body.sub : "",
-    };
   }
 
   throw new GmailProviderUnavailableError();
+}
+
+async function fetchWithTimeout(
+  fetchImpl: typeof fetch,
+  input: string,
+  init: RequestInit,
+  timeoutMs: number,
+) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetchImpl(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function waitForGoogleIdentityRetry() {

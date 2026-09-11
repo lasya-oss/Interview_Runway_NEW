@@ -211,6 +211,37 @@ test("transient Google identity failures retry before Gmail delivery", async () 
   assert.equal(callCount, 3);
 });
 
+test("Google identity verification falls back to the alternate Google UserInfo host", async () => {
+  let callCount = 0;
+  const result = await deliverUserHistoryReportWithGmail({
+    accessToken: "test-google-access-token-1234567890",
+    learnerEmail: "learner@vividlabsai.com",
+    pdf: new TextEncoder().encode("%PDF-1.4\nreport"),
+    recipientEmail: "reviewer@vividlabsai.com",
+    recipientSubject: "google-subject-reviewer",
+  }, {
+    configuredDomain: "vividlabsai.com",
+    fetch: async (input) => {
+      callCount += 1;
+      if (String(input).includes("openidconnect.googleapis.com")) {
+        throw new Error("primary Google identity host unavailable");
+      }
+      if (String(input).includes("www.googleapis.com/oauth2/v3/userinfo")) {
+        return Response.json({
+          email: "reviewer@vividlabsai.com",
+          email_verified: true,
+          hd: "vividlabsai.com",
+          sub: "google-subject-reviewer",
+        });
+      }
+      return Response.json({ id: "gmail-message-after-fallback" });
+    },
+  });
+
+  assert.equal(result.messageId, "gmail-message-after-fallback");
+  assert.equal(callCount, 4);
+});
+
 test("exhausted Google identity failures are classified as provider unavailability", async () => {
   await assert.rejects(
     deliverUserHistoryReportWithGmail({
