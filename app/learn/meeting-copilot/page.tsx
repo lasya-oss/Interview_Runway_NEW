@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { MEETING_COPILOT_RELEASE } from "@/app/lib/meeting-copilot-release";
+import { MeetingCopilotLaunch } from "./meeting-copilot-launch";
 
 export const dynamic = "force-dynamic";
 
@@ -46,15 +47,7 @@ export default async function MeetingCopilotPage() {
           screen capture, profiles, transcripts, and model connections private and intact.
           Keep Interview Runway open while the companion runs in its own tab.
         </p>
-        <a
-          className="member-primary-button"
-          data-meeting-copilot-launch
-          href={launchUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Open Meeting Copilot <span aria-hidden="true">↗</span>
-        </a>
+        <MeetingCopilotLaunch href={launchUrl} probeUrl={MEETING_COPILOT_RELEASE.launchUrl} />
       </section>
     </div>
   );
