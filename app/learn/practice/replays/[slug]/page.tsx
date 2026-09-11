@@ -34,14 +34,6 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
   }
 
   const linkedRoadmapTask = replay.roadmapTaskId ? findRoadmapTask(replay.roadmapTaskId) : null;
-  const linkedRoadmapHref = linkedRoadmapTask
-    ? linkedRoadmapTask.learning.kind === "material"
-      ? `/learn/material/${linkedRoadmapTask.learning.slug}`
-      : `/learn/roadmap/task/${linkedRoadmapTask.id}`
-    : null;
-  const linkedRoadmapLabel = linkedRoadmapTask?.learning.kind === "material"
-    ? "Open linked learning material"
-    : "Open linked roadmap task";
   const replayNumber = getPracticeReplayNumber(replay.slug);
 
   return (
@@ -99,7 +91,6 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
             <p>{linkedRoadmapTask ? `This replay supplements “${linkedRoadmapTask.title}”; it does not replace the task’s learning material or mark it complete.` : "This replay is a practice supplement and does not mark a roadmap task complete."}</p>
           </div>
           <div className="practice-replay-next-actions">
-            {linkedRoadmapHref ? <Link className="member-primary-button" href={linkedRoadmapHref}>{linkedRoadmapLabel} <span aria-hidden="true">↗</span></Link> : null}
             <Link className="member-action-button" href="/learn/practice">Back to Practice <span aria-hidden="true">↗</span></Link>
           </div>
         </footer>

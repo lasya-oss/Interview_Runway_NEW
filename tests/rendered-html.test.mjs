@@ -1476,7 +1476,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(replayHtml, /data-google-drive-file-id=/i);
   assert.doesNotMatch(replayHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(replayHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.doesNotMatch(replayHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-1-patterns["']/i);
+  assert.doesNotMatch(replayHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const behavioralReplay = await request("/learn/practice/replays/behavioural-prioritizing-under-product-ambiguity-03", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1489,7 +1489,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(behavioralText, /Transcript \/ captions\s+Not supplied/i);
   assert.match(behavioralHtml, /data-replay-part-count=["']3["']/i);
   assert.doesNotMatch(behavioralHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(behavioralHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(behavioralHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const bfsReplay = await request("/learn/practice/replays/coding-bfs-debugging-06", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1502,7 +1502,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(bfsText, /Source unchanged/i);
   assert.match(bfsHtml, /data-replay-part-count=["']4["']/i);
   assert.doesNotMatch(bfsHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(bfsHtml, /href=["'][^"']*\/learn\/material\/graph-traversal["']/i);
+  assert.doesNotMatch(bfsHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const remoteCollaborationReplay = await request("/learn/practice/replays/behavioural-remote-collaboration-06", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1518,7 +1518,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(remoteCollaborationHtml, /data-google-drive-file-id=["']1UdJnFdWLB1jPSLXW3biHcBGFomeCCyxQ["']/i);
   assert.doesNotMatch(remoteCollaborationHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(remoteCollaborationHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(remoteCollaborationHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(remoteCollaborationHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const ownershipFailureReplay = await request("/learn/practice/replays/behavioural-ownership-after-failure-01", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1534,7 +1534,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(ownershipFailureHtml, /data-google-drive-file-id=["']10uxp_B7ia6Zx1JZ7vZODNds7LPpovN3Z["']/i);
   assert.doesNotMatch(ownershipFailureHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(ownershipFailureHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(ownershipFailureHtml, /href=["'][^"']*\/learn\/material\/outage-story["']/i);
+  assert.doesNotMatch(ownershipFailureHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const influenceReplay = await request("/learn/practice/replays/behavioural-leadership-without-manager-title-04", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1550,7 +1550,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(influenceHtml, /data-google-drive-file-id=["']1lA7PeRlyBNBKaTCAVBTS6JwpqxWT0Y74["']/i);
   assert.doesNotMatch(influenceHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(influenceHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(influenceHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(influenceHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const customerIntegrityReplay = await request("/learn/practice/replays/behavioural-customer-integrity-05", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1570,7 +1570,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(customerIntegrityHtml, /data-google-drive-file-id=["']1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO["']/i);
   assert.doesNotMatch(customerIntegrityHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(customerIntegrityHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(customerIntegrityHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(customerIntegrityHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const conflictResolutionReplay = await request("/learn/practice/replays/behavioural-conflict-resolution-02", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -1590,7 +1590,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(conflictResolutionHtml, /data-google-drive-file-id=["']1MTv2BG_lIO8lM3ee0DMykRd26n5G2hRq["']/i);
   assert.doesNotMatch(conflictResolutionHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(conflictResolutionHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(conflictResolutionHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(conflictResolutionHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const newlyIntegratedReplays = [
     ["coding-heap-stream-04", "mock_coding_heap-stream_04.mp4", 4],
@@ -1630,6 +1630,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
     assert.doesNotMatch(integratedHtml, /data-google-drive-file-id=/i, slug);
     assert.doesNotMatch(integratedHtml, /Allow replay access|Preparing the protected replay/i, slug);
     assert.doesNotMatch(integratedHtml, /<iframe[^>]+drive\.google\.com/i, slug);
+    assert.doesNotMatch(integratedHtml, /Open linked learning material|Open linked roadmap task/i, slug);
   }
 
   const vaultLogin = await request("/api/demo-session", {
