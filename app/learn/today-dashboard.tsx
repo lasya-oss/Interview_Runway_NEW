@@ -35,12 +35,11 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const reviewMaterials = DEMO_REVIEW_MATERIALS
     .filter((material) => material.profiles.includes(profile.id))
     .slice(0, 3);
-  const nextRoadmapTask = roadmap.nextTask;
-  const nextTask = !isFreshLearner ? nextRoadmapTask : null;
+  const nextTask = roadmap.nextTask;
   const nextAction = nextTask?.title ?? profile.nextAction;
   const nextActionMeta = nextTask?.meta ?? profile.nextActionMeta;
-  const nextActionHref = nextRoadmapTask
-    ? roadmapTaskHref(nextRoadmapTask)
+  const nextActionHref = nextTask
+    ? roadmapTaskHref(nextTask)
     : "/learn/roadmap";
   const nextActionDescription = describeNextAction(profile, nextTask, isFreshLearner);
   const readinessLabel = profile.id === "foundation"

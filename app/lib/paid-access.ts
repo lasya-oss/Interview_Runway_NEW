@@ -7,6 +7,7 @@ import { isInternalFullAccessEmail } from "@/app/lib/internal-access";
 import { ROADMAP_PLANS, TWELVE_WEEK_PLAN } from "@/app/lib/roadmap-data";
 import {
   dateKeyForTimeZone,
+  nextIncompleteRoadmapTask,
   roadmapPlanForWeeks,
   roadmapProgressFor,
   type CompletionActivity,
@@ -484,10 +485,7 @@ function createLiveLearnerProfile(
   const displayName = user.fullName || user.displayName;
   const firstName = displayName.trim().split(/\s+/)[0] || user.email;
   const selectedPlan = roadmapPlanForWeeks(config.roadmapWeeks);
-  const allTasks = selectedPlan.flatMap((week) => week.tasks);
-  const nextTask = allTasks.find(
-    (task) => !progress.completedTaskIds.includes(task.id),
-  );
+  const nextTask = nextIncompleteRoadmapTask(selectedPlan, progress.completedTaskIds);
   const currentWeek = roadmapProgressFor(selectedPlan, progress.completedTaskIds).currentWeek;
 
   return {

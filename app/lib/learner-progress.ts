@@ -113,7 +113,7 @@ export function roadmapProgressFor(
     const date = completionActivity[taskId];
     if (isDateKey(date)) normalizedCompletionActivity[taskId] = date;
   }
-  const nextTask = tasks.find((task) => !completed.has(task.id)) ?? null;
+  const nextTask = nextIncompleteRoadmapTask(weeks, completedTaskIdsInOrder);
   const currentWeek =
     weeks.find((week) => week.tasks.some((task) => !completed.has(task.id)))?.week ??
     weeks.at(-1)?.week ??
@@ -134,6 +134,15 @@ export function roadmapProgressFor(
     currentWeek,
     nextTask,
   };
+}
+
+/** Return the one next roadmap record in canonical week/task order. */
+export function nextIncompleteRoadmapTask(
+  weeks: readonly RoadmapWeek[],
+  completedTaskIds: readonly string[],
+): RoadmapTask | null {
+  const completed = new Set(completedTaskIds);
+  return weeks.flatMap((week) => week.tasks).find((task) => !completed.has(task.id)) ?? null;
 }
 
 export function roadmapWeekProgressFor(

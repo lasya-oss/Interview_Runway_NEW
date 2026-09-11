@@ -3,6 +3,8 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { performance } from 'node:perf_hooks';
 import { createNativePreviewSlots, createPreviewCache, previewInputForMaterial } from '../app/learn/library/material-preview-cache.ts';
+import { SECOND_SEAT_PLAN, TWELVE_WEEK_PLAN } from '../app/lib/roadmap-data.ts';
+import { nextIncompleteRoadmapTask, roadmapProgressFor } from '../app/lib/learner-progress.ts';
 import { cacheForRequest } from 'vinext/cache';
 import { createRequestContext, runWithRequestContext } from '../node_modules/vinext/dist/shims/unified-request-context.js';
 
@@ -99,6 +101,26 @@ test('routing fix uses native prefetch without remounting or replacing guards/pr
   assert.doesNotMatch(source, /<RoadmapProgressProvider\s+key=/);
   const session = await readFile(new URL('../app/lib/demo-session.ts', import.meta.url), 'utf8');
   assert.match(session, /resolveWorkspaceProfile = cacheForRequest/);
+});
+
+test('roadmap Continue selects exactly the first incomplete record in plan order', () => {
+  const plans = [
+    { weeks: TWELVE_WEEK_PLAN, first: '12w-1-map', second: '12w-1-base', third: '12w-2-window' },
+    { weeks: SECOND_SEAT_PLAN, first: '4w-1-stories', second: '4w-2-window', third: '4w-2-rate' },
+  ];
+
+  for (const { weeks, first, second, third } of plans) {
+    assert.equal(nextIncompleteRoadmapTask(weeks, []).id, first);
+    assert.equal(nextIncompleteRoadmapTask(weeks, [second, first]).id, third);
+    assert.equal(roadmapProgressFor(weeks, [second, first]).nextTask.id, third);
+  }
+});
+
+test('Dashboard Continue uses the selected roadmap record even for a fresh plan', async () => {
+  const dashboard = await readFile(new URL('../app/learn/today-dashboard.tsx', import.meta.url), 'utf8');
+  assert.match(dashboard, /const nextTask = roadmap\.nextTask;/);
+  assert.match(dashboard, /const nextActionHref = nextTask\s*\n\s*\? roadmapTaskHref\(nextTask\)/);
+  assert.doesNotMatch(dashboard, /const nextTask = !isFreshLearner/);
 });
 
 test('native PDF readers are bounded and background warming cannot evict an open reader', () => {

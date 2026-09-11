@@ -1308,7 +1308,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const dashboardHtml = await dashboard.text();
   const dashboardText = visibleText(dashboardHtml);
   assert.match(dashboardText, /Start here · Week 1 of 4/i);
-  assert.match(dashboardText, /Choose your first practice round/i);
+  assert.match(dashboardText, /Draft three ownership stories/i);
   assert.match(dashboardText, /Demo workspace/i);
   assert.match(dashboardText, /0 \/ 6/i);
   assert.match(dashboardText, /Second Seat \/ Dashboard/i);
@@ -1748,8 +1748,8 @@ test("Foundation demo Today renders the clean starting values", async () => {
 
 test("Vault and Second Seat Today use plan-appropriate Next Action introductions", async () => {
   for (const [preview, description] of [
-    ["foundation", /Define your target role, interview loop, and evidence bar/],
-    ["practice", /Choose an interview-shaped round, then use the transcript and rubric/],
+    ["foundation", /Create the target-role map/],
+    ["practice", /Draft three ownership stories/],
   ]) {
     const login = await request("/api/demo-session", {
       method: "POST",
