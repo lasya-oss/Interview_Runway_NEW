@@ -6,6 +6,8 @@ const GOOGLE_USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo";
 const GMAIL_SEND_URL = "https://gmail.googleapis.com/upload/gmail/v1/users/me/messages/send?uploadType=media";
 const MAX_ACCESS_TOKEN_LENGTH = 8_192;
 const MAX_PDF_ATTACHMENT_BYTES = 3_000_000;
+const GOOGLE_IDENTITY_ATTEMPTS = 2;
+const GOOGLE_IDENTITY_RETRY_DELAY_MS = 100;
 
 export class GmailAuthorizationError extends Error {
   constructor() {
@@ -18,6 +20,13 @@ export class GmailDeliveryError extends Error {
   constructor(message = "Gmail could not deliver the user history report") {
     super(message);
     this.name = "GmailDeliveryError";
+  }
+}
+
+export class GmailProviderUnavailableError extends GmailDeliveryError {
+  constructor() {
+    super("Google identity verification is temporarily unavailable");
+    this.name = "GmailProviderUnavailableError";
   }
 }
 
@@ -247,41 +256,61 @@ export function createGmailReportMessage({
 }
 
 async function readGoogleIdentity(fetchImpl: typeof fetch, accessToken: string) {
-  let response: Response;
-  try {
-    response = await fetchImpl(GOOGLE_USERINFO_URL, {
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${accessToken}`,
-        "Cache-Control": "no-store",
-      },
-      redirect: "error",
-      signal: AbortSignal.timeout(8_000),
-    });
-  } catch {
-    throw new GmailDeliveryError("Google identity verification is unavailable");
-  }
-  if (response.status === 401 || response.status === 403) throw new GmailAuthorizationError();
-  if (!response.ok) throw new GmailDeliveryError("Google identity verification is unavailable");
-  if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
-    throw new GmailDeliveryError("Google identity verification returned an unexpected response");
+  for (let attempt = 1; attempt <= GOOGLE_IDENTITY_ATTEMPTS; attempt += 1) {
+    let response: Response;
+    try {
+      response = await fetchImpl(GOOGLE_USERINFO_URL, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          "Cache-Control": "no-store",
+        },
+        redirect: "error",
+        signal: AbortSignal.timeout(8_000),
+      });
+    } catch {
+      if (attempt < GOOGLE_IDENTITY_ATTEMPTS) {
+        await waitForGoogleIdentityRetry();
+        continue;
+      }
+      throw new GmailProviderUnavailableError();
+    }
+
+    if (response.status === 401 || response.status === 403) throw new GmailAuthorizationError();
+    if (response.status === 408 || response.status === 429 || response.status >= 500) {
+      if (attempt < GOOGLE_IDENTITY_ATTEMPTS) {
+        await waitForGoogleIdentityRetry();
+        continue;
+      }
+      throw new GmailProviderUnavailableError();
+    }
+    if (!response.ok) throw new GmailDeliveryError(`Google identity verification returned status ${response.status}`);
+    if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
+      throw new GmailProviderUnavailableError();
+    }
+
+    const body = await response.json().catch(() => null) as {
+      email?: unknown;
+      email_verified?: unknown;
+      hd?: unknown;
+      sub?: unknown;
+    } | null;
+    if (!body || typeof body.email !== "string" || typeof body.hd !== "string") {
+      throw new GmailAuthorizationError();
+    }
+    return {
+      email: body.email,
+      emailVerified: body.email_verified === true,
+      hostedDomain: body.hd,
+      subject: typeof body.sub === "string" ? body.sub : "",
+    };
   }
 
-  const body = await response.json().catch(() => null) as {
-    email?: unknown;
-    email_verified?: unknown;
-    hd?: unknown;
-    sub?: unknown;
-  } | null;
-  if (!body || typeof body.email !== "string" || typeof body.hd !== "string") {
-    throw new GmailAuthorizationError();
-  }
-  return {
-    email: body.email,
-    emailVerified: body.email_verified === true,
-    hostedDomain: body.hd,
-    subject: typeof body.sub === "string" ? body.sub : "",
-  };
+  throw new GmailProviderUnavailableError();
+}
+
+function waitForGoogleIdentityRetry() {
+  return new Promise<void>((resolve) => setTimeout(resolve, GOOGLE_IDENTITY_RETRY_DELAY_MS));
 }
 
 function bytesToBase64(bytes: Uint8Array) {

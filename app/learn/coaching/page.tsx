@@ -83,8 +83,6 @@ export default async function CoachingPage() {
           </aside>
         </section>
 
-        {profile.isLive ? <UserHistoryReportPanel /> : null}
-
         <section className="coaching-note" aria-labelledby="coach-note-title">
           <div><span>Private sample note</span><b>17 JUL · 09:10 IST</b></div>
           <blockquote id="coach-note-title">“Your architecture is already credible. The level signal weakens when every decision receives equal narration. Lead with the decisions that were expensive to reverse, then show how other teams changed course because of them.”</blockquote>

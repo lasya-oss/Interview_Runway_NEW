@@ -14,6 +14,7 @@ import {
   GmailAuthorizationError,
   GmailDeliveryError,
   GmailDeliveryIndeterminateError,
+  GmailProviderUnavailableError,
   GmailQuotaError,
   GmailWorkspacePolicyError,
 } from "../app/lib/user-history-gmail.ts";
@@ -145,6 +146,87 @@ test("report email rejects missing origin or Gmail authorization before loading 
   assert.equal(missingToken.status, 400);
   assert.equal(loadCount, 0);
   assert.equal(deliveryCount, 0);
+});
+
+test("expired Gmail authorization returns a reauthorization signal after PDF generation", async () => {
+  const operator = {
+    displayName: "Internal reviewer",
+    email: "reviewer@vividlabsai.com",
+    fullName: "Internal Reviewer",
+    subject: "google-subject-reviewer",
+  };
+  const generate = createUserHistoryReportHandler({
+    authorize: async () => ({ ok: true, user: operator }),
+    deliver: async () => {
+      throw new GmailAuthorizationError();
+    },
+    loadSources: async () => fixture({
+      learnerEmail: "learner@vividlabsai.com",
+      generatedByEmail: operator.email,
+    }),
+  });
+
+  const response = await generate(new Request("https://interviewrunway.com/api/admin/user-history/report", {
+    method: "POST",
+    headers: {
+      authorization: "Bearer test-google-access-token-1234567890",
+      "content-type": "application/json",
+      origin: "https://interviewrunway.com",
+    },
+    body: JSON.stringify({ learnerEmail: "learner@vividlabsai.com" }),
+  }));
+
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("x-interviewrunway-gmail-authorization"), "required");
+  assert.match(response.headers.get("www-authenticate") ?? "", /error="invalid_token"/);
+  assert.match((await response.json()).error, /Reconnect Gmail/i);
+});
+
+test("transient Google identity failures retry before Gmail delivery", async () => {
+  let callCount = 0;
+  const result = await deliverUserHistoryReportWithGmail({
+    accessToken: "test-google-access-token-1234567890",
+    learnerEmail: "learner@vividlabsai.com",
+    pdf: new TextEncoder().encode("%PDF-1.4\nreport"),
+    recipientEmail: "reviewer@vividlabsai.com",
+    recipientSubject: "google-subject-reviewer",
+  }, {
+    configuredDomain: "vividlabsai.com",
+    fetch: async (input) => {
+      callCount += 1;
+      if (callCount === 1) throw new Error("temporary Google network failure");
+      if (String(input).includes("openidconnect.googleapis.com")) {
+        return Response.json({
+          email: "reviewer@vividlabsai.com",
+          email_verified: true,
+          hd: "vividlabsai.com",
+          sub: "google-subject-reviewer",
+        });
+      }
+      return Response.json({ id: "gmail-message-after-retry" });
+    },
+  });
+
+  assert.equal(result.messageId, "gmail-message-after-retry");
+  assert.equal(callCount, 3);
+});
+
+test("exhausted Google identity failures are classified as provider unavailability", async () => {
+  await assert.rejects(
+    deliverUserHistoryReportWithGmail({
+      accessToken: "test-google-access-token-1234567890",
+      learnerEmail: "learner@vividlabsai.com",
+      pdf: new TextEncoder().encode("%PDF-1.4\nreport"),
+      recipientEmail: "reviewer@vividlabsai.com",
+      recipientSubject: "google-subject-reviewer",
+    }, {
+      configuredDomain: "vividlabsai.com",
+      fetch: async () => {
+        throw new Error("Google identity network failure");
+      },
+    }),
+    GmailProviderUnavailableError,
+  );
 });
 
 test("unauthorized report requests never load history or invoke Gmail", async () => {

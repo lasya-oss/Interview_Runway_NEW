@@ -25,7 +25,11 @@ type GoogleTokenResponse = {
 };
 
 type GoogleTokenClient = {
-  requestAccessToken(options?: { prompt?: string }): void;
+  requestAccessToken(options?: {
+    include_granted_scopes?: boolean;
+    prompt?: string;
+    scope?: string;
+  }): void;
 };
 
 type GoogleOauth2 = {
@@ -63,6 +67,7 @@ export function UserHistoryReportPanel({
   const [report, setReport] = useState<ReadyReport | null>(null);
   const tokenClientRef = useRef<GoogleTokenClient | null>(null);
   const pendingLearnerRef = useRef<LearnerResult | null>(null);
+  const reauthorizationAttemptedRef = useRef(false);
   const generating = generationStage !== "idle";
 
   useEffect(() => () => {
@@ -73,8 +78,17 @@ export function UserHistoryReportPanel({
     setReport(null);
   };
 
+  const requestGmailAuthorization = useCallback((options?: Parameters<GoogleTokenClient["requestAccessToken"]>[0]) => {
+    const tokenClient = tokenClientRef.current;
+    if (!tokenClient) return false;
+    tokenClient.requestAccessToken(options);
+    return true;
+  }, []);
+
   const sendReport = useCallback(async (accessToken: string, learner: LearnerResult) => {
     setGenerationStage("sending");
+    setError(null);
+    let waitingForReauthorization = false;
     try {
       const response = await fetch("/api/admin/user-history/report", {
         method: "POST",
@@ -86,11 +100,26 @@ export function UserHistoryReportPanel({
         cache: "no-store",
         body: JSON.stringify({ learnerEmail: learner.email }),
       });
+      if (response.status === 401 && !reauthorizationAttemptedRef.current) {
+        reauthorizationAttemptedRef.current = true;
+        pendingLearnerRef.current = learner;
+        setGenerationStage("authorizing");
+        setError("Your Gmail authorization expired. Reconnect Gmail to continue.");
+        waitingForReauthorization = requestGmailAuthorization({
+          include_granted_scopes: true,
+          prompt: "select_account consent",
+          scope: GMAIL_AUTH_SCOPES,
+        });
+        if (!waitingForReauthorization) {
+          throw new Error("Gmail authorization is unavailable. Refresh this page and try again.");
+        }
+        return;
+      }
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
         throw new Error(
           response.status === 401
-            ? "Your session expired. Sign in again to continue."
+            ? "Gmail reauthorization was not accepted. Choose the same signed-in Vivid Labs account and allow email sending."
             : body?.error || body?.message || "The report could not be sent",
         );
       }
@@ -111,10 +140,12 @@ export function UserHistoryReportPanel({
     } catch (generationError) {
       setError(generationError instanceof Error ? generationError.message : "The report could not be sent");
     } finally {
-      pendingLearnerRef.current = null;
-      setGenerationStage("idle");
+      if (!waitingForReauthorization) {
+        pendingLearnerRef.current = null;
+        setGenerationStage("idle");
+      }
     }
-  }, [deliveryEmail]);
+  }, [deliveryEmail, requestGmailAuthorization]);
 
   useEffect(() => {
     let active = true;
@@ -128,7 +159,7 @@ export function UserHistoryReportPanel({
         tokenClientRef.current = oauth2.initTokenClient({
           client_id: googleClientId,
           scope: GMAIL_AUTH_SCOPES,
-          include_granted_scopes: false,
+          include_granted_scopes: true,
           login_hint: deliveryEmail,
           hd: workspaceDomain,
           callback: (response) => {
@@ -141,7 +172,10 @@ export function UserHistoryReportPanel({
             ) {
               pendingLearnerRef.current = null;
               setGenerationStage("idle");
-              setError(response.error_description || "Allow Gmail email sending to deliver this report");
+              setError(
+                response.error_description
+                  || "Gmail permission was not granted. Choose the same signed-in Vivid Labs account and allow email sending.",
+              );
               return;
             }
             void sendReport(response.access_token, learner);
@@ -222,9 +256,14 @@ export function UserHistoryReportPanel({
     if (!selected || generating || searching || pendingLearnerRef.current || gmailState !== "ready" || !tokenClientRef.current) return;
     setError(null);
     clearReadyReport();
+    reauthorizationAttemptedRef.current = false;
     pendingLearnerRef.current = selected;
     setGenerationStage("authorizing");
-    tokenClientRef.current.requestAccessToken();
+    if (!requestGmailAuthorization()) {
+      pendingLearnerRef.current = null;
+      setGenerationStage("idle");
+      setError("Gmail authorization is unavailable. Refresh this page and try again.");
+    }
   };
 
   return (

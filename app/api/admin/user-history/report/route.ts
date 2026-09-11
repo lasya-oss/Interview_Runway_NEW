@@ -18,6 +18,7 @@ import {
   GmailAuthorizationError,
   GmailDeliveryError,
   GmailDeliveryIndeterminateError,
+  GmailProviderUnavailableError,
   GmailQuotaError,
   GmailWorkspacePolicyError,
   readGoogleBearerToken,
@@ -100,11 +101,22 @@ export function createUserHistoryReportHandler(dependencies: UserHistoryReportDe
         return json({ error: "This report is too large to attach to a Gmail message" }, 413);
       }
       if (error instanceof GmailAuthorizationError) {
-        return json({ error: "Authorize Gmail with the same signed-in Vivid Labs account and allow email sending" }, 403);
+        return json(
+          { error: "Gmail authorization expired or is no longer granted. Reconnect Gmail and try again" },
+          401,
+          {
+            "WWW-Authenticate": 'Bearer realm="user-history-report", error="invalid_token"',
+            "X-InterviewRunway-Gmail-Authorization": "required",
+          },
+        );
       }
       if (error instanceof GmailDeliveryIndeterminateError) {
         console.error("Internal user history report Gmail delivery was indeterminate");
         return json({ error: "Gmail did not confirm delivery. Check your Inbox or Sent folder before trying again" }, 502);
+      }
+      if (error instanceof GmailProviderUnavailableError) {
+        console.error("Internal user history report Google identity verification was unavailable");
+        return json({ error: "Google authorization is temporarily unavailable. Wait a moment, then try again" }, 503);
       }
       if (error instanceof GmailWorkspacePolicyError) {
         console.error("Internal user history report Gmail delivery was blocked by Workspace policy");
@@ -130,9 +142,9 @@ function safeErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
-function json(body: object, status: number) {
+function json(body: object, status: number, headers: Record<string, string> = {}) {
   return NextResponse.json(body, {
     status,
-    headers: { "Cache-Control": "private, no-store" },
+    headers: { "Cache-Control": "private, no-store", ...headers },
   });
 }

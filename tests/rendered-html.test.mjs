@@ -849,6 +849,22 @@ test("Human Calibration cumulative practice records open four distinct first-par
   assert.equal(new Set(hrefs).size, expected.size);
 });
 
+test("Human Calibration mounts one configured Gmail report panel with reauthorization recovery", async () => {
+  const coachingPage = await readFile(new URL("../app/learn/coaching/page.tsx", import.meta.url), "utf8");
+  const reportPanel = await readFile(
+    new URL("../app/learn/coaching/user-history-report-panel.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.equal((coachingPage.match(/<UserHistoryReportPanel/g) ?? []).length, 1);
+  assert.match(coachingPage, /deliveryEmail=\{profile\.email\}/);
+  assert.match(coachingPage, /googleClientId=\{process\.env\.GOOGLE_CLIENT_ID \?\? ""\}/);
+  assert.match(reportPanel, /response\.status === 401 && !reauthorizationAttemptedRef\.current/);
+  assert.match(reportPanel, /prompt: "select_account consent"/);
+  assert.match(reportPanel, /scope: GMAIL_AUTH_SCOPES/);
+  assert.match(reportPanel, /include_granted_scopes: true/);
+});
+
 test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable", async () => {
   const filenames = [
     "career_target-role-evidence-map.pdf",
