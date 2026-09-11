@@ -39,7 +39,7 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const nextAction = nextTask?.title ?? profile.nextAction;
   const nextActionMeta = nextTask?.meta ?? profile.nextActionMeta;
   const nextActionHref = nextTask
-    ? roadmapTaskHref(nextTask)
+    ? "/learn/roadmap?continue=1"
     : "/learn/roadmap";
   const nextActionDescription = describeNextAction(profile, nextTask, isFreshLearner);
   const readinessLabel = profile.id === "foundation"
@@ -128,10 +128,6 @@ function formatFocusedTime(seconds: number) {
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
   return remainingMinutes ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
-}
-
-function roadmapTaskHref(task: RoadmapTask) {
-  return `/learn/roadmap#roadmap-task-${task.id}`;
 }
 
 function describeNextAction(

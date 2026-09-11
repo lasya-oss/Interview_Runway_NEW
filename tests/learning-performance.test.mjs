@@ -119,8 +119,16 @@ test('roadmap Continue selects exactly the first incomplete record in plan order
 test('Dashboard Continue uses the selected roadmap record even for a fresh plan', async () => {
   const dashboard = await readFile(new URL('../app/learn/today-dashboard.tsx', import.meta.url), 'utf8');
   assert.match(dashboard, /const nextTask = roadmap\.nextTask;/);
-  assert.match(dashboard, /const nextActionHref = nextTask\s*\n\s*\? roadmapTaskHref\(nextTask\)/);
+  assert.match(dashboard, /const nextActionHref = nextTask\s*\n\s*\? "\/learn\/roadmap\?continue=1"/);
   assert.doesNotMatch(dashboard, /const nextTask = !isFreshLearner/);
+});
+
+test('Roadmap Continue resolves the target after authoritative progress is ready', async () => {
+  const roadmap = await readFile(new URL('../app/learn/roadmap/roadmap-client.tsx', import.meta.url), 'utf8');
+  assert.match(roadmap, /nextIncompleteRoadmapTask\(weeks, \[\.\.\.completed\]\)/);
+  assert.match(roadmap, /window\.location\.search !== "\?continue=1"/);
+  assert.match(roadmap, /roadmap-task-\$\{nextTask\.id\}/);
+  assert.match(roadmap, /window\.history\.replaceState/);
 });
 
 test('native PDF readers are bounded and background warming cannot evict an open reader', () => {

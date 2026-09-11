@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   dateKeyForTimeZone,
   emitRoadmapProgressUpdated,
+  nextIncompleteRoadmapTask,
   parseStoredRoadmapProgress,
   roadmapProgressFor,
   roadmapStorageKey,
@@ -66,6 +67,27 @@ export function RoadmapChecklist({
   const completionActivity = isAccount
     ? accountOverride?.completionActivity ?? roadmap.completionActivity
     : demoCompletionActivity;
+
+  const nextTask = useMemo(
+    () => nextIncompleteRoadmapTask(weeks, [...completed]),
+    [completed, weeks],
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined" || window.location.search !== "?continue=1" || !nextTask) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(`roadmap-task-${nextTask.id}`);
+      if (!target) return;
+      window.history.replaceState(null, "", `/learn/roadmap#roadmap-task-${nextTask.id}`);
+      target.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [nextTask]);
 
   const completedCount = allTasks.filter((task) => completed.has(task.id)).length;
   const completion = Math.round((completedCount / allTasks.length) * 100);
