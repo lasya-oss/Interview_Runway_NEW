@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { MaterialViewer } from "./material-viewer";
 import type { LibraryMaterialViewerSource } from "./library-material-source";
@@ -20,6 +21,7 @@ export function LibraryMaterialDialog({
   emptyState,
   initialOpen = false,
   returnTo = null,
+  renderInPortal = false,
 }: {
   source: LibraryMaterialViewerSource | null;
   title: string;
@@ -33,6 +35,7 @@ export function LibraryMaterialDialog({
   emptyState?: ReactNode;
   initialOpen?: boolean;
   returnTo?: string | null;
+  renderInPortal?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(initialOpen);
@@ -157,6 +160,56 @@ export function LibraryMaterialDialog({
     }
   }, []);
 
+  const dialog = open || retainNative ? (
+    <div
+      hidden={!open}
+      style={open ? undefined : { display: "none" }}
+      className={`library-material-dialog${isFullscreen ? " is-fullscreen" : ""}`}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) closeViewer();
+      }}
+    >
+      <div
+        ref={dialogRef}
+        className="library-material-dialog__surface"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+      >
+        <header className="library-material-dialog__header">
+          <div>
+            <span>{eyebrow}</span>
+            <h2 id={titleId}>{title}</h2>
+            <p id={descriptionId}>{description}</p>
+          </div>
+          <div className="library-material-dialog__actions">
+            <button
+              className="library-material-dialog__fullscreen"
+              type="button"
+              onClick={toggleFullscreen}
+              aria-label={isFullscreen ? "Exit full screen" : "Open material in full screen"}
+              title={isFullscreen ? "Exit full screen" : "Open material in full screen"}
+            >
+              <span aria-hidden="true">⛶</span>
+            </button>
+            <button className="library-material-dialog__close" ref={closeRef} type="button" onClick={closeViewer} aria-label="Close material viewer">
+              <span>CLOSE</span><b aria-hidden="true">×</b>
+            </button>
+          </div>
+        </header>
+        <div ref={viewerRef} className="library-material-dialog__body">
+          {source ? <MaterialViewer {...source} googleClientId={googleClientId} loginHint={loginHint} /> : emptyState ?? (
+            <div className="library-material-state library-material-content-unavailable" role="status">
+              <strong>Content unavailable</strong>
+              <p>The source material for this preview is not connected yet.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  ) : null;
+
   return (
     <>
       <button
@@ -176,56 +229,9 @@ export function LibraryMaterialDialog({
       >
         {buttonLabel} <span aria-hidden="true">↗</span>
       </button>
-
-      {open || retainNative ? (
-        <div
-          hidden={!open}
-          style={open ? undefined : { display: "none" }}
-          className={`library-material-dialog${isFullscreen ? " is-fullscreen" : ""}`}
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeViewer();
-          }}
-        >
-          <div
-            ref={dialogRef}
-            className="library-material-dialog__surface"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            aria-describedby={descriptionId}
-          >
-            <header className="library-material-dialog__header">
-              <div>
-                <span>{eyebrow}</span>
-                <h2 id={titleId}>{title}</h2>
-                <p id={descriptionId}>{description}</p>
-              </div>
-              <div className="library-material-dialog__actions">
-                <button
-                  className="library-material-dialog__fullscreen"
-                  type="button"
-                  onClick={toggleFullscreen}
-                  aria-label={isFullscreen ? "Exit full screen" : "Open material in full screen"}
-                  title={isFullscreen ? "Exit full screen" : "Open material in full screen"}
-                >
-                  <span aria-hidden="true">⛶</span>
-                </button>
-                <button className="library-material-dialog__close" ref={closeRef} type="button" onClick={closeViewer} aria-label="Close material viewer">
-                  <span>CLOSE</span><b aria-hidden="true">×</b>
-                </button>
-              </div>
-            </header>
-            <div ref={viewerRef} className="library-material-dialog__body">
-              {source ? <MaterialViewer {...source} googleClientId={googleClientId} loginHint={loginHint} /> : emptyState ?? (
-                <div className="library-material-state library-material-content-unavailable" role="status">
-                  <strong>Content unavailable</strong>
-                  <p>The source material for this preview is not connected yet.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {renderInPortal && dialog
+        ? typeof document === "undefined" ? null : createPortal(dialog, document.body)
+        : renderInPortal ? null : dialog}
     </>
   );
 }

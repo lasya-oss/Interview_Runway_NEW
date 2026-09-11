@@ -217,6 +217,7 @@ function ReviewMaterials({
                 buttonLabel={profile.isLive ? `Open ${planLabel} material` : "Open review edition"}
                 buttonClassName="member-card-action"
                 buttonAriaLabel={`Open ${material.title} inside InterviewRunway`}
+                renderInPortal
               />
             </span>
           </article>
