@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { isActivePdfFilename } from "@/app/lib/active-library-selection";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { findRoadmapTask } from "@/app/lib/roadmap-data";
 import { getLibraryCategorySummary, getLibraryCatalog } from "./library-catalog";
 import { LibraryClient } from "./library-client";
 
@@ -14,11 +15,20 @@ export const metadata: Metadata = {
 export default async function LibraryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ pdf?: string | string[] }>;
+  searchParams: Promise<{
+    pdf?: string | string[];
+    from?: string | string[];
+    task?: string | string[];
+  }>;
 }) {
   const params = await searchParams;
   const requestedPdf = Array.isArray(params.pdf) ? params.pdf[0] : params.pdf;
   const initialPdfFilename = requestedPdf && isActivePdfFilename(requestedPdf) ? requestedPdf : null;
+  const requestedOrigin = Array.isArray(params.from) ? params.from[0] : params.from;
+  const requestedTask = Array.isArray(params.task) ? params.task[0] : params.task;
+  const returnTo = initialPdfFilename && requestedOrigin === "roadmap" && requestedTask && findRoadmapTask(requestedTask)
+    ? `/learn/roadmap#roadmap-task-${encodeURIComponent(requestedTask)}`
+    : null;
   const profile = await requireDemoProfile("/learn/library");
   const isLive = profile.isLive === true;
 
@@ -33,6 +43,7 @@ export default async function LibraryPage({
         categorySummary={getLibraryCategorySummary(isLive, profile.id)}
         initialPdfFilename={initialPdfFilename}
         initialCatalog={initialPdfFilename ? getLibraryCatalog(isLive, profile.id) : null}
+        returnTo={returnTo}
       />
     </div>
   );

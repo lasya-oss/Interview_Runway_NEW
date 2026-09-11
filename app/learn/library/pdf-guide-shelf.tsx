@@ -13,10 +13,12 @@ export function PdfGuideShelf({
   guides,
   startNumber,
   initialFilename = null,
+  returnTo = null,
 }: {
   guides: readonly DrivePdfGuide[];
   startNumber: number;
   initialFilename?: string | null;
+  returnTo?: string | null;
 }) {
   return (
       <div className="library-record-list library-pdf-record-list">
@@ -46,6 +48,7 @@ export function PdfGuideShelf({
                   buttonClassName="library-record-open"
                   buttonAriaLabel={`Open ${title} inside InterviewRunway`}
                   initialOpen={initialFilename === guide.filename}
+                  returnTo={returnTo}
                 />
               </div>
             </article>

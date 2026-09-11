@@ -865,6 +865,8 @@ test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable",
   const libraryPage = await readFile(new URL("../app/learn/library/page.tsx", import.meta.url), "utf8");
   const libraryClient = await readFile(new URL("../app/learn/library/library-client.tsx", import.meta.url), "utf8");
   const pdfShelf = await readFile(new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url), "utf8");
+  const materialDialog = await readFile(new URL("../app/learn/library/library-material-dialog.tsx", import.meta.url), "utf8");
+  const roadmapClient = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
 
   for (const filename of filenames) {
     assert.equal(existsSync(new URL(`../public/pdf-guides/${filename}`, import.meta.url)), true, filename);
@@ -884,8 +886,13 @@ test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable",
   assert.match(roadmap, /"12w-4-frame": "\/learn\/library\/material\/template-system-design-canvas-docx-vnkzbt0l"/);
   assert.match(roadmap, /"12w-8-linkedin": "\/learn\/library\/material\/template-linkedin-profile-docx-cyog_vzk"/);
   assert.match(libraryPage, /requestedPdf && isActivePdfFilename\(requestedPdf\)/);
+  assert.match(libraryPage, /requestedOrigin === "roadmap"/);
   assert.match(libraryClient, /initialFilename=\{initialPdfFilename\}/);
+  assert.match(libraryClient, /returnTo=\{returnTo\}/);
   assert.match(pdfShelf, /initialOpen=\{initialFilename === guide\.filename\}/);
+  assert.match(pdfShelf, /returnTo=\{returnTo\}/);
+  assert.match(roadmapClient, /appendRoadmapOrigin\(libraryHref, task\.id\)/);
+  assert.match(materialDialog, /router\.replace\(returnTo, \{ scroll: false \}\)/);
 });
 
 const coreRoutes = [
@@ -1706,7 +1713,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   ]) {
     assert.match(
       vaultRoadmapHtml,
-      new RegExp(`href=["'][^"']*/learn/library\\?pdf=${filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`, "i"),
+      new RegExp(`href=["'][^"']*/learn/library\\?pdf=${filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}&amp;from=roadmap&amp;task=[^"']+["']`, "i"),
       filename,
     );
   }

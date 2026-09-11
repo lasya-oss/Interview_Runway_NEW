@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { MaterialViewer } from "./material-viewer";
 import type { LibraryMaterialViewerSource } from "./library-material-source";
 import { canWarmMaterial, isPdfAsset, nativePreviewSlots, previewInputForMaterial, previewKey, warmMaterialPreview } from "./material-preview-cache";
@@ -18,6 +19,7 @@ export function LibraryMaterialDialog({
   loginHint = null,
   emptyState,
   initialOpen = false,
+  returnTo = null,
 }: {
   source: LibraryMaterialViewerSource | null;
   title: string;
@@ -30,7 +32,9 @@ export function LibraryMaterialDialog({
   loginHint?: string | null;
   emptyState?: ReactNode;
   initialOpen?: boolean;
+  returnTo?: string | null;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(initialOpen);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -83,8 +87,12 @@ export function LibraryMaterialDialog({
     }
     setIsFullscreen(false);
     setOpen(false);
+    if (returnTo) {
+      router.replace(returnTo, { scroll: false });
+      return;
+    }
     window.requestAnimationFrame(() => returnFocusRef.current?.focus());
-  }, []);
+  }, [returnTo, router]);
 
   useEffect(() => {
     if (!open) return;

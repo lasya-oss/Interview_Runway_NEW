@@ -109,6 +109,7 @@ export function LibraryClient({
   categorySummary,
   initialPdfFilename = null,
   initialCatalog = null,
+  returnTo = null,
 }: {
   profileId: DemoTier;
   availablePlans?: readonly DemoTier[];
@@ -118,6 +119,7 @@ export function LibraryClient({
   categorySummary: LibraryCategorySummary;
   initialPdfFilename?: string | null;
   initialCatalog?: LibraryCatalog | null;
+  returnTo?: string | null;
 }) {
   const [catalog, setCatalog] = useState<LibraryCatalog | null>(initialCatalog);
   const [query, setQuery] = useState(initialPdfFilename ?? "");
@@ -325,6 +327,7 @@ export function LibraryClient({
             guides={pdfResults}
             startNumber={results.length + 1}
             initialFilename={initialPdfFilename}
+            returnTo={returnTo}
           />
         </section>
       ) : null}
