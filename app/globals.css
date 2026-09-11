@@ -5684,7 +5684,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   gap: 10px;
 }
 
-.member-review-material-grid > a {
+.member-review-material-grid > article {
   min-height: 282px;
   display: grid;
   grid-template-columns: 112px minmax(0, 1fr);
@@ -5695,7 +5695,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   transition: transform 180ms var(--ease-out-expo), border-color 180ms ease;
 }
 
-.member-review-material-grid > a:hover { transform: translateY(-4px); border-color: rgba(255,107,44,.45); }
+.member-review-material-grid > article:hover { transform: translateY(-4px); border-color: rgba(255,107,44,.45); }
 .member-review-cover { min-width: 0; overflow: hidden; background: #091620; }
 .member-review-cover img { width: 100%; height: 100%; object-fit: cover; object-position: 15% top; }
 .member-review-cover-fallback { height: 100%; padding: 17px 12px; display: flex; justify-content: space-between; flex-direction: column; color: #e5eef0; background: linear-gradient(155deg, #1a4654, #07161e 74%); }
@@ -5705,7 +5705,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .member-review-copy small { color: #9f411f; font-family: var(--font-mono); font-size: 7px; text-transform: uppercase; }
 .member-review-copy strong { margin-top: 18px; font-family: var(--font-display); font-size: 19px; line-height: 1.07; letter-spacing: -.04em; }
 .member-review-copy p { color: #71828a; font-size: 8px; line-height: 1.55; }
-.member-review-copy b { margin-top: auto; color: #9d3f1e; font-size: 8px; }
+.member-review-copy .member-card-action { margin-top: auto; font-size: 8px; }
 
 .material-review-link {
   margin-top: auto;
@@ -5725,7 +5725,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .demo-login-layout { grid-template-columns: 1fr; }
   .demo-login-intro { position: static; max-width: 760px; padding-right: 0; }
   .member-review-material-grid { grid-template-columns: 1fr; }
-  .member-review-material-grid > a { min-height: 230px; }
+  .member-review-material-grid > article { min-height: 230px; }
 }
 
 @media (max-width: 720px) {
@@ -5745,7 +5745,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
   .demo-entry-card::after { left: 0; }
   .demo-entry-cover { height: 170px; min-height: 0; }
   .demo-entry-cover img { object-position: 15% 23%; }
-  .member-review-material-grid > a { grid-template-columns: 92px minmax(0, 1fr); }
+  .member-review-material-grid > article { grid-template-columns: 92px minmax(0, 1fr); }
 }
 
 /* Give the public wordmark enough authority to anchor the flight deck. */
@@ -7297,7 +7297,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .material-review-link span,
 .material-review-link small { font-size: var(--member-micro); }
 .member-review-copy p { font-size: 12px; }
-.member-review-copy b { font-size: 10.5px; }
+.member-review-copy .member-card-action { font-size: 10.5px; }
 .material-review-link strong { font-size: 12px; }
 
 @media (max-width: 900px) {
@@ -11103,7 +11103,7 @@ html[data-second-seat-film="open"] .home-aero-stage {
 .roadmap-toolbar__reset:disabled { cursor: not-allowed; opacity: .5; transform: none; }
 .roadmap-toolbar button.roadmap-toolbar__reset { padding: 0 13px; font-size: 9px; }
 
-.member-review-copy b.member-card-action { font-size: 8px; }
+.member-review-copy button.member-card-action { font-size: 8px; }
 
 .library-start-here__resource a.library-start-here__resource-action {
   margin-top: auto;
@@ -11266,7 +11266,7 @@ html[data-second-seat-film="open"] .home-aero-stage {
 
 .member-shell .member-section-heading > a.member-section-action,
 .member-shell .member-material-card b.member-card-action,
-.member-shell .member-review-copy b.member-card-action,
+.member-shell .member-review-copy button.member-card-action,
 .member-shell .library-start-here__resource a.library-start-here__resource-action,
 .member-shell .library-record-meta > a.library-record-action-button,
 .member-shell .practice-history a > b.practice-history-record__action,

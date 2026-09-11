@@ -11,6 +11,8 @@ import {
   type DemoReviewMaterial,
 } from "@/app/lib/demo-data";
 import type { RoadmapTask } from "@/app/lib/roadmap-data";
+import { LibraryMaterialDialog } from "./library/library-material-dialog";
+import { reviewMaterialViewerSource } from "./library/library-material-source";
 import { useRoadmapProgress } from "./roadmap/learner-progress-client";
 
 export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
@@ -192,7 +194,7 @@ function ReviewMaterials({
       </div>
       <div className="member-review-material-grid">
         {materials.map((material) => (
-          <a href={material.href} target="_blank" rel="noreferrer" key={material.href}>
+          <article key={material.href}>
             <span className="member-review-cover">
               {material.preview ? (
                 <Image src={material.preview} alt={`${material.title} cover`} width={993} height={1403} sizes="180px" />
@@ -203,8 +205,21 @@ function ReviewMaterials({
                 </span>
               )}
             </span>
-            <span className="member-review-copy"><small>{material.category} · {material.format}</small><strong>{material.title}</strong><p>{material.detail}</p><b className="member-card-action">{profile.isLive ? `Open ${planLabel} material` : "Open review edition"} <span aria-hidden="true">↗</span></b></span>
-          </a>
+            <span className="member-review-copy">
+              <small>{material.category} · {material.format}</small>
+              <strong>{material.title}</strong>
+              <p>{material.detail}</p>
+              <LibraryMaterialDialog
+                source={reviewMaterialViewerSource(material)}
+                title={material.title}
+                eyebrow={`${material.category} · ${material.format}`}
+                description="Open the material here without leaving InterviewRunway."
+                buttonLabel={profile.isLive ? `Open ${planLabel} material` : "Open review edition"}
+                buttonClassName="member-card-action"
+                buttonAriaLabel={`Open ${material.title} inside InterviewRunway`}
+              />
+            </span>
+          </article>
         ))}
       </div>
     </section>

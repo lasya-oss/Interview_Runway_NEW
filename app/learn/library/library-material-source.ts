@@ -7,7 +7,7 @@ import {
 } from "@/app/lib/drive-materials";
 import { DRIVE_MATERIAL_CONTENT } from "@/app/lib/drive-material-content";
 import type { DrivePdfGuide } from "@/app/lib/drive-pdf-guides";
-import type { LearningMaterial } from "@/app/lib/demo-data";
+import type { DemoReviewMaterial, LearningMaterial } from "@/app/lib/demo-data";
 
 export type LibraryMaterialViewerSource = {
   fileId: string;
@@ -50,6 +50,18 @@ function filenameFromPath(pathname: string) {
   return decodeURIComponent(filename);
 }
 
+function assetViewerSource(href: string, fileId: string, title: string): LibraryMaterialViewerSource {
+  const url = new URL(href, "https://interviewrunway.invalid");
+  const filename = filenameFromPath(url.pathname);
+  return {
+    fileId,
+    filename,
+    mimeType: /\.pdf$/i.test(filename) ? "application/pdf" : "application/octet-stream",
+    title,
+    assetUrl: `${url.pathname}${url.search}`,
+  };
+}
+
 /**
  * Resolve the first-party source behind a LearningMaterial card. Some legacy
  * cards point at a Drive material route or a Library PDF query; the viewer
@@ -69,13 +81,9 @@ export function learningMaterialViewerSource(material: LearningMaterial): Librar
   const pdfFilename = url.searchParams.get("pdf");
   if (pdfFilename) return pdfSource(pdfFilename, `learning-${material.slug}`, material.title);
 
-  const filename = filenameFromPath(url.pathname);
-  const mimeType = /\.pdf$/i.test(filename) ? "application/pdf" : "application/octet-stream";
-  return {
-    fileId: `learning-${material.slug}`,
-    filename,
-    mimeType,
-    title: material.title,
-    assetUrl: `${url.pathname}${url.search}`,
-  };
+  return assetViewerSource(href, `learning-${material.slug}`, material.title);
+}
+
+export function reviewMaterialViewerSource(material: DemoReviewMaterial): LibraryMaterialViewerSource {
+  return assetViewerSource(material.href, `review-${material.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`, material.title);
 }

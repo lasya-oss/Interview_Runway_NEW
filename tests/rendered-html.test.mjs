@@ -2325,6 +2325,18 @@ test("Today and Status consume the Roadmap snapshot for both learner tiers", asy
   assert.match(loading, /aria-busy="true"/);
 });
 
+test("dashboard review materials use the in-app library viewer", async () => {
+  const dashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const viewerSource = await readFile(new URL("../app/learn/library/library-material-source.ts", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(dashboard, /<LibraryMaterialDialog[\s\S]*reviewMaterialViewerSource\(material\)/);
+  assert.doesNotMatch(dashboard, /target=["']_blank["']/i);
+  assert.match(viewerSource, /export function reviewMaterialViewerSource\(material: DemoReviewMaterial\)/);
+  assert.match(viewerSource, /mimeType:.*application\/pdf/);
+  assert.match(styles, /\.member-review-material-grid > article/);
+});
+
 test("learner progress persistence is scoped to the selected roadmap", async () => {
   const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
   const route = await readFile(new URL("../app/api/learner/progress/route.ts", import.meta.url), "utf8");
