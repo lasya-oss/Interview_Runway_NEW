@@ -2396,6 +2396,7 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   const practice = await readFile(new URL("../app/learn/practice/practice-client.tsx", import.meta.url), "utf8");
   const feedback = await readFile(new URL("../app/learn/feedback/page.tsx", import.meta.url), "utf8");
   const feedbackClient = await readFile(new URL("../app/learn/feedback/feedback-client.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const sessionRoute = await readFile(new URL("../app/api/second-seat/sessions/[id]/route.ts", import.meta.url), "utf8");
 
   assert.match(engine, /SECOND_SEAT_MOCKS/);
@@ -2447,6 +2448,7 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(feedbackClient, /number: "01", label: "Summary"/);
   assert.match(feedbackClient, /number: "02", label: "Answer review"/);
   assert.doesNotMatch(feedbackClient, /label: "Plan changes"/);
+  assert.match(styles, /\.feedback-workspace--second-seat \.feedback-tabs button\[aria-selected="true"\] > span \{ color: #fff; \}/);
   const secondSeatFeedback = feedbackClient.slice(
     feedbackClient.indexOf("function SecondSeatFeedbackExperience"),
     feedbackClient.indexOf("function SecondSeatFeedbackTabs"),

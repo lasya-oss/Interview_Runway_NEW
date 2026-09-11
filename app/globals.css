@@ -6587,7 +6587,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .feedback-workspace--second-seat .feedback-tabs button > span { grid-row: 1 / -1; color: #a6421d; font-family: var(--font-mono); font-size: 8px; }
 .feedback-workspace--second-seat .feedback-tabs button > strong { color: #405762; font-family: var(--font-display); font-size: 11px; font-weight: 600; line-height: 1.1; }
 .feedback-workspace--second-seat .feedback-tabs button > small { color: #87979e; font-size: 8px; line-height: 1.1; }
-.feedback-workspace--second-seat .feedback-tabs button[aria-selected="true"] > span { color: var(--afterburner); }
+.feedback-workspace--second-seat .feedback-tabs button[aria-selected="true"] > span { color: #fff; }
 .feedback-workspace--second-seat .feedback-tabs button[aria-selected="true"] > strong { color: #fff; }
 .feedback-workspace--second-seat .feedback-tabs button[aria-selected="true"] > small { color: #b8c8ce; }
 .feedback-workspace--second-seat .feedback-tabs button:hover:not([aria-selected="true"]) { background: rgba(255,255,255,.65); }
