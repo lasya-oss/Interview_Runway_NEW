@@ -6,7 +6,7 @@
 export const MEETING_COPILOT_RELEASE = {
   repository: "https://github.com/vividlabsai/meeting-copilot",
   branch: "codex/interview-profile-context",
-  commit: "1411f4d870c264d5827043e0c4dc61520254528a",
-  uiVersion: "20260905-clue-coaching-v1",
+  commit: "6c0b0498c3ac8b651dd8d4c46ab23ab0392e9c1b",
+  uiVersion: "20260909-profile-copy-v1",
   launchUrl: "http://127.0.0.1:8123/",
 } as const;

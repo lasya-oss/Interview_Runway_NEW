@@ -111,6 +111,10 @@ class PdfSpec:
     revision: str = "1.0"
     compact: bool = False
     review_required: bool = False
+    edition: str = "VAULT"
+    audience: str = "LEARNER EDITION"
+    format_label: str | None = None
+    single_page: bool = False
 
 
 class CheckboxMark(Flowable):
@@ -382,6 +386,7 @@ def grid_table(
     *,
     font_size: float = 7.45,
     row_heights: Sequence[float] | None = None,
+    cell_padding: float = 6,
 ) -> Table:
     head_style = WHITE_HEAD
     effective_font_size = max(font_size, 7.4)
@@ -406,8 +411,8 @@ def grid_table(
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 7),
         ("RIGHTPADDING", (0, 0), (-1, -1), 7),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), cell_padding),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), cell_padding),
     ]
     for row_index in range(1, len(data)):
         commands.append(("BACKGROUND", (0, row_index), (-1, row_index), PALE_ALT if row_index % 2 == 0 else WHITE))
@@ -498,7 +503,7 @@ def draw_cover(canvas: Canvas, doc: BaseDocTemplate, spec: PdfSpec) -> None:
     draw_wordmark(canvas, MARGIN, PAGE_H - 54)
     canvas.setFillColor(colors.HexColor("#A3B2BC"))
     canvas.setFont("Courier", 6.7)
-    canvas.drawRightString(PAGE_W - MARGIN, PAGE_H - 46, "VAULT / LEARNER EDITION")
+    canvas.drawRightString(PAGE_W - MARGIN, PAGE_H - 46, f"{spec.edition} / {spec.audience}")
     bar_y = PAGE_H - 68
     for index in range(7):
         canvas.setFillColor(TEAL)
@@ -558,13 +563,17 @@ def draw_cover(canvas: Canvas, doc: BaseDocTemplate, spec: PdfSpec) -> None:
     canvas.setFillColor(colors.HexColor("#A3B2BC"))
     canvas.setFont("Courier", 6.8)
     canvas.drawString(MARGIN + 5, metadata_y, f"VERSION {spec.revision}")
-    canvas.drawString(MARGIN + 5, metadata_y - 16, "FORMAT GUIDE + WORKED EXAMPLES" if spec.compact else "FORMAT GUIDE + WORKSHEET")
+    canvas.drawString(
+        MARGIN + 5,
+        metadata_y - 16,
+        spec.format_label or ("FORMAT GUIDE + WORKED EXAMPLES" if spec.compact else "FORMAT GUIDE + WORKSHEET"),
+    )
     canvas.drawString(MARGIN + 5, metadata_y - 32, "STATUS HUMAN REVIEW REQUIRED" if spec.review_required else "STATUS LEARNER READY")
     canvas.drawString(MARGIN + 5, metadata_y - 72, spec.slug.upper())
 
     canvas.setFont("Courier", 6.5)
     canvas.setFillColor(ORANGE)
-    canvas.drawString(MARGIN, 27, "HUMAN REVIEW REQUIRED" if spec.review_required else "LEARNER EDITION")
+    canvas.drawString(MARGIN, 27, "HUMAN REVIEW REQUIRED" if spec.review_required else spec.audience)
     canvas.setFillColor(colors.HexColor("#A3B2BC"))
     canvas.drawRightString(PAGE_W - MARGIN, 27, "interviewrunway.com")
     canvas.restoreState()
@@ -574,7 +583,7 @@ def draw_body(canvas: Canvas, doc: BaseDocTemplate, spec: PdfSpec) -> None:
     canvas.saveState()
     canvas.setFillColor(NAVY_2)
     canvas.setFont("Helvetica-Bold", 7.2)
-    canvas.drawString(MARGIN, PAGE_H - 24, "INTERVIEWRUNWAY / VAULT")
+    canvas.drawString(MARGIN, PAGE_H - 24, f"INTERVIEWRUNWAY / {spec.edition}")
     canvas.setFillColor(colors.HexColor("#8796A3"))
     canvas.setFont("Courier", 6.1)
     canvas.drawRightString(PAGE_W - MARGIN, PAGE_H - 24, spec.slug.upper())
@@ -584,7 +593,7 @@ def draw_body(canvas: Canvas, doc: BaseDocTemplate, spec: PdfSpec) -> None:
     canvas.line(MARGIN, 34, PAGE_W - MARGIN, 34)
     canvas.setFillColor(ORANGE)
     canvas.setFont("Courier", 6.1)
-    canvas.drawString(MARGIN, 22, "HUMAN REVIEW REQUIRED" if spec.review_required else "LEARNER EDITION")
+    canvas.drawString(MARGIN, 22, "HUMAN REVIEW REQUIRED" if spec.review_required else spec.audience)
     canvas.setFillColor(colors.HexColor("#8796A3"))
     canvas.drawRightString(PAGE_W - MARGIN, 22, f"{doc.page:02d}")
     canvas.restoreState()
@@ -602,23 +611,29 @@ def build_pdf(spec: PdfSpec, output_path: Path) -> None:
         title=spec.title,
         author="InterviewRunway",
         subject=spec.subtitle,
-        creator="InterviewRunway Vault content pipeline",
-        keywords=f"InterviewRunway, Vault, {spec.category}, roadmap, worksheet",
+        creator=f"InterviewRunway {spec.edition.title()} content pipeline",
+        keywords=f"InterviewRunway, {spec.edition}, {spec.category}, roadmap, worksheet",
     )
     cover_frame = Frame(0, 0, PAGE_W, PAGE_H, leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0, id="cover-frame")
-    body_frame = Frame(MARGIN, 47, CONTENT_W, PAGE_H - 96, leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0, id="body-frame")
-    doc.addPageTemplates(
-        [
-            PageTemplate(id="cover", frames=[cover_frame], onPage=lambda c, d: draw_cover(c, d, spec)),
-            PageTemplate(id="body", frames=[body_frame], onPage=lambda c, d: draw_body(c, d, spec)),
-        ]
-    )
-    story: list[Flowable] = [NextPageTemplate("body"), PageBreak()]
+    body_frame_y = 36 if spec.single_page else 47
+    body_frame_height = PAGE_H - 74 if spec.single_page else PAGE_H - 96
+    body_frame = Frame(MARGIN, body_frame_y, CONTENT_W, body_frame_height, leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0, id="body-frame")
+    if spec.single_page:
+        doc.addPageTemplates([PageTemplate(id="body", frames=[body_frame], onPage=lambda c, d: draw_body(c, d, spec))])
+        story: list[Flowable] = []
+    else:
+        doc.addPageTemplates(
+            [
+                PageTemplate(id="cover", frames=[cover_frame], onPage=lambda c, d: draw_cover(c, d, spec)),
+                PageTemplate(id="body", frames=[body_frame], onPage=lambda c, d: draw_body(c, d, spec)),
+            ]
+        )
+        story = [NextPageTemplate("body"), PageBreak()]
     body = spec.build_story()
     # Worked-example caption chains stay beside the first table row without
     # nesting KeepTogether containers, which can strand preceding headings.
     body = [flowable for item in body for flowable in (item if isinstance(item, list) else [item])]
-    if spec.compact:
+    if spec.compact and not spec.single_page:
         for item in body:
             if isinstance(item, Paragraph) and item.style is PAGE_DEK:
                 item.style = ParagraphStyle("IRCompactPageDek", parent=PAGE_DEK, keepWithNext=True)
@@ -3156,6 +3171,1535 @@ def build_behavioral_bank_story() -> list[Flowable]:
     return story
 
 
+def build_architecture_narrative_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Make the level signal visible",
+        "An architecture story is a decision record spoken aloud",
+        "A strong Senior-to-Staff narrative lets the listener inspect the system constraint, the expensive decision, your authority boundary, the people you influenced, and the consequence that persisted after launch. The comparison below is a fictional teaching example; replace every fact, date, metric, and ownership claim with your own verified evidence.",
+    )
+    s += [callout(
+        "Core idea",
+        "Do not narrate every component equally. Lead with the choice that was costly to reverse, then use architecture, influence, and outcome evidence to prove why it mattered.",
+        warm=True,
+    ), spacer(10)]
+    s += [numbered_chain([
+        ("Pressure", "Name the user, operating, or business constraint that forced a decision."),
+        ("Decision", "State the options, the chosen path, the accepted cost, and what would reverse it."),
+        ("Influence", "Show whose behavior or plan had to change and how alignment was earned."),
+        ("Consequence", "Connect the decision to a measured result, durable mechanism, and honest limit."),
+    ]), spacer(11)]
+    s += [p("What the listener must be able to repeat", H2), bullet_list([
+        "The system problem and the non-negotiable constraint.",
+        "The primary decision you personally shaped, not just the final architecture.",
+        "The strongest rejected alternative and the trade-off you accepted.",
+        "The stakeholder tension, decision owner, and influence move that changed the path.",
+        "The baseline, observation window, result, and limit of the evidence.",
+    ], checklist=True)]
+    s += [p("Fictional micro-example: project tour versus staff-level narrative", H2), grid_table(
+        ["Signal", "Weak version", "Decision-led version"],
+        [
+            ["Opening", "We rebuilt the platform with several services.", "A 40-minute recovery target could not survive the shared database failure domain."],
+            ["Ownership", "We decided to migrate.", "I framed the decision, tested two alternatives, and brought the final owner an evidence-backed recommendation."],
+            ["Trade-off", "The new design scaled better.", "We accepted duplicate processing during retry and paid the cost with idempotency plus reconciliation."],
+            ["Outcome", "Reliability improved a lot.", "Recovery fell from 38 to 11 minutes across six observed incidents; low-volume tenants were not yet tested."],
+        ],
+        [78, 176, 239],
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Choose the right story",
+        "Select for decision density, not project size",
+        "The best narrative contains a real fork in the road, observable ownership, cross-boundary coordination, and evidence after the change. A famous project with no decision tension is usually weaker.",
+    )
+    s += [grid_table(
+        ["Selection test", "What qualifies", "What weakens the story"],
+        [
+            ["Decision", "Two credible paths existed and each carried a cost.", "The answer was obvious or dictated before you entered."],
+            ["Personal scope", "You framed, recommended, tested, sequenced, or changed the decision.", "Your role cannot be separated from the team summary."],
+            ["Influence", "Another team, leader, or function changed a commitment or behavior.", "Only your direct reports needed instruction."],
+            ["Consequence", "A user, operating, delivery, or organizational result was observed.", "Only implementation completion is available."],
+            ["Truth boundary", "Sources, dates, estimates, and unknowns can be stated precisely.", "The story requires invented scale, causality, or ownership."],
+        ],
+        [92, 210, 191],
+    ), spacer(10)]
+    s += [p("Candidate story comparison", H2)]
+    s += worked_example_table(
+        ["Candidate", "Decision tension", "Influence evidence", "Outcome evidence", "Choice"],
+        [
+            ["A: notification migration", "Dual-write speed versus one source of truth", "Three consuming teams changed adoption sequence", "Six-week delivery and on-call trend", "Primary"],
+            ["B: dashboard rewrite", "Library choice after direction was set", "One local team", "Launch completed; adoption not measured", "Backup"],
+        ],
+        [98, 128, 110, 99, 58],
+    )
+    s += [two_cards(
+        ("Use a backup story", "Keep a second story with a different decision type: reliability, migration, cost, platform adoption, or operating model. It protects against a probe that makes the primary story a poor fit.", "Coverage"),
+        ("Reject an unsafe story", "Do not use confidential architecture, another person's decision, unverified impact, or a story whose evidence cannot be separated from later unrelated work.", "Boundary"),
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Build the decision spine",
+        "Make the irreversible choice easy to inspect",
+        "Treat the narrative as a compact architecture decision record. Supporting components belong only when they explain a constraint, a trade-off, a failure path, or the measured consequence.",
+    )
+    s += [numbered_chain([
+        ("Contract", "Users, guarantee, scale, and decision deadline."),
+        ("Constraint", "The pressure that eliminated the default path."),
+        ("Options", "Two credible alternatives evaluated on the same criteria."),
+        ("Choice", "Decision, accepted cost, safeguards, and owner."),
+        ("Reversal", "Evidence or condition that would trigger a different path."),
+    ]), spacer(10)]
+    s += [grid_table(
+        ["Layer", "Question to answer", "Evidence to carry", "Red flag"],
+        [
+            ["Contract", "What had to remain true for users and operators?", "SLO, data rule, volume band, deadline", "Starting with services and tools"],
+            ["Constraint", "Which limit made the choice non-trivial?", "Failure history, cost, coupling, compliance, migration window", "Calling every requirement critical"],
+            ["Options", "Why were both paths plausible?", "Same criteria, test result, prototype, operating cost", "A straw-man rejected option"],
+            ["Choice", "What did you choose and pay for?", "Accepted risk, mitigation, decision owner, sequence", "Only describing benefits"],
+            ["Reversal", "When would the decision stop being correct?", "Threshold, new fact, review date, exit path", "Pretending the choice is permanent"],
+        ],
+        [67, 145, 173, 108],
+    ), spacer(9)]
+    s += [two_cards(
+        ("Rejected alternative", "Represent the strongest alternative fairly. Name what it optimized, why it lost under the current constraints, and the future condition under which it could win.", "Decision quality"),
+        ("Accepted cost", "Every credible decision spends something: latency, complexity, migration time, consistency, money, or team attention. State the cost before the interviewer has to ask.", "Trade-off"),
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Carry architecture evidence",
+        "Connect each component to a reason",
+        "A diagram is useful only when the learner can explain the system before and after the decision, the invariant that protects correctness, and what happens when the happy path breaks.",
+    )
+    s += [grid_table(
+        ["Architecture evidence", "Minimum useful explanation", "Proof or artifact"],
+        [
+            ["Before state", "Where state lived, the critical flow, and the recurring failure or delivery cost.", "Incident timeline, delivery lead time, dependency map"],
+            ["After state", "What changed in ownership, data flow, boundary, or operating responsibility.", "Decision record, migration plan, interface contract"],
+            ["Invariant", "The rule that must remain true across retries, races, partial failure, or migration.", "Test, reconciliation rule, version check, idempotency key"],
+            ["Failure path", "Detection, containment, recovery, and the unsafe failure you explicitly rejected.", "Alert, rollback, replay, dead-letter or repair path"],
+            ["Rollout", "How risk was bounded while evidence accumulated.", "Shadow read, cohort, dual run, feature flag, stop threshold"],
+            ["Operating loop", "Who owns the signal and what decision the metric triggers.", "Dashboard owner, review cadence, runbook action"],
+        ],
+        [111, 244, 138],
+    ), spacer(9)]
+    s += [callout(
+        "Narration rule",
+        "Use one sentence per component: the constraint it answers, the failure it contains, or the evidence it enables. If a box serves none of those purposes, remove it from the spoken story.",
+    ), spacer(9)]
+    s += [p("A before-and-after explanation", H2)]
+    s += worked_example_table(
+        ["Moment", "Spoken evidence", "Why it earns signal"],
+        [
+            ["Before", "A single scheduler owned priority and delivery state, so one noisy tenant delayed every queue.", "Names the coupling and user consequence."],
+            ["Decision", "Partition admission by tenant class, keep delivery state durable, and preserve at-least-once processing with idempotent consumers.", "States boundary, guarantee, and accepted retry behavior."],
+            ["Failure", "If a worker dies after send, the durable attempt is retried; duplicate risk is bounded by the idempotency contract and reconciliation.", "Explains uncertainty without claiming impossible ownership."],
+            ["Rollout", "Shadow the new scheduler, compare age and duplicate rates, then move three cohorts with a rollback threshold.", "Shows reversible evidence gathering."],
+        ],
+        [66, 298, 129],
+    )
+    end_page(s)
+
+    s += page_heading(
+        "Show influence without inflating authority",
+        "Trace how a decision moved across boundaries",
+        "Staff-level influence is not a list of meetings. It is evidence that you understood competing incentives, changed the decision process, and left a mechanism that continued working without personal heroics.",
+    )
+    s += [numbered_chain([
+        ("Map", "Identify decision owner, affected teams, incentives, and cost of the ask."),
+        ("Listen", "State the strongest objection in terms the other stakeholder would accept."),
+        ("Reduce", "Offer the smallest reversible commitment that can produce decision evidence."),
+        ("Durabilize", "Leave an interface, review, ownership rule, or metric after alignment."),
+    ]), spacer(10)]
+    s += [p("Influence map", H2)]
+    s += worked_example_table(
+        ["Actor", "Competing constraint", "Your move", "Decision evidence"],
+        [
+            ["Payments team", "Could not absorb a breaking event contract during quarter close.", "Proposed a versioned adapter and a two-cohort migration instead of a single cutover.", "Committed to cohort one after replay tests passed."],
+            ["Platform owner", "Wanted one reusable scheduler rather than tenant-specific forks.", "Made tenant class a policy input and documented the extension boundary.", "Approved the shared contract and ownership split."],
+            ["Support lead", "Needed predictable escalation when delivery age crossed the customer promise.", "Added an age-based signal and named the responding owner in the runbook.", "Used the signal during the first production incident."],
+            ["Director", "Needed a decision before the staffing window closed.", "Presented options, accepted cost, open risk, and the reversal threshold in one page.", "Selected staged migration with a dated review."],
+        ],
+        [82, 142, 164, 105],
+    )
+    s += [p("Common influence mistakes", H2), bullet_list([
+        "Saying I convinced everyone without naming the legitimate objection or decision owner.",
+        "Using meeting count as impact instead of showing which commitment changed.",
+        "Claiming the team's execution as personal ownership.",
+        "Treating escalation as failure instead of explaining why the decision needed the right owner.",
+        "Ending at agreement without the durable mechanism that kept teams aligned.",
+    ])]
+    end_page(s)
+
+    s += page_heading(
+        "Prove the consequence",
+        "Use bounded evidence instead of impact theater",
+        "A result is credible when the listener can see the baseline, the change, the observation window, the measured movement, and what the data does not prove.",
+    )
+    s += [grid_table(
+        ["Evidence layer", "Question", "Good answer pattern"],
+        [
+            ["Baseline", "What was true before the decision?", "Metric or recurring observable behavior, with source and date."],
+            ["Change", "What action could plausibly affect it?", "Specific architecture, rollout, ownership, or operating change."],
+            ["Window", "When and for how long was it observed?", "A stated cohort and period, not immediately after launch."],
+            ["Result", "What moved and by how much?", "Exact measure when stored; qualitative evidence labeled when not."],
+            ["Limit", "What remains uncertain or confounded?", "Missing cohort, concurrent change, small sample, or proxy limitation."],
+            ["Durability", "What continued after you stepped away?", "Ownership, review, interface, runbook, or automated guardrail."],
+        ],
+        [86, 151, 256],
+    ), spacer(10)]
+    s += worked_example_table(
+        ["Baseline", "Change", "Window", "Observed result", "Honest limit"],
+        [
+            ["Priority queue age exceeded 18 minutes in four of seven peak periods.", "Tenant-aware admission, durable attempt state, and an age alert with named owner.", "Six weeks; three migrated cohorts.", "Peak age stayed below six minutes; two incidents recovered without manual queue surgery.", "Low-volume cohorts and seasonal peak behavior were not yet observed."],
+        ],
+        [102, 125, 75, 127, 64],
+    )
+    s += [two_cards(
+        ("Leading signal", "A rehearsal, rollout, adoption, latency, or error signal can show movement early. Label it as leading evidence; do not present it as the final business outcome.", "Use carefully"),
+        ("Lagging outcome", "Customer, reliability, cost, or delivery impact needs enough observation time and a plausible connection to the change. Name concurrent factors when they exist.", "Stronger proof"),
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Assemble the spoken narrative",
+        "Use a decision-first spine at three depths",
+        "Prepare one truthful source narrative, then rehearse a 90-second summary and a four-minute version. Do not memorize separate stories that drift apart under follow-up.",
+    )
+    s += [grid_table(
+        ["Clock", "Purpose", "Content"],
+        [
+            ["0:00-0:30", "Orient", "User or operating problem, scope, personal role, and the decision deadline."],
+            ["0:30-1:15", "Create tension", "Constraint, two credible options, and why the default path was unsafe or insufficient."],
+            ["1:15-2:45", "Show judgment", "Chosen path, accepted cost, safeguards, rollout, failure path, and reversal condition."],
+            ["2:45-3:35", "Show influence", "Competing constraint, your move, changed commitment, final decision owner, durable mechanism."],
+            ["3:35-4:15", "Prove consequence", "Baseline, observation window, result, limit, and what you learned or would change."],
+            ["4:15-close", "Invite depth", "One sentence that names the richest technical or influence follow-up available."],
+        ],
+        [65, 99, 329],
+    ), spacer(10)]
+    s += [p("Fictional four-minute spine", H2)]
+    s += worked_example_table(
+        ["Beat", "Illustrative line"],
+        [
+            ["Pressure", "Our shared notification scheduler breached the 15-minute delivery promise when one large tenant burst, and three teams depended on the same event contract."],
+            ["Decision", "I compared a larger shared queue with tenant-aware admission. I recommended the second path because it bounded noisy-neighbor risk, while accepting policy and reconciliation complexity."],
+            ["Architecture", "We kept durable attempt state, at-least-once delivery, an idempotency contract, and a staged cohort migration with age and duplicate thresholds."],
+            ["Influence", "Payments could not take a breaking change. I reframed the migration around a versioned adapter and replay proof; the platform owner retained the final interface decision."],
+            ["Outcome", "Across six weeks and three cohorts, peak age stayed under six minutes and two incidents recovered through the new runbook. Low-volume cohorts remained an open evidence gap."],
+        ],
+        [81, 412],
+    )
+    s += [two_cards(
+        ("90-second compression", "Keep pressure, primary decision, strongest trade-off, one influence move, one bounded outcome, and the limit. Remove component detail before removing the decision.", "First answer"),
+        ("Deep-dive expansion", "Expand only the layer the interviewer probes: option criteria, invariant, failure timeline, stakeholder objection, rollout evidence, or causal limit.", "Follow-up"),
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Rehearse for inspection",
+        "Use probes to test ownership, judgment, and truth boundaries",
+        "A credible narrative survives follow-up without changing facts. Record the sentence where evidence becomes inference, the question that exposes a weak layer, and one correction for the next run.",
+    )
+    s += [grid_table(
+        ["Probe", "What it tests", "Evidence-ready response"],
+        [
+            ["Why was this the decision to lead with?", "Prioritization", "Cost of delay, reversibility, user or operating risk, and decision deadline."],
+            ["Why not the strongest alternative?", "Trade-off quality", "Shared criteria, what the alternative optimized, why it lost now, and reversal condition."],
+            ["What was specifically yours?", "Ownership precision", "Your framing, analysis, recommendation, sequencing, or mechanism; final owner and team work separated."],
+            ["Who disagreed and why?", "Influence maturity", "A fair competing constraint, the smallest commitment, evidence produced, and changed decision."],
+            ["What failed during rollout?", "Operating depth", "Detection, containment, recovery, user impact, and the safeguard changed afterward."],
+            ["What did the metric not prove?", "Evidence honesty", "Observation window, sample, proxy, concurrent change, and remaining unknown."],
+        ],
+        [135, 102, 256],
+    ), spacer(9)]
+    s += [p("0-2 evidence rubric", H2), grid_table(
+        ["Dimension", "0 - absent or unsafe", "1 - present but weak", "2 - inspectable"],
+        [
+            ["Decision", "No real fork", "Choice named; criteria vague", "Options, criteria, cost, owner, reversal"],
+            ["Architecture", "Component tour", "Flow clear; failure thin", "Invariant, failure, rollout, operating signal"],
+            ["Ownership", "Team-only claims", "Personal role broad", "Personal decision separated from team and owner"],
+            ["Influence", "Agreement asserted", "Stakeholders named", "Constraint, move, changed commitment, durable mechanism"],
+            ["Outcome", "Unbounded claim", "Metric without context", "Baseline, window, result, limit, durability"],
+            ["Delivery", "Chronology without thesis", "Decision arrives late", "Decision-first, concise, probe-ready"],
+        ],
+        [72, 135, 123, 163],
+    ), spacer(8)]
+    s += [callout(
+        "Coach handoff",
+        "Bring two story cards, one recorded four-minute run, the lowest rubric row with a timestamped quote, and one corrected sentence. That is enough evidence for a focused calibration session.",
+        warm=True,
+    ), spacer(8)]
+    s += [p("Completion check", H2), bullet_list([
+        "The primary decision appears in the opening minute.",
+        "The rejected alternative is credible and the accepted cost is explicit.",
+        "Personal scope, team execution, and final authority are separated.",
+        "Influence ends in a changed commitment and a durable mechanism.",
+        "The outcome includes a baseline, window, result, and honest limit.",
+        "The 90-second and four-minute versions preserve the same facts.",
+    ], checklist=True), spacer(8)]
+    s += [p("Use after every rehearsal", H2), numbered_chain([
+        ("Observe", "Save one exact quote or timestamp from the lowest-scoring dimension."),
+        ("Correct", "Rewrite one sentence or reorder one decision; do not rebuild the whole story."),
+        ("Transfer", "Retest the correction with a fresh probe and stop when it appears without rescue."),
+    ]), spacer(8)]
+    s += [callout(
+        "Next action",
+        "Choose two truthful architecture stories now. Score both, select the decision-dense primary story, and record one four-minute run for coach review.",
+        warm=True,
+    )]
+    return s
+
+
+def build_target_company_preparation_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Turn research into an interview-week decision",
+        "A target-company brief should change what you rehearse",
+        "This guide converts dated public evidence, recruiter-confirmed facts, and your existing story bank into a focused Senior-to-Staff preparation plan. It does not predict exact questions or treat candidate anecdotes as fact.",
+    )
+    s += [callout(
+        "Core idea",
+        "Separate fact, inference, and unknown. Then spend interview week on the three gaps where better evidence or a better rehearsal can change the hiring signal.",
+        warm=True,
+    ), spacer(10)]
+    s += [numbered_chain([
+        ("Anchor", "Confirm role, level, location, work model, dates, and known loop logistics."),
+        ("Calibrate", "Translate role evidence into observable capabilities at the target level."),
+        ("Map", "Assign truthful primary and backup evidence to each likely interview stage."),
+        ("Rehearse", "Prescribe one test per open risk, then taper when the stop condition is met."),
+    ]), spacer(11)]
+    s += [p("What belongs in the private brief", H2), grid_table(
+        ["Include", "Use", "Keep out"],
+        [
+            ["Official role and company material", "Responsibilities, products, values, public process, role language", "Copied answers or confidential internal detail"],
+            ["Recruiter-confirmed facts", "Actual stages, dates, format, level, work authorization, logistics", "Assumptions presented as recruiter promises"],
+            ["Current repeated candidate patterns", "Questions to verify and capabilities worth rehearsing", "Alleged leaked questions or one anonymous anecdote as truth"],
+            ["Your own evidence and scores", "Story coverage, technical gaps, rehearsal stop conditions", "Invented ownership, scale, metrics, or company-specific claims"],
+        ],
+        [135, 228, 130],
+    ), spacer(9)]
+    s += [p("The interview-week output", H2), bullet_list([
+        "One target sentence and a dated source ledger.",
+        "A likely loop map labeled by confidence, not certainty.",
+        "Primary and backup evidence for each capability.",
+        "Three ranked risks with a rehearsal and stop condition.",
+        "A taper plan, verified logistics, and two high-value questions.",
+    ], checklist=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Build the evidence ledger",
+        "Label what is known before acting on it",
+        "Freshness and provenance matter. A useful brief lets a coach or learner trace every company-specific preparation choice back to a current source or a clearly labeled hypothesis. The dated entries below are fictional teaching data; replace every fact, date, metric, and ownership claim with your own verified evidence.",
+    )
+    s += [grid_table(
+        ["Label", "Meaning", "How to use it"],
+        [
+            ["Fact", "Explicitly stated by an official source or confirmed directly by the recruiter.", "Prepare against it; record the source and date."],
+            ["Inference", "A reasonable pattern derived from multiple current signals.", "Use to choose transferable practice; never claim certainty."],
+            ["Unknown", "A detail that can materially change preparation but is not supported yet.", "Ask the right person or prepare a resilient fallback."],
+            ["Stale", "Previously credible information whose date or context no longer matches the current role.", "Do not act on it until revalidated."],
+        ],
+        [68, 221, 204],
+    ), spacer(10)]
+    s += worked_example_table(
+        ["Claim", "Label and source", "Preparation decision", "Recheck"],
+        [
+            ["Role owns reliability for event-driven services.", "Fact - current role description, accessed 12 Aug.", "Lead one architecture story with failure containment and operating evidence.", "Recheck if role text changes."],
+            ["Design round may emphasize multi-tenant boundaries.", "Inference - role language plus two current public engineering posts.", "Rehearse a transferable noisy-neighbor follow-up, not a predicted prompt.", "Ask recruiter about interview focus."],
+            ["Final decision owner and round order.", "Unknown - not in invite or recruiter note.", "Keep stories reusable across manager and cross-functional conversations.", "Confirm before T-3 days."],
+        ],
+        [124, 139, 170, 60],
+    )
+    s += [callout(
+        "Source rule",
+        "Date recruiter guidance, public pages, and candidate-pattern research. If two sources disagree, preserve the disagreement; do not average them into a false fact.",
+    ), spacer(9)]
+    s += [p("Freshness check", H2), bullet_list([
+        "Is the source about this role, location, and level rather than the company in general?",
+        "Is the publication or confirmation date visible?",
+        "Does the source state the claim, or are you inferring it?",
+        "Would a changed fact alter the rehearsal plan? If yes, assign a recheck date.",
+    ], checklist=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Calibrate the level bar",
+        "Translate titles into observable interview evidence",
+        "Level is not proved by using the word strategic. It is proved by the scope of the decision, the ambiguity handled, the boundaries influenced, and the mechanism that kept working.",
+    )
+    s += [grid_table(
+        ["Capability", "Senior signal", "Staff signal", "Evidence to prepare"],
+        [
+            ["Technical judgment", "Chooses a sound design for a bounded service.", "Frames a decision spanning systems or teams and names long-term option value.", "Decision record, criteria, accepted cost, reversal condition"],
+            ["Operations", "Owns reliability and recovery for a service.", "Changes failure boundaries or the operating model across a wider system.", "Incident trend, SLO movement, runbook or ownership change"],
+            ["Execution", "Ships a complex project with dependencies.", "Sequences uncertainty and creates leverage for multiple teams.", "Milestones, risk retirement, reusable interface or platform"],
+            ["Influence", "Aligns peers and partner teams.", "Changes decisions beyond authority while representing competing constraints fairly.", "Objection, smallest commitment, changed decision, durable mechanism"],
+            ["Communication", "Explains decisions and trade-offs clearly.", "Adjusts depth for executives, engineers, and cross-functional owners without changing facts.", "90-second summary, deep dive, and probe-ready evidence"],
+        ],
+        [85, 122, 169, 117],
+    ), spacer(10)]
+    s += [two_cards(
+        ("Coach hypothesis", "A coach may infer the likely bar from role evidence and prior sessions. Keep the hypothesis labeled until the company or recruiter confirms the level and evaluation focus.", "Calibration"),
+        ("Transferable preparation", "Prepare capabilities that remain useful if the round order or exact prompt changes: decision quality, failure reasoning, ownership precision, influence, and evidence.", "Resilience"),
+    ), spacer(9)]
+    s += [p("Write one target sentence", H2), callout(
+        "Fictional completed example",
+        "I am testing for a Staff backend role where cross-system reliability and influence beyond authority matter. I will prove those capabilities with a tenant-isolation decision and a versioned API migration, while asking the recruiter to confirm the exact level bar.",
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Map the likely loop",
+        "Attach evidence and a follow-up risk to every stage",
+        "A loop map is a planning hypothesis. It should survive a changed order because each stage is tied to a capability and truthful evidence, not a memorized answer.",
+    )
+    s += worked_example_table(
+        ["Stage hypothesis", "Capability", "Primary evidence", "Backup evidence", "Follow-up risk"],
+        [
+            ["Recruiter", "Role clarity and motivation", "Target sentence; reason for this scope and work model", "Career-transition story", "Answer becomes company praise without role fit"],
+            ["Coding", "Correctness under dialogue", "Two timed runs with invariant, tests, and complexity", "Debugging recovery example", "Silent implementation before contract"],
+            ["System design", "Requirement-led judgment", "Tenant-aware scheduling decision narrative", "Versioned API migration", "Guarantees and failure path arrive late"],
+            ["Manager", "Ownership and learning", "Rollback decision with measurable prevention", "Priority conflict story", "Team outcome presented as personal action"],
+            ["Cross-functional", "Influence beyond authority", "Versioned adapter adoption across three teams", "Operating review mechanism", "Disagreement is flattened into easy consensus"],
+            ["Values or final", "Judgment, principles, and questions", "Customer-impact trade-off with honest limit", "Learning-after-miss story", "Values repeated without a real decision"],
+        ],
+        [86, 88, 123, 105, 91],
+    )
+    s += [p("Coverage check", H2), grid_table(
+        ["Pattern", "Risk", "Correction"],
+        [
+            ["One story appears in four stages", "A single weak probe collapses the whole portfolio.", "Add one backup with a different decision and outcome type."],
+            ["Six stories prove delivery only", "The level bar for judgment or influence remains unsupported.", "Select evidence with a real fork, objection, and durable mechanism."],
+            ["Technical practice has scores but no quotes", "The behavior behind the score cannot be reproduced.", "Save one timestamped opening, trade-off, failure, and close."],
+            ["Every company claim is marked fact", "Inference and stale evidence can distort the plan.", "Relabel each claim and assign a verification owner."],
+        ],
+        [126, 177, 190],
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Rank only three open risks",
+        "Convert uncertainty into a bounded rehearsal",
+        "Interview week is too late for a new syllabus. Rank risks qualitatively by likely exposure, consequence at the target bar, and the current evidence deficit, then prescribe one comparable test.",
+    )
+    s += [grid_table(
+        ["Risk factor", "High", "Medium", "Low"],
+        [
+            ["Likely exposure", "Confirmed or repeated across current sources", "Plausible from several signals", "Single weak or stale signal"],
+            ["Consequence", "Missing it blocks a core target-level signal", "Weakens one stage but other evidence exists", "Small polish issue"],
+            ["Evidence deficit", "No recent comparable proof", "Mixed or indirect proof", "Recent repeated proof"],
+        ],
+        [109, 151, 137, 96],
+    ), spacer(10)]
+    s += worked_example_table(
+        ["Ranked risk", "Why now", "Rehearsal prescription", "Stop condition"],
+        [
+            ["1. Design guarantee arrives late", "Confirmed design stage; repeated feedback across two runs.", "18-minute prompt; state users, acceptance guarantee, source of truth, and failure before components.", "The opening appears unaided in two fresh prompts."],
+            ["2. Influence story hides objection", "Staff-level role; coach marked agreement as unearned.", "Four-minute story plus probe: represent the partner constraint before stating your proposal.", "Observer can repeat objection, changed commitment, and final owner."],
+            ["3. Coding close loses boundary test", "Coding likely; one recent timeout, one strong run.", "Two 25-minute problems; reserve final three minutes for boundary test and complexity.", "Both runs close with a correct boundary test before time."],
+        ],
+        [105, 124, 185, 79],
+    )
+    s += [callout(
+        "Stop rule",
+        "Stop rehearsing when the target behavior transfers to fresh prompts at the defined standard. Repetition after stable proof consumes recovery without reducing meaningful risk.",
+        warm=True,
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Prescribe the rehearsal",
+        "Test the decision moment, not topic recall",
+        "Every rehearsal should name the risk, the observable behavior to front-load, the evidence to capture, and the condition that proves transfer.",
+    )
+    s += [grid_table(
+        ["Prescription field", "Required decision"],
+        [
+            ["Capability", "One target-level behavior: clarify, choose, test, trade off, influence, recover, or close."],
+            ["Prompt", "Fresh and representative; no leaked questions, confidential material, or memorized answer."],
+            ["Constraint", "One change that forces judgment rather than recall."],
+            ["Front-loaded behavior", "The exact action that must appear early enough to change the answer."],
+            ["Evidence", "Quote, timestamp, artifact, test result, or observer note."],
+            ["Transfer check", "A second prompt with the same decision type but different surface details."],
+            ["Stop condition", "Observable standard met without rescue; not a target mood or perfect score."],
+        ],
+        [125, 368],
+    ), spacer(10)]
+    s += worked_example_table(
+        ["Risk", "Prompt and changed constraint", "Evidence captured", "Decision"],
+        [
+            ["Failure path arrives late", "Design a webhook platform; receiver times out after processing.", "At 01:10 states at-least-once boundary, idempotency key, retry state, and reconciliation.", "Behavior present; re-test on a file-processing prompt."],
+            ["Ownership remains broad", "Tell the migration story; probe who had final authority.", "Separates personal framing and recommendation from director approval and team implementation.", "Behavior present once; needs one fresh story probe."],
+            ["Closing test is rushed", "Solve a window problem; introduce duplicate input near the end.", "Names no-repeat invariant, traces boundary case, states O(n) time before minute 25.", "Two comparable proofs; stop."],
+        ],
+        [101, 170, 155, 67],
+    )
+    s += [two_cards(
+        ("Correct one variable", "Change the behavior that caused the evidence gap while keeping prompt depth, time box, assistance policy, and scoring dimensions comparable.", "Experimental control"),
+        ("Protect confidence", "A risk board is not a verdict. Keep stable capabilities visible so interview week narrows work instead of turning every skill into an emergency.", "Operating posture"),
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Read a completed private brief",
+        "Use a fictional dossier to see the method end to end",
+        "The example below uses a fictional company and invented teaching data. It demonstrates structure only; replace it with current authorized evidence and your own truthful experience.",
+    )
+    s += [p("Fictional target: Northstar Ledger", H2)]
+    s += worked_example_table(
+        ["Brief field", "Completed example"],
+        [
+            ["Target", "Staff backend engineer; remote India; event platform and reliability scope; interview week begins 19 Aug."],
+            ["Confirmed", "Recruiter named coding, system design, manager, and cross-functional conversations; dates and format confirmed by email on 12 Aug."],
+            ["Inferred", "Public role and engineering material suggest multi-tenant reliability and platform adoption matter; exact prompts remain unknown."],
+            ["Primary evidence", "Tenant-aware scheduler decision; versioned API migration; rollback judgment; two timed coding runs with observable closes."],
+            ["Open risks", "Design guarantee order, fair representation of stakeholder objection, and final coding boundary test."],
+            ["Stop point", "Two fresh proofs for design opening and coding close; one observer-verifiable influence retell; then taper."],
+        ],
+        [104, 389],
+    )
+    s += [spacer(9)]
+    s += [p("Evidence coverage", H2), grid_table(
+        ["Capability", "Primary", "Backup", "Remaining gap"],
+        [
+            ["Technical judgment", "Scheduler partition decision", "API versioning", "External provider boundary needs one probe"],
+            ["Operations", "Age-alert and recovery ownership", "Rollback runbook", "Seasonal peak evidence not available"],
+            ["Influence", "Payments adapter adoption", "Operating review cadence", "State the partner objection earlier"],
+            ["Learning", "Duplicate test miss and correction", "Incident review mechanism", "No current gap"],
+            ["Role motivation", "Target sentence tied to platform leverage", "Career transition", "Ask about first-six-month ownership"],
+        ],
+        [101, 128, 109, 155],
+    ), spacer(9)]
+    s += [callout(
+        "Why this brief is useful",
+        "Every company-specific claim has a confidence label, every likely stage has truthful evidence, and every risk ends in a test or a question. Nothing depends on predicting an exact interview prompt.",
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Run the countdown",
+        "Reduce work as the interview approaches",
+        "The final week should improve retrieval, confidence, and logistics. It should not reopen the curriculum or replace sleep with low-quality repetition.",
+    )
+    s += [grid_table(
+        ["Horizon", "Do", "Stop when", "Avoid"],
+        [
+            ["T-7 to T-4", "Verify loop facts; map evidence; run one baseline per high risk.", "Three risks and prescriptions are explicit.", "Broad topic expansion"],
+            ["T-3 to T-2", "Run transfer checks; fix one sentence or decision order; confirm logistics.", "Stop conditions are met or one bounded risk remains.", "Chasing a perfect score"],
+            ["T-1", "One retrieval pass; review cues and questions; normal meals and sleep.", "Evidence is retrievable without scripts.", "New hard problems or story rewrites"],
+            ["Interview morning", "Check link, timezone, audio, backup, water, and the one-page run sheet.", "The environment is ready and attention is calm.", "Forums, comparison, or full mocks"],
+        ],
+        [75, 184, 144, 90],
+    ), spacer(10)]
+    s += [p("Questions that reduce uncertainty", H2), bullet_list([
+        "Which decisions should this role own independently in the first six months?",
+        "What distinguishes a strong Senior-level answer from a Staff-level answer in this loop?",
+        "Which system or organizational boundary creates the most recurring work for the team today?",
+        "How are design decisions reviewed, and who is the final owner when teams disagree?",
+        "Is there any interview format, tool, or assistance policy I should confirm before the session?",
+    ])]
+    s += [p("Final readiness check", H2), bullet_list([
+        "Role, level, date, timezone, work model, and confirmed stages are dated and sourced.",
+        "Fact, inference, unknown, and stale evidence are visibly separated.",
+        "Each capability has primary evidence and a useful backup.",
+        "The top three risks have comparable rehearsals and stop conditions.",
+        "No story depends on invented ownership, metrics, or company knowledge.",
+        "The final day is protected for retrieval, logistics, energy, and honest listening.",
+    ], checklist=True), spacer(8)]
+    s += [two_cards(
+        ("Bring to calibration", "Dated source ledger, target sentence, loop-to-evidence map, three ranked risks, transfer evidence, and the one-page Interview-Day Run Sheet.", "Coach handoff"),
+        ("Leave out", "Leaked prompts, copied answers, full scripts, confidential company material, unverified claims, and personal data that is not needed for preparation.", "Trust boundary"),
+    ), spacer(8)]
+    s += [callout(
+        "Next action",
+        "Write the three highest-value preparation decisions on one page: what to rehearse, what to verify, and what to stop. Carry those decisions into the Interview-Day Run Sheet.",
+        warm=True,
+    )]
+    return s
+
+
+def build_interview_day_run_sheet_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    run_title = ParagraphStyle("IRRunSheetTitle", parent=PAGE_TITLE, fontSize=16.5, leading=18.5, spaceAfter=4)
+    run_dek = ParagraphStyle("IRRunSheetDek", parent=PAGE_DEK, fontSize=8.5, leading=11.2, spaceAfter=7)
+    s += [p("PRIVATE OPERATING SHEET", PAGE_KICKER), p("Interview-Day Run Sheet", run_title), p(
+        "A one-page cue sheet for readiness, answer order, retrieval, and recovery. Copy verified logistics and your own truthful story labels into private notes before interview day; never store passwords here.",
+        run_dek,
+    )]
+    s += [callout(
+        "Operating rule",
+        "One round at a time. Listen, establish the new contract, make the next useful decision, and close with evidence. A prior answer is a note for later - not the starting state of the next round.",
+        warm=True,
+    ), spacer(4)]
+    s += [p("READINESS BY HORIZON", PAGE_KICKER), grid_table(
+        ["24 hours before", "60 minutes before", "10 minutes before"],
+        [[
+            "Confirm date, timezone, format, contact path, access needs, quiet-space or travel plan, sleep, meal, and permitted materials.",
+            "Test power, network, backup, camera, microphone, browser, editor, allowed tools, meeting link, lighting, water, and interruption plan.",
+            "Close notifications and updates; reset posture; open the correct link; review only cues; do not start a new problem or full rehearsal.",
+        ]],
+        [164, 164, 165],
+        font_size=7.4,
+        cell_padding=3.5,
+    ), spacer(4)]
+    s += [p("ANSWER CUES - SAY THE DECISION ORDER, NOT A MEMORIZED SCRIPT", PAGE_KICKER), grid_table(
+        ["Round", "Decision order", "Minimum close"],
+        [
+            ["Coding", "Contract -> examples -> approach -> invariant -> implement -> boundary tests", "Complexity, remaining check, and what you would verify with more time"],
+            ["System design", "Users and guarantees -> scale -> source of truth -> flow -> failure -> trade-off", "Metric, accepted cost, open assumption, and reversal condition"],
+            ["Behavioral", "Question -> context -> my decision -> alternative -> action -> evidence -> learning", "Measured result, honest limit, and what changed afterward"],
+            ["Story retrieval", "Decision label -> competing constraint -> stakeholder -> changed commitment -> outcome", "Use three cue labels only; keep full scripts out of view"],
+        ],
+        [75, 272, 146],
+        font_size=7.4,
+        cell_padding=3.5,
+    ), spacer(4)]
+    s += [p("THREE-MINUTE BETWEEN-ROUND RESET", PAGE_KICKER), grid_table(
+        ["01 - Release", "02 - Recover", "03 - Reopen"],
+        [[
+            "Write one factual moment from the prior round. No score, verdict, or replay.",
+            "Use one slow breath, posture, water, and an immediate logistics check.",
+            "Name one question and one adjustment for the next round's new contract.",
+        ]],
+        [164, 164, 165],
+        font_size=7.4,
+        cell_padding=3.5,
+    ), spacer(4)]
+    s += [p("RECOVERY LANGUAGE", PAGE_KICKER), grid_table(
+        ["Moment", "Useful sentence"],
+        [
+            ["Prompt is unclear", "Before I choose an approach, may I confirm the input, success condition, and most important constraint?"],
+            ["You are stuck", "I will restate the contract, test the smallest case, and name the correct baseline before optimizing."],
+            ["Connection fails", "I am reconnecting through my tested backup now. If we disconnect again, I will use the agreed contact path."],
+            ["Prior round felt weak", "That round is closed. I have one note for later; I will start this round from its own contract."],
+        ],
+        [105, 388],
+        font_size=7.4,
+        cell_padding=3.5,
+    ), spacer(4)]
+    s += [p("CARRY, ASK, AND PROTECT", PAGE_KICKER), grid_table(
+        ["Private retrieval cues", "Questions and close", "Privacy and ethics"],
+        [[
+            "Carry one target sentence, three truthful story labels with decision and outcome, one coding invariant cue, one design failure cue, and one remaining risk.",
+            "Ask what this person should own in six months and which boundary creates recurring work. Thank the interviewers; save factual notes after the loop.",
+            "Use only your notes and authorized material. Exclude leaked prompts, confidential data, credentials, private personal data, and recordings without consent.",
+        ]],
+        [164, 164, 165],
+        font_size=7.4,
+        cell_padding=3.5,
+    ), spacer(4)]
+    s += [p("AFTER THE LOOP - FACTS BEFORE INTERPRETATION", PAGE_KICKER), grid_table(
+        ["Capture now", "Close safely", "Review later"],
+        [[
+            "Record the date, round type, interviewer names and roles as provided, question themes, commitments, interruptions, and exact facts you can still distinguish from interpretation.",
+            "Send only promised follow-ups through the approved channel. Close recordings and confidential material, preserve permitted notes securely, and remove data you are not authorized to keep.",
+            "After recovery, compare evidence with the rubric: what decision was clear, which probe exposed a gap, and one behavior to test next. Do not invent a score or rewrite history from emotion.",
+        ]],
+        [164, 164, 165],
+        font_size=7.2,
+        cell_padding=3.5,
+    ), spacer(4)]
+    s += [callout(
+        "Close rule",
+        "Capture facts, complete promised actions, and step away. A calm evidence review later is more useful than an immediate verdict about how the interview went.",
+    )]
+    return s
+
+
+def build_metrics_pipeline_replay_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Start from the user-visible contract",
+        "Design a metrics pipeline by deciding what must remain true",
+        "A strong answer does not begin with a queue or a database. It defines who emits data, what acknowledgement means, how fresh results must be, which queries matter, and how loss, duplication, lateness, cardinality, and cost will be bounded.",
+    )
+    s += [callout(
+        "Teaching-data boundary",
+        "This is a scripted teaching replay. Names, timestamps, workloads, scores, incidents, and outcomes are fictional sample data and do not represent a learner or employer. Adapt the method and use only verified evidence.",
+        warm=True,
+    ), spacer(10)]
+    s += [numbered_chain([
+        ("Promise", "State freshness, completeness, query latency, retention, and isolation targets."),
+        ("Semantics", "Define the sample, series identity, timestamps, acknowledgement, and replay rules."),
+        ("Flow", "Separate admission, durable buffering, processing, storage, and query serving."),
+        ("Pressure", "Test cardinality, skew, late data, hot series, store failure, and regional loss."),
+        ("Evidence", "Close with measurable SLIs, accepted costs, and a reversal condition."),
+    ]), spacer(10)]
+    s += [p("The 38-minute interview contract", H2), grid_table(
+        ["Clock", "Decision to make", "Evidence to leave audible"],
+        [
+            ["0-5", "Frame users, alerts, dashboards, scale, freshness, retention, and non-goals.", "A one-sentence contract and the first uncertainty to resolve."],
+            ["5-9", "Estimate samples, bytes, series, write rate, query rate, and retention pressure.", "Rounded ranges connected to architecture decisions, not false precision."],
+            ["9-16", "Define metric types, label policy, event time, ingest time, and acknowledgement.", "A stable sample envelope and explicit delivery semantics."],
+            ["16-24", "Choose partitioning, durable buffer, processors, hot storage, rollups, and cold retention.", "Every component tied to a requirement or failure boundary."],
+            ["24-31", "Walk query, late-data, replay, overload, and tenant-isolation paths.", "User-visible behavior during partial failure."],
+            ["31-38", "Compare trade-offs, operating signals, alternatives, and the close.", "Accepted cost, trigger to revisit, and the highest-risk assumption."],
+        ],
+        [52, 198, 243],
+    )]
+    s += [p("Clarify before drawing", H2), bullet_list([
+        "Who emits samples: services, hosts, devices, customer workloads, or internal agents?",
+        "Which product actions depend on the pipeline: alerts, dashboards, investigations, billing, or compliance?",
+        "What does accepted mean, and may an acknowledged sample later be missing from a query?",
+        "What freshness and query-latency targets matter by use case and time window?",
+        "Which labels are permitted, and which identifiers or sensitive values must never become dimensions?",
+        "How long must raw and rolled-up data remain available, and which historical questions need full resolution?",
+    ], checklist=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Make the data contract explicit",
+        "Metric semantics determine whether the answer is correct",
+        "Storage can be replaced. Ambiguous samples, unbounded labels, and undefined late-data behavior leak into every downstream component. State these rules before choosing the store.",
+    )
+    s += [grid_table(
+        ["Concept", "Meaning", "Interview consequence"],
+        [
+            ["Counter", "A cumulative value that normally increases until a reset.", "Compute change over a time window and detect resets; do not treat the absolute value as a rate."],
+            ["Gauge", "A point-in-time value that may rise or fall.", "Define sampling and staleness behavior; last value is not automatically current truth."],
+            ["Histogram", "Counts observations in compatible value buckets.", "Aggregate bucket counts before estimating quantiles; never average percentiles."],
+            ["Series identity", "Metric name plus the complete normalized label set.", "Cardinality is unique series count, not simply the number of label keys."],
+            ["Event time", "When the measurement occurred at the source.", "Needed for correct windows when transport or processing is delayed."],
+            ["Ingest time", "When the platform accepted the sample.", "Useful for freshness and operational lag, but not a substitute for event time."],
+        ],
+        [82, 160, 251],
+    ), spacer(9)]
+    s += worked_example_table(
+        ["Rounded assumption", "Pressure created", "Decision it informs"],
+        [
+            ["500,000 samples/s", "The admission and log path must sustain burst headroom above the average.", "Partition writes and enforce per-tenant admission rather than relying on one shared endpoint."],
+            ["40-80 encoded bytes/sample", "About 1.7-3.5 TB/day before indexes and replication.", "Compress, tier retention, and keep full-resolution duration explicit."],
+            ["20 million active series", "Catalog memory, compaction, and query fan-out can dominate raw byte cost.", "Set label budgets, reject unsafe dimensions, and isolate tenant explosions."],
+            ["Alerts need under 60 s freshness", "Long batch intervals or an opaque replay can violate the primary promise.", "Track end-to-end freshness and reserve a low-latency processing path."],
+        ],
+        [125, 170, 198],
+    )
+    s += [callout(
+        "Sizing rule",
+        "Use a range and show the unit chain: samples/second x bytes/sample x 86,400 seconds/day. Then name what the estimate excludes, such as indexes, replicas, metadata, compaction, and headroom.",
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Keep ingestion and queries independently survivable",
+        "Name each boundary, source of truth, and replay path",
+        "The architecture is valuable only when the listener can trace a sample from emission to a visible query result and explain what happens if any stage slows or fails.",
+    )
+    s += [numbered_chain([
+        ("Collect", "Batch locally, apply backpressure, and attach stable source identity."),
+        ("Admit", "Authenticate tenant, validate schema, enforce label and rate budgets."),
+        ("Buffer", "Acknowledge at the chosen durable boundary and partition for bounded skew."),
+        ("Process", "Normalize, deduplicate within scope, aggregate, and manage late events."),
+        ("Serve", "Use hot time-series storage plus rollups, cold data, and a bounded query plan."),
+    ]), spacer(10)]
+    s += [grid_table(
+        ["Stage", "Contract", "Failure question", "Evidence"],
+        [
+            ["Agent/SDK", "Local buffering has a byte/time limit.", "What is dropped or blocked when the device is offline?", "Dropped-sample count and oldest buffered age."],
+            ["Admission", "Only valid, authorized, bounded-cardinality samples enter.", "Can one tenant exhaust shared capacity?", "Rejected samples by reason and tenant budget saturation."],
+            ["Durable log", "Acknowledged data survives a process restart within the stated durability target.", "What ordering and replay guarantees exist per partition?", "Oldest unprocessed age, partition skew, and under-replicated state."],
+            ["Processor", "Retries cannot multiply effects or move the watermark silently.", "How are duplicates, late data, and counter resets handled?", "Replay duplicates, correction count, checkpoint age."],
+            ["Query tier", "Fresh and historical results expose known staleness or approximation.", "What happens when hot storage or a region is unavailable?", "Query latency, partial-result flag, freshness age, error budget."],
+        ],
+        [78, 137, 151, 127],
+        font_size=7.4,
+    ), spacer(9)]
+    s += [two_cards(
+        ("Write path owns acceptance", "Declare the exact acknowledgement boundary. A durable log may be the replay source, but only if retention and recovery meet the accepted-sample contract.", "Boundary"),
+        ("Read path owns interpretation", "A query must reveal staleness, partial coverage, rollup resolution, or approximation. A fast number without its meaning is not a reliable result.", "Boundary"),
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Pressure-test correctness before optimizing cost",
+        "Design the failure behavior a learner can defend",
+        "At-least-once delivery is useful only when duplicate scope, idempotency, late data, replay, and query-visible correction are explicit. Exactly-once claims must be limited to a named boundary.",
+    )
+    s += [grid_table(
+        ["Pressure", "Unsafe shortcut", "Defensible policy"],
+        [
+            ["Duplicate replay", "Assume the queue prevents every duplicate.", "Use a stable source/sample identity, a bounded deduplication horizon, and idempotent aggregate updates or reconciliation."],
+            ["Late or out-of-order sample", "Drop it without telling query users.", "Define watermark and lateness allowance; mark provisional windows and publish corrections when policy permits."],
+            ["Counter reset", "Interpret a negative delta as negative usage.", "Detect restart/reset markers, split the interval, and expose unknown data when the reset cannot be reconstructed."],
+            ["Hot series or tenant", "Add partitions without a fairness rule.", "Enforce tenant/series budgets, isolate heavy workloads, and choose a partition key with a stated skew trade-off."],
+            ["Store outage", "Keep accepting forever with no capacity bound.", "Use a durable buffer with time/byte limits, shed by explicit priority, and communicate freshness degradation."],
+            ["Wide historical query", "Fan out without a cost or deadline budget.", "Select rollup resolution, bound fan-out, cache safe results, and return partial/timeout semantics deliberately."],
+        ],
+        [97, 137, 259],
+    ), spacer(10)]
+    s += [p("Pipeline health must be observable from the user's promise", H2), bullet_list([
+        "End-to-end freshness from event time to query visibility, split by tenant and priority.",
+        "Accepted-sample completeness, explicit drop/reject reasons, and correction/replay volume.",
+        "Oldest unprocessed age and partition skew, not only average consumer lag.",
+        "Query latency and error/partial-result rate by time range and resolution.",
+        "Active-series cardinality, new-series creation rate, hot-series concentration, and budget rejections.",
+        "An alert includes an owner and action; dashboards alone do not create recovery.",
+    ])]
+    s += [callout("Trust boundary", "Never place secrets, raw personal identifiers, request IDs, or unbounded user-controlled values in metric labels. Sampling is not automatically safe for billing, security, or other authoritative events.")]
+    end_page(s)
+
+    s += page_heading(
+        "Inspect the answer at the decision moment",
+        "Annotated scored replay: preserve what worked, repair what did not",
+        "A replay is not a rewritten perfect answer. It quotes the observable move, keeps the correct reasoning, identifies the missing decision, and adds one sentence that changes the downstream design.",
+    )
+    s += worked_example_table(
+        ["Moment", "What the candidate did", "Evidence and gap", "Precise improved sentence"],
+        [
+            ["06:14", "Separated ingestion from query serving and gave each an independent scaling path.", "Correct boundary. The acknowledgement point and accepted-sample durability were still unstated.", "I will acknowledge after the tenant-validated sample is durably appended; query freshness can degrade without losing that accepted record."],
+            ["14:52", "Added replication for the time-series store.", "Useful availability instinct. The answer did not choose stale, partial, or unavailable query behavior during failover.", "During failover I will serve the last complete window with its freshness age; I will not merge an incomplete replica as if it were current."],
+            ["27:08", "Suggested adding workers while monitoring queue length.", "Capacity may help, but depth alone hides oldest-event SLO breach, partition skew, retry amplification, and downstream headroom.", "I will scale only after confirming parallel partitions and downstream capacity, while tracking oldest unprocessed age and successful throughput."],
+        ],
+        [52, 126, 145, 170],
+    )
+    s += [p("Follow-up probes that reveal real understanding", H2), grid_table(
+        ["Probe", "Strong decision to expose"],
+        [
+            ["Can you guarantee exactly once?", "Scope the guarantee, name duplicate boundaries, and explain idempotent effects plus reconciliation."],
+            ["A customer adds user_id as a label. What happens?", "Reject or transform it under a documented cardinality/privacy policy and show the rejection signal."],
+            ["How do you aggregate p99 latency?", "Aggregate compatible histogram buckets or a mergeable sketch; do not average precomputed percentiles."],
+            ["A sample arrives ten minutes late. Is history rewritten?", "Apply the declared watermark/correction policy and make provisional or corrected results visible."],
+            ["Why not store raw data forever?", "Tie retention and rollups to query value, cost, privacy, and the questions that still need full resolution."],
+        ],
+        [188, 305],
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Explain the representative score",
+        "Every point must trace back to evidence",
+        "The catalog's scripted score is a teaching example, not learner history or a readiness verdict. The dimensions below average to 78 only because the same prompt, clock, and evidence record are used.",
+    )
+    s += [p("FICTIONAL SCRIPTED SCORECARD - ADAPT THE RUBRIC, NOT THE SCORE", LABEL), grid_table(
+        ["Dimension", "Score", "Evidence", "Highest-value next move"],
+        [
+            ["Problem framing", "82", "Users and ingest/query separation were clear by 06:14.", "State freshness, completeness, retention, and acknowledgement in the opening contract."],
+            ["Technical depth", "76", "Replication and scaling mechanisms appeared, but semantics and replay were incomplete.", "Choose delivery, deduplication, late-data, and counter-reset behavior before topology detail."],
+            ["Trade-off clarity", "70", "Alternatives were named, but accepted costs and reversal triggers were rarely explicit.", "For each major choice, name the cost, user-visible failure behavior, and trigger to revisit."],
+            ["Communication", "84", "The flow was traceable and interviewer probes were answered directly.", "Front-load the decision sentence so strong detail does not arrive before its purpose."],
+        ],
+        [91, 46, 184, 172],
+    ), spacer(10)]
+    s += [two_cards(
+        ("Why 78, not 90", "The answer was coherent and organized, but key correctness semantics arrived late or remained implied. A high score requires those choices before storage topology and under failure probes.", "Score reason"),
+        ("What not to infer", "Do not compare this number with a different prompt, interviewer, rubric, or assistance condition and call the difference improvement. Normalize conditions before claiming movement.", "Evidence rule"),
+    ), spacer(10)]
+    s += [callout(
+        "One correction",
+        "Before naming a store, say: accepted samples are durably buffered with at-least-once delivery; duplicate effects are bounded by stable identity; late samples follow a visible correction policy; alerts optimize freshness while historical queries may use rollups.",
+        warm=True,
+    )]
+    s += [p("Comparable re-test exit criteria", H2), bullet_list([
+        "Use the same prompt family, 38-minute clock, rubric, and assistance rules.",
+        "Semantics appear before topology without an interviewer reminder.",
+        "The late-data, replay, failover, and hot-cardinality probes each receive a user-visible policy.",
+        "A chosen trade-off includes accepted cost and a measurable reversal trigger.",
+    ], checklist=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Run the replay as deliberate practice",
+        "Turn one transcript into a stronger adjacent answer",
+        "The goal is transfer: the learner should make the corrected decision in a nearby telemetry or event-stream prompt without copying a memorized architecture.",
+    )
+    s += [p("A stronger 90-second opening", H2), p(
+        "I will design for multi-tenant infrastructure metrics used by alerts and dashboards. Before topology, I want to confirm sample rate, active-series cardinality, alert freshness, query windows, retention, and accepted loss. My initial contract is that a tenant-valid sample is acknowledged only after durable append, then processed at least once with bounded duplicate effects. Event time drives windows; late samples follow a stated correction policy. I will separate the write path from query serving so a query-tier failure can degrade freshness without losing accepted samples. Next I will size the write and series pressure, then choose partitioning, hot retention, rollups, and the failure behavior for overload and replay.",
+        QUOTE,
+    ), spacer(9)]
+    s += [grid_table(
+        ["Practice block", "Action", "Proof of completion"],
+        [
+            ["Replay - 8 min", "Listen/read only around 06:14, 14:52, and 27:08; record the decision that was audible and the missing consequence.", "Three evidence notes with timestamps; no general impression words."],
+            ["Repair - 8 min", "Say the improved opening and one corrected sentence for each moment without adding invented requirements.", "Semantics precede store choice; each correction changes a downstream decision."],
+            ["Pressure - 10 min", "Answer duplicate replay, high-cardinality label, late event, hot tenant, and regional failover probes.", "Each response contains policy, signal, and user-visible behavior."],
+            ["Transfer - 9 min", "Use a nearby clickstream or device-telemetry prompt with different scale and query needs.", "The method transfers while the architecture changes with the contract."],
+            ["Close - 3 min", "Choose one remaining weakness and schedule a comparable re-test.", "One behavior, one evidence source, one stop condition."],
+        ],
+        [82, 259, 152],
+    ), spacer(10)]
+    s += [p("Completion checklist", H2), bullet_list([
+        "The answer states user-visible freshness, completeness, latency, retention, and isolation before components.",
+        "Sample schema, timestamps, series identity, label budget, acknowledgement, delivery, and replay are explicit.",
+        "Capacity math uses rounded ranges and connects to partitioning, compression, retention, or rollups.",
+        "Every failure probe ends with observable behavior, not only a mechanism name.",
+        "The corrected response preserves what was already correct and adds only the missing decisions.",
+        "The final re-test uses comparable conditions and records evidence rather than a confidence impression.",
+    ], checklist=True)]
+    s += [callout("Next action", "Open the latest metrics-pipeline transcript, mark the three decision moments, rehearse the corrected opening once, and run one comparable transfer prompt before changing any other part of the answer.", warm=True)]
+    return s
+
+
+def build_queue_backlog_replay_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Protect the promise before touching capacity",
+        "A queue backlog is a symptom, not a diagnosis",
+        "The first job is to identify affected work, oldest age, arrival pressure, successful service rate, retry amplification, partition skew, and downstream health. Adding workers is a conditional intervention, not a default answer.",
+    )
+    s += [callout(
+        "Teaching-data boundary",
+        "This is a scripted teaching replay. Names, rates, scores, incidents, timestamps, and outcomes are fictional sample data and do not represent a learner or employer. Adapt the method and use only verified production evidence.",
+        warm=True,
+    ), spacer(10)]
+    s += [numbered_chain([
+        ("Impact", "Name the user promise, affected priority, start time, and accepted-work risk."),
+        ("Rates", "Separate new arrivals, retry arrivals, successful completions, and backlog age."),
+        ("Cause", "Test demand, consumers, partitions, poison work, and downstream dependencies."),
+        ("Contain", "Protect critical traffic and stop amplification before expanding concurrency."),
+        ("Recover", "Drain safely, reconcile effects, prove age falls, and prevent recurrence."),
+    ]), spacer(10)]
+    s += [p("The 31-minute incident conversation", H2), grid_table(
+        ["Clock", "Decision", "Minimum output"],
+        [
+            ["0-3", "Define impact, priority, onset, and data-loss/duplicate risk.", "One user promise and one protection goal."],
+            ["3-8", "Read age, arrivals, successful completions, retries, skew, and dependency health.", "A rate model plus the most dangerous unknown."],
+            ["8-13", "Rank hypotheses and choose fast confirming/disconfirming checks.", "Three hypotheses ordered by evidence and reversibility."],
+            ["13-18", "Contain user harm and retry amplification.", "One protection action, owner, and rollback trigger."],
+            ["18-23", "Bound retries, quarantine poison work, and define safe re-drive.", "Attempt/deadline budget plus DLQ ownership."],
+            ["23-28", "Choose drain or scale conditions and verify downstream headroom.", "Conditional capacity decision and approximate drain range."],
+            ["28-31", "Declare recovery, reconcile, communicate, and prevent recurrence.", "Exit criteria and the next durable guardrail."],
+        ],
+        [50, 217, 226],
+    )]
+    s += [p("Say this before proposing a fix", H2), bullet_list([
+        "Which workflow is delayed, what deadline or user promise is at risk, and which priority/tenant/partition is worst?",
+        "Did accepted work stop completing, complete twice, expire, or move into an unowned dead-letter path?",
+        "What changed near the onset: demand, deploy, configuration, schema, dependency, quota, or partition ownership?",
+        "Can optional producers be paused or critical work isolated without violating a stronger contract?",
+    ], checklist=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Use rates and age to describe the incident",
+        "Depth alone can improve while users get worse",
+        "Measure new work, retry work, successful effects, and oldest age separately. A falling queue depth may reflect expiry, drops, or dead-letter movement rather than recovery.",
+    )
+    s += [callout(
+        "Rate model",
+        "Backlog change per second is approximately new arrivals + retry arrivals - successful completions. When successful completions exceed effective arrivals and rates remain stable, drain time is approximately backlog divided by the net drain rate.",
+    ), spacer(9)]
+    s += worked_example_table(
+        ["Moment", "Observed rates", "Meaning", "Safe inference"],
+        [
+            ["Before containment", "500 new/s + 750 retry/s; 400 successful/s", "Backlog grows about 850/s. Retries exceed new demand.", "Stop amplification and inspect dependency errors before adding concurrency."],
+            ["After retry bound", "200 effective arrivals/s; 800 successful/s", "The theoretical net drain is about 600/s.", "Estimate a drain range only if partitions, priorities, quotas, and rates remain stable."],
+            ["Depth falls, oldest age rises", "Low-priority depth drops; critical oldest age reaches 22 min", "Global depth hides starvation or expiry in a critical lane.", "Segment age and successful throughput by priority, tenant, and partition."],
+            ["Attempts rise, success is flat", "1,600 dequeues/s; 420 successful effects/s", "More work is being attempted, not completed.", "Track acknowledgements and effect completion separately from dequeue rate."],
+        ],
+        [92, 126, 143, 132],
+    )
+    s += [p("The minimum incident panel", H2), grid_table(
+        ["Signal", "Why it matters"],
+        [
+            ["Oldest age by priority/tenant/partition", "Directly exposes deadline risk, starvation, and localized hot spots."],
+            ["New arrivals and retry arrivals", "Separates demand from incident-created amplification."],
+            ["Successful completions", "Measures useful service; attempts and dequeues can rise while effects fail."],
+            ["Processing time and downstream latency/errors/quota", "Shows whether consumers or a dependency set the real service ceiling."],
+            ["Partition lag, ownership, and saturation", "Reveals skew, idle workers, unavailable leases, and misleading global capacity."],
+            ["DLQ ingress, reason, oldest age, and re-drive status", "Makes quarantined work visible and accountable rather than discarded."],
+        ],
+        [191, 302],
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Test a causal tree, not a favorite explanation",
+        "Every hypothesis needs confirming and disconfirming evidence",
+        "Start with the cheapest safe checks that separate demand, service degradation, skew, poison work, retry storms, and downstream saturation. Preserve evidence before changing the system.",
+    )
+    s += [grid_table(
+        ["Hypothesis", "Confirming evidence", "Disconfirming evidence", "First safe check"],
+        [
+            ["Demand spike", "New-arrival rate rises before age and backlog.", "New arrivals are normal while retries surge.", "Compare producer accepts by tenant/event type with the prior baseline."],
+            ["Consumer regression", "Processing time or failure starts with a deploy/config change.", "Old and new versions have the same profile.", "Split success/latency by version and canary a rollback if safe."],
+            ["Hot partition", "One partition ages while workers elsewhere are idle.", "Lag and ownership are balanced.", "Inspect key distribution, leases, and partition ownership."],
+            ["Poison message", "Same item/error repeats and blocks ordered work.", "Failures are broad and input-independent.", "Trace one safe identifier and compare the next item in that key."],
+            ["Dependency throttle", "Remote latency, 429/5xx, quota, or pool saturation rises first.", "Dependency headroom and latency remain normal.", "Compare successful effects with dependency capacity and error classes."],
+            ["Retry storm", "Retry arrivals and synchronized attempts dominate new work.", "Attempts are mostly first tries.", "Group attempts by original operation, error class, and retry age."],
+        ],
+        [83, 146, 129, 135],
+        font_size=7.4,
+    ), spacer(9)]
+    s += [two_cards(
+        ("Preserve evidence", "Record onset, deploy/config identifiers, representative failure classes, rates, age, and partition state before broad restarts or purges erase the sequence.", "Incident discipline"),
+        ("Prefer reversible moves", "Pause optional producers, reduce retry concurrency, isolate priority, roll back a suspect change, or canary capacity with explicit stop conditions.", "Incident discipline"),
+    ), spacer(9)]
+    s += [callout("Never optimize the chart", "Do not purge, expire, or mass-dead-letter accepted work merely to make depth fall. Any discard or replay requires an authorized business policy, impact assessment, and auditable decision.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Contain before you scale",
+        "More workers can accelerate the failure",
+        "Concurrency helps only when work is parallelizable, partitions or leases are available, and every downstream limit has headroom. Otherwise it increases timeouts, lock pressure, database connections, duplicate effects, or provider throttling.",
+    )
+    s += [numbered_chain([
+        ("Protect", "Reserve or prioritize capacity for deadline-critical and transactional work."),
+        ("Reduce", "Pause optional producers and bound new retry creation."),
+        ("Isolate", "Circuit-break failing dependencies or quarantine poison work by policy."),
+        ("Canary", "Change concurrency or rollout on one bounded slice with stop signals."),
+        ("Reconcile", "Prove accepted effects, duplicates, skips, and dead letters are accounted for."),
+    ]), spacer(10)]
+    s += [grid_table(
+        ["Intervention", "Use when", "Do not use when", "Stop/rollback signal"],
+        [
+            ["Add workers", "Partitions and downstream capacity are available; CPU or worker slots are the bottleneck.", "Dependency quota, locks, DB pool, poison work, or retry traffic sets the ceiling.", "Downstream errors, saturation, duplicates, or oldest age worsen."],
+            ["Pause optional producers", "New low-priority demand threatens a stronger accepted-work promise.", "The paused work is itself the highest-priority contract or cannot be recovered.", "Critical age does not improve or lost-input risk exceeds policy."],
+            ["Reduce retry concurrency", "Transient failures are amplifying load faster than new work.", "A deadline-critical retry would be silently abandoned.", "Successful throughput falls without reducing dependency pressure."],
+            ["Quarantine poison work", "A permanent or malformed item blocks ordered or shared progress.", "Skipping violates strict per-key ordering or an authorized loss policy.", "Ordering/effect integrity cannot be preserved for affected keys."],
+        ],
+        [82, 140, 151, 120],
+        font_size=7.4,
+    )]
+    s += [p("Recovery is a set of exit conditions", H2), bullet_list([
+        "Successful throughput exceeds effective arrivals with margin across critical partitions.",
+        "Oldest age falls for the affected priority and tenant, not only globally.",
+        "Downstream latency, errors, quotas, pools, and locks remain inside safe operating bounds.",
+        "Retries return to baseline, DLQ ingress stops, and quarantined work has an owner and plan.",
+        "Accepted effects are reconciled for missing, duplicate, expired, or out-of-order outcomes.",
+    ])]
+    end_page(s)
+
+    s += page_heading(
+        "Treat retries and dead letters as product behavior",
+        "Bound attempts, time, side effects, and re-drive",
+        "Retries are new load. A dead-letter queue is a controlled evidence and recovery path, not a trash bin and not proof that work is correct.",
+    )
+    s += [grid_table(
+        ["Failure class", "Retry policy", "Required evidence"],
+        [
+            ["Transient and safe", "Exponential backoff with jitter, attempt and elapsed-time budget, deadline awareness.", "Original operation ID, attempt number, error class, first/last failure time."],
+            ["Permanent input error", "Do not repeat unchanged work; quarantine under an explicit product policy.", "Validation reason, safe reference, owning team, customer-visible consequence."],
+            ["Ambiguous effect", "Check an idempotency/effect ledger or reconcile before repeating the external action.", "Stable idempotency key, prior response/effect state, reconciliation result."],
+            ["Dependency overload", "Respect server guidance, reduce concurrency, randomize retries, and stop at the user deadline.", "Quota/headroom, retry-after signal where supplied, effective retry arrival rate."],
+        ],
+        [104, 213, 176],
+    ), spacer(9)]
+    s += [p("A safe dead-letter record", H2), bullet_list([
+        "Stable operation reference and safe payload pointer; redact secrets and unnecessary personal data.",
+        "Failure class, first and last failure timestamps, attempt count, producer/consumer version, and partition/key context.",
+        "Business priority, expiry or ordering consequence, current owner, alert state, and retention policy.",
+        "Re-drive requires an approved fix, effect-level idempotency, a canary batch, rate limit, monitoring, pause control, and audit trail.",
+    ], checklist=True), spacer(8)]
+    s += [two_cards(
+        ("Ordering trade-off", "Skipping a poison item can restore throughput but violate strict per-key order. State whether the product prefers blocking, quarantine with key isolation, or an explicit compensating path.", "Decision"),
+        ("Visibility trade-off", "A short visibility/ack deadline can duplicate slow work. A very long deadline delays takeover after failure. Use extension/heartbeat only with bounded ownership.", "Decision"),
+    )]
+    s += [callout("Idempotency boundary", "Broker deduplication does not guarantee the external effect occurs once. Use a stable operation key and record or reconcile the effect at the system that owns the business consequence.")]
+    end_page(s)
+
+    s += page_heading(
+        "Replay the weak answer without discarding its useful instinct",
+        "Capacity may help - after rates, age, retries, and headroom are known",
+        "The scripted response begins with adding workers and monitoring queue length. Keep the valid capacity hypothesis, then insert the missing diagnostic and safety decisions before acting.",
+    )
+    s += worked_example_table(
+        ["Interviewer probe", "Weak-but-useful move", "Missing decision", "Improved response"],
+        [
+            ["The queue is growing. What first?", "Add more workers and watch queue length.", "Impact, oldest age, effective arrivals, successful service, partitions, and downstream headroom.", "I will first protect critical work and compare oldest age, new/retry arrivals, successful completions, partition skew, and downstream capacity; workers are conditional."],
+            ["Why not scale immediately?", "More consumers should drain faster.", "Parallelism and the true service ceiling.", "I will canary concurrency only if partitions are available and downstream latency, quotas, pools, and locks have headroom."],
+            ["What enters the DLQ?", "Messages that fail many times.", "Failure class, deadline, effect ambiguity, ordering, ownership, and re-drive safety.", "Permanent invalid work is quarantined with evidence; ambiguous effects are reconciled; re-drive is canaried, idempotent, rate-limited, owned, and audited."],
+            ["How do you know recovery is real?", "Queue depth returns to normal.", "Depth can fall through expiry, drops, or starvation.", "Recovery requires successful throughput above effective arrivals, falling oldest age across critical partitions, safe dependencies, bounded retries, and reconciled effects."],
+        ],
+        [105, 103, 130, 155],
+    )
+    s += [p("Common incident-answer mistakes", H2), bullet_list([
+        "Using dequeue or attempt rate as successful service rate.",
+        "Applying a global drain-time estimate while one priority or partition remains blocked.",
+        "Treating backoff without jitter as sufficient protection against synchronized retries.",
+        "Moving failed work to a DLQ without owner, alert, retention, ordering policy, or re-drive control.",
+        "Scaling consumers while the database, provider quota, lock, or connection pool is already saturated.",
+        "Calling the incident resolved before accepted effects are reconciled.",
+    ])]
+    end_page(s)
+
+    s += page_heading(
+        "Explain the 71 and run a comparable correction",
+        "A score is useful only when it changes the next observable behavior",
+        "This representative catalog score is scripted teaching data. It identifies why retry bounds and recovery evidence arrived too late; it is not account history or a production incident assessment.",
+    )
+    s += [p("FICTIONAL SCRIPTED SCORECARD - ADAPT THE RUBRIC, NOT THE SCORE", LABEL), grid_table(
+        ["Dimension", "Score", "Evidence", "Correction"],
+        [
+            ["Problem framing", "72", "The backlog was recognized, but user promise and oldest-age segmentation were not first.", "Open with impact, priority, accepted-work risk, and the rate model."],
+            ["Technical depth", "74", "Workers and queue monitoring were plausible, but retries, DLQ, idempotency, and partitions lacked bounds.", "Classify failures and state attempt, deadline, effect, ordering, and re-drive rules."],
+            ["Trade-off clarity", "62", "Capacity was presented as a default rather than a conditional intervention.", "Name when workers help, when they amplify collapse, and the stop signal."],
+            ["Communication", "76", "The response was direct but skipped the evidence sequence required for a safe incident decision.", "Use impact -> rates -> hypothesis -> containment -> recovery -> prevention."],
+        ],
+        [91, 46, 184, 172],
+    ), spacer(10)]
+    s += [callout(
+        "Corrected opening",
+        "I will first protect the affected deadline and establish oldest age, new and retry arrivals, successful completions, partition skew, and downstream headroom. I will bound retry amplification and isolate poison work before adding workers. I will scale only if parallelism and dependencies allow it, and declare recovery only when successful throughput exceeds effective arrivals and oldest age falls across critical partitions.",
+        warm=True,
+    ), spacer(9)]
+    s += [grid_table(
+        ["Practice block", "Action", "Success evidence"],
+        [
+            ["Replay - 6 min", "Mark every claim as observation, hypothesis, action, or exit condition.", "No mechanism is presented as evidence of recovery."],
+            ["Rate model - 5 min", "Calculate growth/drain ranges and list conditions that make them invalid.", "New, retry, and successful rates remain separate."],
+            ["Pressure - 8 min", "Answer worker, DLQ, priority, poison, idempotency, and re-drive probes.", "Each answer includes a boundary and stop condition."],
+            ["Transfer - 9 min", "Debug a nearby file-scan or notification backlog under the same clock and rubric.", "The method transfers without copying the original fix."],
+            ["Close - 3 min", "Select one prevention guardrail and accountable owner.", "Alert threshold, action, and review date are explicit."],
+        ],
+        [82, 259, 152],
+    )]
+    s += [p("Completion checklist", H2), bullet_list([
+        "Impact and oldest age are segmented by priority, tenant, and partition.",
+        "New arrivals, retry arrivals, successful completions, and downstream ceiling are separate.",
+        "The chosen containment is reversible and has an owner plus rollback signal.",
+        "Retries, dead letters, effect idempotency, ordering, and re-drive are bounded.",
+        "Recovery includes falling age and reconciliation, not merely lower depth.",
+        "The re-test uses comparable conditions and records transcript evidence for the score.",
+    ], checklist=True)]
+    s += [callout("Next action", "Rehearse the corrected opening once, then run the same six pressure probes on an adjacent backlog scenario. Stop when the evidence sequence is audible without prompting.", warm=True)]
+    return s
+
+
+def build_resume_profile_lab_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Make role evidence inspectable",
+        "A stronger resume bullet is not a louder claim",
+        "This lab compares controlled revisions against a deterministic role-alignment rubric. The objective is to preserve the learner's verified facts while making scope, personal judgment, technical context, and outcome easier to evaluate.",
+    )
+    s += [callout(
+        "Teaching-data boundary",
+        "All names, roles, companies, dates, metrics, and bullet examples in this guide are fictional teaching data. Use the method with your own verified evidence; never copy a sample claim into a real resume.",
+        warm=True,
+    ), spacer(10)]
+    s += [numbered_chain([
+        ("Target", "Select one role capability and the evidence the job description actually requests."),
+        ("Source", "Record the truthful work facts before improving the sentence."),
+        ("Score", "Apply the same anchored rubric to the original and both revisions."),
+        ("Change", "Rewrite one weak dimension at a time so score movement is explainable."),
+        ("Defend", "Save the final bullet only if every word survives an interviewer probe."),
+    ]), spacer(10)]
+    s += [p("The 25-minute guided lab", H2), grid_table(
+        ["Clock", "Action", "Output"],
+        [
+            ["0-3", "Choose one target role capability and one existing bullet.", "Capability phrase, source, and reason this bullet is relevant."],
+            ["3-6", "Build the evidence ledger from records and memory you can defend.", "Facts, personal action, decision, scope, outcome, and unknowns."],
+            ["6-10", "Score the original using the six 0-2 anchors.", "Dimension evidence and one highest-value gap."],
+            ["10-17", "Create Revision A and Revision B with controlled changes.", "One version improves decision/scope; one improves outcome/clarity."],
+            ["17-22", "Blind-compare all three and probe the claims.", "Selected version with reasons, not preference alone."],
+            ["22-25", "Save final text, source pointer, uncertainty, and likely follow-up.", "A defensible bullet plus the interview story it should open."],
+        ],
+        [51, 217, 225],
+    )]
+    s += [callout("Truth gate", "Unsupported ownership, scale, outcome, tool use, title, or keyword cannot earn a high score. If a fact is unknown, narrow the wording or verify it; do not estimate because the sentence sounds stronger.")]
+    end_page(s)
+
+    s += page_heading(
+        "Separate source evidence from resume language",
+        "Write the ledger before writing the bullet",
+        "A resume sentence is a compressed evidence claim. The ledger protects truth, exposes missing proof, and gives the learner material for interviewer follow-up without adding confidential detail.",
+    )
+    s += [grid_table(
+        ["Evidence field", "Question to answer", "Acceptable source"],
+        [
+            ["Target capability", "Which decision in the target role should this bullet help prove?", "Current job description, recruiter note, or dated role evidence map."],
+            ["Context and constraint", "What system or business condition made the work non-trivial?", "Design note, ticket, incident record, review note, or verified recollection."],
+            ["Personal action", "What did you decide, design, implement, influence, or own directly?", "Commit/review trail, document authorship, task record, or specific manager feedback."],
+            ["Technical judgment", "Which alternative or trade-off did you evaluate?", "Decision record, test, benchmark, experiment, or design review."],
+            ["Scope", "What boundary was affected: service, users, tenants, regions, team, or process?", "Telemetry, inventory, ownership map, release record, or bounded qualitative fact."],
+            ["Outcome", "What changed, over what window, and how was it observed?", "Metric/dashboard, incident trend, adoption record, cost report, or labeled qualitative evidence."],
+            ["Limit", "What does the evidence not prove?", "Missing baseline, shared ownership, concurrent change, confidentiality, or unobserved cohort."],
+        ],
+        [99, 202, 192],
+    ), spacer(9)]
+    s += worked_example_table(
+        ["Ledger field", "Verified teaching fact", "How it constrains wording"],
+        [
+            ["Context", "Checkout alerts had noisy duplicates during payment retries.", "The bullet may say duplicate alerts, not that payments themselves duplicated."],
+            ["Personal action", "Riya proposed a stable event key, implemented deduplication, and added replay tests.", "Use proposed/implemented; do not claim sole ownership of the whole alerting platform."],
+            ["Scope", "Two checkout services and three migrated event types.", "Name the bounded migration rather than enterprise-wide scale."],
+            ["Outcome", "Duplicate alerts fell from 18% to 3% during a six-week observed window.", "Include metric, baseline, window, and result; do not claim revenue impact."],
+            ["Limit", "A platform engineer approved the shared event contract.", "Show collaboration and keep final contract ownership accurate."],
+        ],
+        [92, 251, 150],
+    )
+    s += [p("When no reliable metric exists", H2), two_cards(
+        ("Use observable evidence", "Release adopted by named teams, review cycle shortened, manual handoff removed, incident class no longer observed in a stated window, or ownership rule used after launch.", "Credible"),
+        ("Avoid impact theater", "Do not invent percentages, users, savings, performance, or revenue. 'Improved efficiency significantly' is neither precise nor verifiable.", "Unsafe"),
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Score with anchored evidence",
+        "Use the same 0-2 rubric for every revision",
+        "The total is a comparison index for this lab, not a hiring prediction. A higher score is valid only when the sentence becomes more relevant, specific, credible, and readable without changing the underlying facts.",
+    )
+    s += [grid_table(
+        ["Dimension", "0 - absent or unsafe", "1 - partial", "2 - clear and defensible"],
+        [
+            ["Role relevance", "No visible connection to a target capability.", "Related topic or tool, but the role decision is implied.", "The bullet directly evidences a capability the target role requires."],
+            ["Ownership precision", "Team claim or inflated personal ownership.", "Action is named but personal boundary is blurry.", "The learner's decision/action and collaborators' ownership are distinguishable."],
+            ["Scope and constraint", "No boundary or challenge.", "Scale or constraint is vague or context-heavy.", "A concise, verified system/business boundary explains difficulty."],
+            ["Technical judgment", "Tool list without a decision.", "Mechanism is present; alternative or reason is weak.", "Choice, alternative, accepted cost, or test makes judgment inspectable."],
+            ["Outcome evidence", "Unsupported superlative or invented impact.", "Direction is plausible but baseline/window/source is missing.", "Measured or explicitly qualitative result has a bounded source and honest limit."],
+            ["Clarity and ATS", "Unparseable structure, jargon pile, or overloaded sentence.", "Readable but generic, repetitive, or longer than needed.", "Plain language, standard terms, strong verb, and one coherent evidence claim."],
+        ],
+        [91, 132, 127, 143],
+        font_size=7.4,
+    ), spacer(9)]
+    s += [callout("Scoring order", "Apply the truth gate first. Then underline exact words that earn each point. If a reviewer cannot point to evidence in the sentence and ledger, the point is not earned.", warm=True), spacer(9)]
+    s += [p("Diagnostic reading", H2), bullet_list([
+        "0-4: return to the evidence ledger; polishing language will not fix missing source truth.",
+        "5-7: one or two signals are visible, but the listener still must infer ownership, decision, scope, or outcome.",
+        "8-10: strong evidence exists; improve only the weakest dimension and protect readability.",
+        "11-12: the bullet is role-relevant, specific, defensible, and concise; stop editing unless new verified evidence changes it.",
+    ])]
+    s += [two_cards(
+        ("Consistency check", "A second reviewer should reach a similar score from the anchors and underlined evidence. Large disagreement means the rubric or source facts are still ambiguous.", "Reliable use"),
+        ("Regression check", "A rewrite fails if it raises one dimension by weakening truth, clarity, or ownership accuracy. Do not optimize the total at the expense of integrity.", "Reliable use"),
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Compare revisions one variable at a time",
+        "Preserve the evidence; change the signal",
+        "The fictional ladder below uses the same source ledger on every row. Revision A makes ownership and technical judgment visible. Revision B adds the bounded outcome without claiming work or impact that was not recorded.",
+    )
+    s += worked_example_table(
+        ["Version", "Bullet", "Score", "Why the score moves"],
+        [
+            ["Original", "Worked on alert improvements using Kafka and Redis.", "3/12", "Relevant tools appear, but action, decision, scope, outcome, and personal boundary are missing."],
+            ["Revision A", "Implemented stable event-key deduplication and replay tests for checkout alerts across two services.", "8/12", "Personal action, mechanism, and bounded scope are clear; the constraint, alternative, and observed result remain missing."],
+            ["Revision B", "Reduced duplicate checkout alerts from 18% to 3% over six weeks by proposing a stable event key, implementing deduplication, and adding replay tests across two services and three event types.", "11/12", "The verified result, window, decision, action, and scope are visible; final shared-contract ownership is not overstated."],
+        ],
+        [61, 286, 50, 96],
+    )
+    s += [p("Blind comparison prompts", H2), grid_table(
+        ["Question", "What a useful answer names"],
+        [
+            ["Which version proves the target capability fastest?", "The exact phrase that connects the bullet to the target decision."],
+            ["Which word would trigger the hardest interviewer probe?", "The claim whose source, ownership, metric, or boundary may be weakest."],
+            ["What fact is present in the ledger but absent from the bullet?", "Only the omission that materially changes role relevance or credibility."],
+            ["What could be removed without losing evidence?", "Tools, adjectives, context, or implementation detail that does not support the decision."],
+            ["Would the learner tell the same story aloud?", "A consistent personal action, trade-off, collaborator boundary, result, and limit."],
+        ],
+        [211, 282],
+    )]
+    s += [callout("Stop condition", "Choose the shortest revision that carries the strongest verified role evidence. Do not keep adding facts after the bullet already earns the target signal.")]
+    end_page(s)
+
+    s += page_heading(
+        "Use the right correction for the weak signal",
+        "Specific problems need small, specific rewrites",
+        "Avoid rewriting the entire resume in one pass. Diagnose the sentence, change one dimension, score again, and keep the revision only if the evidence becomes clearer without new unsupported claims.",
+    )
+    s += [grid_table(
+        ["Pattern", "Why it fails", "Smallest useful correction"],
+        [
+            ["Vague verb", "Helped, worked on, and involved in hide the learner's action.", "Replace with the verified decision or action: analyzed, proposed, designed, implemented, migrated, reviewed, or led."],
+            ["Team-only claim", "The interviewer cannot separate collaboration from personal ownership.", "State the learner's action, then name shared or final ownership accurately when material."],
+            ["Floating metric", "A number without baseline, window, population, or source can mislead.", "Add the missing boundary or remove the metric and use labeled qualitative evidence."],
+            ["Tool inventory", "Technology names show exposure, not judgment or outcome.", "Keep only tools needed to explain the decision, constraint, or result."],
+            ["Keyword stuffing", "Repeated job-description terms reduce clarity and can create claims the learner cannot defend.", "Use the standard term once where the verified work truly demonstrates it."],
+            ["Confidential detail", "Private customer, security, financial, or architecture data creates trust risk.", "Generalize names and sensitive values while retaining the decision and bounded impact."],
+            ["Oversized bullet", "Multiple unrelated claims compete and become difficult to parse.", "Keep one evidence claim; split only when each sentence proves a distinct target capability."],
+        ],
+        [89, 179, 225],
+        font_size=7.4,
+    ), spacer(9)]
+    s += [p("Three evidence shapes", H2), two_cards(
+        ("Measured technical result", "Decision + implementation + bounded scope + baseline/window/result. Include the number only when the source and interpretation are defensible.", "Shape 01"),
+        ("Operational or influence result", "Decision + stakeholder/constraint + changed mechanism + observed adoption or recurring behavior. Label it qualitative when no reliable metric exists.", "Shape 02"),
+    ), spacer(8), two_cards(
+        ("Early-career project", "User/problem + personal build decision + technical constraint + test or demonstrable result. Separate tutorial completion from independent judgment.", "Shape 03"),
+        ("Research or experiment", "Question + method + comparison + result + limit. Do not convert a controlled experiment into a production-impact claim.", "Shape 04"),
+    )]
+    end_page(s)
+
+    s += page_heading(
+        "Keep the profile readable and machine-safe",
+        "ATS compatibility is a clarity constraint, not a keyword contest",
+        "Use standard headings, plain text structure, consistent dates, and truthful terms. The resume still needs to work for a human who wants evidence of decisions rather than a dense inventory of technology.",
+    )
+    s += [grid_table(
+        ["Check", "Pass condition", "Failure to avoid"],
+        [
+            ["Section structure", "Experience, projects, education, and skills use conventional text headings.", "Important content placed only in images, text boxes, decorative columns, headers, or footers."],
+            ["Role and dates", "Employer/project, title, location/work model, and dates are consistent and understandable.", "Unexplained title inflation, ambiguous overlap, or inconsistent date formats."],
+            ["Keywords", "Target terms appear where verified evidence demonstrates them.", "A copied job description, hidden keywords, or a skills list that the experience cannot support."],
+            ["Links", "Readable labels and valid destinations; no private repositories or expired access.", "Long tracking URLs, broken links, or sensitive internal locations."],
+            ["File and text", "Selectable text, sensible reading order, common font, and descriptive filename.", "Scanned-only pages, unusual glyphs, password protection, or oversized file without need."],
+            ["Human scan", "Most relevant recent evidence is visible quickly and the hierarchy is consistent.", "Every bullet has equal weight or the target role signal is buried below generic content."],
+        ],
+        [91, 217, 185],
+    ), spacer(9)]
+    s += [p("Defensibility probe", H2), bullet_list([
+        "What exactly did you do, and what did someone else own?",
+        "Why did you choose this approach over the strongest alternative?",
+        "Where did the scope, number, or outcome come from? Over what window?",
+        "What failed, remained uncertain, or would you change now?",
+        "Which confidential detail should stay generalized in a public resume?",
+    ], checklist=True)]
+    s += [callout("Parse test", "Export the resume, copy its text into a plain editor, and check reading order, headings, dates, bullets, links, and symbols. This does not reproduce every employer system, but it catches avoidable structural failures.")]
+    end_page(s)
+
+    s += page_heading(
+        "Save a complete lab record",
+        "The final bullet should open a truthful interview story",
+        "Keep the original, both controlled revisions, scores, evidence sources, remaining uncertainty, and likely follow-up. A polished sentence without its evidence trail is difficult to maintain and risky to defend.",
+    )
+    s += [p("Completed fictional lab record", H2), grid_table(
+        ["Record", "Saved evidence"],
+        [
+            ["Target capability", "Reliability engineering: diagnose duplicate effects and design a replay-safe correction."],
+            ["Original retained", "Worked on alert improvements using Kafka and Redis."],
+            ["Selected revision", "Reduced duplicate checkout alerts from 18% to 3% over six weeks by proposing a stable event key, implementing deduplication, and adding replay tests across two services and three event types."],
+            ["Source pointer", "Incident review, replay-test change, and six-week alert-quality dashboard; fictional teaching sources."],
+            ["Honest limit", "Shared event contract was approved by the platform owner; no revenue or customer-retention claim."],
+            ["Likely probe", "How did the stable key behave across retries, and how did you distinguish a duplicate alert from a valid repeated event?"],
+            ["Story cue", "Duplicate alert -> stable identity -> replay test -> bounded rollout -> measured six-week result."],
+        ],
+        [112, 381],
+    ), spacer(9)]
+    s += [p("Final save checklist", H2), bullet_list([
+        "Target capability and current source are dated.",
+        "Every fact in the selected bullet appears in the evidence ledger.",
+        "Personal action and collaborator/final-owner boundaries are accurate.",
+        "The same anchored rubric was applied to all three versions with underlined evidence.",
+        "The selected revision is shorter or clearer without losing the strongest verified signal.",
+        "No confidential details, invented scale, unsupported metric, hidden keyword, or inaccessible link remains.",
+        "A likely interviewer probe and a truthful story cue are saved beside the bullet.",
+    ], checklist=True)]
+    s += [two_cards(
+        ("Use next", "Place the selected bullet in the editable ATS resume, then re-run the plain-text parse and human scan on the complete document.", "Next action"),
+        ("Review later", "Reopen the ledger only when the target capability or verified evidence changes. Avoid endless stylistic edits that do not improve the rubric.", "Maintenance"),
+    )]
+    return s
+
+
+def build_compensation_conversation_story() -> list[Flowable]:
+    s: list[Flowable] = []
+    s += page_heading(
+        "Prepare a conversation, not a demand",
+        "Negotiate with clear units, relevant evidence, and calm boundaries",
+        "This rehearsal teaches how to clarify the offer, state a reasoned target, handle location-based pushback, explore legitimate package levers, and close in writing without bluffing or inventing market facts.",
+    )
+    s += [callout(
+        "Teaching and advice boundary",
+        "All people, companies, amounts, dates, bands, offers, and dialogue are fictional teaching data - not compensation benchmarks, legal advice, or tax advice. Verify your own terms and seek qualified advice where needed.",
+        warm=True,
+    ), spacer(10)]
+    s += [numbered_chain([
+        ("Clarify", "Confirm model, currency, period, gross/net basis, components, conditions, and deadline."),
+        ("Align", "Restate interest and the role scope or decision the conversation should resolve."),
+        ("Anchor", "State one reasoned target in comparable units, then pause."),
+        ("Explore", "Ask which levers and constraints are real; trade only across acceptable terms."),
+        ("Confirm", "Summarize agreed facts, open items, owners, and timing in writing."),
+    ]), spacer(10)]
+    s += [p("The 20-minute rehearsal", H2), grid_table(
+        ["Clock", "Scenario", "Observable skill"],
+        [
+            ["0-3", "Prepare the offer facts, target, rationale, fallback, questions, and deadline.", "Every amount has a currency, time unit, component, and certainty label."],
+            ["3-7", "Recruiter asks for expectations before sharing the full package.", "Clarify role/level/model and respond without anchoring against an unknown unit."],
+            ["7-11", "Recruiter cites a location-based band.", "Acknowledge, clarify the constraint, re-anchor in role scope and evidence, then pause."],
+            ["11-15", "Base cannot move.", "Explore only real package levers and compare their value/risk explicitly."],
+            ["15-18", "Replay the weakest turn with one correction.", "Improved response preserves truthful rationale and removes defensiveness or bluff."],
+            ["18-20", "Close and save the written summary.", "Agreed facts, open questions, owner, next date, and no accidental acceptance."],
+        ],
+        [51, 240, 202],
+    )]
+    s += [callout("Operating rule", "Ask one clarifying question, make one evidence-backed request, and then leave space for the other person to respond. More words do not create more leverage.")]
+    end_page(s)
+
+    s += page_heading(
+        "Normalize the language before negotiating",
+        "A number without its unit is not an offer",
+        "Separate fixed cash, variable pay, equity, benefits, one-time amounts, and working conditions. Do not compare monthly contractor revenue with annual employee salary or treat a conditional bonus as guaranteed cash.",
+    )
+    s += [grid_table(
+        ["Field", "Clarify", "Do not assume"],
+        [
+            ["Engagement model", "Employee, employer-of-record, contractor, or another arrangement; employer/counterparty and governing terms.", "That labels alone determine taxes, protections, or take-home value."],
+            ["Fixed cash", "Currency, annual/monthly/hourly unit, gross/net basis, pay schedule, review timing.", "That conversion to another currency is fixed or fee-free."],
+            ["Variable", "Target, formula, individual/company conditions, cap, timing, historical payout if authorized.", "That target bonus is guaranteed or paid pro rata."],
+            ["Equity", "Instrument, quantity, vesting, cliff, strike/exercise terms, liquidity, expiration, and documents.", "A headline value equals realizable cash."],
+            ["Benefits", "Leave, insurance, retirement, equipment, learning, travel, notice, severance, and local availability.", "The same benefit exists in every location or engagement model."],
+            ["Working reality", "Timezone overlap, on-call, travel, hours, equipment, expense policy, manager/team, and scope.", "Remote means schedule autonomy or no travel."],
+            ["Decision timing", "Written-offer date, questions deadline, acceptance deadline, start date, and contingencies.", "A verbal discussion is the final written term."],
+        ],
+        [94, 231, 168],
+        font_size=7.4,
+    ), spacer(9)]
+    s += worked_example_table(
+        ["Item", "Fictional fact", "Conversation-safe interpretation"],
+        [
+            ["Fixed cash", "USD 72,000 annual gross through an EOR.", "Comparable only after confirming pay schedule, fees, local deductions, and written terms."],
+            ["Bonus", "Up to 10%, company and individual conditions not yet documented.", "Treat as uncertain variable compensation until formula and payout rules are supplied."],
+            ["Equity", "Options mentioned verbally; no grant size or terms.", "Record as unknown, not as current package value."],
+            ["Work pattern", "Four hours of IST-US overlap plus one on-call week in six.", "A material time and recovery commitment to compare, clarify, and possibly negotiate."],
+            ["Decision", "Written offer expected Friday; response requested Monday.", "Ask for complete documents and a reasonable review window before treating the deadline as fixed."],
+        ],
+        [82, 183, 228],
+    )
+    s += [callout("Companion use", "Use the existing compensation and offer decision workbook for detailed normalization and risk comparison. This guide focuses on how to conduct the spoken conversation and confirm it safely afterward.")]
+    end_page(s)
+
+    s += page_heading(
+        "Build one defensible anchor",
+        "Target, rationale, fallback, and boundary must agree",
+        "An anchor is a clear request in comparable units supported by role scope, level, and truthful evidence. It is not a copied benchmark, a bluff, or a claim about personal need.",
+    )
+    s += [grid_table(
+        ["Anchor card", "What to prepare", "Quality check"],
+        [
+            ["Ask", "Specific component and number/range with currency, period, and gross/net basis.", "The other person can repeat the request without guessing units."],
+            ["Rationale", "Role scope, level, responsibilities, scarce relevant capability, and verified interview/work evidence.", "The reason explains value for this role, not rent, family costs, or an invented market statistic."],
+            ["Package context", "Which terms are confirmed, conditional, unknown, or material to your decision.", "Fixed, variable, equity, benefits, and conditions are not collapsed into one number."],
+            ["Fallback ladder", "Acceptable alternatives ordered before the call.", "Each fallback has real value to you and is available for discussion; no fake concessions."],
+            ["Boundary", "Term that makes the offer unacceptable or requires more diligence.", "A private decision rule, stated professionally only when useful."],
+            ["Evidence source", "Written offer, recruiter clarification, current target-role evidence, and dated source notes.", "Every factual claim is verifiable and no confidential employer data is exposed."],
+        ],
+        [86, 232, 175],
+    ), spacer(9)]
+    s += [p("Sentence framework", H2), p(
+        "I am excited about the role, especially [specific scope]. Based on the responsibilities we discussed and my evidence in [relevant capability], I would like to explore [component and precise unit]. How much flexibility is available within the approved package?",
+        QUOTE,
+    ), spacer(9)]
+    s += [two_cards(
+        ("Evidence, not autobiography", "Use decisions and outcomes relevant to the role. Avoid long personal explanations, current living costs, or confidential details that do not help the company evaluate the request.", "Rationale"),
+        ("Pause after the ask", "Do not immediately discount your request or fill silence with extra concessions. Listen for the actual constraint, then choose the next question.", "Delivery"),
+    )]
+    s += [callout("Ethics boundary", "Never invent a competing offer, current salary, benchmark, deadline, title, scope, or willingness to walk away. A negotiation that depends on a false fact is not a safe rehearsal outcome.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Respond to location-based pushback calmly",
+        "Clarify the policy before arguing with it",
+        "Location may affect approved bands, engagement model, benefits, taxes, currency, or internal equity. The learner's job is to understand the real constraint, reconnect the request to role scope, explore legitimate alternatives, and preserve the relationship.",
+    )
+    s += [numbered_chain([
+        ("Acknowledge", "Reflect the stated constraint without agreeing that every conclusion follows."),
+        ("Clarify", "Ask whether the limit applies to base, total package, level, model, or location policy."),
+        ("Re-anchor", "Return to the role's scope and the learner's verified relevant evidence."),
+        ("Explore", "Ask about approved alternatives, review timing, or level/scope alignment."),
+        ("Pause", "Let the recruiter respond; do not debate geography or repeat the ask emotionally."),
+    ]), spacer(10)]
+    s += worked_example_table(
+        ["Speaker", "Fictional conversation", "Why the move works"],
+        [
+            ["Recruiter", "For candidates based in India, this is already near the top of our band.", "States a policy constraint but does not yet define component, level, or total-package boundary."],
+            ["Candidate", "Thank you for explaining that. Is the limit specific to fixed cash for this location, or does it also constrain level and the total package?", "Acknowledges and asks one precise question before countering."],
+            ["Recruiter", "The fixed-cash band is location-based; level is confirmed and some other terms may be flexible.", "Reveals which constraint is fixed and which levers remain open."],
+            ["Candidate", "Understood. Given the confirmed level, the on-call ownership, and the distributed-systems scope we discussed, I would like to explore USD 78,000 annual gross fixed cash. If that band cannot move, could we review sign-on support or a written six-month compensation review with clear criteria?", "Uses exact units, role evidence, one request, and truthful alternatives without attacking the policy."],
+            ["Recruiter", "I can check sign-on and the review timing, but I cannot promise either today.", "Keeps unknowns explicit instead of converting interest into an agreement."],
+            ["Candidate", "That would be helpful. May I send a short summary of the two questions so we can confirm the response and timing in writing?", "Closes with ownership and a safe written record."],
+        ],
+        [72, 309, 112],
+    )
+    s += [p("Avoid these reactions", H2), bullet_list([
+        "Calling the policy unfair before understanding what it actually constrains.",
+        "Arguing with unsourced salary screenshots or claiming a universal global rate.",
+        "Explaining personal expenses as the primary business rationale.",
+        "Threatening to reject the offer without a real, considered boundary.",
+        "Accepting a verbal alternative without amount, conditions, owner, date, and written confirmation.",
+    ])]
+    end_page(s)
+
+    s += page_heading(
+        "Choose the next question from the constraint",
+        "A branching conversation prevents rehearsed monologues",
+        "Listen for what is fixed, unknown, conditional, or open. The next move should reduce a decision uncertainty, not repeat the same request in different words.",
+    )
+    s += [grid_table(
+        ["What you hear", "Useful next question", "Risk to avoid"],
+        [
+            ["What are your expectations?", "Before I give a comparable number, can we confirm level, engagement model, currency, fixed/variable components, and the budgeted scope?", "Anchoring against an undefined package or refusing to engage indefinitely."],
+            ["We need your current salary.", "Could we focus on the approved range and responsibilities for this role? I can share my expectations in the same units once those are clear.", "Inventing a number, exposing documents unnecessarily, or making legal claims without context."],
+            ["Base is fixed.", "Which other terms are approved for discussion, and how are review timing and criteria documented?", "Trading for low-value perks or treating an informal review as guaranteed pay."],
+            ["We can add equity.", "May I review the instrument, grant size, vesting, strike/exercise terms, expiration, and liquidity information in writing?", "Valuing the headline equity amount like cash."],
+            ["This is our final package.", "Thank you for clarifying. May I confirm the complete written terms and response deadline so I can evaluate the package carefully?", "Negotiating against yourself or accepting under artificial urgency."],
+            ["We can revisit later.", "What date, decision owner, performance criteria, and possible adjustment would be written into the offer or review plan?", "Treating an undefined future conversation as current compensation."],
+        ],
+        [117, 257, 119],
+        font_size=7.4,
+    ), spacer(9)]
+    s += [p("A practical fallback ladder", H2), bullet_list([
+        "Fixed cash in the same unit as the offer.",
+        "One-time sign-on amount with repayment conditions understood.",
+        "Variable target or guarantee only when formula and conditions are written.",
+        "Equity only after instrument and terms are available for diligence.",
+        "Paid leave, equipment, learning, travel, timezone overlap, on-call, or start-date changes with real personal value.",
+        "A written review date with decision owner, criteria, and adjustment scope - not a vague promise.",
+        "Role level, title, reporting line, or scope only when the work itself is accurately aligned.",
+    ])]
+    s += [callout("Trade deliberately", "Do not offer a concession until you understand what you receive, how certain it is, and whether it changes your decision. Package flexibility is not automatically package value.")]
+    end_page(s)
+
+    s += page_heading(
+        "Rehearse under pressure and score observable behavior",
+        "Keep the same facts while changing delivery",
+        "Run the dialogue twice. The second attempt should preserve the target and rationale while improving unit precision, listening, composure, ethical boundaries, or the written close.",
+    )
+    s += [grid_table(
+        ["Dimension", "0", "1", "2"],
+        [
+            ["Unit precision", "Amounts/components cannot be compared.", "Most units are clear; one condition remains mixed.", "Currency, period, gross/net basis, component, and certainty are explicit."],
+            ["Listening and clarification", "Responds to an assumed objection.", "Acknowledges but asks a broad or stacked question.", "Reflects the constraint and asks one question that changes the next decision."],
+            ["Relevant rationale", "Uses need, hype, or invented market claims.", "Role evidence is present but generic.", "Verified scope/capability evidence directly supports the request."],
+            ["Pushback composure", "Argues, apologizes excessively, or discounts immediately.", "Remains calm but repeats the ask without learning.", "Acknowledges, clarifies, re-anchors, explores, and pauses."],
+            ["Ethical boundary", "Bluff, false deadline/offer, or concealed uncertainty.", "No fabrication, but facts and assumptions are mixed.", "Facts, unknowns, boundaries, and confidentiality are explicit."],
+            ["Written close", "No agreed summary or accidental acceptance.", "Summary exists but owner/date/open item is missing.", "Agreed facts, open items, owners, timing, and non-acceptance are clear."],
+        ],
+        [102, 119, 119, 153],
+        font_size=7.4,
+    ), spacer(9)]
+    s += [p("Pressure rounds", H2), grid_table(
+        ["Round", "Recruiter move", "Learner objective"],
+        [
+            ["A", "Expectation requested before range or package details.", "Clarify comparable units and role boundary, then provide a reasoned target if needed."],
+            ["B", "Location-based fixed-cash band is cited.", "Clarify the constrained component and re-anchor once in role evidence."],
+            ["C", "Base is fixed but another lever is offered vaguely.", "Ask for exact terms and compare certainty/value before trading."],
+            ["D", "A quick verbal answer is requested.", "Ask for the complete written offer and a clear review deadline."],
+            ["Replay", "Repeat the learner's weakest turn verbatim.", "Change one behavior only and record why the response became safer or clearer."],
+        ],
+        [51, 213, 229],
+    )]
+    s += [callout("Score reason", "Write one quoted sentence or timestamp beside every point. Confidence and politeness matter, but the rubric scores decisions the learner can repeat and improve.", warm=True)]
+    end_page(s)
+
+    s += page_heading(
+        "Close without creating a false agreement",
+        "Confirm facts, unknowns, owners, and dates",
+        "A short written summary reduces unit confusion and gives both sides a clean record. It should not add new demands, imply acceptance, or turn a respectful conversation into an adversarial memo.",
+    )
+    s += [p("Fictional follow-up structure", H2), grid_table(
+        ["Section", "Example content"],
+        [
+            ["Appreciation", "Thank you for discussing the role and package today. I remain interested in the distributed-systems scope and confirmed level."],
+            ["Confirmed facts", "Current fixed-cash offer: USD 72,000 annual gross through the stated EOR; other terms remain subject to the written offer."],
+            ["Open requests", "Please check whether sign-on support or a six-month compensation review can be included, with amount/criteria, owner, and timing."],
+            ["Documents/questions", "Please share the complete offer and applicable bonus, equity, benefits, on-call, notice, and review terms when available."],
+            ["Timing", "You expect to respond by Thursday; I will review the complete written terms and reply by the mutually confirmed deadline."],
+            ["Boundary", "This note records the discussion and is not acceptance of terms."],
+        ],
+        [108, 385],
+    ), spacer(9)]
+    s += [p("Final rehearsal checklist", H2), bullet_list([
+        "The engagement model and every amount use comparable currency, period, basis, component, and certainty labels.",
+        "The target and fallback ladder reflect the learner's real priorities and verified role evidence.",
+        "The learner asks one clarifying question before responding to location, range, current-salary, equity, or deadline pressure.",
+        "No fabricated offer, benchmark, salary, deadline, authority, or willingness to walk away appears.",
+        "Every alternative is evaluated for terms, conditions, certainty, and actual decision value.",
+        "The close records confirmed facts, unknowns, owners, dates, and non-acceptance where appropriate.",
+        "Legal, tax, currency, classification, and equity uncertainties are marked for qualified diligence rather than guessed.",
+    ], checklist=True), spacer(8)]
+    s += [two_cards(
+        ("Keep", "Calm pace, exact units, relevant evidence, one request, one question, honest uncertainty, and a written record.", "Strong signal"),
+        ("Remove", "Bluffing, excessive justification, argument about geography, unsourced benchmarks, premature concessions, and verbal-only assumptions.", "Risk"),
+    )]
+    s += [callout("Next action", "Complete the anchor card, rehearse the location-based pushback twice, score both attempts with quoted evidence, and send only a truthful written summary after a real conversation.", warm=True)]
+    return s
+
+
 SPECS = [
     PdfSpec(
         filename="behavioral_question-bank.pdf",
@@ -3254,6 +4798,100 @@ SPECS = [
         build_story=build_final_loop_story,
         revision="1.1",
         compact=True,
+    ),
+    PdfSpec(
+        filename="coaching_architecture-narrative-worksheet.pdf",
+        category="Coach room worksheet",
+        title="Architecture Narrative Worksheet",
+        subtitle="A decision-led Senior-to-Staff narrative system for making architecture judgment, influence beyond authority, and bounded outcomes easy to inspect.",
+        thesis="Lead with the expensive decision, connect every component to a constraint, and prove influence and consequence without inflating ownership.",
+        slug="coach-room / architecture-narrative",
+        build_story=build_architecture_narrative_story,
+        revision="1.0",
+        compact=True,
+        edition="HUMAN CALIBRATION",
+        audience="PRIVATE LEARNER COPY",
+        format_label="FORMAT COACH WORKSHEET + COMPLETED EXAMPLES",
+    ),
+    PdfSpec(
+        filename="coaching_target-company-preparation-guide.pdf",
+        category="Coach room private guide",
+        title="Target-Company Preparation Guide",
+        subtitle="An evidence-bounded interview-week brief connecting the target level, likely loop, truthful evidence portfolio, rehearsals, and open risks.",
+        thesis="Convert dated evidence and recruiter-confirmed facts into three focused preparation decisions without predicting or leaking interview questions.",
+        slug="coach-room / target-company-preparation",
+        build_story=build_target_company_preparation_story,
+        revision="1.0",
+        compact=True,
+        edition="HUMAN CALIBRATION",
+        audience="PRIVATE LEARNER COPY",
+        format_label="FORMAT PRIVATE GUIDE + COMPLETED EXAMPLE",
+    ),
+    PdfSpec(
+        filename="coaching_interview-day-run-sheet.pdf",
+        category="Coach room private run sheet",
+        title="Interview-Day Run Sheet",
+        subtitle="A calm one-page operating sheet for readiness, answer cues, recovery, story retrieval, and between-round transitions.",
+        thesis="Protect attention and honest decision-making by removing avoidable interview-day friction.",
+        slug="coach-room / interview-day-run-sheet",
+        build_story=build_interview_day_run_sheet_story,
+        revision="1.0",
+        edition="HUMAN CALIBRATION",
+        audience="PRIVATE LEARNER COPY",
+        format_label="FORMAT ONE-PAGE PRIVATE RUN SHEET",
+        single_page=True,
+    ),
+    PdfSpec(
+        filename="second-seat_metrics-pipeline-scored-replay.pdf",
+        category="AI practice scored replay",
+        title="Design a Metrics Pipeline - Scored Mock Replay",
+        subtitle="A 38-minute interview-shaped replay covering the data contract, workload, architecture, correctness, failure behavior, transcript evidence, score reason, and precise correction.",
+        thesis="Define the user-visible freshness and completeness contract before topology, then make delivery semantics and failure behavior audible at the moment they change the design.",
+        slug="ai-practice / metrics-pipeline-scored-replay",
+        build_story=build_metrics_pipeline_replay_story,
+        revision="1.0",
+        edition="AI PRACTICE",
+        audience="HUMAN CALIBRATION REVIEW COPY",
+        format_label="FORMAT SCORED MOCK REPLAY + CORRECTION LAB",
+    ),
+    PdfSpec(
+        filename="second-seat_queue-backlog-debugging-replay.pdf",
+        category="AI practice debugging replay",
+        title="Debug a Queue Backlog - Production Debugging Replay",
+        subtitle="A 31-minute incident conversation for diagnosing rates, age, retries, dead letters, partition skew, downstream limits, safe containment, recovery, and prevention.",
+        thesis="Protect the user promise, measure effective arrivals and successful service, stop amplification, and scale only when parallelism and downstream headroom are proven.",
+        slug="ai-practice / queue-backlog-debugging-replay",
+        build_story=build_queue_backlog_replay_story,
+        revision="1.0",
+        edition="AI PRACTICE",
+        audience="HUMAN CALIBRATION REVIEW COPY",
+        format_label="FORMAT PRODUCTION DEBUGGING REPLAY + RETEST",
+    ),
+    PdfSpec(
+        filename="second-seat_resume-profile-role-alignment-lab.pdf",
+        category="Career profile guided lab",
+        title="Resume Profile Lab",
+        subtitle="A 25-minute evidence-first lab for scoring an original bullet, producing two controlled revisions, comparing role signal, and saving only the strongest defensible version.",
+        thesis="Preserve verified facts, expose personal judgment and bounded outcomes, and make every score change traceable to evidence rather than louder language.",
+        slug="career-profile / resume-role-alignment-lab",
+        build_story=build_resume_profile_lab_story,
+        revision="1.0",
+        edition="AI PRACTICE",
+        audience="HUMAN CALIBRATION REVIEW COPY",
+        format_label="FORMAT GUIDED LAB + DETERMINISTIC RUBRIC",
+    ),
+    PdfSpec(
+        filename="second-seat_compensation-conversation-rehearsal.pdf",
+        category="AI practice conversation rehearsal",
+        title="Compensation Conversation Rehearsal",
+        subtitle="A 20-minute branching rehearsal for clarifying package terms, making a reasoned ask, handling location-based pushback, exploring real levers, and closing safely in writing.",
+        thesis="Use exact units, role-relevant evidence, calm questions, honest boundaries, and a written record - never bluff, guess, or negotiate against an undefined package.",
+        slug="ai-practice / compensation-conversation-rehearsal",
+        build_story=build_compensation_conversation_story,
+        revision="1.0",
+        edition="AI PRACTICE",
+        audience="HUMAN CALIBRATION REVIEW COPY",
+        format_label="FORMAT BRANCHING CONVERSATION REHEARSAL",
     ),
 ]
 

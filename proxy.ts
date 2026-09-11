@@ -7,6 +7,8 @@ import {
 const PUBLIC_ROUTES = new Set([
   "/api/auth/google",
   "/api/auth/sign-out",
+  "/api/meeting-copilot/profile-copy",
+  "/api/meeting-copilot/session",
   "/api/webhooks/paddle",
   "/sign-in",
 ]);
