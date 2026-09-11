@@ -16,7 +16,6 @@ type Action = { number: string; title: string; body: string; meta: string; href:
 const TABS: readonly { key: FeedbackTab; number: string; label: string; description: string }[] = [
   { key: "summary", number: "01", label: "Summary", description: "Scores + pattern" },
   { key: "evidence", number: "02", label: "Answer review", description: "Original + improved" },
-  { key: "actions", number: "03", label: "Plan changes", description: "What · why · next" },
 ];
 
 export function FeedbackClient({
@@ -65,8 +64,6 @@ export function FeedbackClient({
         overall={overall}
         dimensions={dimensions}
         evidence={evidence}
-        actions={actions}
-        premium={premium}
         live={live}
         mockTitle={mockTitle}
         insightTitle={insightTitle}
@@ -168,8 +165,6 @@ function SecondSeatFeedbackExperience({
   overall,
   dimensions,
   evidence,
-  actions,
-  premium,
   live,
   mockTitle,
   insightTitle,
@@ -187,8 +182,6 @@ function SecondSeatFeedbackExperience({
   overall: number;
   dimensions: readonly Dimension[];
   evidence: readonly Evidence[];
-  actions: readonly Action[];
-  premium: boolean;
   live: boolean;
   mockTitle: string;
   insightTitle?: string;
@@ -346,28 +339,6 @@ function SecondSeatFeedbackExperience({
         </section>
       ) : null}
 
-      {tab === "actions" ? (
-        <section id="feedback-panel-actions" className="feedback-actions" role="tabpanel" aria-labelledby="feedback-tab-actions" tabIndex={0}>
-          <div className="feedback-actions-heading"><p className="member-kicker">{live ? "Adaptive plan" : "Preview plan regeneration"}</p><h2>Correct the gap while it is still specific.</h2><p>{live ? "The plan turns the lowest score into a concrete rehearsal, then checks whether the correction transfers." : "The plan makes the handoff from feedback to preparation explicit."}</p></div>
-          <div className="feedback-action-list">
-            {actions.map((action, index) => {
-              const details = actionDetails(action, index, dimensions, live);
-              return (
-                <article key={action.number}>
-                  <span>{action.number}</span>
-                  <div className="feedback-action-copy">
-                    <small>{action.meta}</small>
-                    <div className="feedback-action-what"><span>What to improve</span><h3>{details.what}</h3></div>
-                    <div className="feedback-action-detail"><div><span>Why it matters</span><p>{details.why}</p></div><div><span>Practice next</span><p>{details.next}</p></div></div>
-                  </div>
-                  <Link className="feedback-action-button" href={action.href}>{actionLinkLabel(action.href)} <span aria-hidden="true">↗</span></Link>
-                </article>
-              );
-            })}
-          </div>
-          {premium ? <Link className="member-primary-button" href="/learn/coaching">Bring this pattern to the coach room <span aria-hidden="true">↗</span></Link> : <Link className="member-primary-button" href="/learn/practice">Run another scripted mock <span aria-hidden="true">↗</span></Link>}
-        </section>
-      ) : null}
     </div>
   );
 }
@@ -438,28 +409,6 @@ function verdictText(verdict: SecondSeatAnswerFeedback["verdict"]) {
   if (verdict === "off-topic") return "Off-topic answer";
   if (verdict === "misconception") return "Misconception found";
   return `${verdict[0].toUpperCase()}${verdict.slice(1)} answer`;
-}
-
-function actionDetails(action: Action, index: number, dimensions: readonly Dimension[], live: boolean) {
-  const lowestDimension = dimensions.reduce<Dimension | null>(
-    (lowest, dimension) => !lowest || dimension.score < lowest.score ? dimension : lowest,
-    null,
-  );
-  return {
-    what: action.what ?? action.title,
-    why: action.why ?? (index === 0 && lowestDimension
-      ? `${lowestDimension.label} is the lowest score in this round at ${lowestDimension.score}/100, so it is the clearest place to test a correction.`
-      : live
-        ? "This step turns one transcript observation into evidence you can test on the next attempt."
-        : "A focused correction is easier to repeat and review than a broad request to improve."),
-    next: action.next ?? action.body,
-  };
-}
-
-function actionLinkLabel(href: string) {
-  if (href === "/learn/practice") return "Run practice";
-  if (href === "/learn/feedback") return "Review transcript";
-  return "Open next step";
 }
 
 function scoreBand(score: number) {

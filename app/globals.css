@@ -6582,7 +6582,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .feedback-workspace--second-seat .feedback-score strong { display: flex; align-items: baseline; justify-content: center; gap: 2px; }
 .feedback-workspace--second-seat .feedback-score strong small { margin: 0; color: #81949d; font-family: var(--font-mono); font-size: 11px; line-height: 1; }
 .feedback-workspace--second-seat .feedback-score > small { margin-top: 7px; color: #a6421d; font-size: 7px; }
-.feedback-workspace--second-seat .feedback-tabs { min-height: 72px; gap: 3px; }
+.feedback-workspace--second-seat .feedback-tabs { min-height: 72px; gap: 3px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .feedback-workspace--second-seat .feedback-tabs button { min-height: 62px; padding: 9px 13px; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; align-content: center; gap: 3px 9px; text-align: left; }
 .feedback-workspace--second-seat .feedback-tabs button > span { grid-row: 1 / -1; color: #a6421d; font-family: var(--font-mono); font-size: 8px; }
 .feedback-workspace--second-seat .feedback-tabs button > strong { color: #405762; font-family: var(--font-display); font-size: 11px; font-weight: 600; line-height: 1.1; }

@@ -2443,6 +2443,14 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(feedbackClient, /What is incorrect/);
   assert.match(feedbackClient, /What is missing/);
   assert.match(feedbackClient, /Improved answer/);
+  assert.match(feedbackClient, /number: "01", label: "Summary"/);
+  assert.match(feedbackClient, /number: "02", label: "Answer review"/);
+  assert.doesNotMatch(feedbackClient, /label: "Plan changes"/);
+  const secondSeatFeedback = feedbackClient.slice(
+    feedbackClient.indexOf("function SecondSeatFeedbackExperience"),
+    feedbackClient.indexOf("function SecondSeatFeedbackTabs"),
+  );
+  assert.doesNotMatch(secondSeatFeedback, /feedback-panel-actions/);
   assert.match(feedbackClient, /Why this would score higher/);
   assert.match(feedback, /feedback-empty/);
   assert.match(feedback, /const isLiveLearner = profile\.isLive === true/);

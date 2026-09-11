@@ -76,12 +76,15 @@ try {
   assert.equal(await page.getByText("Improved answer", { exact: true }).first().isVisible(), true);
   assert.equal(await page.getByText("Why this would score higher", { exact: true }).first().isVisible(), true);
   assert.equal(await page.getByText(answers[0], { exact: false }).isVisible(), true);
+  assert.equal(await page.getByRole("tab").count(), 2);
+  assert.equal(await page.getByRole("tab", { name: /Summary/i }).getAttribute("aria-selected"), "false");
+  assert.equal(await page.getByRole("tab", { name: /Plan changes/i }).count(), 0);
 
   await answerReview.focus();
   await answerReview.press("ArrowRight");
-  assert.equal(await page.getByRole("tab", { name: /Plan changes/i }).getAttribute("aria-selected"), "true");
-  await page.getByRole("tab", { name: /Plan changes/i }).press("Home");
   assert.equal(await page.getByRole("tab", { name: /Summary/i }).getAttribute("aria-selected"), "true");
+  await page.getByRole("tab", { name: /Summary/i }).press("End");
+  assert.equal(await page.getByRole("tab", { name: /Answer review/i }).getAttribute("aria-selected"), "true");
 
   const feedbackUrl = page.url();
   await page.goBack({ waitUntil: "domcontentloaded" });
