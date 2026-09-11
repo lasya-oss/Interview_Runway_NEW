@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { isActivePdfFilename } from "@/app/lib/active-library-selection";
+import { driveMaterialSlug } from "@/app/lib/drive-materials";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { findRoadmapTask } from "@/app/lib/roadmap-data";
 import { getLibraryCategorySummary, getLibraryCatalog } from "./library-catalog";
@@ -17,6 +18,7 @@ export default async function LibraryPage({
 }: {
   searchParams: Promise<{
     pdf?: string | string[];
+    material?: string | string[];
     from?: string | string[];
     task?: string | string[];
   }>;
@@ -24,13 +26,19 @@ export default async function LibraryPage({
   const params = await searchParams;
   const requestedPdf = Array.isArray(params.pdf) ? params.pdf[0] : params.pdf;
   const initialPdfFilename = requestedPdf && isActivePdfFilename(requestedPdf) ? requestedPdf : null;
+  const requestedMaterial = Array.isArray(params.material) ? params.material[0] : params.material;
   const requestedOrigin = Array.isArray(params.from) ? params.from[0] : params.from;
   const requestedTask = Array.isArray(params.task) ? params.task[0] : params.task;
-  const returnTo = initialPdfFilename && requestedOrigin === "roadmap" && requestedTask && findRoadmapTask(requestedTask)
-    ? `/learn/roadmap#roadmap-task-${encodeURIComponent(requestedTask)}`
-    : null;
   const profile = await requireDemoProfile("/learn/library");
   const isLive = profile.isLive === true;
+  const initialCatalog = initialPdfFilename || requestedMaterial ? getLibraryCatalog(isLive, profile.id) : null;
+  const initialMaterialSlug = requestedMaterial && initialCatalog && (
+    initialCatalog.materials.some((material) => material.slug === requestedMaterial)
+    || initialCatalog.driveMaterials.some((material) => driveMaterialSlug(material) === requestedMaterial)
+  ) ? requestedMaterial : null;
+  const returnTo = (initialPdfFilename || initialMaterialSlug) && requestedOrigin === "roadmap" && requestedTask && findRoadmapTask(requestedTask)
+    ? `/learn/roadmap#roadmap-task-${encodeURIComponent(requestedTask)}`
+    : null;
 
   return (
     <div className="member-page">
@@ -42,7 +50,8 @@ export default async function LibraryPage({
         loginHint={profile.email}
         categorySummary={getLibraryCategorySummary(isLive, profile.id)}
         initialPdfFilename={initialPdfFilename}
-        initialCatalog={initialPdfFilename ? getLibraryCatalog(isLive, profile.id) : null}
+        initialMaterialSlug={initialMaterialSlug}
+        initialCatalog={initialCatalog}
         returnTo={returnTo}
       />
     </div>

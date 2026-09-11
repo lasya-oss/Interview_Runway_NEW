@@ -251,7 +251,7 @@ export function RoadmapChecklist({
                   {week.tasks.map((task) => {
                     const isComplete = completed.has(task.id);
                     const libraryHref = libraryHrefForRoadmapTask(task);
-                    const libraryHrefWithOrigin = libraryHref?.startsWith("/learn/library?pdf=")
+                    const libraryHrefWithOrigin = libraryHref
                       ? appendRoadmapOrigin(libraryHref, task.id)
                       : libraryHref;
                     const taskCopy = (
@@ -300,8 +300,15 @@ export function RoadmapChecklist({
 }
 
 function appendRoadmapOrigin(href: string, taskId: string) {
-  const separator = href.includes("?") ? "&" : "?";
-  return `${href}${separator}from=roadmap&task=${encodeURIComponent(taskId)}`;
+  const normalizedHref = normalizeRoadmapLibraryHref(href);
+  const separator = normalizedHref.includes("?") ? "&" : "?";
+  return `${normalizedHref}${separator}from=roadmap&task=${encodeURIComponent(taskId)}`;
+}
+
+function normalizeRoadmapLibraryHref(href: string) {
+  const materialMatch = href.match(/^\/learn\/(?:material|library\/material)\/([^/?#]+)$/);
+  if (!materialMatch) return href;
+  return `/learn/library?material=${encodeURIComponent(decodeURIComponent(materialMatch[1]))}`;
 }
 
 function readCompletionActivity(value: unknown): Record<string, string> {

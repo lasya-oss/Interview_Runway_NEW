@@ -4,6 +4,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   driveMaterialCategory,
   driveMaterialKindLabel,
+  driveMaterialSlug,
   driveMaterialTitle,
 } from "@/app/lib/drive-materials";
 import { drivePdfCategory, drivePdfTitle, type DrivePdfGuide } from "@/app/lib/drive-pdf-guides";
@@ -13,7 +14,7 @@ import type { LibraryCategorySummary, LibraryCatalog } from "./library-catalog";
 import { DriveMaterialShelf } from "./drive-material-shelf";
 import { LibraryMaterialDialog } from "./library-material-dialog";
 import { formatLibraryRecordNumber, LIBRARY_OPEN_LABEL } from "./library-copy";
-import { learningMaterialViewerSource } from "./library-material-source";
+import { driveMaterialViewerSource, learningMaterialViewerSource } from "./library-material-source";
 import { entitledLibraryPlans } from "./library-plan-access";
 import { VaultStartHere } from "./library-start-here";
 import { PdfGuideShelf } from "./pdf-guide-shelf";
@@ -108,6 +109,7 @@ export function LibraryClient({
   loginHint = null,
   categorySummary,
   initialPdfFilename = null,
+  initialMaterialSlug = null,
   initialCatalog = null,
   returnTo = null,
 }: {
@@ -118,12 +120,34 @@ export function LibraryClient({
   loginHint?: string | null;
   categorySummary: LibraryCategorySummary;
   initialPdfFilename?: string | null;
+  initialMaterialSlug?: string | null;
   initialCatalog?: LibraryCatalog | null;
   returnTo?: string | null;
 }) {
   const [catalog, setCatalog] = useState<LibraryCatalog | null>(initialCatalog);
   const [query, setQuery] = useState(initialPdfFilename ?? "");
   const [category, setCategory] = useState<string | null>(initialPdfFilename ? "All" : null);
+  const initialViewer = useMemo(() => {
+    if (!initialMaterialSlug || !catalog) return null;
+
+    const learningMaterial = catalog.materials.find((material) => material.slug === initialMaterialSlug);
+    if (learningMaterial) {
+      return {
+        source: learningMaterialViewerSource(learningMaterial),
+        title: learningMaterial.title,
+        eyebrow: `${learningMaterial.category} · ${learningMaterial.format}`,
+      };
+    }
+
+    const driveMaterial = catalog.driveMaterials.find((material) => driveMaterialSlug(material) === initialMaterialSlug);
+    if (!driveMaterial) return null;
+    const title = driveMaterialTitle(driveMaterial.filename);
+    return {
+      source: driveMaterialViewerSource(driveMaterial, title),
+      title,
+      eyebrow: `${driveMaterialCategory(driveMaterial.filename)} · ${driveMaterialKindLabel(driveMaterial.kind)}`,
+    };
+  }, [catalog, initialMaterialSlug]);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
   const hasSearchQuery = deferredQuery.length > 0;
   const entitledPlanIds = useMemo(
@@ -345,6 +369,21 @@ export function LibraryClient({
 
   return (
     <div className="library-workspace">
+      {initialViewer ? (
+        <LibraryMaterialDialog
+          source={initialViewer.source}
+          title={initialViewer.title}
+          eyebrow={initialViewer.eyebrow}
+          description="Open the material here without leaving InterviewRunway."
+          buttonLabel={LIBRARY_OPEN_LABEL}
+          buttonClassName="library-record-open"
+          buttonAriaLabel={`Open ${initialViewer.title} inside InterviewRunway`}
+          googleClientId={googleClientId}
+          loginHint={loginHint}
+          initialOpen={true}
+          returnTo={returnTo}
+        />
+      ) : null}
       <section className="library-heading">
         <div>
           <p className="member-kicker">Member material library</p>

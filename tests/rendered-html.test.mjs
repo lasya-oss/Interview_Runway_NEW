@@ -1430,7 +1430,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal((roadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 6);
   assert.equal((roadmapText.match(/View in Library/g) ?? []).length, 6);
   assert.equal((roadmapText.match(/No matching material/g) ?? []).length, 0);
-  assert.match(roadmapHtml, /href=["'][^"']*\/learn\/material\/notification-mock["']/i);
+  assert.match(roadmapHtml, /href=["'][^"']*\/learn\/library\?material=notification-mock(?:&amp;|&)from=roadmap(?:&amp;|&)task=4w-3-mock["']/i);
   assert.doesNotMatch(roadmapHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-3-correct["']/i);
   assert.doesNotMatch(roadmapText, /Prepare the interview-day runbook|metrics-pipeline-mock|queue-backlog-mock|Resume profile lab|Rehearse the compensation conversation/i);
 
@@ -1703,7 +1703,11 @@ test("demo sign-in issues a protected session and opens the learner product", as
     "outage-story",
     "us-ats-resume",
   ]) {
-    assert.match(vaultRoadmapHtml, new RegExp(`href=["'][^"']*/learn/material/${slug}["']`, "i"), slug);
+    assert.match(
+      vaultRoadmapHtml,
+      new RegExp(`href=["'][^"']*/learn/library\\?material=${slug}&amp;from=roadmap&amp;task=[^"']+["']`, "i"),
+      slug,
+    );
   }
   for (const filename of [
     "dsa_traversal-decision-practice-workbook.pdf",
