@@ -1067,6 +1067,7 @@ test("Second Seat Meeting Copilot page alone launches the pinned validated relea
   const release = await readFile(new URL("../app/lib/meeting-copilot-release.ts", import.meta.url), "utf8");
   const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
   const pageSource = await readFile(new URL("../app/learn/meeting-copilot/page.tsx", import.meta.url), "utf8");
+  const launchComponent = await readFile(new URL("../app/learn/meeting-copilot/meeting-copilot-launch.tsx", import.meta.url), "utf8");
   const launchRoute = await readFile(new URL("../app/api/meeting-copilot/launch/route.ts", import.meta.url), "utf8");
 
   assert.match(release, /https:\/\/github\.com\/vividlabsai\/meeting-copilot/);
@@ -1089,6 +1090,10 @@ test("Second Seat Meeting Copilot page alone launches the pinned validated relea
   assert.doesNotMatch(pageSource, /[?&]ir_profile_copy=/);
   assert.doesNotMatch(shell, /const MEETING_COPILOT_URL/);
   assert.doesNotMatch(pageSource, /const MEETING_COPILOT_URL/);
+  assert.doesNotMatch(launchComponent, /window\.open\("about:blank"/);
+  assert.match(launchComponent, /probeCompanion\(probeUrl, availabilityRef, probeRef\)/);
+  assert.match(launchComponent, /window\.open\(href, "_blank", "noopener,noreferrer"\)/);
+  assert.match(launchComponent, /meeting-copilot-launch-status\$\{state === "unavailable" \|\| state === "blocked"/);
 
   const login = await request("/api/demo-session", {
     method: "POST",

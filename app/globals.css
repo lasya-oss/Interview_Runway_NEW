@@ -5271,7 +5271,7 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .member-locked-panel > p:not(.member-kicker) { max-width: 650px; margin: 22px 0 0; color: #657780; font-size: 13px; }
 .member-locked-panel .member-primary-button { margin-top: 30px; }
 .meeting-copilot-launch-status { max-width: 650px; margin: 16px 0 0; color: #657780; font-size: 13px; line-height: 1.5; }
-.meeting-copilot-launch-status.is-error { color: #a6421d; }
+.meeting-copilot-launch-status.is-error { padding: 14px 16px; border: 1px solid rgba(166,66,29,.24); border-left: 4px solid #a6421d; border-radius: 10px; background: rgba(166,66,29,.08); color: #8c351c; font-weight: 650; box-shadow: 0 8px 24px rgba(166,66,29,.08); }
 .locked-orbit { align-self: flex-end; width: 145px; height: 145px; margin: -35px 10px -45px 0; display: grid; place-items: center; border: 1px solid rgba(42,82,98,.13); border-radius: 50%; box-shadow: 0 0 0 25px rgba(42,82,98,.03), 0 0 0 55px rgba(42,82,98,.018); }
 .locked-orbit span { width: 11px; height: 11px; border-radius: 50%; background: var(--afterburner); box-shadow: 0 0 22px var(--afterburner); }
 .member-locked-evidence { padding-left: 16px; border-left: 2px solid var(--afterburner); }

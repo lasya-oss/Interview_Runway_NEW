@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 type LaunchState = "idle" | "checking" | "unavailable" | "blocked";
 
 const PROBE_TIMEOUT_MS = 1800;
+const PROBE_CACHE_MS = 5000;
 
 export function MeetingCopilotLaunch({
   href,
@@ -14,30 +15,40 @@ export function MeetingCopilotLaunch({
   probeUrl: string;
 }) {
   const [state, setState] = useState<LaunchState>("idle");
+  const availabilityRef = useRef<{ available: boolean; checkedAt: number } | null>(null);
+  const probeRef = useRef<Promise<boolean> | null>(null);
+
+  useEffect(() => {
+    void probeCompanion(probeUrl, availabilityRef, probeRef);
+  }, [probeUrl]);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     if (state === "checking") return;
 
-    // Open synchronously from the user gesture so browsers do not block the
-    // companion tab after the asynchronous local availability check.
-    const pendingTab = window.open("about:blank", "_blank");
-    if (!pendingTab) {
-      setState("blocked");
-      return;
-    }
-    pendingTab.opener = null;
-    setState("checking");
-
-    void probeLocalCompanion(probeUrl).then((available) => {
-      if (!available) {
-        pendingTab.close();
+    const cachedAvailability = availabilityRef.current;
+    const hasFreshAvailability = cachedAvailability && Date.now() - cachedAvailability.checkedAt < PROBE_CACHE_MS;
+    if (hasFreshAvailability) {
+      if (!cachedAvailability.available) {
         setState("unavailable");
         return;
       }
 
-      pendingTab.location.replace(href);
-      setState("idle");
+      const companionTab = window.open(href, "_blank", "noopener,noreferrer");
+      setState(companionTab ? "idle" : "blocked");
+      return;
+    }
+
+    setState("checking");
+
+    void probeCompanion(probeUrl, availabilityRef, probeRef).then((available) => {
+      if (!available) {
+        setState("unavailable");
+        return;
+      }
+
+      const companionTab = window.open(href, "_blank", "noopener,noreferrer");
+      setState(companionTab ? "idle" : "blocked");
     });
   };
 
@@ -73,6 +84,23 @@ export function MeetingCopilotLaunch({
       ) : null}
     </>
   );
+}
+
+function probeCompanion(
+  url: string,
+  availabilityRef: { current: { available: boolean; checkedAt: number } | null },
+  probeRef: { current: Promise<boolean> | null },
+) {
+  if (probeRef.current) return probeRef.current;
+
+  const probe = probeLocalCompanion(url).then((available) => {
+    availabilityRef.current = { available, checkedAt: Date.now() };
+    return available;
+  }).finally(() => {
+    probeRef.current = null;
+  });
+  probeRef.current = probe;
+  return probe;
 }
 
 async function probeLocalCompanion(url: string) {
