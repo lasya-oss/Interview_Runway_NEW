@@ -2438,6 +2438,7 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(feedback, /requestedSessionId/);
   assert.match(feedback, /selectedSession\?\.status === "completed"/);
   assert.match(feedback, /findSecondSeatMock\(feedbackSession\.mockId\)/);
+  assert.match(feedback, /secondSeat=\{profile\.id === "practice" \|\| profile\.id === "premium" \|\| profile\.isSecondSeatLive === true\}/);
   assert.match(feedbackClient, /Question evaluated/);
   assert.match(feedbackClient, /Your original answer/);
   assert.match(feedbackClient, /What is incorrect/);

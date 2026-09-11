@@ -130,7 +130,7 @@ export default async function FeedbackPage({
         actions={actions}
         premium={profile.id === "premium"}
         live={profile.isSecondSeatLive === true}
-        secondSeat={profile.id === "practice" || profile.isSecondSeatLive === true}
+        secondSeat={profile.id === "practice" || profile.id === "premium" || profile.isSecondSeatLive === true}
         mockTitle={feedbackSession ? findSecondSeatMock(feedbackSession.mockId)?.title ?? "Your practice round" : isLiveLearner ? "Your practice round" : "Design a metrics pipeline"}
         insightTitle={liveEvaluation?.insightTitle}
         insightBody={liveEvaluation?.insightBody}
