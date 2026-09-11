@@ -6067,7 +6067,8 @@ html[data-motion-tier="lite"] .control-step { background: rgba(247,249,250,.96);
 .roadmap-week--completed .roadmap-week-index i { background: #78ae95; }
 .roadmap-week--upcoming .roadmap-week-content { background: rgba(255,255,255,.32); }
 .roadmap-task-list { margin-top: 25px; border-top: 1px solid rgba(31,65,78,.11); }
-.roadmap-task-row { min-height: 57px; display: grid; grid-template-columns: 22px 1fr; gap: 11px; align-items: stretch; border-bottom: 1px solid rgba(31,65,78,.1); color: #344851; }
+.roadmap-task-row { min-height: 57px; display: grid; grid-template-columns: 22px 1fr; gap: 11px; align-items: stretch; border-bottom: 1px solid rgba(31,65,78,.1); color: #344851; scroll-margin-top: 32px; }
+.roadmap-task-row:target { background: rgba(255,107,44,.08); box-shadow: inset 3px 0 0 var(--afterburner); }
 .roadmap-task-check { display: grid; place-items: center; cursor: pointer; }
 .roadmap-task-check input { position: absolute; opacity: 0; pointer-events: none; }
 .roadmap-task-check > span { width: 15px; height: 15px; border: 1px solid rgba(34,71,85,.27); border-radius: 4px; background: rgba(255,255,255,.4); }

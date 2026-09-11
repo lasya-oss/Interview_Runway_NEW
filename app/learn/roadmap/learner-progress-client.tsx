@@ -197,17 +197,15 @@ function createStaticSnapshot(
     .flatMap((week) => week.tasks)
     .slice(0, completedTaskCount)
     .map((task) => task.id);
+  const progress = roadmapProgressFor(weeks, completedTaskIds);
   return {
-    completedTaskIds: [],
+    ...progress,
     completionActivity: {},
     weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
-    weekProgress: roadmapWeekProgressFor(weeks, completedTaskIds, currentWeek),
     focusedSeconds: 0,
-    completedCount: completedTaskCount,
-    totalTaskCount,
     progressPercent,
     currentWeek,
-    nextTask: null,
+    weekProgress: roadmapWeekProgressFor(weeks, progress.completedTaskIds, currentWeek),
   };
 }
 

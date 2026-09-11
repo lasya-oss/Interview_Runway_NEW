@@ -236,7 +236,11 @@ export function RoadmapChecklist({
                       </span>
                     );
                     return (
-                      <div className={`roadmap-task-row ${isComplete ? "is-complete" : ""}`} key={task.id}>
+                      <div
+                        className={`roadmap-task-row ${isComplete ? "is-complete" : ""}`}
+                        id={`roadmap-task-${task.id}`}
+                        key={task.id}
+                      >
                         <label className="roadmap-task-check">
                           <input
                             type="checkbox"

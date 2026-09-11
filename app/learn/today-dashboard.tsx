@@ -35,14 +35,13 @@ export function TodayDashboard({ profile }: { profile: DemoProfileView }) {
   const reviewMaterials = DEMO_REVIEW_MATERIALS
     .filter((material) => material.profiles.includes(profile.id))
     .slice(0, 3);
-  const nextTask = isTracked && !isFreshLearner ? roadmap.nextTask : null;
+  const nextRoadmapTask = roadmap.nextTask;
+  const nextTask = !isFreshLearner ? nextRoadmapTask : null;
   const nextAction = nextTask?.title ?? profile.nextAction;
   const nextActionMeta = nextTask?.meta ?? profile.nextActionMeta;
-  const nextActionHref = nextTask
-    ? nextTask.learning.kind === "material"
-      ? `/learn/material/${nextTask.learning.slug}`
-      : `/learn/roadmap/task/${nextTask.id}`
-    : profile.nextActionHref ?? (profile.id === "premium" ? "/learn/coaching" : profile.id === "practice" ? "/learn/practice" : "/learn/roadmap");
+  const nextActionHref = nextRoadmapTask
+    ? roadmapTaskHref(nextRoadmapTask)
+    : "/learn/roadmap";
   const nextActionDescription = describeNextAction(profile, nextTask, isFreshLearner);
   const readinessLabel = profile.id === "foundation"
     ? progress === 100 ? <>Plan<br />complete</> : <>Plan<br />progress</>
@@ -130,6 +129,10 @@ function formatFocusedTime(seconds: number) {
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
   return remainingMinutes ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+}
+
+function roadmapTaskHref(task: RoadmapTask) {
+  return `/learn/roadmap#roadmap-task-${task.id}`;
 }
 
 function describeNextAction(
