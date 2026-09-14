@@ -11,7 +11,6 @@ type GoogleAccountsId = {
     auto_select: boolean;
     callback(response: GoogleCredentialResponse): void;
     client_id: string;
-    hd: string;
     itp_support: boolean;
     ux_mode: "popup";
   }): void;
@@ -94,11 +93,14 @@ export function GoogleSignIn({
       if (!active || !window.google?.accounts.id || !buttonRef.current) return;
 
       buttonRef.current.replaceChildren();
+      // No hosted-domain restriction here: the account chooser must also offer
+      // the temporary pre-launch QA account. The server remains the enforcer
+      // and still admits only Workspace accounts plus that one allowlisted
+      // address.
       window.google.accounts.id.initialize({
         auto_select: false,
         callback: handleCredential,
         client_id: clientId,
-        hd: "vividlabsai.com",
         itp_support: true,
         ux_mode: "popup",
       });
@@ -111,7 +113,7 @@ export function GoogleSignIn({
         type: "standard",
         width: 320,
       });
-      setMessage("Only @vividlabsai.com accounts are permitted.");
+      setMessage("Only approved Google accounts can sign in.");
     };
 
     const existing = document.querySelector<HTMLScriptElement>(

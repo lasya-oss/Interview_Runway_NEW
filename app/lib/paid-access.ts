@@ -76,11 +76,22 @@ export function isConfiguredTestSecondSeatEmail(email: string): boolean {
   return configuredTestEmails("TEST_SECOND_SEAT_EMAILS").includes(normalizedEmail);
 }
 
+/**
+ * Temporary pre-launch QA allowlist for one named external test account.
+ * Unlike the Workspace-domain test lists, this matches an exact address on
+ * any domain and grants the full user-level plan stack. It never confers
+ * internal or admin access, which remain domain-gated elsewhere.
+ */
+export function isConfiguredTestFullAccessEmail(email: string): boolean {
+  return configuredTestEmails("TEST_FULL_ACCESS_EMAILS").includes(normalizeEmail(email));
+}
+
 export async function hasVaultAccess(email: string): Promise<boolean> {
   if (
     isInternalFullAccessEmail(email) ||
     isConfiguredTestFoundationEmail(email) ||
-    isConfiguredTestSecondSeatEmail(email)
+    isConfiguredTestSecondSeatEmail(email) ||
+    isConfiguredTestFullAccessEmail(email)
   ) {
     return true;
   }
@@ -103,6 +114,7 @@ export async function hasVaultAccess(email: string): Promise<boolean> {
 export async function hasSecondSeatAccess(email: string): Promise<boolean> {
   if (isInternalFullAccessEmail(email)) return true;
   if (isConfiguredTestSecondSeatEmail(email)) return true;
+  if (isConfiguredTestFullAccessEmail(email)) return true;
   if (!(await hasVaultAccess(email))) return false;
 
   const [entitlement] = await (await getDb())
@@ -128,6 +140,9 @@ export async function hasSecondSeatAccess(email: string): Promise<boolean> {
 export async function getLearnerAccess(email: string): Promise<LearnerAccess> {
   const normalizedEmail = normalizeEmail(email);
   if (isInternalFullAccessEmail(normalizedEmail)) {
+    return { vault: true, secondSeat: true, humanCalibration: true };
+  }
+  if (isConfiguredTestFullAccessEmail(normalizedEmail)) {
     return { vault: true, secondSeat: true, humanCalibration: true };
   }
   const foundationTestEmail = isConfiguredTestFoundationEmail(normalizedEmail);
@@ -156,7 +171,9 @@ export async function getLearnerAccess(email: string): Promise<LearnerAccess> {
   };
 }
 
-function configuredTestEmails(key: "TEST_FOUNDATION_EMAILS" | "TEST_SECOND_SEAT_EMAILS") {
+function configuredTestEmails(
+  key: "TEST_FOUNDATION_EMAILS" | "TEST_SECOND_SEAT_EMAILS" | "TEST_FULL_ACCESS_EMAILS",
+) {
   return (process.env[key] ?? "")
     .split(/[\s,]+/)
     .map(normalizeEmail)

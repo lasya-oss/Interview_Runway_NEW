@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import {
+  MEETING_COPILOT_PROBE_TIMEOUT_MS,
+  meetingCopilotProbeUrls,
+} from "@/app/lib/meeting-copilot-probe";
 
 type LaunchState = "idle" | "checking" | "unavailable" | "blocked";
 
-const PROBE_TIMEOUT_MS = 1800;
 const PROBE_CACHE_MS = 5000;
 
 export function MeetingCopilotLaunch({
@@ -26,14 +29,14 @@ export function MeetingCopilotLaunch({
     event.preventDefault();
     if (state === "checking") return;
 
+    // Only a fresh positive probe may skip re-checking. A cached negative
+    // result goes stale the moment the local companion starts, so an
+    // explicit click must always re-probe instead of repeating the message.
     const cachedAvailability = availabilityRef.current;
-    const hasFreshAvailability = cachedAvailability && Date.now() - cachedAvailability.checkedAt < PROBE_CACHE_MS;
-    if (hasFreshAvailability) {
-      if (!cachedAvailability.available) {
-        setState("unavailable");
-        return;
-      }
-
+    if (
+      cachedAvailability?.available
+      && Date.now() - cachedAvailability.checkedAt < PROBE_CACHE_MS
+    ) {
       const companionTab = window.open(href, "_blank", "noopener,noreferrer");
       setState(companionTab ? "idle" : "blocked");
       return;
@@ -52,13 +55,13 @@ export function MeetingCopilotLaunch({
     });
   };
 
-  const statusMessage = state === "checking"
-    ? "Checking that Meeting Copilot is running on this device…"
-    : state === "unavailable"
-      ? "Meeting Copilot is not running on this device. Start the local companion, then try again."
-      : state === "blocked"
-        ? "The Meeting Copilot tab could not be opened. Allow pop-ups for Interview Runway, then try again."
-        : null;
+  // While live, the button opens the companion without showing any message:
+  // the availability check runs silently and only a real failure surfaces.
+  const statusMessage = state === "unavailable"
+    ? "Meeting Copilot is not running on this device. Start the local companion, then try again."
+    : state === "blocked"
+      ? "The Meeting Copilot tab could not be opened. Allow pop-ups for Interview Runway, then try again."
+      : null;
 
   return (
     <>
@@ -71,12 +74,12 @@ export function MeetingCopilotLaunch({
         onClick={handleClick}
         aria-busy={state === "checking"}
       >
-        {state === "checking" ? "Checking Meeting Copilot…" : "Open Meeting Copilot"} <span aria-hidden="true">↗</span>
+        Open Meeting Copilot <span aria-hidden="true">↗</span>
       </a>
       {statusMessage ? (
         <p
           className={`meeting-copilot-launch-status${state === "unavailable" || state === "blocked" ? " is-error" : ""}`}
-          role={state === "checking" ? "status" : "alert"}
+          role="alert"
           aria-live="polite"
         >
           {statusMessage}
@@ -104,8 +107,15 @@ function probeCompanion(
 }
 
 async function probeLocalCompanion(url: string) {
+  for (const candidate of meetingCopilotProbeUrls(url)) {
+    if (await probeOnce(candidate)) return true;
+  }
+  return false;
+}
+
+async function probeOnce(url: string) {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
+  const timeout = window.setTimeout(() => controller.abort(), MEETING_COPILOT_PROBE_TIMEOUT_MS);
 
   try {
     await fetch(url, {
