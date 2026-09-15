@@ -31,10 +31,7 @@ const token = await new SignJWT({
 
 const cookie = `interviewrunway_session=${token}; ir_active_learner_plan=practice`;
 
-const created = await api("/api/second-seat/sessions", {
-  method: "POST",
-  body: JSON.stringify({ mockId: "notification-service" }),
-});
+const created = await createSessionAfterPropagation();
 assert.equal(created.response.status, 201, requestFailure("create session", created));
 assert.ok(created.body?.session?.id, "create session response did not include a session id");
 
@@ -72,6 +69,19 @@ const evidence = {
 };
 
 console.log(`AI_VERIFY_RESULT=${JSON.stringify(evidence)}`);
+
+async function createSessionAfterPropagation() {
+  let result;
+  for (let attempt = 1; attempt <= 12; attempt += 1) {
+    result = await api("/api/second-seat/sessions", {
+      method: "POST",
+      body: JSON.stringify({ mockId: "notification-service" }),
+    });
+    if (result.response.status !== 404) return result;
+    if (attempt < 12) await new Promise((resolve) => setTimeout(resolve, 2_500));
+  }
+  return result;
+}
 
 async function api(pathname, init) {
   const response = await fetch(new URL(pathname, baseUrl), {
