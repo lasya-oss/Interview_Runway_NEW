@@ -282,7 +282,21 @@ async function requestEvaluation(
   } catch {
     throw new ProviderEvaluationError("invalid_json");
   }
-  return normalizeProviderEvaluation(content, mock, answers);
+  try {
+    return normalizeProviderEvaluation(content, mock, answers);
+  } catch (error) {
+    if (
+      process.env.AI_EVALUATION_DEBUG_SHAPE === "1"
+      && error instanceof ProviderEvaluationError
+      && error.reason === "schema_mismatch"
+    ) {
+      console.warn("Second Seat provider response shape", {
+        provider: provider.name,
+        shape: jsonValueShape(content),
+      });
+    }
+    throw error;
+  }
 }
 
 function assessmentSystemPrompt() {
@@ -746,6 +760,23 @@ function isNonEmptyString(value: unknown): value is string {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function jsonValueShape(value: unknown, depth = 0): unknown {
+  if (value === null) return "null";
+  if (typeof value === "string") return `string(${value.length})`;
+  if (typeof value !== "object") return typeof value;
+  if (depth >= 4) return Array.isArray(value) ? `array(${value.length})` : "object";
+  if (Array.isArray(value)) {
+    return {
+      type: "array",
+      length: value.length,
+      first: value.length ? jsonValueShape(value[0], depth + 1) : undefined,
+    };
+  }
+  return Object.fromEntries(
+    Object.entries(value).map(([key, child]) => [key, jsonValueShape(child, depth + 1)]),
+  );
 }
 
 class ProviderEvaluationError extends Error {
