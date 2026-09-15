@@ -17,25 +17,26 @@ const answers = [
 function answerFeedback(turn, index, score = 8) {
   return {
     turn_id: turn.id,
-    verdict: score >= 9 ? "strong" : score >= 7 ? "sound" : score >= 5 ? "partial" : "incorrect",
     scores: {
-      correctness: { score, reason: `Correctness evidence for turn ${index + 1}.` },
-      relevance: { score, reason: `Relevance evidence for turn ${index + 1}.` },
-      completeness: { score: Math.max(0, score - 1), reason: `Completeness evidence for turn ${index + 1}.` },
-      technicalAccuracy: { score, reason: `Technical evidence for turn ${index + 1}.` },
-      clarity: { score: Math.min(10, score + 1), reason: `Clarity evidence for turn ${index + 1}.` },
-      interviewQuality: { score, reason: `Interview evidence for turn ${index + 1}.` },
+      correctness: score,
+      relevance: score,
+      completeness: Math.max(0, score - 1),
+      technicalAccuracy: score,
+      clarity: Math.min(10, score + 1),
+      interviewQuality: score,
+    },
+    rubric_reasons: {
+      correctness: `Correctness evidence for turn ${index + 1}.`,
+      relevance: `Relevance evidence for turn ${index + 1}.`,
+      completeness: `Completeness evidence for turn ${index + 1}.`,
+      technicalAccuracy: `Technical evidence for turn ${index + 1}.`,
+      clarity: `Clarity evidence for turn ${index + 1}.`,
+      interviewQuality: `Interview evidence for turn ${index + 1}.`,
     },
     score_reason: `This answer scored ${score} because its decisions were mostly explicit.`,
     strengths: ["It states a concrete decision."],
-    correct_points: ["The core technical direction is correct."],
-    weaknesses: ["The consequence could be more explicit."],
     incorrect_points: ["No major factual errors were identified."],
     missing_points: ["Add the user-visible consequence."],
-    relevance_feedback: "The response directly addresses the question.",
-    clarity_feedback: "The sequence is easy to follow.",
-    technical_accuracy_feedback: "The terms are used accurately.",
-    interview_quality_feedback: "The answer is concise and defensible.",
     improvement_actions: ["Add one explicit consequence and the signal used to verify it."],
     improved_answer: `${answers[index]} I would make the consequence and verification signal explicit.`,
     why_improved_answer_is_better: "It preserves the correct decision while making the missing consequence observable.",
@@ -190,7 +191,7 @@ test("keeps the saved assessment usable when both providers fail", async () => {
 test("rejects malformed scores and duplicate turn records instead of rendering them", async () => {
   const malformed = providerPayload();
   const parsed = JSON.parse(malformed.choices[0].message.content);
-  parsed.answer_feedback[0].scores.correctness.score = 14;
+  parsed.answer_feedback[0].scores.correctness = 14;
   parsed.answer_feedback[1].turn_id = parsed.answer_feedback[0].turn_id;
   malformed.choices[0].message.content = JSON.stringify(parsed);
 

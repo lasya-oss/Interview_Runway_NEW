@@ -95,55 +95,37 @@ const RESPONSE_SCHEMA = {
         type: "object",
         properties: {
           turn_id: { type: "string" },
-          verdict: {
-            type: "string",
-            enum: ["strong", "sound", "partial", "incorrect", "misconception", "off-topic"],
-          },
           scores: {
             type: "object",
             properties: Object.fromEntries(RUBRIC.map((item) => [
               item.key,
-              {
-                type: "object",
-                properties: {
-                  score: { type: "integer", minimum: 0, maximum: 10 },
-                  reason: { type: "string" },
-                },
-                required: ["score", "reason"],
-                additionalProperties: false,
-              },
+              { type: "integer", minimum: 0, maximum: 10 },
             ])),
+            required: RUBRIC.map((item) => item.key),
+            additionalProperties: false,
+          },
+          rubric_reasons: {
+            type: "object",
+            properties: Object.fromEntries(RUBRIC.map((item) => [item.key, { type: "string" }])),
             required: RUBRIC.map((item) => item.key),
             additionalProperties: false,
           },
           score_reason: { type: "string" },
           strengths: { type: "array", items: { type: "string" } },
-          correct_points: { type: "array", items: { type: "string" } },
-          weaknesses: { type: "array", items: { type: "string" } },
           incorrect_points: { type: "array", minItems: 1, items: { type: "string" } },
           missing_points: { type: "array", items: { type: "string" } },
-          relevance_feedback: { type: "string" },
-          clarity_feedback: { type: "string" },
-          technical_accuracy_feedback: { type: "string" },
-          interview_quality_feedback: { type: "string" },
           improvement_actions: { type: "array", minItems: 1, items: { type: "string" } },
           improved_answer: { type: "string" },
           why_improved_answer_is_better: { type: "string" },
         },
         required: [
           "turn_id",
-          "verdict",
           "scores",
+          "rubric_reasons",
           "score_reason",
           "strengths",
-          "correct_points",
-          "weaknesses",
           "incorrect_points",
           "missing_points",
-          "relevance_feedback",
-          "clarity_feedback",
-          "technical_accuracy_feedback",
-          "interview_quality_feedback",
           "improvement_actions",
           "improved_answer",
           "why_improved_answer_is_better",
@@ -366,17 +348,19 @@ function normalizeProviderEvaluation(
       throw new ProviderEvaluationError("invalid_turn_id");
     }
     seen.add(turnId);
-    const requestedVerdict = normalizeVerdict(item.verdict);
     if (!isRecord(item.scores)) throw new ProviderEvaluationError("schema_mismatch");
+    if (!isRecord(item.rubric_reasons)) throw new ProviderEvaluationError("schema_mismatch");
     const itemScores = item.scores;
+    const itemReasons = item.rubric_reasons;
     const scores = Object.fromEntries(RUBRIC.map((rubric) => {
       const rawScore = itemScores[rubric.key];
-      if (!isRecord(rawScore)) throw new ProviderEvaluationError("schema_mismatch");
-      const score = rawScore.score;
-      if (!Number.isInteger(score) || (score as number) < 0 || (score as number) > 10) {
+      if (!Number.isInteger(rawScore) || (rawScore as number) < 0 || (rawScore as number) > 10) {
         throw new ProviderEvaluationError("invalid_score");
       }
-      return [rubric.key, { score: score as number, reason: requiredString(rawScore.reason, 500) }];
+      return [rubric.key, {
+        score: rawScore as number,
+        reason: requiredString(itemReasons[rubric.key], 500),
+      }];
     })) as Record<SecondSeatRubricKey, { score: number; reason: string }>;
     const originalAnswer = answersForValidation.get(turnId) ?? "";
     const incorrectPoints = stringList(item.incorrect_points, 6, 420, 1);
@@ -389,21 +373,23 @@ function normalizeProviderEvaluation(
     const hasFactualCorrection = incorrectPoints.some(
       (point) => !/no major factual errors were identified/i.test(point),
     );
-    const verdict = consistentVerdict(requestedVerdict, scores, hasFactualCorrection);
+    const verdict = consistentVerdict(scores, hasFactualCorrection);
+    const strengths = stringList(item.strengths, 6, 360);
+    const missingPoints = stringList(item.missing_points, 6, 360);
     byTurn.set(turnId, {
       turnId,
       verdict,
       scores,
       scoreReason: requiredString(item.score_reason, 600),
-      strengths: stringList(item.strengths, 6, 360),
-      correctPoints: stringList(item.correct_points, 6, 360),
-      weaknesses: stringList(item.weaknesses, 6, 360),
+      strengths,
+      correctPoints: strengths,
+      weaknesses: missingPoints,
       incorrectPoints,
-      missingPoints: stringList(item.missing_points, 6, 360),
-      relevanceFeedback: requiredString(item.relevance_feedback, 600),
-      clarityFeedback: requiredString(item.clarity_feedback, 600),
-      technicalAccuracyFeedback: requiredString(item.technical_accuracy_feedback, 700),
-      interviewQualityFeedback: requiredString(item.interview_quality_feedback, 600),
+      missingPoints,
+      relevanceFeedback: scores.relevance.reason,
+      clarityFeedback: scores.clarity.reason,
+      technicalAccuracyFeedback: scores.technicalAccuracy.reason,
+      interviewQualityFeedback: scores.interviewQuality.reason,
       improvementActions: stringList(item.improvement_actions, 5, 420, 1),
       improvedAnswer,
       whyImprovedAnswerIsBetter: requiredString(item.why_improved_answer_is_better, 800),
@@ -443,7 +429,6 @@ function responseFormat(provider: ProviderName, model: string) {
 }
 
 function consistentVerdict(
-  requested: SecondSeatAnswerVerdict,
   scores: Readonly<Record<SecondSeatRubricKey, { score: number; reason: string }>>,
   hasFactualCorrection: boolean,
 ): SecondSeatAnswerVerdict {
@@ -454,14 +439,6 @@ function consistentVerdict(
   if (scores.relevance.score <= 2) return "off-topic";
   if (
     hasFactualCorrection
-    &&
-    requested === "misconception"
-    && (scores.correctness.score <= 5 || scores.technicalAccuracy.score <= 5)
-  ) return "misconception";
-  if (
-    hasFactualCorrection
-    &&
-    requested === "incorrect"
     && (scores.correctness.score <= 4 || scores.technicalAccuracy.score <= 4)
   ) return "incorrect";
   if (weighted >= 8.5) return "strong";
@@ -669,11 +646,6 @@ function assessmentFingerprint(mock: SecondSeatMock, answers: readonly string[])
     hash = Math.imul(hash, 0x01000193);
   }
   return `fnv1a-${(hash >>> 0).toString(16).padStart(8, "0")}`;
-}
-
-function normalizeVerdict(value: unknown): SecondSeatAnswerVerdict {
-  if (value === "strong" || value === "sound" || value === "partial" || value === "incorrect" || value === "misconception" || value === "off-topic") return value;
-  throw new ProviderEvaluationError("invalid_verdict");
 }
 
 function requiredString(value: unknown, maxLength: number) {
