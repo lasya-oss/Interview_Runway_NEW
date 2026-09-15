@@ -1,0 +1,39 @@
+## Close a process while preserving a relationship
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Respond to a rejection professionally, keep the connection specific, and avoid repeated requests that pressure the recipient.
+
+## Keep the goal narrow
+
+This message acknowledges the decision and leaves a credible route to future contact. It is not an appeal unless the company has invited one. Mention the work you genuinely discussed and a capability that could fit a future role. Respect any no-contact instruction.
+
+## Worked message - fictional
+
+Hi Leena, thank you for letting me know. I appreciated learning how the platform team is improving release safety across services. Although I am disappointed, I remain interested in that problem area. If a future role needs hands-on service reliability and deployment tooling experience, I would be glad to reconnect. May I stay in touch? Best, Nila.
+
+## Useful follow-through
+
+A later update should contain a real change in fit, such as a relevant project you can share, rather than another request for a job. For example: 'Since our conversation, I completed an open-source retry-queue demo with failure-injection tests. I thought the design note might be relevant to our earlier discussion.' Only send it if continued contact is welcome.
+
+Do not challenge the interviewer's motives, request confidential comparisons with other candidates, or send the same message repeatedly. Record one lesson from the process for your own preparation, then continue with other opportunities.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
+INTERVIEWRUNWAY VAULT
+Rejection Stay-in-Touch Message
+Rejection follow-up that preserves a real professional relationship.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Message template
+Hi [Name],
+Thank you for letting me know. I appreciated the chance to learn about [team/problem] and speak with [people].
+Although I am disappointed, I remain interested in [company/domain]. If a future role needs [specific capability], I would be glad to reconnect. May I stay in touch?
+Best, [Name]
+Follow-through
+Connect only with context
+Share occasional relevant progress, not repeated job asks
+Reapply when fit materially improves
+Respect a no-contact signal
+

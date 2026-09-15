@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.sql-vs-nosql.01",
+  "filename": "sysdesign_sql-vs-nosql_01.mp4",
+  "title": "SQL vs NoSQL: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "sql-vs-nosql",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 812,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Select a data model and consistency model from access patterns, not product labels.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Transactions",
+        "joins",
+        "schema evolution",
+        "scale shape",
+        "indexing",
+        "and operational maturity."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Polyglot sprawl",
+        "denormalization bugs",
+        "and choosing for hypothetical scale."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

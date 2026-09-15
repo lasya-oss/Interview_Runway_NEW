@@ -1,0 +1,191 @@
+1
+00:00:00,000 --> 00:00:09,950
+Last reviewed: 2026-07-18 This lesson is a dated decision guide for Benchmark Remote Compensation, prepared for India-based candidates
+
+2
+00:00:10,000 --> 00:00:19,950
+pursuing remote or US-linked roles. It is educational material, not individualized legal, tax, immigration, employment, or financial advice.
+
+3
+00:00:20,000 --> 00:00:29,950
+Rules, platform availability, fees, and company policies change. Verify the current position on official portals and with a
+
+4
+00:00:30,000 --> 00:00:39,950
+qualified India professional before acting. The useful goal is to know which questions to ask and which records
+
+5
+00:00:40,000 --> 00:00:49,950
+to preserve. Separate employee, employer-of-record employee, and independent contractor arrangements. The label in an offer is not enough;
+
+6
+00:00:50,000 --> 00:00:59,950
+actual control, benefits, tax treatment, invoicing,
+
+7
+00:01:00,000 --> 00:01:09,950
+intellectual-property terms, termination rights, and local compliance can differ. Ask which legal entity signs the contract, which country
+
+8
+00:01:10,000 --> 00:01:19,950
+law governs it, who withholds or reports payments, what benefits exist, and whether exclusivity or working-hour requirements apply.
+
+9
+00:01:20,000 --> 00:01:29,950
+Write the full payment path from payer to your Indian bank account. Record invoice currency, settlement currency, platform
+
+10
+00:01:30,000 --> 00:01:39,950
+or intermediary, transfer fee, foreign-exchange spread, expected settlement time, refund or chargeback behavior, and the document produced for
+
+11
+00:01:40,000 --> 00:01:49,950
+each payment. Compare total received value and operational reliability, not only the advertised fee. Keep contracts, invoices, bank
+
+12
+00:01:50,000 --> 00:01:59,950
+advice, platform statements, and conversion records
+
+13
+00:02:00,000 --> 00:02:09,950
+together. Income classification, deductions, advance-tax obligations, tax return forms, GST registration, export-of-services conditions, place of supply, LUT use,
+
+14
+00:02:10,000 --> 00:02:19,950
+and documentation depend on facts and current law. Do not rely on a social-media checklist as a conclusion.
+
+15
+00:02:20,000 --> 00:02:29,950
+Use the Income Tax Department and GST/CBIC sources as the starting point, then ask a qualified professional to
+
+16
+00:02:30,000 --> 00:02:39,950
+apply them to your engagement. Build calendar reminders from the professional's written advice. Read compensation, currency, expenses, notice,
+
+17
+00:02:40,000 --> 00:02:49,950
+termination, probation, intellectual property, confidentiality, non-solicit, non-compete, exclusivity, equipment, security, dispute resolution, governing law, and liability together. Highlight
+
+18
+00:02:50,000 --> 00:02:59,950
+clauses that create uncapped personal liability,
+
+19
+00:03:00,000 --> 00:03:09,950
+assign unrelated inventions, allow one-sided changes, delay earned payments, or conflict with another obligation. Ask for revisions in
+
+20
+00:03:10,000 --> 00:03:19,950
+plain language and retain the final signed version. Ask the recruiter or contracting contact to confirm the hiring
+
+21
+00:03:20,000 --> 00:03:29,950
+entity, engagement classification, work location, reporting manager, expected overlap hours, on-call duties, pay schedule, invoice process, fee responsibility,
+
+22
+00:03:30,000 --> 00:03:39,950
+expense policy, leave, benefits, notice, termination, and equipment. Ask which version of the policy or contract controls when
+
+23
+00:03:40,000 --> 00:03:49,950
+a sales page, email, and agreement differ. Written answers do not replace professional advice, but they reduce ambiguity
+
+24
+00:03:50,000 --> 00:03:59,950
+and give a reviewer concrete terms
+
+25
+00:04:00,000 --> 00:04:09,950
+to assess. A person working physically from India for a foreign organization is not automatically working in the
+
+26
+00:04:10,000 --> 00:04:19,950
+United States. US work authorization questions become relevant when the role requires physical work in the United States
+
+27
+00:04:20,000 --> 00:04:29,950
+or another immigration-triggering activity. The hiring company may still impose location restrictions for payroll, security, export-control, customer, or
+
+28
+00:04:30,000 --> 00:04:39,950
+policy reasons. Ask where you are legally permitted and operationally expected to work; do not infer permission from
+
+29
+00:04:40,000 --> 00:04:49,950
+the word remote. Normalize offers to annual expected cash in INR after predictable fees, while keeping exchange-rate uncertainty
+
+30
+00:04:50,000 --> 00:04:59,950
+visible. Separate base cash, variable pay,
+
+31
+00:05:00,000 --> 00:05:09,950
+equity, benefits, paid leave, equipment, insurance, tax support, notice protection, and unpaid downtime. Contractor gross pay is not
+
+32
+00:05:10,000 --> 00:05:19,950
+directly comparable to employee cost-to-company. Use multiple market references, but anchor negotiation in role scope, evidence, and alternatives
+
+33
+00:05:20,000 --> 00:05:29,950
+rather than a single online number. Create one folder per engagement containing the signed agreement, amendments, invoices, payment
+
+34
+00:05:30,000 --> 00:05:39,950
+confirmations, bank records, foreign-exchange documents, expense receipts, tax working papers, professional advice, and key email confirmations. Use consistent
+
+35
+00:05:40,000 --> 00:05:49,950
+filenames with dates and amounts. Reconcile expected and received payments monthly. Review platform terms and official guidance before
+
+36
+00:05:50,000 --> 00:05:59,950
+a material change, and schedule a
+
+37
+00:06:00,000 --> 00:06:09,950
+ninety-day freshness check for tax, GST, payment, immigration, and market claims. Preserve prior versions so a later reviewer
+
+38
+00:06:10,000 --> 00:06:19,950
+can see what information you relied on. Confirm overlap hours, meeting load, on-call expectations, equipment ownership, internet backup,
+
+39
+00:06:20,000 --> 00:06:29,950
+security controls, expense reimbursement, leave approval, performance review, manager location, and communication norms. Test whether the arrangement works
+
+40
+00:06:30,000 --> 00:06:39,950
+during illness, holidays, outages, and urgent incidents. A remote offer is attractive only when the operating model is
+
+41
+00:06:40,000 --> 00:06:49,950
+sustainable and the contract accurately reflects it. Before accepting, obtain the legal entity name, engagement type, total compensation
+
+42
+00:06:50,000 --> 00:06:59,950
+breakdown, payment path, working-location permission, expected
+
+43
+00:07:00,000 --> 00:07:09,950
+hours, leave terms, termination and notice, IP boundaries, equipment/security rules, and dispute process in writing. Have high-risk tax
+
+44
+00:07:10,000 --> 00:07:19,950
+and contract questions reviewed. Keep an offer comparison sheet and a folder for final documents. Recheck official information
+
+45
+00:07:20,000 --> 00:07:29,950
+every ninety days for time-sensitive material. When two sources conflict, prefer the current official authority for the rule
+
+46
+00:07:30,000 --> 00:07:39,950
+and ask the relevant professional to document how it applies to your facts. Record unresolved questions rather than
+
+47
+00:07:40,000 --> 00:07:49,950
+silently choosing the most convenient interpretation. Use this guide to prepare questions and documents; do not treat it
+
+48
+00:07:50,000 --> 00:07:59,950
+as a personalized conclusion.

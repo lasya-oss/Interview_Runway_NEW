@@ -1,0 +1,82 @@
+{
+  "asset_id": "video.dsa.intervals.01",
+  "filename": "dsa_intervals_01.mp4",
+  "title": "Intervals: Pattern recognition and reusable templates",
+  "category": "dsa",
+  "topic": "intervals",
+  "target_duration_minutes": 8,
+  "transcript_word_count": 846,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Sort ranges by a boundary, then reason about overlap using the last accepted or currently merged interval.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "merge or insert ranges",
+        "meeting conflicts",
+        "coverage",
+        "minimum rooms or removals"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "Processed intervals are represented by a correct non-overlapping summary, and only the last summary interval can overlap the next sorted one.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "define inclusive versus half-open boundaries",
+        "choose sort key",
+        "compare next start with active end",
+        "merge or finalize",
+        "handle touching intervals deliberately"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "When merging, if next.start <= current.end, extend current.end; otherwise emit current and start a new range.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "O(n log n) for sorting and O(n) for scanning; output may require O(n) space.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "wrong overlap inequality",
+        "sorting by the wrong endpoint",
+        "mutating caller data unexpectedly",
+        "confusing room-count and merge logic"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

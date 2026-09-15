@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-07-19T05:12:09.314030+00:00",
+  "passed": true,
+  "video_count": 112,
+  "error_count": 0,
+  "errors": [],
+  "checks": [
+    "catalog reconciliation",
+    "voice allocation",
+    "transcript and media hashes",
+    "8-scene request evidence",
+    "H.264 1080p",
+    "AAC mono 48kHz",
+    "5-15 minute duration",
+    "A/V duration delta <= 50ms",
+    "integrated loudness",
+    "true peak"
+  ]
+}

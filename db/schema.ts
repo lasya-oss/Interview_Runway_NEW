@@ -49,6 +49,83 @@ export const entitlements = sqliteTable(
   ],
 );
 
+export const learnerProgress = sqliteTable("learner_progress", {
+  userEmail: text("user_email").primaryKey(),
+  completedTaskIds: text("completed_task_ids").notNull().default("[]"),
+  completionActivity: text("completion_activity").notNull().default("{}"),
+  focusedSeconds: integer("focused_seconds").notNull().default(0),
+  progressPercent: integer("progress_percent").notNull().default(0),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const secondSeatSessions = sqliteTable(
+  "second_seat_sessions",
+  {
+    id: text("id").primaryKey(),
+    userEmail: text("user_email").notNull(),
+    mockId: text("mock_id").notNull(),
+    status: text("status").notNull().default("in_progress"),
+    answers: text("answers").notNull().default("[]"),
+    evaluation: text("evaluation"),
+    startedAt: text("started_at").notNull(),
+    completedAt: text("completed_at"),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [
+    index("second_seat_sessions_user_updated_idx").on(
+      table.userEmail,
+      table.updatedAt,
+    ),
+    index("second_seat_sessions_user_status_idx").on(
+      table.userEmail,
+      table.status,
+    ),
+  ],
+);
+
+export const meetingCopilotProfileDeliveries = sqliteTable(
+  "meeting_copilot_profile_deliveries",
+  {
+    deliveryKey: text("delivery_key").primaryKey(),
+    ownerHash: text("owner_hash").notNull(),
+    profileId: text("profile_id").notNull(),
+    profileRevision: integer("profile_revision").notNull(),
+    eventId: text("event_id").notNull(),
+    status: text("status").notNull().default("pending"),
+    messageId: text("message_id"),
+    failureCode: text("failure_code"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+    sentAt: text("sent_at"),
+  },
+  (table) => [
+    uniqueIndex("meeting_copilot_profile_deliveries_owner_profile_revision_unique").on(
+      table.ownerHash,
+      table.profileId,
+      table.profileRevision,
+    ),
+    index("meeting_copilot_profile_deliveries_owner_created_idx").on(
+      table.ownerHash,
+      table.createdAt,
+    ),
+  ],
+);
+
+export const meetingCopilotBridgeTokenConsumptions = sqliteTable(
+  "meeting_copilot_bridge_token_consumptions",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    ownerHash: text("owner_hash").notNull(),
+    expiresAt: text("expires_at").notNull(),
+    consumedAt: text("consumed_at").notNull(),
+  },
+  (table) => [
+    index("meeting_copilot_bridge_token_consumptions_expires_idx").on(
+      table.expiresAt,
+    ),
+  ],
+);
+
 export const paddleEvents = sqliteTable("paddle_events", {
   eventId: text("event_id").primaryKey(),
   eventType: text("event_type").notNull(),

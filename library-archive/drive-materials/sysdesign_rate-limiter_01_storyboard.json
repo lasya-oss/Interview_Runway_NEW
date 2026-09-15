@@ -1,0 +1,84 @@
+{
+  "asset_id": "video.sysdesign.rate-limiter.01",
+  "filename": "sysdesign_rate-limiter_01.mp4",
+  "title": "Design a Rate Limiter",
+  "category": "sysdesign",
+  "topic": "rate-limiter",
+  "target_duration_minutes": 14,
+  "transcript_word_count": 806,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Enforce per-identity budgets at the edge with bounded error under distributed concurrency.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Algorithm",
+        "storage",
+        "sharding",
+        "atomicity",
+        "regional policy",
+        "and failure mode."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Counter races",
+        "uneven identities",
+        "latency at the limiter",
+        "and fail-open abuse."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

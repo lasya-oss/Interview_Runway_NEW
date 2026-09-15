@@ -1,0 +1,85 @@
+{
+  "asset_id": "video.sysdesign.file-storage-service.01",
+  "filename": "sysdesign_file-storage-service_01.mp4",
+  "title": "Design a File Storage Service",
+  "category": "sysdesign",
+  "topic": "file-storage-service",
+  "target_duration_minutes": 14,
+  "transcript_word_count": 809,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Store large immutable or versioned objects separately from metadata and access policy.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Multipart upload",
+        "object keys",
+        "metadata DB",
+        "replication",
+        "checksums",
+        "and signed access."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Partial upload",
+        "orphaned chunks",
+        "corruption",
+        "unauthorized sharing",
+        "and hot objects."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

@@ -2,11 +2,15 @@ export type DemoTier = "foundation" | "practice" | "premium";
 
 export type DemoProfile = {
   id: DemoTier;
+  isLive?: boolean;
+  isSecondSeatLive?: boolean;
+  /** Plans the authenticated account may select for QA; demo profiles omit this. */
+  availablePlans?: readonly DemoTier[];
   name: string;
   firstName: string;
   initials: string;
   email: string;
-  password: string;
+  password?: string;
   role: string;
   target: string;
   plan: string;
@@ -16,6 +20,9 @@ export type DemoProfile = {
   streak: number;
   week: number;
   roadmapWeeks: number;
+  completedTaskIds?: readonly string[];
+  completionActivity?: Readonly<Record<string, string>>;
+  nextActionHref?: string;
   nextAction: string;
   nextActionMeta: string;
   focus: string;
@@ -39,13 +46,15 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     target: "Remote backend roles",
     plan: "The Vault · Foundation",
     planShort: "Vault",
-    progress: 18,
-    streak: 4,
-    week: 2,
+    progress: 0,
+    streak: 0,
+    week: 1,
     roadmapWeeks: 12,
-    nextAction: "Rate limiting: choose the right algorithm",
-    nextActionMeta: "System design · 18 min",
-    focus: "Build repeatable technical patterns before adding timed mocks.",
+    completedTaskIds: [],
+    nextAction: "Create the target-role map",
+    nextActionMeta: "Plan · 20 min",
+    nextActionHref: "/learn/roadmap/task/12w-1-map",
+    focus: "Start by defining the role, level, timeline, and evidence bar.",
     access: { library: true, practice: false, feedback: false, coaching: false },
   },
   {
@@ -59,13 +68,15 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     target: "US infrastructure teams",
     plan: "The Second Seat · Practice",
     planShort: "The Second Seat",
-    progress: 54,
-    streak: 9,
-    week: 3,
+    progress: 0,
+    streak: 0,
+    week: 1,
     roadmapWeeks: 4,
-    nextAction: "Mock 08: design a notification service",
-    nextActionMeta: "Adaptive mock · 35 min",
-    focus: "State the consistency model before discussing scale and storage.",
+    completedTaskIds: [],
+    nextAction: "Choose your first practice round",
+    nextActionMeta: "Practice · 30 min",
+    nextActionHref: "/learn/practice",
+    focus: "Start with one interview-shaped round and use the transcript to choose the next correction.",
     access: { library: true, practice: true, feedback: true, coaching: false },
   },
   {
@@ -96,27 +107,25 @@ export type DemoReviewMaterial = {
   detail: string;
   format: string;
   href: string;
-  preview: string;
+  preview?: string;
   profiles: readonly DemoTier[];
 };
 
 export const DEMO_REVIEW_MATERIALS: readonly DemoReviewMaterial[] = [
   {
-    title: "4-Week Accelerated Interview Roadmap",
+    title: "12-Week Foundation Roadmap",
     category: "Plan",
-    detail: "7-page weekly plan and checkpoint system",
-    format: "PDF · 7 pages",
-    href: "/demo-materials/roadmap_4week.pdf",
-    preview: "/demo-materials/previews/roadmap_4week.png",
+    detail: "Full Foundation sequence with learning steps and account-backed progress",
+    format: "PDF · 15 pages",
+    href: "/pdf-guides/roadmap_12week.pdf",
     profiles: ["foundation"],
   },
   {
     title: "Sliding Window Pattern Reference",
     category: "DSA",
-    detail: "Recognition cues, invariants and practice ladder",
+    detail: "Foundation QA reference for recognition cues, invariants, and practice",
     format: "PDF · 9 pages",
-    href: "/demo-materials/dsa_sliding-window.pdf",
-    preview: "/demo-materials/previews/dsa_sliding-window.png",
+    href: "/pdf-guides/dsa_sliding-window.pdf",
     profiles: ["foundation"],
   },
   {
@@ -126,11 +135,11 @@ export const DEMO_REVIEW_MATERIALS: readonly DemoReviewMaterial[] = [
     format: "PDF · 3 pages",
     href: "/demo-materials/sysdesign_rate-limiting.pdf",
     preview: "/demo-materials/previews/sysdesign_rate-limiting.png",
-    profiles: ["foundation", "practice"],
+    profiles: ["practice"],
   },
   {
     title: "Design a Notification System",
-    category: "Second Seat brief",
+    category: "Second Seat guide",
     detail: "Requirements-to-architecture walkthrough used by a mock",
     format: "PDF · 3 pages",
     href: "/demo-materials/sysdesign_notification-system-walkthrough.pdf",
@@ -167,7 +176,7 @@ export type LearningMaterial = {
   duration: string;
   tier: DemoTier;
   tags: readonly string[];
-  availability: "sample" | "preview";
+  availability: "included" | "sample" | "preview";
   reviewed: string;
   level: string;
   roadmap: string;
@@ -189,29 +198,29 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "18 min",
     tier: "foundation",
     tags: ["Caching", "Redis", "Trade-offs"],
-    availability: "sample",
-    reviewed: "Sample · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Intermediate",
     roadmap: "Week 2",
     progress: 42,
-    demoAsset: { href: "/demo-materials/sysdesign_rate-limiting.pdf", label: "Open 3-page review edition" },
+    demoAsset: { href: "/pdf-guides/sysdesign_rate-limiter-walkthrough.pdf", label: "Open the Vault review edition" },
   },
   {
     slug: "sliding-window",
     number: "02",
     category: "DSA patterns",
-    title: "Recognise the sliding-window signal",
+    title: "Recognise the sliding-window pattern",
     description: "Move from problem wording to invariant, boundary choice, and complexity explanation.",
     format: "Pattern lab",
     duration: "22 min",
     tier: "foundation",
     tags: ["Arrays", "Strings", "Invariants"],
-    availability: "sample",
-    reviewed: "Pilot artifact · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Foundation",
     roadmap: "Week 1",
     progress: 68,
-    demoAsset: { href: "/demo-materials/dsa_sliding-window.pdf", label: "Open 9-page review edition" },
+    demoAsset: { href: "/pdf-guides/dsa_sliding-window.pdf", label: "Open the Vault review edition" },
   },
   {
     slug: "scope-stories",
@@ -223,11 +232,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "16 min",
     tier: "foundation",
     tags: ["STAR", "Ownership", "Impact"],
-    availability: "preview",
-    reviewed: "Sample · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · lesson content",
     level: "All levels",
     roadmap: "Week 2",
     progress: 0,
+    demoAsset: { href: "/learn/library/material/template-title-translation-guide-docx-9xsy6dtn", label: "Open the India-to-US scope workbook" },
   },
   {
     slug: "remote-compensation",
@@ -240,10 +250,11 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     tier: "foundation",
     tags: ["Contracts", "USD", "Negotiation"],
     availability: "preview",
-    reviewed: "Sample · Jul 2026",
+    reviewed: "Qualified review required",
     level: "All levels",
     roadmap: "Week 4",
     progress: 0,
+    demoAsset: { href: "/learn/library?pdf=remote_compensation-and-offer-decision-workbook.pdf", label: "Open the compensation decision workbook" },
   },
   {
     slug: "notification-mock",
@@ -260,7 +271,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Intermediate",
     roadmap: "Practice loop",
     progress: 0,
-    demoAsset: { href: "/demo-materials/sysdesign_notification-system-walkthrough.pdf", label: "Open 3-page mock brief" },
+    demoAsset: { href: "/demo-materials/sysdesign_notification-system-walkthrough.pdf", label: "Open 3-page mock guide" },
   },
   {
     slug: "staff-scope-calibration",
@@ -289,11 +300,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "9 pages",
     tier: "foundation",
     tags: ["Caching", "Consistency", "Failure modes"],
-    availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Intermediate",
     roadmap: "Week 2",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/sysdesign_caching.pdf", label: "Open the Vault caching guide" },
   },
   {
     slug: "graph-traversal",
@@ -305,11 +317,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "24 min",
     tier: "foundation",
     tags: ["Graphs", "BFS", "State"],
-    availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Foundation",
     roadmap: "Week 1",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/dsa_bfs.pdf", label: "Open the Vault traversal guide" },
   },
   {
     slug: "binary-search-boundaries",
@@ -321,11 +334,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "12 min",
     tier: "foundation",
     tags: ["Binary search", "Invariants", "Communication"],
-    availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built asset",
     level: "Foundation",
     roadmap: "Week 1",
     progress: 100,
+    demoAsset: { href: "/pdf-guides/dsa_binary-search.pdf", label: "Open the Vault boundary guide" },
   },
   {
     slug: "outage-story",
@@ -337,43 +351,46 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     duration: "20 min",
     tier: "foundation",
     tags: ["Incident", "Ownership", "Impact"],
-    availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · lesson content",
     level: "All levels",
     roadmap: "Week 3",
     progress: 20,
+    demoAsset: { href: "/learn/library/material/mock-behavioral-ownership-failure-01-md-evtsevfm", label: "Open the worked ownership interview" },
   },
   {
     slug: "us-ats-resume",
     number: "11",
-    category: "Career signal",
+    category: "Career profile",
     title: "US ATS engineering resume",
     description: "An editable structure for impact-first bullets, technical context, and internationally legible scope.",
     format: "Editable template",
     duration: "DOCX preview",
     tier: "foundation",
     tags: ["Resume", "ATS", "US roles"],
-    availability: "sample",
-    reviewed: "Pilot artifact · Jul 2026",
+    availability: "included",
+    reviewed: "Vault QA · built template",
     level: "All levels",
     roadmap: "Setup",
     progress: 0,
+    demoAsset: { href: "/learn/library/material/template-us-ats-resume-docx-ymrqj987", label: "Open the editable US ATS resume" },
   },
   {
     slug: "remote-offer-matrix",
     number: "12",
     category: "Remote career",
     title: "Compare remote offers as systems",
-    description: "Model cash, benefits, time zones, tax uncertainty, currency risk, and career signal in one view.",
+    description: "Model cash, benefits, time zones, tax uncertainty, currency risk, and career value in one view.",
     format: "Decision template",
     duration: "18 min",
     tier: "foundation",
     tags: ["Offers", "Remote", "Negotiation"],
     availability: "preview",
-    reviewed: "Sample record · Jul 2026",
+    reviewed: "Qualified review required",
     level: "All levels",
     roadmap: "Week 4",
     progress: 0,
+    demoAsset: { href: "/learn/library?pdf=remote_compensation-and-offer-decision-workbook.pdf", label: "Open the offer comparison workbook" },
   },
   {
     slug: "metrics-pipeline-mock",
@@ -390,6 +407,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Intermediate",
     roadmap: "Practice loop",
     progress: 100,
+    demoAsset: { href: "/pdf-guides/second-seat_metrics-pipeline-scored-replay.pdf", label: "Open the metrics-pipeline scored replay" },
   },
   {
     slug: "queue-backlog-mock",
@@ -406,12 +424,13 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Intermediate",
     roadmap: "Practice loop",
     progress: 100,
+    demoAsset: { href: "/pdf-guides/second-seat_queue-backlog-debugging-replay.pdf", label: "Open the queue-backlog debugging replay" },
   },
   {
     slug: "resume-signal-lab",
     number: "15",
-    category: "Career signal",
-    title: "Resume signal lab",
+    category: "Career profile",
+    title: "Resume profile lab",
     description: "Compare bullet revisions against a deterministic role-alignment rubric and save stronger evidence.",
     format: "Guided lab",
     duration: "25 min",
@@ -422,6 +441,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Practice loop",
     progress: 35,
+    demoAsset: { href: "/pdf-guides/second-seat_resume-profile-role-alignment-lab.pdf", label: "Open the resume profile lab" },
   },
   {
     slug: "negotiation-rehearsal",
@@ -438,6 +458,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Practice loop",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/second-seat_compensation-conversation-rehearsal.pdf", label: "Open the compensation conversation rehearsal" },
   },
   {
     slug: "architecture-narrative",
@@ -454,14 +475,15 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Senior → Staff",
     roadmap: "Coach assigned",
     progress: 60,
+    demoAsset: { href: "/pdf-guides/coaching_architecture-narrative-worksheet.pdf", label: "Open the architecture narrative worksheet" },
   },
   {
     slug: "target-company-brief",
     number: "18",
     category: "Coach room",
-    title: "Target-company calibration brief",
-    description: "An example private brief connecting the role loop, likely evidence bar, rehearsals, and open risks.",
-    format: "Private brief",
+    title: "Target-company preparation guide",
+    description: "An example private guide connecting the role loop, likely evidence bar, rehearsals, and open risks.",
+    format: "Private guide",
     duration: "Coach prepared",
     tier: "premium",
     tags: ["Company", "Calibration", "Plan"],
@@ -470,6 +492,7 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "Senior → Staff",
     roadmap: "Interview week",
     progress: 80,
+    demoAsset: { href: "/pdf-guides/coaching_target-company-preparation-guide.pdf", label: "Open the target-company preparation guide" },
   },
   {
     slug: "interview-day-run-sheet",
@@ -486,11 +509,12 @@ export const LEARNING_MATERIALS: readonly LearningMaterial[] = [
     level: "All levels",
     roadmap: "Interview day",
     progress: 0,
+    demoAsset: { href: "/pdf-guides/coaching_interview-day-run-sheet.pdf", label: "Open the interview-day run sheet" },
   },
 ] as const;
 
 export const ROADMAP_WEEKS = [
-  { week: 1, title: "Recognise the patterns", detail: "Core DSA signals, answer structure, and baseline system trade-offs.", tasks: 8 },
+  { week: 1, title: "Recognise the patterns", detail: "Core DSA patterns, answer structure, and starting system trade-offs.", tasks: 8 },
   { week: 2, title: "Build reliable explanations", detail: "Rate limits, caching, queues, behavioural scope, and verbal walkthroughs.", tasks: 10 },
   { week: 3, title: "Introduce interview pressure", detail: "Timed problem solving, design prompts, and story retrieval under constraint.", tasks: 9 },
   { week: 4, title: "Correct and consolidate", detail: "Review the recurring gaps, rehearse target-company patterns, and plan the next loop.", tasks: 7 },
@@ -517,6 +541,14 @@ export function findDemoByCredentials(email: string, password: string) {
 
 export function findDemoById(id: DemoTier | undefined) {
   return DEMO_PROFILES.find((profile) => profile.id === id) ?? null;
+}
+
+export type DemoProfileView = Omit<DemoProfile, "password">;
+
+export function toDemoProfileView(profile: DemoProfile): DemoProfileView {
+  const view = { ...profile };
+  Reflect.deleteProperty(view, "password");
+  return view;
 }
 
 export function canAccessMaterial(profile: DemoProfile, material: LearningMaterial) {

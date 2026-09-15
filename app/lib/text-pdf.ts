@@ -1,0 +1,229 @@
+const PDF_WIDTH = 612;
+const PDF_HEIGHT = 792;
+const PDF_MARGIN = 46;
+const PDF_MAX_CHARS = 88;
+const PDF_REPLACEMENTS: Record<string, string> = {
+  "\u2018": "'",
+  "\u2019": "'",
+  "\u201c": '"',
+  "\u201d": '"',
+  "\u2013": "-",
+  "\u2014": "-",
+  "\u2022": "-",
+  "\u2192": "->",
+  "\u00d7": "x",
+  "\u00a0": " ",
+};
+
+function pdfSafeText(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\x20-\x7e\n\t]/g, (character) => PDF_REPLACEMENTS[character] ?? "?");
+}
+
+function wrapPdfLine(line: string) {
+  if (line.length <= PDF_MAX_CHARS) return [line];
+
+  const wrapped: string[] = [];
+  let remainder = line;
+  while (remainder.length > PDF_MAX_CHARS) {
+    const boundary = remainder.lastIndexOf(" ", PDF_MAX_CHARS);
+    const splitAt = boundary > PDF_MAX_CHARS * 0.55 ? boundary : PDF_MAX_CHARS;
+    wrapped.push(remainder.slice(0, splitAt));
+    remainder = remainder.slice(splitAt).trimStart();
+  }
+  wrapped.push(remainder);
+  return wrapped;
+}
+
+type PdfLine = {
+  kind: "body" | "bullet" | "heading" | "blank";
+  text: string;
+};
+
+function pdfContentLines(source: string): PdfLine[] {
+  return pdfSafeText(source.replace(/\r\n?/g, "\n"))
+    .split("\n")
+    .flatMap((line): PdfLine[] => {
+      const trimmed = line.trimEnd();
+      if (!trimmed.trim()) return [{ kind: "blank", text: "" }];
+
+      const heading = trimmed.match(/^#{1,6}\s+(.+)$/);
+      if (heading) {
+        return wrapPdfLine(heading[1].trim()).map((text) => ({ kind: "heading", text }));
+      }
+
+      const bullet = trimmed.match(/^[-*]\s+(.+)$/);
+      if (bullet) {
+        return wrapPdfLine(`- ${bullet[1].trim()}`).map((text) => ({ kind: "bullet", text }));
+      }
+
+      return wrapPdfLine(trimmed).map((text) => ({ kind: "body", text }));
+    });
+}
+
+function escapePdfString(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
+
+function pdfText(font: "F1" | "F2", size: number, x: number, y: number, color: string, value: string) {
+  return `BT /${font} ${size} Tf ${color} rg 1 0 0 1 ${x} ${y} Tm (${escapePdfString(value)}) Tj ET`;
+}
+
+function pdfLineMetrics(line: PdfLine) {
+  if (line.kind === "heading") return { size: 14, leading: 23 };
+  if (line.kind === "blank") return { size: 1, leading: 10 };
+  return { size: 9.5, leading: 15 };
+}
+
+function bytesFor(value: string) {
+  return new TextEncoder().encode(value);
+}
+
+function concatBytes(chunks: readonly Uint8Array[]) {
+  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return result;
+}
+
+export type TextPdfPresentation = {
+  headerLabel?: string;
+  subtitle?: string;
+  sourceLabel?: string | null;
+  footerLabel?: string;
+};
+
+export function createTextPdf(
+  title: string,
+  filename: string,
+  source: string,
+  presentation: TextPdfPresentation = {},
+) {
+  const headerLabel = presentation.headerLabel ?? "SUPPORTING MATERIAL";
+  const headerX = presentation.headerLabel === undefined ? 430 : 400;
+  const subtitle = presentation.subtitle ?? "PDF preview · readable inside InterviewRunway";
+  const sourceLabel = presentation.sourceLabel === undefined ? `SOURCE · ${filename}` : presentation.sourceLabel;
+  const footerLabel = presentation.footerLabel ?? "INTERVIEWRUNWAY";
+  const lines = pdfContentLines(source);
+  const pages: PdfLine[][] = [];
+  let page: PdfLine[] = [];
+  let usedHeight = 0;
+  const pushPage = () => {
+    while (page.at(-1)?.kind === "blank") page.pop();
+    if (page.length) pages.push(page);
+    page = [];
+    usedHeight = 0;
+  };
+
+  for (const [index, line] of lines.entries()) {
+    if (line.kind === "blank" && !page.length) continue;
+    const { leading } = pdfLineMetrics(line);
+    const pageHeight = pages.length === 0 ? 518 : 626;
+    let requiredHeight = leading;
+    if (line.kind === "heading") {
+      // Keep a wrapped heading and its first body line on the same page.
+      for (const following of lines.slice(index + 1)) {
+        requiredHeight += pdfLineMetrics(following).leading;
+        if (following.kind !== "blank" && following.kind !== "heading") break;
+      }
+    }
+    if (page.length && usedHeight + requiredHeight > pageHeight) pushPage();
+    if (line.kind === "blank" && !page.length) continue;
+    page.push(line);
+    usedHeight += leading;
+  }
+  pushPage();
+  // Keep the existing valid one-page result for an explicitly empty input.
+  if (!pages.length) pages.push([]);
+
+  const objects: string[] = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>",
+  ];
+
+  const pageObjectNumbers: number[] = [];
+  for (const [pageIndex, pageLines] of pages.entries()) {
+    const pageObjectNumber = objects.length + 1;
+    const contentObjectNumber = objects.length + 2;
+    pageObjectNumbers.push(pageObjectNumber);
+    const commands = [
+      "q",
+      "0.027 0.078 0.11 rg",
+      `0 0 ${PDF_WIDTH} ${PDF_HEIGHT} re`,
+      "f",
+      "Q",
+      "0.96 0.98 0.99 rg",
+      "0.42 0.65 0.71 rg",
+      pdfText("F2", 8.5, PDF_MARGIN, 754, "0.96 0.98 0.99", "INTERVIEWRUNWAY"),
+      pdfText("F1", 7.5, headerX, 754, "0.42 0.65 0.71", headerLabel),
+      "1 0.42 0.17 rg",
+      `46 736 ${PDF_WIDTH - PDF_MARGIN * 2} 2 re`,
+      "f",
+    ];
+
+    let y = 690;
+    if (pageIndex === 0) {
+      commands.push(
+        pdfText("F2", 24, PDF_MARGIN, 690, "0.96 0.98 0.99", title),
+        pdfText("F1", 9, PDF_MARGIN, 654, "0.62 0.72 0.76", subtitle),
+      );
+      if (sourceLabel) {
+        commands.push(pdfText("F1", 7.5, PDF_MARGIN, 633, "0.42 0.65 0.71", sourceLabel));
+      }
+      y = sourceLabel ? 594 : 615;
+    } else {
+      commands.push(pdfText("F2", 16, PDF_MARGIN, 704, "0.96 0.98 0.99", title));
+      y = 670;
+    }
+
+    for (const line of pageLines) {
+      const { size, leading } = pdfLineMetrics(line);
+      const font = line.kind === "heading" ? "F2" : "F1";
+      const color = line.kind === "heading" ? "1 0.45 0.23" : line.kind === "bullet" ? "0.78 0.87 0.89" : "0.84 0.9 0.91";
+      if (line.text) commands.push(pdfText(font, size, PDF_MARGIN, y, color, line.text));
+      y -= leading;
+    }
+
+    commands.push(
+      "0.18 0.32 0.38 rg",
+      `46 40 ${PDF_WIDTH - PDF_MARGIN * 2} 1 re`,
+      "f",
+      pdfText("F1", 7, PDF_MARGIN, 25, "0.42 0.65 0.71", `${footerLabel} · PAGE ${pageIndex + 1} / ${pages.length}`),
+    );
+
+    const stream = commands.join("\n");
+    objects.push(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PDF_WIDTH} ${PDF_HEIGHT}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentObjectNumber} 0 R >>`,
+      `<< /Length ${bytesFor(stream).length} >>\nstream\n${stream}\nendstream`,
+    );
+  }
+
+  objects[1] = `<< /Type /Pages /Kids [${pageObjectNumbers.map((number) => `${number} 0 R`).join(" ")}] /Count ${pages.length} >>`;
+
+  const chunks: Uint8Array[] = [bytesFor("%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n")];
+  const offsets = [0];
+  let offset = chunks[0].length;
+  objects.forEach((object, index) => {
+    offsets[index + 1] = offset;
+    const chunk = bytesFor(`${index + 1} 0 obj\n${object}\nendobj\n`);
+    chunks.push(chunk);
+    offset += chunk.length;
+  });
+  const xrefOffset = offset;
+  const xref = [
+    `xref\n0 ${objects.length + 1}`,
+    "0000000000 65535 f ",
+    ...offsets.slice(1).map((item) => `${String(item).padStart(10, "0")} 00000 n `),
+    `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`,
+  ].join("\n");
+  chunks.push(bytesFor(xref));
+  return concatBytes(chunks);
+}

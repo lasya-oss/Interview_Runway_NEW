@@ -1,0 +1,84 @@
+{
+  "asset_id": "video.sysdesign.ride-sharing-dispatch.01",
+  "filename": "sysdesign_ride-sharing-dispatch_01.mp4",
+  "title": "Design a Ride-Sharing Dispatch",
+  "category": "sysdesign",
+  "topic": "ride-sharing-dispatch",
+  "target_duration_minutes": 14,
+  "transcript_word_count": 804,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Match supply and demand using fresh geospatial state under rapid change.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Location indexing",
+        "candidate search",
+        "scoring",
+        "reservation",
+        "consistency",
+        "and regional partitioning."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Double assignment",
+        "stale locations",
+        "surge spikes",
+        "and city-level outages."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

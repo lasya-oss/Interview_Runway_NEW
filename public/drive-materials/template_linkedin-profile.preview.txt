@@ -1,0 +1,50 @@
+## Build a profile that supports your claims
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Make the target role and strongest evidence easy to recognize while keeping the profile consistent with the resume and interview story.
+
+## Use the headline for positioning
+
+Name a standard role family, a real technical strength, and an evidence or operating signal. Avoid packing the headline with every technology or an unsupported seniority label. The About section should explain what you have done and where you want to contribute, not repeat a list of adjectives.
+
+## Worked profile - fictional
+
+Headline: Backend Engineer | Reliable APIs and Notification Systems | Service Ownership and Async Collaboration
+
+About: 'I am a backend engineer with four years of experience building and operating account services. My recent work includes idempotent notification delivery, recovery tests, and release checks that make failures easier to diagnose. I enjoy turning an ambiguous reliability problem into an explicit contract, a testable change, and an operating note that another engineer can use. I am interested in backend roles with end-to-end service ownership and clear distributed-team practices.'
+
+Experience example: 'Owned the retry and reconciliation path for account notifications; documented ambiguous timeout behavior and tested duplicate-request handling before rollout.' A sanitized technical note in the Featured section could support this claim, but only if sharing is permitted.
+
+## Consistency check
+
+Compare employment dates, titles, scope, and metrics with your resume. List demonstrated skills, not a wish list. Keep location and work preferences accurate. Remove client secrets and confidential screenshots. Ask a reviewer to identify your target role and strongest capability in ten seconds; if they cannot, simplify the opening.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
+INTERVIEWRUNWAY VAULT
+LinkedIn Profile Template
+Fill-in profile system for remote-hiring recruiter discovery and credible positioning.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Headline formula
+[Target role] | [Strongest technical/domain signal] | [Evidence or scale] | [Remote collaboration signal]
+Draft: [________________________________________________________________]
+About section
+Line 1 - role and years: [________________________________]
+Lines 2-3 - systems and evidence: [________________________________]
+Line 4 - strongest ownership example: [________________________________]
+Line 5 - target role and location/overlap: [________________________________]
+Experience entry
+One-sentence team/product context
+Three to five evidence-first bullets
+Truthful keywords from target roles
+No confidential details or unsupported metrics
+Searchability checklist
+Standard role family in headline
+Location and remote preference set accurately
+Top skills match demonstrated experience
+Custom URL and contact method
+Featured section supports claims
+

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
+import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { findPracticeReplay, formatMegabytes, getPracticeReplayNumber } from "@/app/lib/practice-replays";
 import { findRoadmapTask } from "@/app/lib/roadmap-data";
@@ -23,34 +23,23 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
 
   if (!profile.access.practice) {
     return (
-      <MemberShell profile={profile} active="practice">
-        <div className="member-page">
-          <LockedMemberPanel
-            tier={replay.accessTier}
-            title="This replay belongs to the practice layer."
-            body="The replay is kept out of the Vault catalogue. Unlock The Second Seat to review mock interview recordings and practice evidence."
-          />
-        </div>
-      </MemberShell>
+      <div className="member-page">
+        <LockedMemberPanel
+          tier={replay.accessTier}
+          title="This replay belongs to the practice layer."
+          body="The replay is kept out of the Vault catalogue. Unlock The Second Seat to review mock interview recordings and practice evidence."
+        />
+      </div>
     );
   }
 
   const linkedRoadmapTask = replay.roadmapTaskId ? findRoadmapTask(replay.roadmapTaskId) : null;
-  const linkedRoadmapHref = linkedRoadmapTask
-    ? linkedRoadmapTask.learning.kind === "material"
-      ? `/learn/material/${linkedRoadmapTask.learning.slug}`
-      : `/learn/roadmap/task/${linkedRoadmapTask.id}`
-    : null;
-  const linkedRoadmapLabel = linkedRoadmapTask?.learning.kind === "material"
-    ? "Open linked learning material"
-    : "Open linked roadmap task";
   const replayNumber = getPracticeReplayNumber(replay.slug);
 
   return (
-    <MemberShell profile={profile} active="practice">
       <article className="member-page practice-replay-page">
         <nav className="material-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/learn/practice">Practice</Link><span>/</span><span>{replay.category}</span><span>/</span><strong>Replay {replayNumber}</strong>
+          <Link className="material-breadcrumb__link" href="/learn/practice">Practice</Link><span>/</span><span>{replay.category}</span><span>/</span><strong>Replay {replayNumber}</strong>
         </nav>
 
         <header className="practice-replay-header">
@@ -98,15 +87,13 @@ export default async function PracticeReplayPage({ params }: { params: Promise<{
         <footer className="practice-replay-next-step">
           <div>
             <p className="member-kicker">Connected practice</p>
-            <h2>Use the replay to sharpen the {replay.category.toLowerCase()} signal.</h2>
-            <p>{linkedRoadmapTask ? `This replay supplements “${linkedRoadmapTask.title}”; it does not replace the task’s learning brief or mark it complete.` : "This replay is a practice supplement and does not mark a roadmap task complete."}</p>
+            <h2>Use the replay to improve your {replay.category.toLowerCase()} skills.</h2>
+            <p>{linkedRoadmapTask ? `This replay supplements “${linkedRoadmapTask.title}”; it does not replace the task’s learning material or mark it complete.` : "This replay is a practice supplement and does not mark a roadmap task complete."}</p>
           </div>
           <div className="practice-replay-next-actions">
-            {linkedRoadmapHref ? <Link className="member-primary-button" href={linkedRoadmapHref}>{linkedRoadmapLabel} <span aria-hidden="true">↗</span></Link> : null}
-            <Link href="/learn/practice">Back to Practice</Link>
+            <Link className="member-action-button" href="/learn/practice">Back to Practice <span aria-hidden="true">↗</span></Link>
           </div>
         </footer>
       </article>
-    </MemberShell>
   );
 }

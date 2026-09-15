@@ -1,0 +1,85 @@
+{
+  "asset_id": "video.sysdesign.observability.01",
+  "filename": "sysdesign_observability_01.mp4",
+  "title": "Observability: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "observability",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 805,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Turn system behavior into actionable signals that support detection, diagnosis, and learning.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Metrics",
+        "logs",
+        "traces",
+        "SLOs",
+        "sampling",
+        "cardinality",
+        "and ownership."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Alert fatigue",
+        "high-cardinality cost",
+        "missing correlation",
+        "and dashboard-only monitoring."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

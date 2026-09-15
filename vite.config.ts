@@ -35,6 +35,13 @@ const localBindingConfig = {
     AUTH_ALLOWED_DOMAIN: process.env.AUTH_ALLOWED_DOMAIN ?? "vividlabsai.com",
     AUTH_SESSION_SECRET: process.env.AUTH_SESSION_SECRET ?? "",
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? "",
+    INTERNAL_FULL_ACCESS_DOMAIN: process.env.INTERNAL_FULL_ACCESS_DOMAIN ?? "",
+    TEST_FOUNDATION_EMAILS: process.env.TEST_FOUNDATION_EMAILS ?? "",
+    TEST_SECOND_SEAT_EMAILS: process.env.TEST_SECOND_SEAT_EMAILS ?? "",
+    CEREBRAS_API_KEY: process.env.CEREBRAS_API_KEY ?? "",
+    CEREBRAS_MODEL: process.env.CEREBRAS_MODEL ?? "gpt-oss-120b",
+    GROQ_API_KEY: process.env.GROQ_API_KEY ?? "",
+    GROQ_BRAIN_MODEL: process.env.GROQ_BRAIN_MODEL ?? "openai/gpt-oss-120b",
   },
 };
 

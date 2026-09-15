@@ -1,0 +1,81 @@
+{
+  "asset_id": "video.dsa.two-pointers.02",
+  "filename": "dsa_two-pointers_02.mp4",
+  "title": "Two Pointers: Worked interview problem",
+  "category": "dsa",
+  "topic": "two-pointers",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 835,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Maintain two positions whose movement discards a provably irrelevant region after every comparison.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "sorted input",
+        "pair or triplet target",
+        "in-place compaction",
+        "opposite-end comparison"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "Everything outside the active pointer range has already been classified or cannot improve the answer.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "name what each pointer represents",
+        "prove which pointer can move",
+        "handle equality explicitly",
+        "decide whether order must be preserved"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "In a sorted pair-sum search, a sum below target forces the left pointer right; moving right cannot increase the sum.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "O(n) after sorting, or O(n log n) including a required sort; often O(1) auxiliary space.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "moving both pointers without proof",
+        "ignoring duplicate handling",
+        "sorting when original indices matter",
+        "off-by-one loop bounds"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

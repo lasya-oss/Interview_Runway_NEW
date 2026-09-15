@@ -1,0 +1,36 @@
+## Lead with the team's engineering problem
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Show a hiring manager a concrete connection between the team's needs and your work without prescribing an architecture from outside the company.
+
+## Research only enough to be specific
+
+Use the role description or a public engineering discussion to identify a real problem. Treat your interpretation as an inference, not inside knowledge. Then offer one relevant experience. The goal is to make a conversation useful, not to audit the team's architecture in a cold message.
+
+## Worked message - fictional
+
+Hi Arun, I saw the backend opening on OrbitDesk's notification team. The role description's emphasis on recovery after provider failures stood out because I recently owned a similar reliability improvement. I introduced stable request keys, bounded retries, and a reconciliation report after duplicate sends were observed, then tested the recovery path under injected timeouts. I would be glad to discuss how that experience maps to your team's priorities. Would a short conversation be useful? My resume and a sanitized design note are included. Best, Nila.
+
+## Avoid the common failure
+
+Do not tell the manager to adopt a technology before understanding the requirements. Do not imply that public symptoms prove an internal defect. Keep proprietary details out of examples and label a demonstration project accurately. Use a clear, low-pressure request and follow the normal application process.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
+INTERVIEWRUNWAY VAULT
+Hiring Manager Outreach Message
+Hiring-manager outreach centered on a product or engineering problem.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Message template
+Hi [Name] - I saw the opening for [role] on [team]. The team's work on [specific product/problem] stood out because I have [relevant evidence].
+In my recent work I [decision/action] for [scope], producing [result]. I would be glad to share how that experience maps to [team challenge].
+Would a short conversation be useful? [Resume/portfolio link]
+Checks
+Demonstrate real team research
+Lead with relevance, not need
+Avoid asking for special treatment
+Make reply easy
+

@@ -1,0 +1,81 @@
+{
+  "asset_id": "video.dsa.union-find.02",
+  "filename": "dsa_union-find_02.mp4",
+  "title": "Union-Find: Worked interview problem",
+  "category": "dsa",
+  "topic": "union-find",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 830,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Maintain disjoint components under repeated merges with parent links, path compression, and union by rank or size.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "dynamic connectivity",
+        "redundant edge",
+        "component count after unions",
+        "Kruskal minimum spanning tree"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "Every element reaches exactly one representative; component metadata belongs only to representatives.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "initialize each element as its own root",
+        "compress during find",
+        "merge roots not raw nodes",
+        "update count only on a real merge"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "An edge whose endpoints already share a representative is redundant and closes a cycle.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "Nearly O(1) amortized per operation: O(alpha(n)); O(n) storage.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "merging non-root nodes",
+        "incorrect rank updates",
+        "counting duplicate unions",
+        "using it when deletions or path details are required"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

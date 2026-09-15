@@ -13,7 +13,7 @@ import {
 const TIER_PROMISE: Record<DemoTier, { headline: string; summary: string; access: readonly string[] }> = {
   foundation: {
     headline: "Build the preparation base.",
-    summary: "Inspect the structured library, 12-week roadmap, weekly work surface, and progress model before timed practice begins.",
+    summary: "Inspect the structured library, 12-week roadmap, clean starting state, and progress model before timed practice begins.",
     access: ["Vault library + roadmap", "Real review-edition PDFs", "Foundation progress state"],
   },
   practice: {
@@ -68,20 +68,27 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
         return (
           <article className={`demo-entry-card demo-entry-card-${profile.id}`} key={profile.id}>
             <div className="demo-entry-cover">
-              <Image
-                src={cover.preview}
-                alt={`${cover.title} review-edition cover`}
-                width={993}
-                height={1403}
-                sizes="(max-width: 900px) 32vw, 180px"
-              />
+              {cover.preview ? (
+                <Image
+                  src={cover.preview}
+                  alt={`${cover.title} review-edition cover`}
+                  width={993}
+                  height={1403}
+                  sizes="(max-width: 900px) 32vw, 180px"
+                />
+              ) : (
+                <div className="demo-entry-cover-fallback" aria-label={`${cover.title} Vault QA asset`}>
+                  <strong>{cover.category}</strong>
+                  <span>APPROVED<br />VAULT ASSET</span>
+                </div>
+              )}
               <span>REVIEW<br />EDITION</span>
             </div>
 
             <div className="demo-entry-copy">
               <div className="demo-entry-label">
                 <span>0{index + 1} / {profile.planShort}</span>
-                <small>{profile.progress}% populated progress</small>
+                <small>{profile.progress === 0 ? "0% starting progress" : `${profile.progress}% populated progress`}</small>
               </div>
               <h2>{promise.headline}</h2>
               <p>{promise.summary}</p>
@@ -116,7 +123,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
       })}
 
       {message ? <p className="demo-login-error" role="alert">{message}</p> : null}
-      <p className="demo-login-note">Sample workspace data · Review-edition materials remain marked pending final human editorial review.</p>
+      <p className="demo-login-note">Sample workspace data · Foundation cards use QA references; higher-tier demo materials remain marked pending final human editorial review.</p>
     </div>
   );
 }

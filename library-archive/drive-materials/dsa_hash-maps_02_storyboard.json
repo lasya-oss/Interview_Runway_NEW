@@ -1,0 +1,81 @@
+{
+  "asset_id": "video.dsa.hash-maps.02",
+  "filename": "dsa_hash-maps_02.mp4",
+  "title": "Hash Maps and Counting: Worked interview problem",
+  "category": "dsa",
+  "topic": "hash-maps",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 842,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Store a compact summary of values already seen so a repeated lookup replaces a nested scan.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "pair or complement lookup",
+        "frequency or grouping",
+        "first or last occurrence",
+        "membership with order-independent access"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "The map describes exactly the processed prefix, or exactly the active window when entries are removed.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "choose the minimum state needed",
+        "query before updating when self-matches are invalid",
+        "define duplicate behavior",
+        "state expected O(1) lookup assumptions"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "For Two Sum, store value to index; for each value x, check target - x before inserting x.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "Usually O(n) time and O(n) space; adversarial hashing caveats are rarely the interview focus.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "updating before querying",
+        "losing duplicate indices",
+        "using a set when counts matter",
+        "forgetting window removals"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

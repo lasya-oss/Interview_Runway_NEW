@@ -1,0 +1,56 @@
+{
+  "asset_id": "pdf.company.uber",
+  "company": "Uber",
+  "research_status": "requires_named_human_verification_before_publish",
+  "method": "Original practice prompts derived from public company product, engineering, careers, and role context. No verbatim proprietary question set was copied.",
+  "profile": {
+    "domain": "real-time mobility and logistics",
+    "emphases": [
+      "geospatial systems",
+      "marketplace reliability",
+      "operational scale"
+    ]
+  },
+  "source_requirements": {
+    "minimum_independent_sources": 3,
+    "recent_source_required": true,
+    "verbatim_copy_prohibited": true
+  },
+  "sources": [
+    {
+      "url": "https://uber.com/",
+      "publisher": "Uber",
+      "source_type": "official_company",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    },
+    {
+      "url": "https://www.glassdoor.com/Interview/Uber-Interview-Questions-E575263.htm",
+      "publisher": "glassdoor",
+      "source_type": "public_interview_discussion_or_guide",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    },
+    {
+      "url": "https://www.interviewquery.com/guides/uber-software-engineer",
+      "publisher": "interviewquery.com",
+      "source_type": "public_interview_discussion_or_guide",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    }
+  ],
+  "frequency_claims": [],
+  "exclusion_if_gate_fails": true,
+  "automated_collection": {
+    "query": "\"Uber\" software engineer interview official careers engineering Glassdoor 2026",
+    "collected_at": "2026-07-18",
+    "candidate_count": 3,
+    "human_verification_complete": false
+  }
+}

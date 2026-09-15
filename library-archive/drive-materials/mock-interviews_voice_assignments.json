@@ -1,0 +1,297 @@
+{
+  "schema_version": "interviewrunway.mock-voice-assignments.v1",
+  "policy": "10 candidate voices reused three times each; four interviewer voices reused 7-8 times each",
+  "interview_count": 30,
+  "candidate_voice_count": 10,
+  "interviewer_voice_count": 4,
+  "candidate_usage": {
+    "9a4e0509-6a22-4a95-b202-3321aebb4d3f": 3,
+    "75f05e9b-c84a-4eab-9f0d-c5c88fe88799": 3,
+    "e7cc4201-8ebc-4376-a4cf-78ca85142110": 3,
+    "e5b9d67b-885e-4306-b7be-3366c6e26d41": 3,
+    "8b55b7c5-4c05-4968-a80e-c91e152d58b9": 3,
+    "19e0687c-bbd8-4398-9844-512ba01981ee": 3,
+    "efb6d51d-ce64-4ec3-bacc-5f8e3a2594db": 3,
+    "b6f9907b-69fb-4bdb-a4f8-1b39c916602f": 3,
+    "2965944c-5668-4039-983e-02245229e5e5": 3,
+    "32ab6304-5b90-45d3-a523-15fdd53e70c8": 3
+  },
+  "interviewer_usage": {
+    "2e4f5fed-e691-4d6a-bdbe-82880007ad4b": 8,
+    "3b8223cb-30e4-4472-9952-21f89f20548d": 8,
+    "8b9ed861-3382-455d-9c03-a40671943d6b": 7,
+    "cb1a4fae-dad5-4729-bd73-a43f570b9117": 7
+  },
+  "assignments": [
+    {
+      "sequence": 1,
+      "interview_id": "mock_recruiter_remote-saas-backend_01",
+      "category": "recruiter",
+      "candidate_voice_name": "student1",
+      "candidate_voice_id": "9a4e0509-6a22-4a95-b202-3321aebb4d3f",
+      "interviewer_voice_name": "Pavitra2",
+      "interviewer_voice_id": "2e4f5fed-e691-4d6a-bdbe-82880007ad4b"
+    },
+    {
+      "sequence": 2,
+      "interview_id": "mock_recruiter_frontend-growth_02",
+      "category": "recruiter",
+      "candidate_voice_name": "Student2",
+      "candidate_voice_id": "75f05e9b-c84a-4eab-9f0d-c5c88fe88799",
+      "interviewer_voice_name": "Interviewer voice 2",
+      "interviewer_voice_id": "3b8223cb-30e4-4472-9952-21f89f20548d"
+    },
+    {
+      "sequence": 3,
+      "interview_id": "mock_recruiter_platform-eor_03",
+      "category": "recruiter",
+      "candidate_voice_name": "student3",
+      "candidate_voice_id": "e7cc4201-8ebc-4376-a4cf-78ca85142110",
+      "interviewer_voice_name": "Interviewer voice 3",
+      "interviewer_voice_id": "8b9ed861-3382-455d-9c03-a40671943d6b"
+    },
+    {
+      "sequence": 4,
+      "interview_id": "mock_recruiter_services-to-product_04",
+      "category": "recruiter",
+      "candidate_voice_name": "student4",
+      "candidate_voice_id": "e5b9d67b-885e-4306-b7be-3366c6e26d41",
+      "interviewer_voice_name": "Interviewer voice 4",
+      "interviewer_voice_id": "cb1a4fae-dad5-4729-bd73-a43f570b9117"
+    },
+    {
+      "sequence": 5,
+      "interview_id": "mock_recruiter_data-short-tenure_05",
+      "category": "recruiter",
+      "candidate_voice_name": "student5",
+      "candidate_voice_id": "8b55b7c5-4c05-4968-a80e-c91e152d58b9",
+      "interviewer_voice_name": "Pavitra2",
+      "interviewer_voice_id": "2e4f5fed-e691-4d6a-bdbe-82880007ad4b"
+    },
+    {
+      "sequence": 6,
+      "interview_id": "mock_recruiter_fullstack-contractor_06",
+      "category": "recruiter",
+      "candidate_voice_name": "Student6",
+      "candidate_voice_id": "19e0687c-bbd8-4398-9844-512ba01981ee",
+      "interviewer_voice_name": "Interviewer voice 2",
+      "interviewer_voice_id": "3b8223cb-30e4-4472-9952-21f89f20548d"
+    },
+    {
+      "sequence": 7,
+      "interview_id": "mock_coding_sliding-window_01",
+      "category": "coding",
+      "candidate_voice_name": "student7",
+      "candidate_voice_id": "efb6d51d-ce64-4ec3-bacc-5f8e3a2594db",
+      "interviewer_voice_name": "Interviewer voice 3",
+      "interviewer_voice_id": "8b9ed861-3382-455d-9c03-a40671943d6b"
+    },
+    {
+      "sequence": 8,
+      "interview_id": "mock_coding_intervals_02",
+      "category": "coding",
+      "candidate_voice_name": "student8",
+      "candidate_voice_id": "b6f9907b-69fb-4bdb-a4f8-1b39c916602f",
+      "interviewer_voice_name": "Interviewer voice 4",
+      "interviewer_voice_id": "cb1a4fae-dad5-4729-bd73-a43f570b9117"
+    },
+    {
+      "sequence": 9,
+      "interview_id": "mock_coding_topological-sort_03",
+      "category": "coding",
+      "candidate_voice_name": "student9",
+      "candidate_voice_id": "2965944c-5668-4039-983e-02245229e5e5",
+      "interviewer_voice_name": "Pavitra2",
+      "interviewer_voice_id": "2e4f5fed-e691-4d6a-bdbe-82880007ad4b"
+    },
+    {
+      "sequence": 10,
+      "interview_id": "mock_coding_heap-stream_04",
+      "category": "coding",
+      "candidate_voice_name": "student10",
+      "candidate_voice_id": "32ab6304-5b90-45d3-a523-15fdd53e70c8",
+      "interviewer_voice_name": "Interviewer voice 2",
+      "interviewer_voice_id": "3b8223cb-30e4-4472-9952-21f89f20548d"
+    },
+    {
+      "sequence": 11,
+      "interview_id": "mock_coding_dynamic-programming_05",
+      "category": "coding",
+      "candidate_voice_name": "student1",
+      "candidate_voice_id": "9a4e0509-6a22-4a95-b202-3321aebb4d3f",
+      "interviewer_voice_name": "Interviewer voice 3",
+      "interviewer_voice_id": "8b9ed861-3382-455d-9c03-a40671943d6b"
+    },
+    {
+      "sequence": 12,
+      "interview_id": "mock_coding_bfs-debugging_06",
+      "category": "coding",
+      "candidate_voice_name": "Student2",
+      "candidate_voice_id": "75f05e9b-c84a-4eab-9f0d-c5c88fe88799",
+      "interviewer_voice_name": "Interviewer voice 4",
+      "interviewer_voice_id": "cb1a4fae-dad5-4729-bd73-a43f570b9117"
+    },
+    {
+      "sequence": 13,
+      "interview_id": "mock_sysdesign_url-shortener_01",
+      "category": "sysdesign",
+      "candidate_voice_name": "student3",
+      "candidate_voice_id": "e7cc4201-8ebc-4376-a4cf-78ca85142110",
+      "interviewer_voice_name": "Pavitra2",
+      "interviewer_voice_id": "2e4f5fed-e691-4d6a-bdbe-82880007ad4b"
+    },
+    {
+      "sequence": 14,
+      "interview_id": "mock_sysdesign_notification-platform_02",
+      "category": "sysdesign",
+      "candidate_voice_name": "student4",
+      "candidate_voice_id": "e5b9d67b-885e-4306-b7be-3366c6e26d41",
+      "interviewer_voice_name": "Interviewer voice 2",
+      "interviewer_voice_id": "3b8223cb-30e4-4472-9952-21f89f20548d"
+    },
+    {
+      "sequence": 15,
+      "interview_id": "mock_sysdesign_webhook-delivery_03",
+      "category": "sysdesign",
+      "candidate_voice_name": "student5",
+      "candidate_voice_id": "8b55b7c5-4c05-4968-a80e-c91e152d58b9",
+      "interviewer_voice_name": "Interviewer voice 3",
+      "interviewer_voice_id": "8b9ed861-3382-455d-9c03-a40671943d6b"
+    },
+    {
+      "sequence": 16,
+      "interview_id": "mock_sysdesign_chat_04",
+      "category": "sysdesign",
+      "candidate_voice_name": "Student6",
+      "candidate_voice_id": "19e0687c-bbd8-4398-9844-512ba01981ee",
+      "interviewer_voice_name": "Interviewer voice 4",
+      "interviewer_voice_id": "cb1a4fae-dad5-4729-bd73-a43f570b9117"
+    },
+    {
+      "sequence": 17,
+      "interview_id": "mock_sysdesign_job-scheduler_05",
+      "category": "sysdesign",
+      "candidate_voice_name": "student7",
+      "candidate_voice_id": "efb6d51d-ce64-4ec3-bacc-5f8e3a2594db",
+      "interviewer_voice_name": "Pavitra2",
+      "interviewer_voice_id": "2e4f5fed-e691-4d6a-bdbe-82880007ad4b"
+    },
+    {
+      "sequence": 18,
+      "interview_id": "mock_sysdesign_file-storage_06",
+      "category": "sysdesign",
+      "candidate_voice_name": "student8",
+      "candidate_voice_id": "b6f9907b-69fb-4bdb-a4f8-1b39c916602f",
+      "interviewer_voice_name": "Interviewer voice 2",
+      "interviewer_voice_id": "3b8223cb-30e4-4472-9952-21f89f20548d"
+    },
+    {
+      "sequence": 19,
+      "interview_id": "mock_behavioral_ownership-failure_01",
+      "category": "behavioral",
+      "candidate_voice_name": "student9",
+      "candidate_voice_id": "2965944c-5668-4039-983e-02245229e5e5",
+      "interviewer_voice_name": "Interviewer voice 3",
+      "interviewer_voice_id": "8b9ed861-3382-455d-9c03-a40671943d6b"
+    },
+    {
+      "sequence": 20,
+      "interview_id": "mock_behavioral_conflict_02",
+      "category": "behavioral",
+      "candidate_voice_name": "student10",
+      "candidate_voice_id": "32ab6304-5b90-45d3-a523-15fdd53e70c8",
+      "interviewer_voice_name": "Interviewer voice 4",
+      "interviewer_voice_id": "cb1a4fae-dad5-4729-bd73-a43f570b9117"
+    },
+    {
+      "sequence": 21,
+      "interview_id": "mock_behavioral_ambiguity_03",
+      "category": "behavioral",
+      "candidate_voice_name": "student1",
+      "candidate_voice_id": "9a4e0509-6a22-4a95-b202-3321aebb4d3f",
+      "interviewer_voice_name": "Pavitra2",
+      "interviewer_voice_id": "2e4f5fed-e691-4d6a-bdbe-82880007ad4b"
+    },
+    {
+      "sequence": 22,
+      "interview_id": "mock_behavioral_influence_04",
+      "category": "behavioral",
+      "candidate_voice_name": "Student2",
+      "candidate_voice_id": "75f05e9b-c84a-4eab-9f0d-c5c88fe88799",
+      "interviewer_voice_name": "Interviewer voice 2",
+      "interviewer_voice_id": "3b8223cb-30e4-4472-9952-21f89f20548d"
+    },
+    {
+      "sequence": 23,
+      "interview_id": "mock_behavioral_customer-integrity_05",
+      "category": "behavioral",
+      "candidate_voice_name": "student3",
+      "candidate_voice_id": "e7cc4201-8ebc-4376-a4cf-78ca85142110",
+      "interviewer_voice_name": "Interviewer voice 3",
+      "interviewer_voice_id": "8b9ed861-3382-455d-9c03-a40671943d6b"
+    },
+    {
+      "sequence": 24,
+      "interview_id": "mock_behavioral_remote-collaboration_06",
+      "category": "behavioral",
+      "candidate_voice_name": "student4",
+      "candidate_voice_id": "e5b9d67b-885e-4306-b7be-3366c6e26d41",
+      "interviewer_voice_name": "Interviewer voice 4",
+      "interviewer_voice_id": "cb1a4fae-dad5-4729-bd73-a43f570b9117"
+    },
+    {
+      "sequence": 25,
+      "interview_id": "mock_manager_backend-project_01",
+      "category": "manager",
+      "candidate_voice_name": "student5",
+      "candidate_voice_id": "8b55b7c5-4c05-4968-a80e-c91e152d58b9",
+      "interviewer_voice_name": "Pavitra2",
+      "interviewer_voice_id": "2e4f5fed-e691-4d6a-bdbe-82880007ad4b"
+    },
+    {
+      "sequence": 26,
+      "interview_id": "mock_manager_incident_02",
+      "category": "manager",
+      "candidate_voice_name": "Student6",
+      "candidate_voice_id": "19e0687c-bbd8-4398-9844-512ba01981ee",
+      "interviewer_voice_name": "Interviewer voice 2",
+      "interviewer_voice_id": "3b8223cb-30e4-4472-9952-21f89f20548d"
+    },
+    {
+      "sequence": 27,
+      "interview_id": "mock_manager_api-migration_03",
+      "category": "manager",
+      "candidate_voice_name": "student7",
+      "candidate_voice_id": "efb6d51d-ce64-4ec3-bacc-5f8e3a2594db",
+      "interviewer_voice_name": "Interviewer voice 3",
+      "interviewer_voice_id": "8b9ed861-3382-455d-9c03-a40671943d6b"
+    },
+    {
+      "sequence": 28,
+      "interview_id": "mock_manager_frontend-performance_04",
+      "category": "manager",
+      "candidate_voice_name": "student8",
+      "candidate_voice_id": "b6f9907b-69fb-4bdb-a4f8-1b39c916602f",
+      "interviewer_voice_name": "Interviewer voice 4",
+      "interviewer_voice_id": "cb1a4fae-dad5-4729-bd73-a43f570b9117"
+    },
+    {
+      "sequence": 29,
+      "interview_id": "mock_manager_quality-mentoring_05",
+      "category": "manager",
+      "candidate_voice_name": "student9",
+      "candidate_voice_id": "2965944c-5668-4039-983e-02245229e5e5",
+      "interviewer_voice_name": "Pavitra2",
+      "interviewer_voice_id": "2e4f5fed-e691-4d6a-bdbe-82880007ad4b"
+    },
+    {
+      "sequence": 30,
+      "interview_id": "mock_manager_async-execution_06",
+      "category": "manager",
+      "candidate_voice_name": "student10",
+      "candidate_voice_id": "32ab6304-5b90-45d3-a523-15fdd53e70c8",
+      "interviewer_voice_name": "Interviewer voice 2",
+      "interviewer_voice_id": "3b8223cb-30e4-4472-9952-21f89f20548d"
+    }
+  ]
+}

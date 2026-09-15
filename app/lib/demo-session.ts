@@ -1,9 +1,22 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cacheForRequest } from "vinext/cache";
 import { findDemoById, type DemoProfile, type DemoTier } from "./demo-data";
+import { getChatGPTUser, requireChatGPTUser } from "@/app/chatgpt-auth";
+import {
+  createFoundationProfile,
+  createHumanCalibrationProfile,
+  createSecondSeatProfile,
+  learnerPlansForAccess,
+  getLearnerAccess,
+  getLearnerProgress,
+  hasVaultAccess,
+} from "@/app/lib/paid-access";
 
 export const DEMO_SESSION_COOKIE = "ir_demo_session";
 export const DEMO_SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
+export const ACTIVE_LEARNER_PLAN_COOKIE = "ir_active_learner_plan";
+export const ACTIVE_LEARNER_PLAN_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 const SESSION_VERSION = 1;
 const MINIMUM_SECRET_LENGTH = 32;
@@ -54,9 +67,124 @@ export async function getDemoProfile(): Promise<DemoProfile | null> {
 export async function requireDemoProfile(
   returnTo = "/learn",
 ): Promise<DemoProfile> {
-  const profile = await getDemoProfile();
+  const state = await resolveWorkspaceProfile();
+  const profile = state.profile;
+  // An authenticated owner is always represented by an entitled live plan.
+  // This prevents an older demo cookie from replacing account-backed identity,
+  // plan selection, or progress after the user has signed in.
   if (profile) return profile;
-  redirect(`/demo-login?return_to=${encodeURIComponent(safeReturnTo(returnTo))}`);
+
+  const authenticatedUser = state.user ?? (await requireChatGPTUser(returnTo));
+  if (!(state.user ? state.vaultAccess : await hasVaultAccess(authenticatedUser.email))) {
+    redirect(
+      `/pricing?access=required&return_to=${encodeURIComponent(safeReturnTo(returnTo))}`,
+    );
+  }
+
+  return createFoundationProfile(
+    authenticatedUser,
+    await getLearnerProgress(authenticatedUser.email),
+  );
+}
+
+type WorkspaceProfileState = {
+  profile: DemoProfile | null;
+  user: ChatGPTUser | null;
+  vaultAccess: boolean;
+  secondSeatAccess: boolean;
+  humanCalibrationAccess: boolean;
+};
+
+// Do not memoize this lookup outside the request lifecycle. The active plan is
+// a browser cookie that changes when the QA selector is used; a long-lived edge
+// worker must never reuse a previous request's selected profile.
+const resolveWorkspaceProfile = cacheForRequest(async (): Promise<WorkspaceProfileState> => {
+  const [profile, user] = await Promise.all([getDemoProfile(), getChatGPTUser()]);
+  if (!user) {
+    return {
+      profile,
+      user: null,
+      vaultAccess: false,
+      secondSeatAccess: false,
+      humanCalibrationAccess: false,
+    };
+  }
+
+  let access: Awaited<ReturnType<typeof getLearnerAccess>> = {
+    vault: false,
+    secondSeat: false,
+    humanCalibration: false,
+  };
+  try {
+    access = await getLearnerAccess(user.email);
+  } catch {
+    // A valid demo remains usable when the optional account lookup is not
+    // available in a local preview. Live access remains fail-closed.
+  }
+
+  if (!access.vault) {
+    return {
+      // An explicit demo session remains a sample workspace. It never
+      // supplies live access because authenticated accounts are only upgraded
+      // through getLearnerAccess above.
+      profile,
+      user,
+      vaultAccess: false,
+      secondSeatAccess: false,
+      humanCalibrationAccess: false,
+    };
+  }
+
+  const availablePlans = learnerPlansForAccess(access);
+  const selectedPlan = selectActivePlan(await getActivePlanPreference(), availablePlans);
+  const liveProfile = await createProfileForPlan(user, selectedPlan, availablePlans);
+
+  return {
+    profile: liveProfile,
+    user,
+    vaultAccess: access.vault,
+    secondSeatAccess: access.secondSeat,
+    humanCalibrationAccess: access.humanCalibration,
+  };
+});
+
+async function getActivePlanPreference(): Promise<DemoTier | null> {
+  const value = (await cookies()).get(ACTIVE_LEARNER_PLAN_COOKIE)?.value;
+  return isDemoTier(value) ? value : null;
+}
+
+function selectActivePlan(
+  preference: DemoTier | null,
+  availablePlans: readonly DemoTier[],
+): DemoTier {
+  if (preference && availablePlans.includes(preference)) return preference;
+  return availablePlans.at(-1) ?? "foundation";
+}
+
+async function createProfileForPlan(
+  user: ChatGPTUser,
+  plan: DemoTier,
+  availablePlans: readonly DemoTier[],
+): Promise<DemoProfile> {
+  if (plan === "premium") {
+    return createHumanCalibrationProfile(
+      user,
+      await getLearnerProgress(user.email, 4),
+      availablePlans,
+    );
+  }
+  if (plan === "practice") {
+    return createSecondSeatProfile(
+      user,
+      await getLearnerProgress(user.email, 4),
+      availablePlans,
+    );
+  }
+  return createFoundationProfile(
+    user,
+    await getLearnerProgress(user.email),
+    availablePlans,
+  );
 }
 
 async function verifyDemoSession(

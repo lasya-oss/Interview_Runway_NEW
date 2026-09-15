@@ -1,0 +1,82 @@
+{
+  "asset_id": "video.dsa.greedy.01",
+  "filename": "dsa_greedy_01.mp4",
+  "title": "Greedy: Pattern recognition and reusable templates",
+  "category": "dsa",
+  "topic": "greedy",
+  "target_duration_minutes": 8,
+  "transcript_word_count": 838,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Make the locally best irreversible choice only when an exchange or dominance argument proves an optimum still exists.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "interval scheduling",
+        "minimum resources with ordering",
+        "locally dominant choice",
+        "matroid-like selection"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "After each choice, there remains an optimal solution consistent with every choice already made.",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "identify candidate ordering",
+        "state local choice",
+        "give exchange proof",
+        "search for counterexamples",
+        "distinguish feasibility from optimality"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "Selecting the interval with earliest finishing time leaves the most room for all remaining intervals.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "Often O(n log n) for sorting plus O(n) scanning, with O(1) or O(n) auxiliary state.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "calling intuition a proof",
+        "choosing earliest start instead of finish",
+        "ignoring negative or zero cases",
+        "using greedy where choices interact later"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

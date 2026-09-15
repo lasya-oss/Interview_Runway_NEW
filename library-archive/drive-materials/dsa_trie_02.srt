@@ -1,0 +1,191 @@
+1
+00:00:00,000 --> 00:00:13,700
+This lesson builds an interview-ready mental model for Trie, with emphasis on worked interview problem. The goal is
+
+2
+00:00:13,750 --> 00:00:27,450
+not to memorize a code shape. The goal is to recognize when the pattern is justified, name the
+
+3
+00:00:27,500 --> 00:00:41,200
+invariant before implementation, and explain why every pointer, state update, or recursive step preserves correctness. The core mental
+
+4
+00:00:41,250 --> 00:00:54,950
+model is simple: Store strings by shared prefixes so lookup cost depends on key length rather than number
+
+5
+00:00:55,000 --> 00:01:08,700
+of stored keys. During an interview, say the model out loud before touching the editor. That gives the
+
+6
+00:01:08,750 --> 00:01:22,450
+interviewer a testable plan and gives you a reference point when
+
+7
+00:01:22,500 --> 00:01:36,200
+edge cases appear. Strong cues include prefix queries, dictionary word search, autocomplete, and many string lookups with shared
+
+8
+00:01:36,250 --> 00:01:49,950
+prefixes. These phrases are evidence, not proof. Translate the prompt into three questions: what part of the input
+
+9
+00:01:50,000 --> 00:02:03,700
+is active, what summary changes incrementally, and what decision lets you discard work permanently? If those answers line
+
+10
+00:02:03,750 --> 00:02:17,450
+up with this pattern, proceed. If the prompt requires arbitrary reordering, nonlocal updates, or a guarantee the pattern
+
+11
+00:02:17,500 --> 00:02:31,200
+cannot provide, choose another tool. A disciplined candidate explains both why a pattern fits and what would make
+
+12
+00:02:31,250 --> 00:02:44,950
+it fail. Write the invariant in one sentence: The path from
+
+13
+00:02:45,000 --> 00:02:58,700
+root to a node spells one prefix; an end marker distinguishes full words from prefixes. Treat that sentence
+
+14
+00:02:58,750 --> 00:03:12,450
+as a contract. Before the loop or recursion begins, show why it is true. For every update, explain
+
+15
+00:03:12,500 --> 00:03:26,200
+why it remains true. At termination, connect it directly to the returned answer. This structure turns code narration
+
+16
+00:03:26,250 --> 00:03:39,950
+into a short correctness proof. It also exposes common bugs early: if a variable cannot be connected to
+
+17
+00:03:40,000 --> 00:03:53,700
+the invariant, it may be unnecessary or updated at the wrong time. Use this sequence: choose child representation,
+
+18
+00:03:53,750 --> 00:04:07,450
+mark terminal nodes, separate exact and prefix search, and consider memory
+
+19
+00:04:07,500 --> 00:04:21,200
+tradeoffs. Start with the clearest correct implementation, then discuss optimization. Name boundary conventions explicitly. If duplicates, empty inputs,
+
+20
+00:04:21,250 --> 00:04:34,950
+or invalid parameters change behavior, decide that behavior before coding. Keep the implementation vocabulary aligned with your explanation:
+
+21
+00:04:35,000 --> 00:04:48,700
+names such as left, right, distance, parent, count, or best should describe their role, not their type. This
+
+22
+00:04:48,750 --> 00:05:02,450
+makes the dry run and test discussion much faster. Use this representative example: Autocomplete follows the query prefix,
+
+23
+00:05:02,500 --> 00:05:16,200
+then enumerates terminal descendants subject to a result limit. Before calculating, predict what the state should mean after
+
+24
+00:05:16,250 --> 00:05:29,950
+the first meaningful step. Then trace at least one normal transition,
+
+25
+00:05:30,000 --> 00:05:43,700
+one boundary transition, and one transition that changes the best answer. Do not narrate every assignment. Narrate the
+
+26
+00:05:43,750 --> 00:05:57,450
+decisions that rule out alternatives. In a live interview, a small table with input position, active state, and
+
+27
+00:05:57,500 --> 00:06:11,200
+current answer is usually enough to make the reasoning visible. The target analysis is: O(L) insert and lookup
+
+28
+00:06:11,250 --> 00:06:24,950
+for key length L; memory is proportional to stored prefix nodes. Explain the bound by counting operations, not
+
+29
+00:06:25,000 --> 00:06:38,700
+by pointing at the visual nesting of loops. A nested loop can still be linear when a pointer
+
+30
+00:06:38,750 --> 00:06:52,450
+moves only forward across the entire execution. Conversely, a short implementation
+
+31
+00:06:52,500 --> 00:07:06,200
+can hide expensive copies, slicing, sorting, or repeated hashing. State time, auxiliary space, output space when relevant, and
+
+32
+00:07:06,250 --> 00:07:19,950
+the assumptions behind the bound. The most common mistakes are forgetting end markers, treating prefix as a full
+
+33
+00:07:20,000 --> 00:07:33,700
+word, oversized fixed alphabets, and unbounded enumeration after prefix match. Test each one deliberately. Use an empty input,
+
+34
+00:07:33,750 --> 00:07:47,450
+a single item, all-equal values, no valid answer, an answer at the first or last position, and the
+
+35
+00:07:47,500 --> 00:08:01,200
+smallest input that forces the main state transition. For numeric problems, add zero, negative values, and overflow-sized totals
+
+36
+00:08:01,250 --> 00:08:14,950
+when the prompt permits them. A good final check is to
+
+37
+00:08:15,000 --> 00:08:28,700
+restate the invariant and verify every mutation preserves it. A concise talk track is: I see Trie because
+
+38
+00:08:28,750 --> 00:08:42,450
+the prompt contains the relevant structural cues. My state will represent the active portion of the input, and
+
+39
+00:08:42,500 --> 00:08:56,200
+my invariant is the contract I just stated. I will update one boundary or decision at a time,
+
+40
+00:08:56,250 --> 00:09:09,950
+restore validity when necessary, and record the answer only when the invariant guarantees it is meaningful. The resulting
+
+41
+00:09:10,000 --> 00:09:23,700
+complexity follows from the bounded number of state transitions. I will dry-run a boundary case before I call
+
+42
+00:09:23,750 --> 00:09:37,450
+the solution complete. Practice in three passes. First, classify six prompts
+
+43
+00:09:37,500 --> 00:09:51,200
+without coding and write only the state and invariant. Second, implement two canonical problems from a blank editor
+
+44
+00:09:51,250 --> 00:10:04,950
+while speaking the proof. Third, take one near-miss problem where this pattern looks tempting but is wrong, and
+
+45
+00:10:05,000 --> 00:10:18,700
+explain the disqualifying condition. Revisit the set after forty-eight hours. A pattern counts as learned only when you
+
+46
+00:10:18,750 --> 00:10:32,450
+can identify it, reject it when inappropriate, implement it, test it, and explain its complexity without notes. Finish
+
+47
+00:10:32,500 --> 00:10:46,200
+by writing one new edge case and predicting the result before running code; that prediction is evidence that
+
+48
+00:10:46,250 --> 00:10:59,950
+the mental model, not the syntax, is doing the work.

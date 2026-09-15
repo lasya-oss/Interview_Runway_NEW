@@ -15,6 +15,48 @@
       "when": 1784525810076,
       "tag": "0001_stiff_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787986851525,
+      "tag": "0002_brown_bloodscream",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788175083911,
+      "tag": "0003_lovely_scrambler",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788254991521,
+      "tag": "0004_true_kang",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1788258564665,
+      "tag": "0005_perpetual_human_cannonball",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1788941494884,
+      "tag": "0006_meeting_copilot_profile_delivery",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1788943702902,
+      "tag": "0007_meeting_copilot_bridge_token_consumption",
+      "breakpoints": true
     }
   ]
 }

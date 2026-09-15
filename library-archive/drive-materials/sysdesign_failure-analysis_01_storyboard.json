@@ -1,0 +1,84 @@
+{
+  "asset_id": "video.sysdesign.failure-analysis.01",
+  "filename": "sysdesign_failure-analysis_01.mp4",
+  "title": "Failure-Mode Analysis",
+  "category": "sysdesign",
+  "topic": "failure-analysis",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 804,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Walk each dependency and state transition through timeout, partial failure, overload, and recovery.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Blast radius",
+        "detection",
+        "fallback",
+        "data correctness",
+        "operator action",
+        "and recovery test."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Happy-path-only designs",
+        "retry storms",
+        "correlated dependencies",
+        "and no reconciliation path."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

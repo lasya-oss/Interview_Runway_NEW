@@ -1,0 +1,76 @@
+{
+  "collection": "InterviewRunway Mock Interviews",
+  "version": "audio-library-1",
+  "status": "audio_complete_video_pending",
+  "audience": "India-based software engineers with 1-8 years of experience interviewing for US remote roles",
+  "interview_count": 30,
+  "candidate_voice_policy": "10 roster voices reused exactly three times each across 30 interviews",
+  "interviewer_voice_policy": "four approved roster voices balanced across 30 interviews at 8, 8, 7, and 7 uses",
+  "categories": [
+    {
+      "id": "recruiter",
+      "name": "Recruiter and remote-fit screens",
+      "interviewer_voice_assignment": "balanced_roster_rotation",
+      "interviews": [
+        {"id":"mock_recruiter_remote-saas-backend_01","title":"Backend Engineer: Remote SaaS Recruiter Screen","candidate_profile":"5 years, Bengaluru, product and logistics platforms","level":"mid-level","duration_target_min":18,"focus":["career narrative","Indian title translation","remote motivation","notice period","overlap hours","compensation"]},
+        {"id":"mock_recruiter_frontend-growth_02","title":"Frontend Engineer: Growth-Stage Startup Screen","candidate_profile":"2 years, Pune, consumer web product","level":"early-career","duration_target_min":18,"focus":["concise introduction","portfolio depth","startup motivation","written communication","availability"]},
+        {"id":"mock_recruiter_platform-eor_03","title":"Platform Engineer: EOR and Seniority Screen","candidate_profile":"7 years, Hyderabad, cloud platform","level":"senior","duration_target_min":21,"focus":["scope calibration","EOR model","on-call","time-zone boundaries","compensation"]},
+        {"id":"mock_recruiter_services-to-product_04","title":"Services-to-Product Career Transition","candidate_profile":"4 years, Chennai, client delivery and backend systems","level":"mid-level","duration_target_min":20,"focus":["company context","individual ownership","transition motivation","product signal","notice period"]},
+        {"id":"mock_recruiter_data-short-tenure_05","title":"Data Engineer: Short Tenure and Job Change","candidate_profile":"3 years, Gurugram, analytics infrastructure","level":"mid-level","duration_target_min":19,"focus":["short tenure","non-defensive framing","remote readiness","work authorization language","salary expectations"]},
+        {"id":"mock_recruiter_fullstack-contractor_06","title":"Full-Stack Engineer: Contractor Remote Screen","candidate_profile":"6 years, Kochi, B2B applications","level":"senior","duration_target_min":21,"focus":["contractor model","USD payment questions","security setup","overlap hours","candidate questions"]}
+      ]
+    },
+    {
+      "id": "coding",
+      "name": "Live coding and problem solving",
+      "interviewer_voice_assignment": "balanced_roster_rotation",
+      "interviews": [
+        {"id":"mock_coding_sliding-window_01","title":"Longest Stable Activity Window","candidate_profile":"3 years, backend engineer","level":"mid-level","duration_target_min":34,"focus":["clarification","sliding window","duplicates","testing","complexity"]},
+        {"id":"mock_coding_intervals_02","title":"Merge Deployment Freeze Windows","candidate_profile":"2 years, full-stack engineer","level":"early-career","duration_target_min":32,"focus":["interval semantics","sorting","edge cases","communication"]},
+        {"id":"mock_coding_topological-sort_03","title":"Order Dependent Data Migrations","candidate_profile":"5 years, platform engineer","level":"mid-level","duration_target_min":36,"focus":["graph modeling","topological sort","cycle detection","failure return"]},
+        {"id":"mock_coding_heap-stream_04","title":"Top Error Signatures in a Stream","candidate_profile":"6 years, reliability engineer","level":"senior","duration_target_min":38,"focus":["heap","streaming constraints","memory tradeoff","follow-up scaling"]},
+        {"id":"mock_coding_dynamic-programming_05","title":"Minimum-Cost Support Coverage","candidate_profile":"4 years, product engineer","level":"mid-level","duration_target_min":38,"focus":["recurrence","one-dimensional DP","base cases","space optimization"]},
+        {"id":"mock_coding_bfs-debugging_06","title":"Debug the Shortest Escalation Path","candidate_profile":"7 years, backend lead","level":"senior","duration_target_min":36,"focus":["BFS","debugging existing code","tests","production reasoning"]}
+      ]
+    },
+    {
+      "id": "sysdesign",
+      "name": "System design and architecture",
+      "interviewer_voice_assignment": "balanced_roster_rotation",
+      "interviews": [
+        {"id":"mock_sysdesign_url-shortener_01","title":"Design a Multi-Tenant URL Shortener","candidate_profile":"4 years, backend engineer","level":"mid-level","duration_target_min":35,"focus":["requirements","ID generation","data model","cache","abuse"]},
+        {"id":"mock_sysdesign_notification-platform_02","title":"Design a Notification Delivery Platform","candidate_profile":"5 years, distributed-systems engineer","level":"mid-senior","duration_target_min":37,"focus":["queues","preferences","fan-out","retries","observability"]},
+        {"id":"mock_sysdesign_webhook-delivery_03","title":"Design a Reliable Webhook Delivery Service","candidate_profile":"6 years, platform engineer","level":"senior","duration_target_min":35,"focus":["idempotency","delivery semantics","backpressure","tenant isolation","security"]},
+        {"id":"mock_sysdesign_chat_04","title":"Design Team Chat for Remote Work","candidate_profile":"3 years, full-stack engineer","level":"mid-level","duration_target_min":35,"focus":["websockets","ordering","presence","offline delivery","search"]},
+        {"id":"mock_sysdesign_job-scheduler_05","title":"Design a Distributed Job Scheduler","candidate_profile":"8 years, infrastructure engineer","level":"senior","duration_target_min":38,"focus":["leases","duplicate execution","partitioning","recovery","fairness"]},
+        {"id":"mock_sysdesign_file-storage_06","title":"Design Secure File Storage and Sharing","candidate_profile":"7 years, cloud engineer","level":"senior","duration_target_min":38,"focus":["metadata and blobs","uploads","permissions","versioning","multi-region"]}
+      ]
+    },
+    {
+      "id": "behavioral",
+      "name": "Behavioral and leadership",
+      "interviewer_voice_assignment": "balanced_roster_rotation",
+      "interviews": [
+        {"id":"mock_behavioral_ownership-failure_01","title":"Ownership After a Production Mistake","candidate_profile":"3 years, backend engineer","level":"mid-level","duration_target_min":27,"focus":["failure","ownership","repair","learning mechanism"]},
+        {"id":"mock_behavioral_conflict_02","title":"Technical Disagreement Without Blame","candidate_profile":"5 years, mobile engineer","level":"mid-senior","duration_target_min":29,"focus":["conflict","evidence","disagree and commit","relationship"]},
+        {"id":"mock_behavioral_ambiguity_03","title":"Prioritizing Under Product Ambiguity","candidate_profile":"2 years, frontend engineer","level":"early-career","duration_target_min":26,"focus":["ambiguity","prioritization","questions","learning speed"]},
+        {"id":"mock_behavioral_influence_04","title":"Leadership Without a Manager Title","candidate_profile":"7 years, data engineer","level":"senior","duration_target_min":31,"focus":["influence","stakeholder alignment","scope","durable mechanism"]},
+        {"id":"mock_behavioral_customer-integrity_05","title":"Customer Pressure and Engineering Integrity","candidate_profile":"6 years, payments engineer","level":"senior","duration_target_min":30,"focus":["integrity","customer focus","risk","escalation"]},
+        {"id":"mock_behavioral_remote-collaboration_06","title":"Remote Collaboration Across Three Time Zones","candidate_profile":"4 years, platform engineer","level":"mid-level","duration_target_min":29,"focus":["async communication","handoffs","misunderstanding","written clarity"]}
+      ]
+    },
+    {
+      "id": "hiring_manager",
+      "name": "Hiring-manager and project deep dives",
+      "interviewer_voice_assignment": "balanced_roster_rotation",
+      "interviews": [
+        {"id":"mock_manager_backend-project_01","title":"Backend Project Architecture Deep Dive","candidate_profile":"5 years, backend engineer","level":"mid-senior","duration_target_min":33,"focus":["individual contribution","architecture","tradeoffs","outcome"]},
+        {"id":"mock_manager_incident_02","title":"Production Incident and Operational Judgment","candidate_profile":"7 years, site reliability engineer","level":"senior","duration_target_min":36,"focus":["incident command","diagnosis","communication","postmortem"]},
+        {"id":"mock_manager_api-migration_03","title":"API Migration Across Product Teams","candidate_profile":"4 years, platform engineer","level":"mid-level","duration_target_min":32,"focus":["migration strategy","stakeholders","compatibility","adoption"]},
+        {"id":"mock_manager_frontend-performance_04","title":"Frontend Performance and Product Tradeoffs","candidate_profile":"3 years, frontend engineer","level":"mid-level","duration_target_min":31,"focus":["measurement","user impact","product negotiation","rollout"]},
+        {"id":"mock_manager_quality-mentoring_05","title":"Code Quality, Reviews, and Mentoring","candidate_profile":"8 years, technical lead","level":"senior","duration_target_min":36,"focus":["quality bar","mentoring","delegation","team leverage"]},
+        {"id":"mock_manager_async-execution_06","title":"Owning a Remote Project Across Time Zones","candidate_profile":"6 years, full-stack engineer","level":"senior","duration_target_min":34,"focus":["written plan","decision latency","handoffs","delivery risk","candidate questions"]}
+      ]
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LockedMemberPanel, MemberShell } from "@/app/components/member-shell";
+import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
+import { isInternalFullAccessEmail } from "@/app/lib/internal-access";
+import { UserHistoryReportPanel } from "./user-history-report-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -28,22 +30,21 @@ export default async function CoachingPage() {
 
   if (!profile.access.coaching) {
     return (
-      <MemberShell profile={profile} active="coaching">
-        <div className="member-page">
-          <LockedMemberPanel
-            tier="Human Calibration"
-            title="Human calibration is reserved for a named gap."
-            body={`${profile.planShort} can see how the private coaching room is structured, but agenda notes, session scheduling, and coach deliverables belong to the qualification-based example engagement. No coach is contacted from this demo.`}
-          >
-            <p className="member-locked-evidence">The Human Calibration sample is triggered only after repeated practice evidence shows a persistent gap.</p>
-          </LockedMemberPanel>
-        </div>
-      </MemberShell>
+      <div className="member-page">
+        <LockedMemberPanel
+          tier="Human Calibration"
+          title="Human calibration is reserved for a named gap."
+          body={`${profile.planShort} can see how the private coaching room is structured, but agenda notes, session scheduling, and coach deliverables belong to the qualification-based example engagement. No coach is contacted from this demo.`}
+        >
+          <p className="member-locked-evidence">The Human Calibration sample is triggered only after repeated practice evidence shows a persistent gap.</p>
+        </LockedMemberPanel>
+      </div>
     );
   }
 
+  const canGenerateUserHistoryReport = profile.isLive && isInternalFullAccessEmail(profile.email);
+
   return (
-    <MemberShell profile={profile} active="coaching">
       <div className="member-page coaching-workspace">
         <section className="coaching-heading">
           <div>
@@ -53,6 +54,13 @@ export default async function CoachingPage() {
           </div>
           <div className="coaching-status"><i /><span>Example engagement</span><strong>02 / 03</strong><small>sample session path</small></div>
         </section>
+
+        {canGenerateUserHistoryReport ? (
+          <UserHistoryReportPanel
+            deliveryEmail={profile.email}
+            googleClientId={process.env.GOOGLE_CLIENT_ID ?? ""}
+          />
+        ) : null}
 
         <section className="coaching-command-grid">
           <article className="coaching-next-session">
@@ -71,7 +79,7 @@ export default async function CoachingPage() {
             <p className="member-kicker">Assigned founder coach</p>
             <h2>Verified identity appears here before paid coaching opens.</h2>
             <p>The public founder record must supply the real name, photograph, professional history, and coaching scope. This demo intentionally does not invent them.</p>
-            <Link href="/about">Review the verification standard <span aria-hidden="true">↗</span></Link>
+            <Link className="member-action-button member-action-button--dark" href="/about">Review the verification standard <span aria-hidden="true">↗</span></Link>
           </aside>
         </section>
 
@@ -100,11 +108,25 @@ export default async function CoachingPage() {
             ))}
           </div>
           <aside className="coaching-prework">
-            <p className="member-kicker">Due before session 02</p>
-            <h2>Bring two influence stories.</h2>
-            <p>Each should identify the competing constraint, the decision you changed, who needed alignment, and the measurable result six weeks later.</p>
-            <dl><div><dt>Preparation</dt><dd>25 min</dd></div><div><dt>Sample due</dt><dd>22 Jul · 18:30</dd></div></dl>
-            <button type="button" disabled>Submission disabled in demo</button>
+            {canGenerateUserHistoryReport ? (
+              <>
+                <p className="member-kicker">Vivid Labs internal reporting</p>
+                <h2>User History Report.</h2>
+                <p>Choose a stored learner account, generate its private history PDF, and send it to your signed-in Vivid Labs Gmail account.</p>
+                <dl><div><dt>Source</dt><dd>Stored history only</dd></div><div><dt>Delivery</dt><dd>Company Gmail + private copy</dd></div></dl>
+                <Link className="member-primary-button coaching-prework-report-action" href="#user-history-report">
+                  Generate User History Report <span aria-hidden="true">&#8599;</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="member-kicker">Due before session 02</p>
+                <h2>Bring two influence stories.</h2>
+                <p>Each should identify the competing constraint, the decision you changed, who needed alignment, and the measurable result six weeks later.</p>
+                <dl><div><dt>Preparation</dt><dd>25 min</dd></div><div><dt>Sample due</dt><dd>22 Jul · 18:30</dd></div></dl>
+                <button type="button" disabled>Submission disabled in demo</button>
+              </>
+            )}
           </aside>
         </section>
 
@@ -112,6 +134,5 @@ export default async function CoachingPage() {
           <strong>Demo boundary</strong><p>No booking, rescheduling, file access, messaging, or coach contact occurs here. A production version requires verified identity, live calendar data, explicit package terms, and durable private storage.</p>
         </footer>
       </div>
-    </MemberShell>
   );
 }

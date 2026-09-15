@@ -1,0 +1,39 @@
+## Give a recruiter a clear fit signal
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Write a short first message that identifies the role, supports relevance with evidence, and asks for one easy next step.
+
+## Use role, evidence, ask
+
+The recipient needs to know which opening you mean and why your background is relevant. Choose one result that maps to a major requirement. Avoid listing every technology, describing your entire career, or claiming to be a perfect fit. Check that the opening is current before contacting someone.
+
+## Worked message - fictional
+
+Hi Riya, I am a backend engineer with four years of experience building account and notification services. I recently improved delivery recovery by introducing idempotent requests and failure-injection tests. I am interested in OrbitDesk's backend reliability opening because its service-ownership and distributed-systems responsibilities match that work. If you support this opening, would you be open to a brief conversation? My resume is attached. Thank you, Nila.
+
+## Check the message
+
+The example names a role family, gives one supported engineering signal, connects it to the opening, and ends with one question. In your version, include only a resume or portfolio link that works for the recipient. Avoid attachments or sensitive information the company has not requested.
+
+If the recipient is not the right contact, a polite redirection is enough. Follow any stated application process; outreach does not replace it. Record whom you contacted so you do not send duplicate messages through several channels.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
+INTERVIEWRUNWAY VAULT
+Recruiter Outreach Message
+Cold recruiter outreach with a clear fit signal and low-friction ask.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Message template
+Hi [Name] - I am a [role] with [X years] working on [relevant systems/domain]. I recently [one evidence-rich result].
+I am interested in [specific role/team] because [specific reason]. My experience with [two requirements] appears relevant.
+If you are the right contact, would you be open to a brief conversation? Resume/portfolio: [link]. Thank you.
+Checks
+Under 100 words
+Specific role or team
+One defensible result
+One simple ask
+No generic praise
+

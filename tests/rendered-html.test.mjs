@@ -1,8 +1,31 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { registerHooks } from "node:module";
 import test from "node:test";
 import { SignJWT } from "jose";
+
+const cloudflareEnvironmentProperty = "__interviewRunwayRenderedTestEnvironment";
+const cloudflareWorkersTestModule = `data:text/javascript,${encodeURIComponent(`
+  export const env = new Proxy({}, {
+    get(_target, property) {
+      return globalThis.${cloudflareEnvironmentProperty}?.[property];
+    },
+  });
+`)}`;
+
+// The production runtime provides this virtual module. The rendered tests run
+// under Node, so expose the same request-scoped binding shape without copying
+// any binding values into module source or test output.
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier === "cloudflare:workers") {
+      return { shortCircuit: true, url: cloudflareWorkersTestModule };
+    }
+    return nextResolve(specifier, context);
+  },
+});
 
 let renderSequence = 0;
 const testSessionSecret = "interviewrunway-test-session-secret-2026-07-17";
@@ -37,7 +60,7 @@ async function getWorkspaceSessionCookie() {
   return workspaceSessionCookie;
 }
 
-async function request(pathname = "/", init = {}, authenticated = true) {
+async function request(pathname = "/", init = {}, authenticated = true, environment = {}) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set(
     "test",
@@ -56,24 +79,56 @@ async function request(pathname = "/", init = {}, authenticated = true) {
     }
   }
 
-  return worker.fetch(
-    new Request(new URL(pathname, "http://localhost"), {
-      ...init,
-      headers,
-    }),
-    {
+  const workerEnvironment = {
       ASSETS: {
         fetch: async (assetRequest) => {
-          void assetRequest;
+          const assetPath = new URL(assetRequest.url).pathname;
+          if (assetPath.startsWith("/drive-materials/")) {
+            const filename = decodeURIComponent(assetPath.slice("/drive-materials/".length));
+            if (!filename.includes("/")) {
+              try {
+                const body = await readFile(new URL(`../public/drive-materials/${filename}`, import.meta.url));
+                return new Response(body, {
+                  headers: { "content-type": filename.endsWith(".txt") ? "text/plain" : "text/markdown" },
+                });
+              } catch {
+                // Fall through to the normal missing-asset response.
+              }
+            }
+          }
+          if (assetPath === "/pdf-guides/sysdesign_url-shortener-walkthrough.pdf") {
+            return new Response("%PDF-test", {
+              headers: { "content-type": "application/octet-stream", "content-length": "9" },
+            });
+          }
           return new Response("Not found", { status: 404 });
         },
       },
       REPLAY_ASSETS: {
-        get: async (name) => {
-          if (name !== "mock_behavioral_customer-integrity_05.mp4.part-00") return null;
+        list: async ({ prefix }) => {
+          const parts = {
+            "mock_behavioral_customer-integrity_05.mp4.part-00": testReplayChunk,
+            "mock_behavioral_customer-integrity_05.mp4.part-01": "second replay chunk",
+          };
           return {
-            body: new Blob([testReplayChunk]).stream(),
-            size: testReplayChunk.length,
+            objects: Object.entries(parts)
+              .filter(([name]) => name.startsWith(prefix))
+              .map(([key, value]) => ({ key, size: value.length })),
+          };
+        },
+        get: async (name, options = {}) => {
+          const parts = {
+            "mock_behavioral_customer-integrity_05.mp4.part-00": testReplayChunk,
+            "mock_behavioral_customer-integrity_05.mp4.part-01": "second replay chunk",
+          };
+          const value = parts[name];
+          if (!value) return null;
+          const offset = options.range?.offset ?? 0;
+          const length = options.range?.length ?? value.length - offset;
+          const body = new Blob([value.slice(offset, offset + length)]);
+          return {
+            body: body.stream(),
+            size: body.size,
             httpEtag: '"test-replay-etag"',
           };
         },
@@ -82,12 +137,61 @@ async function request(pathname = "/", init = {}, authenticated = true) {
       AUTH_SESSION_SECRET: testAuthSessionSecret,
       DEMO_SESSION_SECRET: testSessionSecret,
       GOOGLE_CLIENT_ID: testGoogleClientId,
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
+      ...environment,
+  };
+  const previousEnvironment = globalThis[cloudflareEnvironmentProperty];
+  globalThis[cloudflareEnvironmentProperty] = workerEnvironment;
+  try {
+    return await worker.fetch(
+      new Request(new URL(pathname, "http://localhost"), {
+        ...init,
+        headers,
+      }),
+      workerEnvironment,
+      {
+        waitUntil() {},
+        passThroughOnException() {},
+      },
+    );
+  } finally {
+    if (previousEnvironment === undefined) {
+      delete globalThis[cloudflareEnvironmentProperty];
+    } else {
+      globalThis[cloudflareEnvironmentProperty] = previousEnvironment;
+    }
+  }
+}
+
+async function withEnvironment(environment, action) {
+  const previous = new Map(
+    Object.keys(environment).map((name) => [name, process.env[name]]),
   );
+  for (const [name, value] of Object.entries(environment)) {
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  }
+  try {
+    return await action();
+  } finally {
+    for (const [name, value] of previous) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+}
+
+function emptyD1Database() {
+  return {
+    prepare() {
+      return {
+        bind() { return this; },
+        async all() { return { results: [], success: true }; },
+        async first() { return null; },
+        async raw() { return []; },
+        async run() { return { meta: { changes: 0 }, success: true }; },
+      };
+    },
+  };
 }
 
 async function render(pathname = "/", init = {}) {
@@ -188,6 +292,22 @@ test("application pages stay protected", async () => {
   assert.match(protectedPage.headers.get("location") ?? "", /\/sign-in\?/i);
 });
 
+test("internal full access matches only the exact configured email domain", async () => {
+  const { isInternalFullAccessEmail } = await import(
+    new URL("../app/lib/internal-access.ts", import.meta.url)
+  );
+
+  assert.equal(isInternalFullAccessEmail("lasya@vividlabsai.com", "vividlabsai.com"), true);
+  assert.equal(isInternalFullAccessEmail(" LASYA@VIVIDLABSAI.COM ", " VividLabsAI.com "), true);
+  assert.equal(isInternalFullAccessEmail("lasya@team.vividlabsai.com", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@evilvividlabsai.com", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@vividlabsai.com.evil.test", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("@vividlabsai.com", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@@vividlabsai.com", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@other.example", "vividlabsai.com"), false);
+  assert.equal(isInternalFullAccessEmail("lasya@vividlabsai.com", ""), false);
+});
+
 test("R2 replay assets are served without a separate Drive permission", async () => {
   const response = await request(
     "/api/replay-assets/mock_behavioral_customer-integrity_05.mp4.part-00",
@@ -197,6 +317,598 @@ test("R2 replay assets are served without a separate Drive permission", async ()
   assert.equal(response.status, 200);
   assert.equal(await response.text(), testReplayChunk);
   assert.equal(response.headers.get("cache-control"), "public, max-age=31536000, immutable");
+});
+
+test("R2 replay videos stream as one range-capable MP4 without buffering every chunk", async () => {
+  const response = await request(
+    "/api/replay-assets/mock_behavioral_customer-integrity_05.mp4",
+    { headers: { range: "bytes=7-18" } },
+    false,
+  );
+  assert.equal(response.status, 206);
+  assert.equal(response.headers.get("content-type"), "video/mp4");
+  assert.equal(response.headers.get("content-range"), "bytes 7-18/38");
+  assert.equal(await response.text(), "replay chunk");
+});
+
+test("PDF guides are served inline from first-party assets without Drive authorization", async () => {
+  const response = await request(
+    "/pdf-guides/sysdesign_url-shortener-walkthrough.pdf",
+    {},
+    false,
+  );
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "application/pdf");
+  assert.equal(response.headers.get("content-disposition"), "inline");
+  assert.equal(await response.text(), "%PDF-test");
+});
+
+test("Vault template and explainer actions open first-party inline PDF previews", async () => {
+  const libraryStartHere = await readFile(
+    new URL("../app/learn/library/library-start-here.tsx", import.meta.url),
+    "utf8",
+  );
+  const previewRoute = await readFile(
+    new URL("../app/api/learn/library/material-preview/[slug]/route.ts", import.meta.url),
+    "utf8",
+  );
+  const materialViewer = await readFile(
+    new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(libraryStartHere, /LibraryMaterialDialog/i);
+  assert.doesNotMatch(libraryStartHere, /target=\{record\.external \? "_blank"/i);
+  assert.match(previewRoute, /Content-Type.*application\/pdf/i);
+  assert.match(previewRoute, /Content-Disposition.*inline/i);
+  assert.match(previewRoute, /readFirstPartyText/i);
+  assert.match(materialViewer, /materialPreviewCache/i);
+
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "foundation" }),
+  });
+  assert.equal(login.status, 200);
+  const demoSessionCookie = login.headers.get("set-cookie")?.split(";")[0] ?? "";
+  assert.match(demoSessionCookie, /^ir_demo_session=/i);
+
+  const linkedPdf = await request("/learn/library?pdf=operations_final-loop-interview-day-runbook.pdf", {
+    headers: { cookie: demoSessionCookie },
+  });
+  assert.equal(linkedPdf.status, 200);
+  const linkedHtml = await linkedPdf.text();
+  assert.match(linkedHtml, /<iframe[^>]+src="\/pdf-guides\/operations_final-loop-interview-day-runbook\.pdf"/);
+  assert.doesNotMatch(visibleText(linkedHtml), /Loading materials for this category/);
+
+  for (const slug of [
+    "template-weekly-prep-tracker-docx-yzovxjy1",
+    "dsa-binary-search-01-mp4-k8sh5_uz",
+  ]) {
+    const response = await request(`/api/learn/library/material-preview/${slug}`, {
+      headers: { accept: "application/pdf", cookie: demoSessionCookie },
+    });
+    assert.equal(response.status, 200, slug);
+    assert.equal(response.headers.get("content-type"), "application/pdf", slug);
+    assert.match(response.headers.get("content-disposition") ?? "", /^inline;/i, slug);
+    assert.equal((await response.text()).slice(0, 8), "%PDF-1.4", slug);
+  }
+});
+
+test("Library content actions never point at missing assets", async () => {
+  const demoData = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+  const libraryStartHere = await readFile(
+    new URL("../app/learn/library/library-start-here.tsx", import.meta.url),
+    "utf8",
+  );
+  const materialPage = await readFile(
+    new URL("../app/learn/material/[slug]/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const assetHrefs = [...demoData.matchAll(/demoAsset:\s*\{\s*href:\s*"([^"]+)"/g)].map((match) => match[1]);
+  const demoLogin = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "foundation" }),
+  });
+  assert.equal(demoLogin.status, 200);
+  const demoCookie = demoLogin.headers.get("set-cookie")?.split(";")[0] ?? "";
+
+  assert.ok(assetHrefs.length > 0, "learning materials should expose at least one real preview asset");
+  for (const href of assetHrefs) {
+    if (href.startsWith("/learn/library")) {
+      const response = await request(href, { headers: { cookie: demoCookie } });
+      assert.equal(response.status, 200, `missing first-party Library material: ${href}`);
+    } else {
+      assert.ok(existsSync(new URL(`../public${href}`, import.meta.url)), `missing first-party preview asset: ${href}`);
+    }
+  }
+
+  assert.match(libraryClient, /isPreviewContentUnavailable/i);
+  assert.match(libraryClient, /isLive && !material\.demoAsset/i);
+  assert.match(libraryClient, /className="library-record-content-unavailable"/i);
+  assert.match(libraryClient, /Source material not supplied yet/i);
+  assert.match(libraryClient, /generic[\s\S]+decision-lab shell/i);
+  assert.match(libraryStartHere, /contentUnavailable\?: boolean/i);
+  assert.match(libraryStartHere, /isLive && record\.contentUnavailable/i);
+  assert.match(materialPage, /contentUnavailable/i);
+  assert.match(materialPage, /profile\.isLive === true && !material\.demoAsset/i);
+  assert.match(materialPage, /source material for this preview has not been supplied yet/i);
+});
+
+test("Supplied narrated mirrors play directly and unsupplied records stay honest", async () => {
+  const activeSelection = await readFile(
+    new URL("../app/lib/active-library-selection.ts", import.meta.url),
+    "utf8",
+  );
+  const materialData = await readFile(
+    new URL("../app/lib/drive-materials.ts", import.meta.url),
+    "utf8",
+  );
+  const materialViewer = await readFile(
+    new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
+    "utf8",
+  );
+  const replayPlayer = await readFile(
+    new URL("../app/learn/practice/replays/drive-replay-player.tsx", import.meta.url),
+    "utf8",
+  );
+  const activeDriveSection = activeSelection.slice(
+    activeSelection.indexOf("export const ACTIVE_DRIVE_FILENAMES"),
+    activeSelection.indexOf("export const LOCAL_DRIVE_MATERIAL_FILENAMES"),
+  );
+  const narratedFiles = [...activeDriveSection.matchAll(/^  "([^\"]+\.mp4)",$/gm)].map((match) => match[1]);
+  const localFiles = [...activeSelection.matchAll(/LOCAL_DRIVE_MATERIAL_FILENAMES = \[([\s\S]*?)\] as const;/g)].flatMap((match) =>
+    [...match[1].matchAll(/^  "([^\"]+\.mp4)",$/gm)].map((entry) => entry[1]),
+  );
+
+  assert.equal(narratedFiles.length, 15, "Vault should expose the 15 curated narrated records");
+  assert.deepEqual(localFiles, [
+    "dsa_bfs_01.mp4",
+    "dsa_binary-search_01.mp4",
+    "dsa_dynamic-programming-1d_01.mp4",
+    "dsa_sliding-window_01.mp4",
+    "dsa_two-pointers_01.mp4",
+    "sysdesign_caching_01.mp4",
+    "sysdesign_notification-system_01.mp4",
+    "sysdesign_rate-limiting_01.mp4",
+    "sysdesign_url-shortener_01.mp4",
+    "sysdesign_load-balancing_01.mp4",
+    "behavioral_ownership_01.mp4",
+    "behavioral_star-method_01.mp4",
+    "behavioral_failure-answers_01.mp4",
+    "remote_async-collaboration_01.mp4",
+    "behavioral_career-transitions_01.mp4",
+  ]);
+  for (const filename of narratedFiles) {
+    const isLocal = localFiles.includes(filename);
+    assert.equal(existsSync(new URL(`../public/drive-materials/${filename}`, import.meta.url)), isLocal, filename);
+    assert.equal(existsSync(new URL(`../public/drive-materials/${filename.replace(/\.mp4$/i, "_transcript.md")}`, import.meta.url)), true, `${filename} should retain its transcript companion`);
+  }
+
+  assert.match(materialData, /LOCAL_DRIVE_MATERIAL_FILENAME_SET\.has\(material\.filename\)/i);
+  assert.match(materialData, /return driveMaterialAssetHref\(material\.filename\)/i);
+  assert.match(materialViewer, /Never make a Drive-only video or audio record look playable/i);
+  assert.match(materialViewer, /library-material-content-unavailable/i);
+  assert.doesNotMatch(materialViewer, /const companionPdfUrl/);
+  assert.match(replayPlayer, /Content unavailable/i);
+  assert.match(replayPlayer, /onError=\{handleMediaError\}/i);
+});
+
+test("PDF viewer shows a record header and user-controlled fullscreen option", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const pdfShelf = await readFile(
+    new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+  const driveShelf = await readFile(
+    new URL("../app/learn/library/drive-material-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(styles, /\.library-material-dialog\s*\{[^}]*inset:\s*0;[^}]*padding:\s*0;/);
+  assert.match(styles, /\.library-material-dialog__surface\s*\{[^}]*width:\s*100%;[^}]*height:\s*100dvh;[^}]*border:\s*0;[^}]*border-radius:\s*0;/);
+  assert.match(styles, /\.library-material-dialog__actions\s*\{/);
+  assert.match(styles, /\.library-material-dialog__fullscreen\s*\{[^}]*width:\s*48px;[^}]*height:\s*48px;/);
+  assert.match(styles, /\.library-material-dialog__close\s*\{/);
+  assert.match(styles, /\.library-material-dialog__body\s*>\s*\.library-material-pdf-frame\s*\{[^}]*width:\s*100%;[^}]*min-height:\s*0;/);
+  assert.match(styles, /\.library-material-dialog__body\s*>\s*\.library-material-media\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*max-height:\s*none;/);
+  assert.match(styles, /\.library-material-dialog__body:fullscreen\s*\{[^}]*width:\s*100vw;[^}]*height:\s*100dvh;/);
+  assert.match(driveShelf, /<LibraryMaterialDialog[\s\S]*driveMaterialViewerSource\(material, title\)/i);
+  assert.match(pdfShelf, /<LibraryMaterialDialog[\s\S]*drivePdfViewerSource\(guide, title\)/i);
+  assert.match(pdfShelf, /initialOpen=\{initialFilename === guide\.filename\}/i);
+  assert.doesNotMatch(driveShelf, /<div className="library-material-viewer">/);
+});
+
+test("Library categories expose filtered records and real content viewers", async () => {
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+  const libraryStartHere = await readFile(
+    new URL("../app/learn/library/library-start-here.tsx", import.meta.url),
+    "utf8",
+  );
+  const materialViewer = await readFile(
+    new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
+    "utf8",
+  );
+  const driveReplayPlayer = await readFile(
+    new URL("../app/learn/practice/replays/drive-replay-player.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(libraryClient, /const resourceCountLabel = totalResourceCount >= 100/i);
+  assert.match(libraryClient, /<strong>\{resourceCountLabel\}<\/strong>/i);
+  assert.match(libraryClient, /aria-expanded=\{category === item\}/i);
+  assert.match(libraryClient, /id="library-category-results"/i);
+  assert.match(libraryClient, /className="library-category-view"/i);
+  assert.match(libraryClient, /Back to categories/i);
+  assert.match(libraryClient, /onClick=\{\(\) => setCategory\(item\)\}/i);
+  assert.match(libraryClient, /library-category-view__records">\{renderResults\(false\)\}/i);
+  assert.match(libraryClient, /import\("\.\/library-catalog"\)/i);
+  assert.match(libraryClient, /Choose a category to view its materials/i);
+  assert.match(libraryClient, /library-catalog-loading/i);
+  assert.match(libraryStartHere, /Not sure where to start\? Build your preparation from the right foundation\./i);
+  assert.match(libraryStartHere, /<span>Choose your focus<\/span>/i);
+  assert.match(libraryStartHere, /record\.domain === domain/i);
+  assert.match(libraryStartHere, /normalizedFilename\.startsWith\("dsa_"\)/i);
+  assert.match(libraryStartHere, /normalizedFilename\.startsWith\("sysdesign_"\)/i);
+  assert.match(libraryStartHere, /selectedLevel/);
+  assert.match(libraryStartHere, /className="library-start-here__level-card/);
+  assert.match(libraryStartHere, /onClick=\{\(\) => setSelectedLevel\(level\.id\)\}/i);
+  assert.match(libraryStartHere, /matchingRecords\.filter\(\(record\) => record\.level === selectedLevel\)/i);
+  assert.match(libraryStartHere, /scrollIntoView/);
+  assert.doesNotMatch(libraryStartHere, /VAULT_START_HERE_ROLES|StartHereRole|setRole/i);
+  assert.doesNotMatch(libraryStartHere, /Select a role or domain/i);
+  assert.match(libraryClient, /learningMaterialViewerSource\(material\)/i);
+  assert.match(libraryClient, /LibraryMaterialDialog/i);
+  assert.match(libraryClient, /LIBRARY_OPEN_LABEL/);
+  assert.doesNotMatch(libraryClient, /Open (?:actual content|lesson|preview|sample)/i);
+  assert.match(materialViewer, /DriveReplayPlayer/i);
+  assert.match(materialViewer, /mediaType=\{displayKind\}/i);
+  assert.match(materialViewer, /isMediaKind\(displayKind\)/i);
+  assert.match(materialViewer, /Never make a Drive-only video or audio record look playable/i);
+  assert.doesNotMatch(materialViewer, /const companionPdfUrl/);
+  const protectedViewerBranch = materialViewer.indexOf('if (!assetUrl && googleClientId && isMediaKind(displayKind))');
+  const protectedViewer = materialViewer.indexOf("<DriveReplayPlayer", protectedViewerBranch);
+  const unavailableFallback = materialViewer.indexOf("library-material-content-unavailable", protectedViewerBranch);
+  assert.ok(protectedViewerBranch >= 0, "protected media branch should exist");
+  assert.ok(protectedViewer >= 0 && protectedViewer < unavailableFallback, "protected media should be selected before unavailable fallback");
+  assert.match(libraryStartHere, /action: LIBRARY_OPEN_LABEL,/i);
+  assert.doesNotMatch(libraryStartHere, /Open (?:actual content|lesson|guide|template|explainer)/i);
+  assert.match(libraryStartHere, /driveMaterialViewerSource\(material/i);
+  assert.match(driveReplayPlayer, /mediaType\?: "video" \| "audio"/i);
+  assert.match(driveReplayPlayer, /<audio className="library-material-audio-player"/i);
+});
+
+test("Library record serials follow the rendered order without gaps or repeats", async () => {
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+  const libraryCopy = await readFile(
+    new URL("../app/learn/library/library-copy.ts", import.meta.url),
+    "utf8",
+  );
+  const pdfShelf = await readFile(
+    new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+  const driveShelf = await readFile(
+    new URL("../app/learn/library/drive-material-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(libraryClient, /results\.map\(\(material, index\) =>/i);
+  assert.match(libraryClient, /formatLibraryRecordNumber\(index \+ 1\)/i);
+  assert.doesNotMatch(libraryClient, /material\.number/i);
+  assert.match(libraryClient, /startNumber=\{results\.length \+ 1\}/i);
+  assert.match(libraryClient, /startNumber=\{results\.length \+ pdfResults\.length \+ 1\}/i);
+  assert.match(libraryCopy, /String\(number\)\.padStart\(2, "0"\)/i);
+  assert.match(pdfShelf, /formatLibraryRecordNumber\(startNumber \+ index\)/i);
+  assert.match(driveShelf, /formatLibraryRecordNumber\(startNumber \+ index\)/i);
+});
+
+test("Library opens on the authenticated plan and presents plan cards as a switcher", async () => {
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(libraryClient, /const defaultPlan = entitledPlanIds\.includes\(profileId\)/i);
+  assert.match(libraryClient, /useState<DemoTier \| null>\(\(\) => defaultPlan\)/i);
+  assert.match(libraryClient, /<p className="member-kicker">Your Library<\/p>/i);
+  assert.match(libraryClient, /Your current plan is selected automatically/i);
+  assert.doesNotMatch(libraryClient, /Choose your plan library/i);
+  assert.doesNotMatch(libraryClient, /Start with the plan that contains your material/i);
+  assert.match(libraryClient, /const hasSearchQuery = deferredQuery\.length > 0/i);
+  assert.match(libraryClient, /aria-label="Search results"/i);
+  assert.match(libraryClient, /setCategory\(value\.trim\(\) \? "All" : null\)/i);
+
+  const searchPosition = libraryClient.indexOf('aria-label="Library search"');
+  const startHerePosition = libraryClient.indexOf("<VaultStartHere");
+  const planPosition = libraryClient.indexOf('aria-labelledby="library-plan-picker-title"');
+  assert.ok(searchPosition >= 0 && searchPosition < startHerePosition, "search should precede Start Here");
+  assert.ok(startHerePosition >= 0 && startHerePosition < planPosition, "Start Here should precede Your Library");
+});
+
+test("Library plan cards expose cumulative locked and unlocked states", async () => {
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+  const planAccess = await readFile(
+    new URL("../app/learn/library/library-plan-access.ts", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(planAccess, /availablePlans\.length \? availablePlans : \[profileId\]/i);
+  assert.match(planAccess, /LIBRARY_PLAN_ORDER\.filter\(\(plan\) => LIBRARY_PLAN_RANK\[plan\] <= highestRank\)/i);
+  assert.match(libraryClient, /const defaultPlan = entitledPlanIds\.includes\(profileId\)/i);
+  assert.match(libraryClient, /data-access-state=\{isAvailable \? "unlocked" : "locked"\}/i);
+  assert.match(libraryClient, /aria-label=\{`\$\{plan\.label\} plan — \$\{isAvailable \? "unlocked" : "locked"\}`\}/i);
+  assert.match(libraryClient, /isAvailable \? `\$\{planCount\.toLocaleString\("en-IN"\)\} materials` : <span className="library-plan-card__lock-status"><LockIcon \/> Upgrade to unlock<\/span>/i);
+  assert.doesNotMatch(libraryClient, /🔒/u);
+  assert.match(libraryClient, /disabled=\{!isAvailable\}/i);
+});
+
+test("Start Here is shared by all three plans with plan-scoped material", async () => {
+  const libraryClient = await readFile(
+    new URL("../app/learn/library/library-client.tsx", import.meta.url),
+    "utf8",
+  );
+  const libraryStartHere = await readFile(
+    new URL("../app/learn/library/library-start-here.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(libraryClient, /selectedPlan === profileId/);
+  assert.match(libraryClient, /profileId === "premium" \? "human-calibration"/);
+  assert.match(libraryStartHere, /export type StartHerePlan = "vault" \| "second-seat" \| "human-calibration"/);
+  assert.match(libraryStartHere, /plan === "second-seat" && material\.tier === "practice"/);
+  assert.match(libraryStartHere, /plan === "human-calibration"/);
+  assert.match(libraryStartHere, /Second Seat’s existing practice material/i);
+  assert.match(libraryStartHere, /Human Calibration starting paths/i);
+  assert.match(libraryStartHere, /normalizedCategory === "ai practice"/i);
+  assert.match(libraryStartHere, /className="library-start-here__toggle"/i);
+});
+
+test("curated Library count is consistent for Vault and Second Seat", async () => {
+  for (const tier of ["foundation", "practice"]) {
+    const login = await request("/api/demo-session", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin: "http://localhost",
+      },
+      body: JSON.stringify({ preview: tier }),
+    });
+    assert.equal(login.status, 200, tier);
+    const sessionCookie = login.headers.get("set-cookie")?.split(";")[0] ?? "";
+    const library = await request("/learn/library", {
+      headers: { accept: "text/html", cookie: sessionCookie },
+    });
+    assert.equal(library.status, 200, tier);
+    const html = await library.text();
+    const text = visibleText(html);
+    const expectedLibraryCount = "100+";
+    assert.match(text, new RegExp(`${expectedLibraryCount.replace("+", "\\+")}\\s+Resources\\s+Available`, "i"), tier);
+    assert.match(text, new RegExp(`All\\s+${expectedLibraryCount.replace("+", "\\+")}`, "i"), tier);
+    assert.doesNotMatch(text, /1000\+|Company Evidence|Vault Production Workspace/i, tier);
+  }
+
+  const selection = await readFile(
+    new URL("../app/lib/active-library-selection.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(selection, /ACTIVE_PDF_FILENAMES/);
+  assert.match(selection, /ACTIVE_DRIVE_FILENAMES/);
+  assert.match(selection, /ACTIVE_DRIVE_RECORD_KEY_SET/);
+});
+
+test("low-information Library PDFs are archived and excluded from the active catalog", async () => {
+  const selection = await readFile(
+    new URL("../app/lib/active-library-selection.ts", import.meta.url),
+    "utf8",
+  );
+  const archivedNames = [
+    "behavioral_story-bank.pdf",
+    "behavioral_follow-up-probes.pdf",
+    "behavioral_evidence-and-metrics.pdf",
+    "behavioral_final-prep.pdf",
+    "behavioral_recruiter-screen.pdf",
+    "career_ats-resume.pdf",
+    "career_resume-bullets.pdf",
+    "career_resume-metrics.pdf",
+    "career_linkedin-headline.pdf",
+    "career_resume-review.pdf",
+    "operations_interview-day.pdf",
+    "operations_post-interview-debrief.pdf",
+    "operations_study-planning.pdf",
+  ];
+
+  const activePdfNames = selection.match(/export const ACTIVE_PDF_FILENAMES = \[([\s\S]*?)\] as const/)?.[1].match(/"([^"]+)"/g) ?? [];
+  assert.equal(activePdfNames.length, 78);
+  for (const filename of archivedNames) {
+    assert.doesNotMatch(selection, new RegExp(`\\"${filename.replace(".", "\\.")}\\"`));
+    assert.equal(existsSync(new URL(`../public/pdf-guides/${filename}`, import.meta.url)), false, filename);
+    assert.equal(existsSync(new URL(`../library-archive/pdf-guides/${filename}`, import.meta.url)), true, filename);
+  }
+});
+
+test("every live Vault catalog record has a real supporting asset", async () => {
+  const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const selection = await readFile(new URL("../app/lib/active-library-selection.ts", import.meta.url), "utf8");
+  const pdfManifest = await readFile(new URL("../app/lib/drive-pdf-guides.ts", import.meta.url), "utf8");
+  const records = [...data.matchAll(/\{\s*slug: "([^"]+)"[\s\S]*?\n  \},/g)].map((match) => ({
+    slug: match[1],
+    source: match[0],
+  }));
+  const foundationRecords = records.filter((record) => /tier: "foundation"/.test(record.source));
+
+  assert.equal(foundationRecords.length, 10);
+  assert.deepEqual(
+    foundationRecords.filter((record) => !/demoAsset:\s*\{\s*href:/.test(record.source)).map((record) => record.slug),
+    [],
+  );
+
+  const expectedMappings = new Map([
+    ["scope-stories", "/learn/library/material/template-title-translation-guide-docx-9xsy6dtn"],
+    ["remote-compensation", "/learn/library?pdf=remote_compensation-and-offer-decision-workbook.pdf"],
+    ["outage-story", "/learn/library/material/mock-behavioral-ownership-failure-01-md-evtsevfm"],
+    ["us-ats-resume", "/learn/library/material/template-us-ats-resume-docx-ymrqj987"],
+    ["remote-offer-matrix", "/learn/library?pdf=remote_compensation-and-offer-decision-workbook.pdf"],
+  ]);
+  for (const [slug, href] of expectedMappings) {
+    const record = foundationRecords.find((candidate) => candidate.slug === slug);
+    assert.ok(record, slug);
+    assert.match(record.source, new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), slug);
+  }
+
+  const filename = "remote_compensation-and-offer-decision-workbook.pdf";
+  assert.equal((selection.match(new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length, 1);
+  assert.equal((pdfManifest.match(new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length, 1);
+  const pdf = await readFile(new URL(`../public/pdf-guides/${filename}`, import.meta.url));
+  assert.equal(pdf.subarray(0, 5).toString(), "%PDF-");
+  assert.ok(pdf.length > 35_000);
+});
+
+test("Human Calibration coach-room records open three distinct first-party PDFs", async () => {
+  const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const selection = await readFile(new URL("../app/lib/active-library-selection.ts", import.meta.url), "utf8");
+  const records = [...data.matchAll(/\{\s*slug: "([^"]+)"[\s\S]*?\n  \},/g)].map((match) => ({
+    slug: match[1],
+    source: match[0],
+  }));
+  const expected = new Map([
+    ["architecture-narrative", "/pdf-guides/coaching_architecture-narrative-worksheet.pdf"],
+    ["target-company-brief", "/pdf-guides/coaching_target-company-preparation-guide.pdf"],
+    ["interview-day-run-sheet", "/pdf-guides/coaching_interview-day-run-sheet.pdf"],
+  ]);
+
+  const hrefs = [];
+  for (const [slug, href] of expected) {
+    const record = records.find((candidate) => candidate.slug === slug);
+    assert.ok(record, slug);
+    assert.match(record.source, /tier: "premium"/, slug);
+    assert.match(record.source, new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), slug);
+    assert.doesNotMatch(selection, new RegExp(href.split("/").at(-1).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `${slug}: avoid a duplicate PDF-shelf record`);
+    const pdf = await readFile(new URL(`../public${href}`, import.meta.url));
+    assert.equal(pdf.subarray(0, 5).toString(), "%PDF-", slug);
+    assert.ok(pdf.length > (slug === "interview-day-run-sheet" ? 5_000 : 20_000), `${slug}: substantive PDF`);
+    hrefs.push(href);
+  }
+  assert.equal(new Set(hrefs).size, expected.size);
+});
+
+test("Human Calibration cumulative practice records open four distinct first-party PDFs", async () => {
+  const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const selection = await readFile(new URL("../app/lib/active-library-selection.ts", import.meta.url), "utf8");
+  const pdfManifest = await readFile(new URL("../app/lib/drive-pdf-guides.ts", import.meta.url), "utf8");
+  const libraryCatalog = await readFile(new URL("../app/learn/library/library-catalog.ts", import.meta.url), "utf8");
+  const records = [...data.matchAll(/\{\s*slug: "([^"]+)"[\s\S]*?\n  \},/g)].map((match) => ({
+    slug: match[1],
+    source: match[0],
+  }));
+  const expected = new Map([
+    ["metrics-pipeline-mock", "/pdf-guides/second-seat_metrics-pipeline-scored-replay.pdf"],
+    ["queue-backlog-mock", "/pdf-guides/second-seat_queue-backlog-debugging-replay.pdf"],
+    ["resume-signal-lab", "/pdf-guides/second-seat_resume-profile-role-alignment-lab.pdf"],
+    ["negotiation-rehearsal", "/pdf-guides/second-seat_compensation-conversation-rehearsal.pdf"],
+  ]);
+
+  const hrefs = [];
+  for (const [slug, href] of expected) {
+    const record = records.find((candidate) => candidate.slug === slug);
+    assert.ok(record, slug);
+    assert.match(record.source, /tier: "practice"/, `${slug}: preserve owning tier`);
+    assert.match(record.source, new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), slug);
+    const filename = href.split("/").at(-1);
+    assert.doesNotMatch(selection, new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `${slug}: avoid duplicate PDF-shelf record`);
+    assert.doesNotMatch(pdfManifest, new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `${slug}: keep canonical LearningMaterial card`);
+    assert.match(libraryCatalog, new RegExp(`"${slug}"`), `${slug}: preserve existing Second Seat catalog suppression`);
+    const pdf = await readFile(new URL(`../public${href}`, import.meta.url));
+    assert.equal(pdf.subarray(0, 5).toString(), "%PDF-", slug);
+    assert.ok(pdf.length > 20_000, `${slug}: substantive PDF`);
+    hrefs.push(href);
+  }
+  assert.equal(new Set(hrefs).size, expected.size);
+});
+
+test("Human Calibration mounts one configured Gmail report panel with reauthorization recovery", async () => {
+  const coachingPage = await readFile(new URL("../app/learn/coaching/page.tsx", import.meta.url), "utf8");
+  const reportPanel = await readFile(
+    new URL("../app/learn/coaching/user-history-report-panel.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.equal((coachingPage.match(/<UserHistoryReportPanel/g) ?? []).length, 1);
+  assert.match(coachingPage, /deliveryEmail=\{profile\.email\}/);
+  assert.match(coachingPage, /googleClientId=\{process\.env\.GOOGLE_CLIENT_ID \?\? ""\}/);
+  assert.match(reportPanel, /response\.status === 401 && !reauthorizationAttemptedRef\.current/);
+  assert.match(reportPanel, /prompt: "select_account consent"/);
+  assert.match(reportPanel, /scope: GMAIL_AUTH_SCOPES/);
+  assert.match(reportPanel, /include_granted_scopes: true/);
+});
+
+test("new roadmap learning PDFs are active, uniquely mapped, and deep-linkable", async () => {
+  const filenames = [
+    "career_target-role-evidence-map.pdf",
+    "dsa_traversal-decision-practice-workbook.pdf",
+    "operations_technical-baseline-scorecard.pdf",
+    "company_interview-loop-gap-map.pdf",
+    "operations_evidence-comparison-correction-workbook.pdf",
+    "operations_final-loop-interview-day-runbook.pdf",
+    "operations_timed-technical-rehearsal-workbook.pdf",
+  ];
+  const selection = await readFile(new URL("../app/lib/active-library-selection.ts", import.meta.url), "utf8");
+  const pdfManifest = await readFile(new URL("../app/lib/drive-pdf-guides.ts", import.meta.url), "utf8");
+  const roadmap = await readFile(new URL("../app/lib/roadmap-data.ts", import.meta.url), "utf8");
+  const libraryPage = await readFile(new URL("../app/learn/library/page.tsx", import.meta.url), "utf8");
+  const libraryClient = await readFile(new URL("../app/learn/library/library-client.tsx", import.meta.url), "utf8");
+  const pdfShelf = await readFile(new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url), "utf8");
+  const materialDialog = await readFile(new URL("../app/learn/library/library-material-dialog.tsx", import.meta.url), "utf8");
+  const roadmapClient = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+
+  for (const filename of filenames) {
+    assert.equal(existsSync(new URL(`../public/pdf-guides/${filename}`, import.meta.url)), true, filename);
+    assert.equal((selection.match(new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length, 1, filename);
+    assert.equal((pdfManifest.match(new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length, 1, filename);
+    assert.match(roadmap, new RegExp(`pdfLibraryHref\\(\\"${filename.replace(".", "\\.")}\\"\\)`));
+  }
+
+  assert.match(roadmap, /"12w-9-map": pdfLibraryHref\("company_interview-loop-gap-map\.pdf"\)/);
+  assert.match(roadmap, /"12w-9-gaps": pdfLibraryHref\("company_interview-loop-gap-map\.pdf"\)/);
+  assert.match(roadmap, /"12w-3-practice": pdfLibraryHref\("dsa_traversal-decision-practice-workbook\.pdf"\)/);
+  assert.match(roadmap, /"12w-10-coding": pdfLibraryHref\("operations_timed-technical-rehearsal-workbook\.pdf"\)/);
+  assert.match(roadmap, /"12w-10-design": pdfLibraryHref\("operations_timed-technical-rehearsal-workbook\.pdf"\)/);
+  assert.match(roadmap, /"12w-11-correct": pdfLibraryHref\("operations_evidence-comparison-correction-workbook\.pdf"\)/);
+  assert.match(roadmap, /"12w-12-loop": pdfLibraryHref\("operations_final-loop-interview-day-runbook\.pdf"\)/);
+  assert.match(roadmap, /"12w-12-runbook": pdfLibraryHref\("operations_final-loop-interview-day-runbook\.pdf"\)/);
+  assert.match(roadmap, /"12w-4-frame": "\/learn\/library\/material\/template-system-design-canvas-docx-vnkzbt0l"/);
+  assert.match(roadmap, /"12w-8-linkedin": "\/learn\/library\/material\/template-linkedin-profile-docx-cyog_vzk"/);
+  assert.match(libraryPage, /requestedPdf && isActivePdfFilename\(requestedPdf\)/);
+  assert.match(libraryPage, /requestedOrigin === "roadmap"/);
+  assert.match(libraryClient, /initialFilename=\{initialPdfFilename\}/);
+  assert.match(libraryClient, /returnTo=\{returnTo\}/);
+  assert.match(pdfShelf, /initialOpen=\{initialFilename === guide\.filename\}/);
+  assert.match(pdfShelf, /returnTo=\{returnTo\}/);
+  assert.match(roadmapClient, /appendRoadmapOrigin\(libraryHref, task\.id\)/);
+  assert.match(materialDialog, /router\.replace\(returnTo, \{ scroll: false \}\)/);
 });
 
 const coreRoutes = [
@@ -297,6 +1009,303 @@ test("all three one-click demos issue protected tier sessions", async () => {
   }
 });
 
+test("Human Calibration keeps Current access in the status drawer and omits Second Seat-only navigation", async () => {
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "premium" }),
+  });
+  assert.equal(login.status, 200);
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+
+  const response = await request("/learn", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /data-member-layout=["']calibration["']/i);
+
+  const sidebar = html.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+  assert.ok(sidebar, "Human Calibration sidebar should render");
+  assert.doesNotMatch(sidebar, /member-plan-card|Current access/i);
+  assert.doesNotMatch(visibleText(sidebar), /Meeting Copilot|WhatsApp Support/i);
+  assert.doesNotMatch(sidebar, /href=["']\/learn\/(?:meeting-copilot|whatsapp-support)["']/i);
+
+  const statusAccess = html.match(/<section\b[^>]*ops-current-access[^>]*>[\s\S]*?<\/section>/i)?.[0] ?? "";
+  assert.ok(statusAccess, "status drawer Current access section should render");
+  assert.match(statusAccess, /member-plan-card member-plan-card-status/i);
+  assert.match(visibleText(statusAccess), /Current access\s+Human Calibration\s*·\s*Qualified/i);
+  assert.equal((html.match(/member-plan-card member-plan-card-status/gi) ?? []).length, 1);
+});
+
+test("Meeting Copilot and WhatsApp Support remain Second Seat navigation sections", async () => {
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "practice" }),
+  });
+  assert.equal(login.status, 200);
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+
+  const response = await request("/learn", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /data-member-layout=["']second-seat["']/i);
+
+  const sidebar = html.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+  assert.ok(sidebar, "Second Seat sidebar should render");
+  const sidebarText = visibleText(sidebar);
+  assert.match(sidebarText, /Meeting Copilot/i);
+  assert.match(sidebarText, /WhatsApp Support/i);
+  assert.match(sidebar, /href=["']\/learn\/meeting-copilot["']/i);
+  assert.match(sidebar, /href=["']\/learn\/whatsapp-support["']/i);
+  assert.ok(
+    sidebarText.indexOf("Meeting Copilot") < sidebarText.indexOf("WhatsApp Support"),
+    "WhatsApp Support should remain directly below Meeting Copilot",
+  );
+  assert.ok(
+    sidebarText.indexOf("WhatsApp Support") < sidebarText.indexOf("Coach room"),
+    "Coach room should remain after the Second Seat support sections",
+  );
+});
+
+test("Second Seat Meeting Copilot page alone launches the pinned validated release", async () => {
+  const release = await readFile(new URL("../app/lib/meeting-copilot-release.ts", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const pageSource = await readFile(new URL("../app/learn/meeting-copilot/page.tsx", import.meta.url), "utf8");
+  const launchComponent = await readFile(new URL("../app/learn/meeting-copilot/meeting-copilot-launch.tsx", import.meta.url), "utf8");
+  const launchRoute = await readFile(new URL("../app/api/meeting-copilot/launch/route.ts", import.meta.url), "utf8");
+
+  assert.match(release, /https:\/\/github\.com\/vividlabsai\/meeting-copilot/);
+  assert.match(release, /branch: "codex\/interview-profile-context"/);
+  assert.match(release, /commit: "6c0b0498c3ac8b651dd8d4c46ab23ab0392e9c1b"/);
+  assert.match(release, /uiVersion: "20260909-profile-copy-v1"/);
+  assert.match(release, /launchUrl: "http:\/\/127\.0\.0\.1:8123\/"/);
+  assert.doesNotMatch(shell, /MEETING_COPILOT_RELEASE/);
+  assert.doesNotMatch(shell, /openMeetingCopilot|window\.open/);
+  assert.doesNotMatch(shell, /127\.0\.0\.1:8123/);
+  assert.doesNotMatch(shell, /onClick=\{item\.key === "meeting-copilot"/);
+  assert.match(pageSource, /MEETING_COPILOT_RELEASE\.launchUrl/);
+  assert.match(pageSource, /profile\.isLive === true && profile\.id === "practice"/);
+  assert.match(pageSource, /"\/api\/meeting-copilot\/launch"/);
+  assert.doesNotMatch(pageSource, /issueMeetingCopilotBridgeSession|ir_profile_copy/);
+  assert.match(launchRoute, /await issueMeetingCopilotBridgeSession\(\)/);
+  assert.doesNotMatch(launchRoute, /issueMeetingCopilotBridgeSession\(\)\.catch\(\(\) => null\)/);
+  assert.match(launchRoute, /#ir_profile_copy=\$\{encodeURIComponent\(bridgeSession\.token\)\}/);
+  assert.doesNotMatch(launchRoute, /PUBLIC_ROUTES/);
+  assert.doesNotMatch(pageSource, /[?&]ir_profile_copy=/);
+  assert.doesNotMatch(shell, /const MEETING_COPILOT_URL/);
+  assert.doesNotMatch(pageSource, /const MEETING_COPILOT_URL/);
+  assert.doesNotMatch(launchComponent, /window\.open\("about:blank"/);
+  assert.match(launchComponent, /probeCompanion\(probeUrl, availabilityRef, probeRef\)/);
+  assert.match(launchComponent, /window\.open\(href, "_blank", "noopener,noreferrer"\)/);
+  assert.match(launchComponent, /meeting-copilot-launch-status\$\{state === "unavailable" \|\| state === "blocked"/);
+
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "practice" }),
+  });
+  assert.equal(login.status, 200);
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+
+  const response = await request("/learn/meeting-copilot", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /data-member-layout=["']second-seat["']/i);
+  assert.match(html, /data-meeting-copilot-source-branch=["']codex\/interview-profile-context["']/i);
+  assert.match(html, /data-meeting-copilot-source-commit=["']6c0b0498c3ac8b651dd8d4c46ab23ab0392e9c1b["']/i);
+  assert.match(html, /data-meeting-copilot-ui-version=["']20260909-profile-copy-v1["']/i);
+  assert.match(html, /data-meeting-copilot-launch=["']true["']/i);
+  assert.match(html, /href=["']http:\/\/127\.0\.0\.1:8123\/["']/i);
+  assert.doesNotMatch(html, /ir_profile_copy=/i);
+  assert.match(html, /target=["']_blank["']/i);
+  assert.doesNotMatch(html, /<iframe\b/i);
+});
+
+test("live Second Seat creates its short-lived profile token only on the protected launch click", async () => {
+  const pageResponse = await withEnvironment(
+    {
+      MEETING_COPILOT_BRIDGE_SECRET: "meeting-copilot-bridge-test-secret-2026-09-09",
+      TEST_SECOND_SEAT_EMAILS: "pratheep@vividlabsai.com",
+    },
+    () => request(
+      "/learn/meeting-copilot",
+      { headers: { accept: "text/html" } },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(pageResponse.status, 200, pageResponse.headers.get("location") ?? "no redirect location");
+  const html = await pageResponse.text();
+  assert.match(html, /href=["']\/api\/meeting-copilot\/launch["']/i);
+  assert.doesNotMatch(html, /ir_profile_copy=|meeting-copilot-bridge-test-secret/i);
+
+  const launchResponse = await withEnvironment(
+    {
+      MEETING_COPILOT_BRIDGE_SECRET: "meeting-copilot-bridge-test-secret-2026-09-09",
+      TEST_SECOND_SEAT_EMAILS: "pratheep@vividlabsai.com",
+    },
+    () => request(
+      "/api/meeting-copilot/launch",
+      { headers: { accept: "text/html" }, redirect: "manual" },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(launchResponse.status, 302);
+  assert.match(launchResponse.headers.get("cache-control") ?? "", /private, no-store/i);
+  assert.equal(launchResponse.headers.get("referrer-policy"), "no-referrer");
+  const launchUrl = new URL(launchResponse.headers.get("location"));
+  assert.equal(launchUrl.origin, "http://127.0.0.1:8123");
+  assert.equal(launchUrl.pathname, "/");
+  assert.equal(launchUrl.search, "");
+  assert.ok(launchUrl.hash.startsWith("#ir_profile_copy="));
+  const token = decodeURIComponent(launchUrl.hash.slice("#ir_profile_copy=".length));
+  assert.ok(token.length >= 64, "Bridge token should be opaque and non-trivial");
+
+  const unauthorized = await request(
+    "/api/meeting-copilot/launch",
+    { headers: { accept: "application/json" }, redirect: "manual" },
+    false,
+  );
+  assert.equal(unauthorized.status, 401);
+  assert.doesNotMatch(unauthorized.headers.get("location") ?? "", /ir_profile_copy=/i);
+});
+
+test("live Meeting Copilot launch fails closed without bridge configuration and never bridges Human Calibration", async () => {
+  const unconfiguredSecondSeat = await withEnvironment(
+    {
+      MEETING_COPILOT_BRIDGE_SECRET: undefined,
+      TEST_SECOND_SEAT_EMAILS: "pratheep@vividlabsai.com",
+    },
+    () => request(
+      "/learn/meeting-copilot",
+      { headers: { accept: "text/html" } },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(
+    unconfiguredSecondSeat.status,
+    200,
+    unconfiguredSecondSeat.headers.get("location") ?? "no redirect location",
+  );
+  const unconfiguredHtml = await unconfiguredSecondSeat.text();
+  assert.match(unconfiguredHtml, /href=["']\/api\/meeting-copilot\/launch["']/i);
+  assert.doesNotMatch(unconfiguredHtml, /ir_profile_copy=/i);
+
+  const unconfiguredLaunch = await withEnvironment(
+    {
+      MEETING_COPILOT_BRIDGE_SECRET: undefined,
+      TEST_SECOND_SEAT_EMAILS: "pratheep@vividlabsai.com",
+    },
+    () => request(
+      "/api/meeting-copilot/launch",
+      { headers: { accept: "text/html" }, redirect: "manual" },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(unconfiguredLaunch.status, 503);
+  assert.equal(unconfiguredLaunch.headers.get("location"), null);
+  assert.doesNotMatch(unconfiguredLaunch.headers.get("location") ?? "", /ir_profile_copy=/i);
+
+  const humanCalibration = await withEnvironment(
+    {
+      INTERNAL_FULL_ACCESS_DOMAIN: "vividlabsai.com",
+      MEETING_COPILOT_BRIDGE_SECRET: "meeting-copilot-bridge-test-secret-2026-09-09",
+    },
+    () => request(
+      "/learn/meeting-copilot",
+      { headers: { accept: "text/html" } },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(humanCalibration.status, 200);
+  const humanCalibrationHtml = await humanCalibration.text();
+  assert.match(humanCalibrationHtml, /href=["']http:\/\/127\.0\.0\.1:8123\/["']/i);
+  assert.doesNotMatch(humanCalibrationHtml, /ir_profile_copy=/i);
+
+  const humanCalibrationLaunch = await withEnvironment(
+    {
+      INTERNAL_FULL_ACCESS_DOMAIN: "vividlabsai.com",
+      MEETING_COPILOT_BRIDGE_SECRET: "meeting-copilot-bridge-test-secret-2026-09-09",
+    },
+    () => request(
+      "/api/meeting-copilot/launch",
+      { headers: { accept: "application/json" }, redirect: "manual" },
+      true,
+      { DB: emptyD1Database() },
+    ),
+  );
+  assert.equal(humanCalibrationLaunch.status, 403);
+  assert.doesNotMatch(humanCalibrationLaunch.headers.get("location") ?? "", /ir_profile_copy=/i);
+});
+
+test("Meeting Copilot profile-copy configuration stays server-only and environment-driven", async () => {
+  const environmentExample = await readFile(new URL("../.env.example", import.meta.url), "utf8");
+  const viteConfig = await readFile(new URL("../vite.config.ts", import.meta.url), "utf8");
+  const variableNames = [
+    "MEETING_COPILOT_BRIDGE_SECRET",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_GMAIL_REFRESH_TOKEN",
+    "GOOGLE_GMAIL_SENDER_EMAIL",
+    "MEETING_COPILOT_PROFILE_RECIPIENTS",
+  ];
+
+  for (const variableName of variableNames) {
+    assert.match(environmentExample, new RegExp(`^${variableName}=`, "m"));
+    assert.doesNotMatch(
+      viteConfig,
+      new RegExp(`${variableName}: process\\.env\\.${variableName}`),
+      `${variableName} must be injected through Sites runtime bindings, not copied into the build artifact`,
+    );
+  }
+  assert.doesNotMatch(environmentExample, /NEXT_PUBLIC_(?:MEETING_COPILOT|GOOGLE_(?:CLIENT_SECRET|GMAIL))/);
+  assert.doesNotMatch(viteConfig, /NEXT_PUBLIC_(?:MEETING_COPILOT|GOOGLE_(?:CLIENT_SECRET|GMAIL))/);
+});
+
+test("Vault cannot launch the pinned Meeting Copilot companion", async () => {
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "foundation" }),
+  });
+  assert.equal(login.status, 200);
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+
+  const response = await request("/learn/meeting-copilot", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Meeting Copilot joins you in the Second Seat/i);
+  assert.doesNotMatch(html, /data-meeting-copilot-launch/i);
+  assert.doesNotMatch(html, /href=["']http:\/\/127\.0\.0\.1:8123\/["']/i);
+});
+
 test("demo sign-in issues a protected session and opens the learner product", async () => {
   const login = await request("/api/demo-session", {
     method: "POST",
@@ -324,11 +1333,114 @@ test("demo sign-in issues a protected session and opens the learner product", as
     headers: { accept: "text/html", cookie: sessionCookie },
   });
   assert.equal(dashboard.status, 200);
-  const dashboardText = visibleText(await dashboard.text());
-  assert.match(dashboardText, /Good evening, Rohan/i);
-  assert.match(dashboardText, /Every attempt leaves evidence/i);
-  assert.match(dashboardText, /Demo workspace · sample learner data/i);
+  const dashboardHtml = await dashboard.text();
+  const dashboardText = visibleText(dashboardHtml);
+  assert.match(dashboardText, /Start here · Week 1 of 4/i);
+  assert.match(dashboardText, /Draft three ownership stories/i);
+  assert.match(dashboardText, /Demo workspace/i);
+  assert.match(dashboardText, /0 \/ 6/i);
+  assert.match(dashboardText, /Second Seat \/ Dashboard/i);
+  assert.match(dashboardText, /The Second Seat workspace/i);
+  const secondSeatWeekStrip = dashboardHtml.match(/<ol\b[^>]*class=["'][^"']*week-strip[^"']*["'][^>]*>[\s\S]*?<\/ol>/i)?.[0] ?? "";
+  assert.equal((secondSeatWeekStrip.match(/class=["']week-progress-item week-progress-item--/g) ?? []).length, 4);
+  assert.match(visibleText(secondSeatWeekStrip), /W\s*1[\s\S]*W\s*4/i);
+  assert.doesNotMatch(visibleText(secondSeatWeekStrip), /W\s*5/i);
+  assert.equal((secondSeatWeekStrip.match(/week-progress-item--in-progress/g) ?? []).length, 1);
+  assert.equal((secondSeatWeekStrip.match(/week-progress-item--upcoming/g) ?? []).length, 3);
+  assert.doesNotMatch(dashboardHtml, /member-ops-rail(?:\b|-)/i);
+  assert.doesNotMatch(dashboardText, /Good evening, Rohan|Every attempt leaves evidence|4h 38m|Adaptive mock 08/i);
   assert.doesNotMatch(dashboardText, /fictional learner data/i);
+
+  const secondSeatSidebar = dashboardHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+  assert.doesNotMatch(secondSeatSidebar, /member-plan-card|Current access/i);
+  assert.match(dashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
+  assert.equal((dashboardHtml.match(/<div\b[^>]*class=["'][^"']*member-plan-card member-plan-card-status["']/gi) ?? []).length, 1);
+
+  const library = await request("/learn/library", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(library.status, 200);
+  const libraryHtml = await library.text();
+  assert.match(visibleText(libraryHtml), /100\+\s+Resources\s+Available/i);
+  assert.match(visibleText(libraryHtml), /Choose a category to view its materials/i);
+  assert.match(visibleText(libraryHtml), /All\s+100\+/i);
+  assert.doesNotMatch(visibleText(libraryHtml), /Drive PDF guides/i);
+  assert.doesNotMatch(libraryHtml, /class="library-record-list library-pdf-record-list"/i);
+  assert.doesNotMatch(libraryHtml, /class="library-record library-pdf-record"/i);
+  assert.doesNotMatch(visibleText(libraryHtml), /sysdesign_url-shortener-walkthrough\.pdf/i);
+  assert.doesNotMatch(libraryHtml, /<a[^>]+drive\.google\.com/i);
+
+  for (const pathname of ["/learn/roadmap", "/learn/practice", "/learn/feedback", "/learn/coaching"]) {
+    const sectionResponse = await request(pathname, {
+      headers: { accept: "text/html", cookie: sessionCookie },
+    });
+    assert.equal(sectionResponse.status, 200, pathname);
+    const sectionHtml = await sectionResponse.text();
+    const sectionSidebar = sectionHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+    assert.doesNotMatch(sectionSidebar, /member-plan-card|Current access/i, pathname);
+    assert.match(sectionHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i, pathname);
+  }
+
+  const driveShelf = await readFile(
+    new URL("../app/learn/library/drive-material-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(driveShelf, /className="library-record-open"/i);
+  assert.match(driveShelf, /<LibraryMaterialDialog[\s\S]*driveMaterialViewerSource\(material, title\)/i);
+  assert.doesNotMatch(driveShelf, /<Link\b/i);
+  const pdfShelf = await readFile(
+    new URL("../app/learn/library/pdf-guide-shelf.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(pdfShelf, /<LibraryMaterialDialog[\s\S]*drivePdfViewerSource\(guide, title\)/i);
+  assert.match(pdfShelf, /initialOpen=\{initialFilename === guide\.filename\}/i);
+  assert.match(pdfShelf, /<article className="library-record library-pdf-record"/i);
+  assert.match(pdfShelf, /className="library-record-open"/i);
+  assert.doesNotMatch(pdfShelf, /<button\s+className="library-record library-pdf-record"/i);
+  assert.doesNotMatch(pdfShelf, /Read inside InterviewRunway/i);
+  assert.doesNotMatch(pdfShelf, /drive\.google\.com/i);
+  assert.match(pdfShelf, /pdf-guides/);
+
+  const driveMaterial = await request("/learn/library/material/template-weekly-prep-tracker-docx-yzovxjy1", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(driveMaterial.status, 200);
+  const driveMaterialHtml = await driveMaterial.text();
+  assert.match(visibleText(driveMaterialHtml), /Weekly Prep Tracker/i);
+  assert.match(visibleText(driveMaterialHtml), /Editable Word templates/i);
+  assert.match(visibleText(driveMaterialHtml), /Open material/i);
+  assert.match(visibleText(driveMaterialHtml), /PDF Preparing the PDF preview inside InterviewRunway/i);
+  assert.match(driveMaterialHtml, /class="library-material-viewer"/i);
+  assert.match(driveMaterialHtml, /class="library-material-pdf-state library-material-state"/i);
+  assert.doesNotMatch(visibleText(driveMaterialHtml), /Open in Drive/i);
+  assert.doesNotMatch(driveMaterialHtml, /drive\.google\.com/i);
+  assert.match(driveMaterialHtml, /Original file preserved/i);
+  assert.doesNotMatch(visibleText(driveMaterialHtml), /Material context/i);
+  assert.doesNotMatch(driveMaterialHtml, /class="material-next-step"/i);
+
+  const archivedMaterial = await request("/learn/library/material/vault-readme-md-nqbojpax", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(archivedMaterial.status, 404);
+
+  const materialViewer = await readFile(
+    new URL("../app/learn/library/material-viewer.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(materialViewer, /content\?: string \| null/i);
+  assert.match(materialViewer, /fallbackAssetUrl\?: string \| null/i);
+  assert.match(materialViewer, /materialPreviewCache/i);
+  const previewCache = await readFile(new URL("../app/learn/library/material-preview-cache.ts", import.meta.url), "utf8");
+  assert.match(previewCache, /createTextPdf/i);
+  assert.match(previewCache, /application\/pdf/i);
+  assert.match(materialViewer, /library-material-pdf-frame/i);
+  assert.match(materialViewer, /PDF preview for/i);
+  assert.doesNotMatch(materialViewer, /catalogued in InterviewRunway and will open here/i);
+  assert.match(materialViewer, /in-app PDF preview/i);
+  assert.doesNotMatch(materialViewer, /Allow material access/i);
+  assert.doesNotMatch(materialViewer, /requestAccessToken|accounts\.oauth2|Authorization:.*Bearer/i);
+  assert.doesNotMatch(materialViewer, /drive\.google\.com/i);
+  assert.doesNotMatch(driveShelf, /<Link\b/i);
 
   const roadmap = await request("/learn/roadmap", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -336,10 +1448,12 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.equal(roadmap.status, 200);
   const roadmapHtml = await roadmap.text();
   const roadmapText = visibleText(roadmapHtml);
-  assert.match(roadmapText, /Open learning content/i);
-  assert.match(roadmapText, /View learning brief/i);
-  assert.match(roadmapHtml, /href=["'][^"']*\/learn\/material\/notification-mock["']/i);
-  assert.match(roadmapHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-3-correct["']/i);
+  assert.equal((roadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 6);
+  assert.equal((roadmapText.match(/View in Library/g) ?? []).length, 6);
+  assert.equal((roadmapText.match(/No matching material/g) ?? []).length, 0);
+  assert.match(roadmapHtml, /href=["'][^"']*\/learn\/library\?material=notification-mock(?:&amp;|&)from=roadmap(?:&amp;|&)task=4w-3-mock["']/i);
+  assert.doesNotMatch(roadmapHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-3-correct["']/i);
+  assert.doesNotMatch(roadmapText, /Prepare the interview-day runbook|metrics-pipeline-mock|queue-backlog-mock|Resume profile lab|Rehearse the compensation conversation/i);
 
   const material = await request("/learn/material/notification-mock", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -350,10 +1464,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   const planned = await request("/learn/roadmap/task/4w-3-correct", {
     headers: { accept: "text/html", cookie: sessionCookie },
   });
-  assert.equal(planned.status, 200);
-  const plannedText = visibleText(await planned.text());
-  assert.match(plannedText, /The destination exists; the reviewed lesson does not yet/i);
-  assert.match(plannedText, /Scored feedback loop and re-test worksheet/i);
+  assert.equal(planned.status, 404);
 
   const practice = await request("/learn/practice", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -376,12 +1487,12 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(replayHtml, /data-replay-part-count=["']4["']/i);
   assert.match(
     replayHtml,
-    /\/api\/replay-assets\/mock_coding_dynamic-programming_05\.mp4\.part-00/i,
+    /\/api\/replay-assets\/mock_coding_dynamic-programming_05\.mp4/i,
   );
   assert.doesNotMatch(replayHtml, /data-google-drive-file-id=/i);
   assert.doesNotMatch(replayHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(replayHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(replayHtml, /href=["'][^"']*\/learn\/roadmap\/task\/4w-1-patterns["']/i);
+  assert.doesNotMatch(replayHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const behavioralReplay = await request("/learn/practice/replays/behavioural-prioritizing-under-product-ambiguity-03", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -394,7 +1505,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(behavioralText, /Transcript \/ captions\s+Not supplied/i);
   assert.match(behavioralHtml, /data-replay-part-count=["']3["']/i);
   assert.doesNotMatch(behavioralHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(behavioralHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(behavioralHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const bfsReplay = await request("/learn/practice/replays/coding-bfs-debugging-06", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -407,7 +1518,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(bfsText, /Source unchanged/i);
   assert.match(bfsHtml, /data-replay-part-count=["']4["']/i);
   assert.doesNotMatch(bfsHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(bfsHtml, /href=["'][^"']*\/learn\/material\/graph-traversal["']/i);
+  assert.doesNotMatch(bfsHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const remoteCollaborationReplay = await request("/learn/practice/replays/behavioural-remote-collaboration-06", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -423,7 +1534,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(remoteCollaborationHtml, /data-google-drive-file-id=["']1UdJnFdWLB1jPSLXW3biHcBGFomeCCyxQ["']/i);
   assert.doesNotMatch(remoteCollaborationHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(remoteCollaborationHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(remoteCollaborationHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(remoteCollaborationHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const ownershipFailureReplay = await request("/learn/practice/replays/behavioural-ownership-after-failure-01", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -439,7 +1550,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(ownershipFailureHtml, /data-google-drive-file-id=["']10uxp_B7ia6Zx1JZ7vZODNds7LPpovN3Z["']/i);
   assert.doesNotMatch(ownershipFailureHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(ownershipFailureHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(ownershipFailureHtml, /href=["'][^"']*\/learn\/material\/outage-story["']/i);
+  assert.doesNotMatch(ownershipFailureHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const influenceReplay = await request("/learn/practice/replays/behavioural-leadership-without-manager-title-04", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -455,7 +1566,7 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.doesNotMatch(influenceHtml, /data-google-drive-file-id=["']1lA7PeRlyBNBKaTCAVBTS6JwpqxWT0Y74["']/i);
   assert.doesNotMatch(influenceHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(influenceHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(influenceHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(influenceHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const customerIntegrityReplay = await request("/learn/practice/replays/behavioural-customer-integrity-05", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -470,12 +1581,12 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(customerIntegrityHtml, /data-replay-part-count=["']4["']/i);
   assert.match(
     customerIntegrityHtml,
-    /\/api\/replay-assets\/mock_behavioral_customer-integrity_05\.mp4\.part-00/i,
+    /\/api\/replay-assets\/mock_behavioral_customer-integrity_05\.mp4/i,
   );
   assert.doesNotMatch(customerIntegrityHtml, /data-google-drive-file-id=["']1E8Ikzlbc2dlulNURVvijiy3MFojrzlIO["']/i);
   assert.doesNotMatch(customerIntegrityHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(customerIntegrityHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(customerIntegrityHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(customerIntegrityHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const conflictResolutionReplay = await request("/learn/practice/replays/behavioural-conflict-resolution-02", {
     headers: { accept: "text/html", cookie: sessionCookie },
@@ -490,12 +1601,12 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(conflictResolutionHtml, /data-replay-part-count=["']4["']/i);
   assert.match(
     conflictResolutionHtml,
-    /\/api\/replay-assets\/mock_behavioral_conflict_02\.mp4\.part-00/i,
+    /\/api\/replay-assets\/mock_behavioral_conflict_02\.mp4/i,
   );
   assert.doesNotMatch(conflictResolutionHtml, /data-google-drive-file-id=["']1MTv2BG_lIO8lM3ee0DMykRd26n5G2hRq["']/i);
   assert.doesNotMatch(conflictResolutionHtml, /Allow replay access|Preparing the protected replay/i);
   assert.doesNotMatch(conflictResolutionHtml, /<iframe[^>]+drive\.google\.com/i);
-  assert.match(conflictResolutionHtml, /href=["'][^"']*\/learn\/material\/scope-stories["']/i);
+  assert.doesNotMatch(conflictResolutionHtml, /Open linked learning material|Open linked roadmap task/i);
 
   const newlyIntegratedReplays = [
     ["coding-heap-stream-04", "mock_coding_heap-stream_04.mp4", 4],
@@ -529,10 +1640,13 @@ test("demo sign-in issues a protected session and opens the learner product", as
     assert.equal(integratedReplay.status, 200, slug);
     const integratedHtml = await integratedReplay.text();
     assert.match(integratedHtml, new RegExp(`data-replay-part-count=["']${partCount}["']`, "i"), slug);
-    assert.ok(integratedHtml.includes(`/api/replay-assets/${filename}.part-00`), slug);
+    assert.ok(integratedHtml.includes(`/api/replay-assets/${filename}"`), slug);
+    const escapedFilename = filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    assert.doesNotMatch(integratedHtml, new RegExp(`/api/replay-assets/${escapedFilename}\\.part-00`, "i"), slug);
     assert.doesNotMatch(integratedHtml, /data-google-drive-file-id=/i, slug);
     assert.doesNotMatch(integratedHtml, /Allow replay access|Preparing the protected replay/i, slug);
     assert.doesNotMatch(integratedHtml, /<iframe[^>]+drive\.google\.com/i, slug);
+    assert.doesNotMatch(integratedHtml, /Open linked learning material|Open linked roadmap task/i, slug);
   }
 
   const vaultLogin = await request("/api/demo-session", {
@@ -549,11 +1663,145 @@ test("demo sign-in issues a protected session and opens the learner product", as
   });
   assert.equal(vaultLogin.status, 200);
   const vaultCookie = (vaultLogin.headers.get("set-cookie") ?? "").split(";")[0];
+  const vaultDashboard = await request("/learn", {
+    headers: { accept: "text/html", cookie: vaultCookie },
+  });
+  assert.equal(vaultDashboard.status, 200);
+  const vaultDashboardHtml = await vaultDashboard.text();
+  const vaultDashboardText = visibleText(vaultDashboardHtml);
+  assert.match(vaultDashboardHtml, /data-member-layout=["']vault["']/i);
+  const statusDrawer = vaultDashboardHtml.match(/<details\b[^>]*member-status-drawer[^>]*>/i)?.[0] ?? "";
+  assert.match(statusDrawer, /class=["'][^"']*member-status-drawer/i);
+  assert.doesNotMatch(statusDrawer, /\bopen\b/i);
+  assert.match(vaultDashboardHtml, /<summary\b[^>]*member-status-drawer-toggle/i);
+  assert.doesNotMatch(vaultDashboardHtml, /member-ops-rail-collapsible|member-ops-rail-content/i);
+  assert.match(vaultDashboardText, /Learner data\s+Sample profile/i);
+  const vaultWeekStrip = vaultDashboardHtml.match(/<ol\b[^>]*class=["'][^"']*week-strip[^"']*["'][^>]*>[\s\S]*?<\/ol>/i)?.[0] ?? "";
+  assert.equal((vaultWeekStrip.match(/class=["']week-progress-item week-progress-item--/g) ?? []).length, 12);
+  assert.match(visibleText(vaultWeekStrip), /W\s*1[\s\S]*W\s*12/i);
+  assert.doesNotMatch(visibleText(vaultWeekStrip), /W\s*13/i);
+  assert.equal((vaultWeekStrip.match(/week-progress-item--in-progress/g) ?? []).length, 1);
+  assert.equal((vaultWeekStrip.match(/week-progress-item--upcoming/g) ?? []).length, 11);
+  const vaultSidebar = vaultDashboardHtml.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
+  assert.doesNotMatch(vaultSidebar, /member-plan-card|Current access/i);
+  assert.doesNotMatch(vaultDashboardHtml, /Current tasks/i);
+  assert.match(vaultDashboardHtml, /<section\b[^>]*ops-current-access[^>]*>[\s\S]*?Current access[\s\S]*?<\/section>/i);
+  assert.equal((vaultDashboardHtml.match(/<div\b[^>]*class=["']member-plan-card member-plan-card-status["']/gi) ?? []).length, 1);
+
+  for (const [pathname, section] of [
+    ["/learn/roadmap", "Roadmap"],
+    ["/learn/library", "Library"],
+    ["/learn/practice", "Practice"],
+    ["/learn/feedback", "Feedback"],
+    ["/learn/coaching", "Coach room"],
+  ]) {
+    const sectionResponse = await request(pathname, {
+      headers: { accept: "text/html", cookie: vaultCookie },
+    });
+    assert.equal(sectionResponse.status, 200, pathname);
+    const sectionHtml = await sectionResponse.text();
+    assert.match(sectionHtml, /data-member-layout=["']vault["']/i, pathname);
+    assert.match(sectionHtml, /class=["'][^"']*member-topbar-vault/i, pathname);
+    assert.match(sectionHtml, new RegExp(`Vault(?:\\s*<!-- -->\\s*)* \/(?:\\s*<!-- -->\\s*)*${section}`, "i"), pathname);
+    assert.doesNotMatch(sectionHtml, /member-ops-rail(?:\b|-)/i, pathname);
+  }
+
+  const vaultRoadmap = await request("/learn/roadmap", {
+    headers: { accept: "text/html", cookie: vaultCookie },
+  });
+  assert.equal(vaultRoadmap.status, 200);
+  const vaultRoadmapHtml = await vaultRoadmap.text();
+  const vaultRoadmapText = visibleText(vaultRoadmapHtml);
+  assert.equal((vaultRoadmapHtml.match(/roadmap-week roadmap-week--/g) ?? []).length, 12);
+  assert.equal((vaultRoadmapHtml.match(/roadmap-task-library-button/g) ?? []).length, 24);
+  assert.equal((vaultRoadmapText.match(/View in Library/g) ?? []).length, 24);
+  assert.equal((vaultRoadmapText.match(/No matching material/g) ?? []).length, 0);
+  for (const slug of [
+    "sliding-window",
+    "graph-traversal",
+    "cache-consistency",
+    "rate-limiter",
+    "scope-stories",
+    "outage-story",
+    "us-ats-resume",
+  ]) {
+    assert.match(
+      vaultRoadmapHtml,
+      new RegExp(`href=["'][^"']*/learn/library\\?material=${slug}&amp;from=roadmap&amp;task=[^"']+["']`, "i"),
+      slug,
+    );
+  }
+  for (const filename of [
+    "dsa_traversal-decision-practice-workbook.pdf",
+    "operations_timed-technical-rehearsal-workbook.pdf",
+    "operations_evidence-comparison-correction-workbook.pdf",
+    "operations_final-loop-interview-day-runbook.pdf",
+  ]) {
+    assert.match(
+      vaultRoadmapHtml,
+      new RegExp(`href=["'][^"']*/learn/library\\?pdf=${filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}&amp;from=roadmap&amp;task=[^"']+["']`, "i"),
+      filename,
+    );
+  }
+  assert.doesNotMatch(vaultRoadmapHtml, /href=["'][^"']*\/learn\/roadmap\/task\//i);
+
   const lockedReplay = await request("/learn/practice/replays/coding-dynamic-programming-05", {
     headers: { accept: "text/html", cookie: vaultCookie },
   });
   assert.equal(lockedReplay.status, 200);
   assert.match(visibleText(await lockedReplay.text()), /This replay belongs to the practice layer/i);
+});
+
+test("Foundation demo Today renders the clean starting values", async () => {
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "foundation" }),
+  });
+  assert.equal(login.status, 200);
+
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+  const dashboard = await request("/learn", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+  });
+  assert.equal(dashboard.status, 200);
+  const dashboardText = visibleText(await dashboard.text());
+  assert.match(dashboardText, /Start here · Week 1 of 12/i);
+  assert.match(dashboardText, /0 Plan progress/i);
+  assert.match(dashboardText, /Create the target-role map/i);
+  assert.match(dashboardText, /0 \/ 24/i);
+  assert.match(dashboardText, /Starts at 0m/i);
+  assert.match(dashboardText, /After first study step/i);
+  assert.doesNotMatch(dashboardText, /Friday · Week 2|18 Plan complete|5 \/ 9|2h 14m|Next review Sunday/i);
+});
+
+test("Vault and Second Seat Today use plan-appropriate Next Action introductions", async () => {
+  for (const [preview, description] of [
+    ["foundation", /Create the target-role map/],
+    ["practice", /Draft three ownership stories/],
+  ]) {
+    const login = await request("/api/demo-session", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin: "http://localhost",
+      },
+      body: JSON.stringify({ preview }),
+    });
+    assert.equal(login.status, 200, preview);
+
+    const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+    const dashboard = await request("/learn", {
+      headers: { accept: "text/html", cookie: sessionCookie },
+    });
+    assert.equal(dashboard.status, 200, preview);
+    assert.match(visibleText(await dashboard.text()), description, preview);
+  }
 });
 
 test("analytics contract is present on acquisition and payment surfaces", async () => {
@@ -798,6 +2046,24 @@ test("member demo typography has an explicit legibility floor", async () => {
   assert.match(styles, /\.member-material-card p\s*\{\s*font-size:\s*var\(--member-body\)/);
 });
 
+test("Vault and Second Seat reuse only Human Calibration's existing page background", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(
+    styles,
+    /\.member-shell\[data-member-tier="foundation"\],\s*\.member-shell\[data-member-tier="practice"\],\s*\.member-shell\[data-member-tier="premium"\]\s*\{\s*background:\s*#e9e7e0;\s*\}/,
+  );
+  assert.match(
+    styles,
+    /\.member-shell\[data-member-tier="premium"\] \.readiness-dial::before\s*\{\s*background:\s*#e9e7e0;\s*\}/,
+  );
+});
+
+test("Second Seat keeps the learner profile anchored at the bottom of the sidebar", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(styles, /\.member-shell\[data-member-layout="second-seat"\] \.member-profile-card\s*\{\s*margin-top:\s*auto/);
+});
+
 test("three-layer evidence readouts use body-copy sizing", async () => {
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 
@@ -847,6 +2113,412 @@ test("demo chooser is not constrained by the member application shell", async ()
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 
   assert.doesNotMatch(styles, /\.member-shell\s*,\s*\.demo-login-page\s*\{/);
-  assert.match(styles, /\.member-shell\s*\{[\s\S]*grid-template-columns:\s*232px minmax\(0, 1fr\) 218px/);
+  assert.match(styles, /\.member-shell\s*\{[\s\S]*grid-template-columns:\s*232px minmax\(0, 1fr\)/);
   assert.match(styles, /\.demo-login-layout\s*\{[\s\S]*grid-template-columns:\s*minmax\(390px, \.76fr\) minmax\(0, 1\.24fr\)/);
+});
+
+test("Vault roadmap destinations are complete Foundation lessons", async () => {
+  const roadmap = await readFile(new URL("../app/lib/roadmap-data.ts", import.meta.url), "utf8");
+  const vaultStart = roadmap.indexOf("export const TWELVE_WEEK_PLAN");
+  assert.notEqual(vaultStart, -1);
+
+  const vaultPlan = roadmap.slice(vaultStart);
+  assert.doesNotMatch(vaultPlan, /\bplanned\s*\(/);
+  assert.match(vaultPlan, /\blesson\s*\(/);
+  assert.doesNotMatch(vaultPlan, /queue-backlog-mock|interview-day-run-sheet/);
+});
+
+test("Vault review materials do not point at legacy demo PDFs", async () => {
+  const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const libraryPage = await readFile(new URL("../app/learn/library/page.tsx", import.meta.url), "utf8");
+  const libraryCatalog = await readFile(new URL("../app/learn/library/library-catalog.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(data, /\/demo-materials\/(?:roadmap_4week|dsa_sliding-window)\.(?:pdf|png)/i);
+  assert.match(data, /\/pdf-guides\/roadmap_12week\.pdf/i);
+  assert.match(data, /\/pdf-guides\/dsa_sliding-window\.pdf/i);
+  assert.match(data, /Qualified review required/i);
+  assert.match(libraryPage, /getLibraryCategorySummary\(isLive, profile\.id\)/);
+  assert.match(libraryCatalog, /isLive\s*\n?\s*\? DRIVE_PDF_GUIDES\.filter/);
+  assert.match(libraryCatalog, /driveMaterials:\s*DRIVE_MATERIALS\.filter/);
+  assert.doesNotMatch(libraryCatalog, /profileId === "foundation"\s*\n?\s*\? \[\]/);
+  assert.match(libraryCatalog, /SECOND_SEAT_DEMO_SHELL_SLUGS/);
+  assert.match(libraryCatalog, /roadmap_4week\.pdf/);
+  assert.doesNotMatch(libraryCatalog, /new Set\(\["roadmap_4week\.pdf",\s*"dsa_sliding-window\.pdf"\]\)/);
+  assert.equal(existsSync(new URL("../public/demo-materials/roadmap_4week.pdf", import.meta.url)), false);
+  assert.equal(existsSync(new URL("../public/demo-materials/dsa_sliding-window.pdf", import.meta.url)), false);
+});
+
+test("live Foundation cannot open four-week unpublished briefs", async () => {
+  const taskPage = await readFile(new URL("../app/learn/roadmap/task/[id]/page.tsx", import.meta.url), "utf8");
+  assert.match(taskPage, /roadmapPlanForWeeks\(profile\.roadmapWeeks\)/);
+  assert.match(taskPage, /if \(!isProfileRoadmapTask\)/);
+  assert.match(taskPage, /four-week plan remains unpublished and gated/i);
+});
+
+test("pending Foundation previews cannot be recorded as completed lessons", async () => {
+  const materialPage = await readFile(new URL("../app/learn/material/[slug]/page.tsx", import.meta.url), "utf8");
+  assert.match(materialPage, /material\.availability === "included" && linkedTask/);
+  assert.match(materialPage, /remote-offer-matrix/);
+  assert.match(materialPage, /qualified review before publication/i);
+});
+
+test("live Foundation access takes precedence over a seeded demo cookie", async () => {
+  const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
+
+  assert.match(session, /const state = await resolveWorkspaceProfile\(\);/);
+  assert.match(session, /const \[profile, user\] = await Promise\.all\(\[getDemoProfile\(\), getChatGPTUser\(\)\]\);/);
+  assert.match(session, /if \(profile\) return profile;/);
+  assert.match(session, /getLearnerAccess\(user\.email\)/);
+  assert.match(session, /if \(!access\.vault\)[\s\S]*profile,/);
+  assert.match(session, /authenticated accounts are only upgraded/);
+  assert.match(session, /through getLearnerAccess above/);
+  assert.match(session, /createProfileForPlan\(user, selectedPlan, availablePlans\)/);
+});
+
+test("live Second Seat access selects its own workspace and roadmap", async () => {
+  const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const materialPage = await readFile(new URL("../app/learn/material/[slug]/page.tsx", import.meta.url), "utf8");
+
+  assert.match(session, /if \(plan === "practice"\)[\s\S]*createSecondSeatProfile\([\s\S]*getLearnerProgress\(user\.email, 4\)/);
+  assert.match(paidAccess, /export function createSecondSeatProfile\([\s\S]*roadmapWeeks: 4[\s\S]*plan: "The Second Seat/);
+  assert.match(paidAccess, /selectedPlan = roadmapPlanForWeeks\(config\.roadmapWeeks\)/);
+  assert.match(shell, /\{isLive \? <FocusTimeTracker profileId=\{profile\.id\} \/> : null\}/);
+  assert.match(shell, /PAID SECOND SEAT QA/);
+  assert.match(materialPage, /roadmapPlanForWeeks\(profile\.roadmapWeeks\)/);
+});
+
+test("live workspace headers use plan names instead of prices for active access", async () => {
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(shell, /isLive \? "Vault Plan Active" : "Demo workspace"/);
+  assert.match(shell, /isLive \? "Second Seat Plan Active" : "Demo workspace"/);
+  assert.match(shell, /isLive \? "Human Calibration Plan Active" : "Demo workspace"/);
+  assert.doesNotMatch(shell, /₹799 access active|₹2,499 access active|Human Calibration access active/);
+  assert.match(styles, /\.member-account-status \{[^}]*text-transform: none;/);
+});
+
+test("the configured internal domain receives live Human Calibration full access", async () => {
+  const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const internalAccess = await readFile(new URL("../app/lib/internal-access.ts", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const today = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const checkoutStore = await readFile(new URL("../app/lib/checkout-store.ts", import.meta.url), "utf8");
+  const checkoutPage = await readFile(new URL("../app/checkout/[offer]/page.tsx", import.meta.url), "utf8");
+  const viteConfig = await readFile(new URL("../vite.config.ts", import.meta.url), "utf8");
+
+  assert.match(internalAccess, /INTERNAL_FULL_ACCESS_DOMAIN/);
+  assert.match(paidAccess, /return \{ vault: true, secondSeat: true, humanCalibration: true \}/);
+  assert.match(session, /if \(plan === "premium"\)[\s\S]*createHumanCalibrationProfile\([\s\S]*getLearnerProgress\(user\.email, 4\)/);
+  assert.match(paidAccess, /export function createHumanCalibrationProfile\([\s\S]*id: "premium"[\s\S]*practiceAccess: true[\s\S]*isSecondSeatLive: true[\s\S]*coachingAccess: true/);
+  assert.match(shell, /HUMAN CALIBRATION<br \/>FULL ACCESS ACTIVE/);
+  assert.match(shell, /isLive[\s\S]*href: "\/learn\/coaching", label: "Open Coach room"/);
+  assert.match(today, /profile\.id === "practice"[\s\S]*"₹2,499 Second Seat"[\s\S]*"Human Calibration"/);
+  assert.match(checkoutStore, /hasActiveVaultEntitlement[\s\S]*isInternalFullAccessEmail\(userEmail\)/);
+  assert.match(checkoutPage, /isInternalFullAccessEmail\(user\.email\)[\s\S]*redirect\("\/learn"\)/);
+  assert.match(viteConfig, /INTERNAL_FULL_ACCESS_DOMAIN: process\.env\.INTERNAL_FULL_ACCESS_DOMAIN \?\? ""/);
+});
+
+test("live paid accounts can switch only among their existing entitled plans", async () => {
+  const session = await readFile(new URL("../app/lib/demo-session.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const route = await readFile(new URL("../app/api/learner/plan/route.ts", import.meta.url), "utf8");
+  const actions = await readFile(new URL("../app/components/member-actions.tsx", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const proxy = await readFile(new URL("../proxy.ts", import.meta.url), "utf8");
+
+  assert.match(paidAccess, /export function learnerPlansForAccess\(access: LearnerAccess\)/);
+  assert.match(paidAccess, /export function canAccessLearnerPlan\(/);
+  assert.match(session, /ACTIVE_LEARNER_PLAN_COOKIE/);
+  assert.match(session, /availablePlans\.includes\(preference\)/);
+  assert.match(session, /createProfileForPlan\([\s\S]*plan === "premium"[\s\S]*plan === "practice"/);
+  assert.match(route, /getLearnerAccess\(user\.email\)/);
+  assert.match(route, /canAccessLearnerPlan\(access, selectedPlan\)/);
+  assert.match(route, /httpOnly: true/);
+  assert.match(route, /ACTIVE_LEARNER_PLAN_MAX_AGE_SECONDS/);
+  assert.match(actions, /fetch\("\/api\/learner\/plan"/);
+  assert.match(actions, /credentials: "same-origin"/);
+  assert.match(actions, /cache: "no-store"/);
+  assert.match(actions, /window\.location\.assign\("\/learn"\)/);
+  assert.match(shell, /<LivePlanSwitcher/);
+  assert.match(shell, /profile\.availablePlans/);
+  assert.match(proxy, /Cache-Control", "private, no-store"/);
+  assert.doesNotMatch(session, /const resolveWorkspaceProfile = cache\(/);
+});
+
+test("Foundation demo starts Today with a clean learner state", async () => {
+  const data = await readFile(new URL("../app/lib/demo-data.ts", import.meta.url), "utf8");
+  const todayPage = await readFile(new URL("../app/learn/page.tsx", import.meta.url), "utf8");
+  const todayDashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const memberShell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const roadmapClient = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+
+  const foundationProfile = data.slice(
+    data.indexOf('id: "foundation"'),
+    data.indexOf('id: "practice"'),
+  );
+  assert.match(foundationProfile, /progress: 0/);
+  assert.match(foundationProfile, /streak: 0/);
+  assert.match(foundationProfile, /week: 1/);
+  assert.match(foundationProfile, /completedTaskIds: \[\]/);
+  assert.match(foundationProfile, /nextActionHref: "\/learn\/roadmap\/task\/12w-1-map"/);
+  assert.doesNotMatch(foundationProfile, /progress: 18|week: 2|2h 14m/);
+
+  assert.match(todayPage, /TodayDashboard/);
+  assert.match(todayDashboard, /const isFreshLearner = progress === 0/);
+  assert.match(todayDashboard, /isFreshLearner\s*\?\s*`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/);
+  assert.match(todayDashboard, /const weekProgress = roadmap\.weekProgress/);
+  assert.match(todayDashboard, /const totalPlanTasks = roadmap\.totalTaskCount;/);
+  assert.doesNotMatch(todayDashboard, /Skill progress/);
+  assert.doesNotMatch(todayDashboard, /Continue learning/);
+  assert.doesNotMatch(todayDashboard, /Your progress and next focus/);
+  assert.doesNotMatch(todayDashboard, /Materials placed in context/);
+  assert.match(memberShell, /const isFreshLearner = profile\.progress === 0 && \(profile\.completedTaskIds\?\.length \?\? 0\) === 0;/);
+  assert.match(memberShell, /event: isFreshLearner \? "First study step"/);
+  assert.match(roadmapClient, /roadmapStorageKey\(profileId\)/);
+});
+
+test("fresh Vault learners derive Today and Roadmap state from account progress", async () => {
+  const todayPage = await readFile(new URL("../app/learn/page.tsx", import.meta.url), "utf8");
+  const todayDashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const roadmapClient = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+
+  assert.match(todayPage, /TodayDashboard/);
+  assert.match(todayDashboard, /const roadmap = useRoadmapProgress\(\);/);
+  assert.match(todayDashboard, /const progress = isTracked \? roadmap\.progressPercent : profile\.progress;/);
+  assert.match(
+    todayDashboard,
+    /const todayKicker = isFreshLearner[\s\S]*?`Start here · Week 1 of \$\{profile\.roadmapWeeks\}`/,
+  );
+  assert.match(todayDashboard, /const weekProgress = roadmap\.weekProgress/);
+
+  assert.match(paidAccess, /const currentWeek = roadmapProgressFor\(selectedPlan, progress\.completedTaskIds\)\.currentWeek;/);
+  assert.match(
+    paidAccess,
+    /export function currentFoundationWeek\(completedTaskIds: readonly string\[\]\)[\s\S]*?roadmapProgressFor\(TWELVE_WEEK_PLAN, completedTaskIds\)\.currentWeek/,
+  );
+  assert.doesNotMatch(paidAccess, /Math\.floor\(progress\.progressPercent/);
+
+  const statusFunction = roadmapClient.slice(
+    roadmapClient.indexOf("function getWeekStatus"),
+    roadmapClient.indexOf("function formatWeekStatus"),
+  );
+  assert.match(statusFunction, /if \(weekCompleted === week\.tasks\.length\) return "completed";/);
+  assert.match(statusFunction, /if \(week\.week === activeWeek\) return "in-progress";/);
+  assert.match(statusFunction, /return "upcoming";/);
+  assert.doesNotMatch(statusFunction, /return "in-progress";[\s\S]*return "in-progress";/);
+});
+
+test("Today and Status consume the Roadmap snapshot for both learner tiers", async () => {
+  const progress = await readFile(new URL("../app/lib/learner-progress.ts", import.meta.url), "utf8");
+  const provider = await readFile(new URL("../app/learn/roadmap/learner-progress-client.tsx", import.meta.url), "utf8");
+  const dashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const accessCard = await readFile(new URL("../app/components/current-access-card.tsx", import.meta.url), "utf8");
+  const roadmap = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+  const studyButton = await readFile(new URL("../app/learn/study-progress-button.tsx", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+  const layout = await readFile(new URL("../app/learn/layout.tsx", import.meta.url), "utf8");
+  const loading = await readFile(new URL("../app/learn/loading.tsx", import.meta.url), "utf8");
+
+  assert.match(progress, /roadmapStorageKey\(profileId: string\)/);
+  assert.match(progress, /roadmapProgressFor\([\s\S]*?completedCount[\s\S]*?progressPercent[\s\S]*?currentWeek/);
+  assert.match(provider, /if \(!isLive\)[\s\S]*?window\.localStorage\.getItem\(storageKey\)/);
+  assert.match(provider, /fetch\(`\/api\/learner\/progress\?roadmapWeeks=\$\{roadmapWeeks\}`,[\s\S]*?cache: "no-store"/);
+  assert.match(provider, /const pathname = usePathname\(\)/);
+  assert.match(provider, /\[isLive, pathname, profileId, roadmapWeeks, storageKey, synchronized, weeks\]/);
+  assert.match(dashboard, /const completedLabel = isTracked[\s\S]*?roadmap\.completedCount/);
+  assert.match(dashboard, /const weekProgress = roadmap\.weekProgress/);
+  assert.match(dashboard, /week-progress-item--\$\{week\.status\}/);
+  assert.match(dashboard, /const nextActionDescription = describeNextAction\(profile, nextTask, isFreshLearner\)/);
+  assert.match(dashboard, /function describeNextAction\([\s\S]*?nextTask\.learning\.kind === "material"[\s\S]*?LEARNING_MATERIALS\.find[\s\S]*?nextTask\.learning\.objective/);
+  assert.doesNotMatch(dashboard, /Continue the lesson, then explain your choice aloud before viewing the worked decision tree/);
+  assert.match(accessCard, /progress\.synchronized \? progress\.progressPercent : fallbackProgress/);
+  assert.match(roadmap, /useRoadmapProgress\(\)/);
+  assert.match(roadmap, /accountOverride\?\.completedTaskIds \?\? roadmap\.completedTaskIds/);
+  assert.match(roadmap, /accountOverride\?\.completionActivity \?\? roadmap\.completionActivity/);
+  assert.match(roadmap, /emitRoadmapProgressUpdated\(profileId, \[\.\.\.next\], nextCompletionActivity\)/);
+  assert.match(studyButton, /emitRoadmapProgressUpdated\(\s*profileId,/);
+  assert.match(shell, /<RoadmapProgressProvider[\s\S]*?initialCompleted=\{profile\.completedTaskIds\}/);
+  assert.match(shell, /usePathname\(\)/);
+  assert.match(layout, /<MemberShell profile=\{profile\}>\{children\}<\/MemberShell>/);
+  assert.match(loading, /aria-busy="true"/);
+});
+
+test("dashboard review materials use the in-app library viewer", async () => {
+  const dashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const viewerSource = await readFile(new URL("../app/learn/library/library-material-source.ts", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(dashboard, /<LibraryMaterialDialog[\s\S]*reviewMaterialViewerSource\(material\)/);
+  assert.doesNotMatch(dashboard, /target=["']_blank["']/i);
+  assert.match(viewerSource, /export function reviewMaterialViewerSource\(material: DemoReviewMaterial\)/);
+  assert.match(viewerSource, /mimeType:.*application\/pdf/);
+  assert.match(styles, /\.member-review-material-grid > article/);
+});
+
+test("learner progress persistence is scoped to the selected roadmap", async () => {
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const route = await readFile(new URL("../app/api/learner/progress/route.ts", import.meta.url), "utf8");
+  const roadmap = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+  const studyButton = await readFile(new URL("../app/learn/study-progress-button.tsx", import.meta.url), "utf8");
+
+  assert.match(paidAccess, /export type RoadmapWeeks = 4 \| 12;/);
+  assert.match(paidAccess, /getLearnerProgress\([\s\S]*?roadmapWeeks: RoadmapWeeks = 12/);
+  assert.match(paidAccess, /saveLearnerProgress\([\s\S]*?roadmapWeeks: RoadmapWeeks = 12/);
+  assert.match(paidAccess, /const selectedPlan = roadmapPlanForWeeks\(roadmapWeeks\);/);
+  assert.match(paidAccess, /const preservedTaskIds = storedTaskIds\.filter/);
+  assert.match(paidAccess, /completedTaskIds: JSON\.stringify\(storedTaskIdsForAllPlans\)/);
+  assert.match(route, /searchParams\.get\("roadmapWeeks"\)/);
+  assert.match(route, /roadmapWeeks\?: unknown/);
+  assert.match(route, /roadmapWeeks === 4 && !\(await hasSecondSeatAccess\(user\.email\)\)/);
+  assert.match(roadmap, /completedTaskIds: \[\.\.\.next\], roadmapWeeks/);
+  assert.match(studyButton, /learner\/progress\?roadmapWeeks=\$\{roadmapWeeks\}/);
+  assert.match(studyButton, /completedTaskIds: \[\.\.\.new Set\(\[\.\.\.currentIds, taskId\]\)\],/);
+});
+
+test("learner weekly activity is persisted from dated roadmap completions", async () => {
+  const schema = await readFile(new URL("../db/schema.ts", import.meta.url), "utf8");
+  const migration = await readFile(new URL("../drizzle/0004_true_kang.sql", import.meta.url), "utf8");
+  const focusMigration = await readFile(new URL("../drizzle/0005_perpetual_human_cannonball.sql", import.meta.url), "utf8");
+  const progress = await readFile(new URL("../app/lib/learner-progress.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const provider = await readFile(new URL("../app/learn/roadmap/learner-progress-client.tsx", import.meta.url), "utf8");
+  const roadmap = await readFile(new URL("../app/learn/roadmap/roadmap-client.tsx", import.meta.url), "utf8");
+  const studyButton = await readFile(new URL("../app/learn/study-progress-button.tsx", import.meta.url), "utf8");
+  const focusRoute = await readFile(new URL("../app/api/learner/focus/route.ts", import.meta.url), "utf8");
+  const focusTracker = await readFile(new URL("../app/learn/focus-time-tracker.tsx", import.meta.url), "utf8");
+  const dashboard = await readFile(new URL("../app/learn/today-dashboard.tsx", import.meta.url), "utf8");
+  const shell = await readFile(new URL("../app/components/member-shell.tsx", import.meta.url), "utf8");
+
+  assert.match(schema, /completionActivity: text\("completion_activity"\)/);
+  assert.match(schema, /focusedSeconds: integer\("focused_seconds"\)/);
+  assert.match(migration, /ADD `completion_activity` text DEFAULT '\{\}' NOT NULL/);
+  assert.match(focusMigration, /ADD `focused_seconds` integer DEFAULT 0 NOT NULL/);
+  assert.match(paidAccess, /completionActivity: learnerProgress\.completionActivity/);
+  assert.match(paidAccess, /updatedAt: learnerProgress\.updatedAt/);
+  assert.match(paidAccess, /repairLegacyCompletionActivity\(/);
+  assert.match(paidAccess, /hasNewCompletionActivity\(/);
+  assert.match(paidAccess, /completionActivity: JSON\.stringify\(completionActivity\)/);
+  assert.match(paidAccess, /completedTaskIds\.length !== 1/);
+  assert.match(paidAccess, /dateKeyForTimeZone\(new Date\(\)\)/);
+  assert.match(paidAccess, /else if \(!storedTaskIds\.includes\(taskId\)\)/);
+  assert.match(paidAccess, /roadmapPlanForWeeks\(roadmapWeeks\)/);
+  assert.match(paidAccess, /completionActivity: JSON\.stringify\(nextCompletionActivity\)/);
+  assert.match(progress, /export function weeklyActivityCounts\(/);
+  assert.match(progress, /parseStoredRoadmapProgress\(/);
+  assert.match(progress, /LEARNER_ACTIVITY_EVENT/);
+  assert.match(paidAccess, /export async function recordFocusedTime\(/);
+  assert.match(paidAccess, /focusedSeconds: sql`\$\{learnerProgress\.focusedSeconds\} \+ \$\{seconds\}`/);
+  assert.match(focusRoute, /hasVaultAccess\(user\.email\)/);
+  assert.match(focusRoute, /body\.seconds < 1 \|\| body\.seconds > 300/);
+  assert.match(focusTracker, /FLUSH_INTERVAL_MS = 30_000/);
+  assert.match(focusTracker, /visibilityState/);
+  assert.match(dashboard, /formatFocusedTime\(roadmap\.focusedSeconds\)/);
+  assert.match(dashboard, /roadmap\.nextTask \? "After next study step"/);
+  assert.match(dashboard, /week-strip-status/);
+  assert.match(progress, /LEARNER_TIME_ZONE = "Asia\/Kolkata"/);
+  assert.match(progress, /weeklyActivity: weeklyActivityCounts\(normalizedCompletionActivity\)/);
+  assert.match(provider, /initialCompletionActivity/);
+  assert.match(provider, /readCompletionActivity\(value\.completionActivity\)/);
+  assert.match(roadmap, /serializeStoredRoadmapProgress\(\[\.\.\.next\], nextCompletionActivity\)/);
+  assert.match(roadmap, /readCompletionActivity\(saved\.completionActivity\)/);
+  assert.match(studyButton, /readCompletionActivity\(saved\.completionActivity\)/);
+  assert.match(shell, /FocusTimeTracker profileId=\{profile\.id\}/);
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /\.week-progress-track i \{ position: absolute;/);
+});
+
+test("Second Seat practice is durable, entitlement-gated, and transcript-backed", async () => {
+  const engine = await readFile(new URL("../app/lib/second-seat-engine.ts", import.meta.url), "utf8");
+  const aiEvaluator = await readFile(new URL("../app/lib/second-seat-ai-evaluator.ts", import.meta.url), "utf8");
+  const store = await readFile(new URL("../app/lib/second-seat-store.ts", import.meta.url), "utf8");
+  const paidAccess = await readFile(new URL("../app/lib/paid-access.ts", import.meta.url), "utf8");
+  const viteConfig = await readFile(new URL("../vite.config.ts", import.meta.url), "utf8");
+  const schema = await readFile(new URL("../db/schema.ts", import.meta.url), "utf8");
+  const practice = await readFile(new URL("../app/learn/practice/practice-client.tsx", import.meta.url), "utf8");
+  const feedback = await readFile(new URL("../app/learn/feedback/page.tsx", import.meta.url), "utf8");
+  const feedbackClient = await readFile(new URL("../app/learn/feedback/feedback-client.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const sessionRoute = await readFile(new URL("../app/api/second-seat/sessions/[id]/route.ts", import.meta.url), "utf8");
+
+  assert.match(engine, /SECOND_SEAT_MOCKS/);
+  assert.match(engine, /evaluateSecondSeatSession/);
+  assert.match(engine, /assessSecondSeatAnswer/);
+  assert.match(engine, /minimumConcepts/);
+  assert.match(engine, /irrelevant response/);
+  assert.match(engine, /isQuestionEcho/);
+  assert.match(engine, /repeating the interview question is not enough to score/i);
+  assert.match(engine, /problemFraming|technicalDepth|tradeoffClarity|communication/);
+  assert.match(paidAccess, /isConfiguredTestSecondSeatEmail/);
+  assert.match(paidAccess, /TEST_SECOND_SEAT_EMAILS/);
+  assert.match(paidAccess, /return \{ vault: true, secondSeat: true, humanCalibration: false \}/);
+  assert.match(viteConfig, /TEST_SECOND_SEAT_EMAILS: process\.env\.TEST_SECOND_SEAT_EMAILS \?\? ""/);
+  assert.match(store, /secondSeatSessions/);
+  assert.match(store, /evaluateSecondSeatSession\(mock, answers\)/);
+  assert.match(store, /parseStoredSecondSeatEvaluation\(record\.evaluation, mock, answers\)/);
+  assert.match(store, /version 2 rows retain the exact validated/i);
+  assert.match(schema, /second_seat_sessions/);
+  assert.match(schema, /second_seat_sessions_user_updated_idx/);
+  assert.match(practice, /response is saved only for your Second Seat transcript/i);
+  assert.match(practice, /api\/second-seat\/sessions/);
+  assert.match(practice, /aria-expanded=\{selected\}/);
+  assert.match(practice, /practice-round-context-\$\{candidate\.id\}/);
+  assert.match(practice, /candidate\.turns\[0\]\.prompt/);
+  assert.match(practice, /feedbackHref\(session\.id, isLive\)/);
+  assert.match(practice, /feedbackHref\(sessionId, isLive\)/);
+  assert.match(practice, /MINIMUM_SECOND_SEAT_ANSWER_CHARACTERS/);
+  assert.match(practice, /MAXIMUM_SECOND_SEAT_ANSWER_CHARACTERS/);
+  assert.match(practice, /Evaluating your answers/);
+  assert.match(practice, /id="practice-response-error" role="alert"/);
+  assert.match(practice, /aria-describedby=\{error \? "practice-response-guidance practice-response-error"/);
+  assert.ok(
+    practice.indexOf('id="practice-response-error"') > practice.indexOf('onClick={() => void submit()}'),
+    "the submit warning should render immediately after the submit action",
+  );
+  assert.doesNotMatch(practice, /fixed three-turn sequence|No AI evaluation occurred|Use a sample response/i);
+  assert.match(feedback, /getLatestCompletedSecondSeatSession/);
+  assert.match(feedback, /getSecondSeatSession/);
+  assert.match(feedback, /requestedSessionId/);
+  assert.match(feedback, /selectedSession\?\.status === "completed"/);
+  assert.match(feedback, /findSecondSeatMock\(feedbackSession\.mockId\)/);
+  assert.match(feedback, /secondSeat=\{profile\.id === "practice" \|\| profile\.id === "premium" \|\| profile\.isSecondSeatLive === true\}/);
+  assert.match(feedbackClient, /Question evaluated/);
+  assert.match(feedbackClient, /Your original answer/);
+  assert.match(feedbackClient, /What is incorrect/);
+  assert.match(feedbackClient, /What is missing/);
+  assert.match(feedbackClient, /Improved answer/);
+  assert.match(feedbackClient, /number: "01", label: "Summary"/);
+  assert.match(feedbackClient, /number: "02", label: "Answer review"/);
+  assert.doesNotMatch(feedbackClient, /label: "Plan changes"/);
+  assert.match(styles, /\.feedback-workspace--second-seat \.feedback-tabs button\[aria-selected="true"\] > span \{ color: #fff; \}/);
+  const secondSeatFeedback = feedbackClient.slice(
+    feedbackClient.indexOf("function SecondSeatFeedbackExperience"),
+    feedbackClient.indexOf("function SecondSeatFeedbackTabs"),
+  );
+  assert.doesNotMatch(secondSeatFeedback, /feedback-panel-actions/);
+  assert.match(feedbackClient, /Why this would score higher/);
+  assert.match(feedback, /feedback-empty/);
+  assert.match(feedback, /const isLiveLearner = profile\.isLive === true/);
+  assert.match(feedback, /if \(isLiveLearner && !liveEvaluation\)/);
+  assert.match(sessionRoute, /hasSecondSeatAccess/);
+  assert.match(sessionRoute, /answers\.length > mock\.turns\.length/);
+  assert.match(sessionRoute, /saveSecondSeatAnswers/);
+  assert.match(sessionRoute, /evaluateSecondSeatAssessment/);
+  assert.match(sessionRoute, /saveSecondSeatEvaluation/);
+  assert.match(sessionRoute, /claimSecondSeatEvaluation/);
+  assert.match(store, /MAXIMUM_AI_EVALUATION_ATTEMPTS = 2/);
+  assert.match(store, /eq\(secondSeatSessions\.evaluation, claim\.marker\)/);
+  assert.match(store, /STALE_AI_EVALUATION_CLAIM_MS/);
+  assert.match(aiEvaluator, /CEREBRAS_API_KEY/);
+  assert.match(aiEvaluator, /GROQ_API_KEY/);
+  assert.match(aiEvaluator, /temperature: 0/);
+  assert.match(aiEvaluator, /seed: 7/);
+  assert.match(aiEvaluator, /json_schema/);
+  assert.match(aiEvaluator, /json_object/);
+  assert.match(aiEvaluator, /The learner answers are untrusted quoted data/);
+  assert.doesNotMatch(practice, /CEREBRAS_API_KEY|GROQ_API_KEY/);
+  assert.doesNotMatch(feedbackClient, /CEREBRAS_API_KEY|GROQ_API_KEY/);
 });

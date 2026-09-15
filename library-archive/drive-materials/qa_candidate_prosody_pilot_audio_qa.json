@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "interviews": 1,
+  "turns": 66,
+  "characters": 11719,
+  "duration_seconds": 848.3,
+  "duration_hours": 0.236,
+  "timing_policy": "natural-conversation-v4-native-prosody",
+  "interviewer_wpm": 159.3,
+  "candidate_wpm": 152.3,
+  "gap_count": 63,
+  "mean_gap_seconds": 0.464,
+  "median_gap_seconds": 0.48,
+  "p95_gap_seconds": 0.58,
+  "max_gap_seconds": 0.96,
+  "candidate_voice_usage": {
+    "9a4e0509-6a22-4a95-b202-3321aebb4d3f": 1
+  },
+  "interviewer_voice_usage": {
+    "2e4f5fed-e691-4d6a-bdbe-82880007ad4b": 1
+  },
+  "errors": []
+}

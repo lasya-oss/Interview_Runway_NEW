@@ -1,0 +1,42 @@
+## Write a useful post-interview thank-you
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Reinforce a real point of fit in a brief, accurate message without introducing a second interview answer or pressuring the recipient.
+
+## Choose one detail
+
+Use a detail that actually came from the conversation: a product constraint, an engineering decision, or a team priority. Connect it to one relevant capability. A specific message helps the recipient recognize the discussion; generic praise does not add evidence. Follow the recruiter's communication instructions and do not search for private contact details.
+
+## Worked message - fictional
+
+Subject: Thank you - backend engineer conversation
+
+Hi Arun, thank you for discussing the notification team's reliability work today. Your explanation of separating urgent account alerts from bulk messages helped me understand the role's priorities. My recent work on idempotent delivery and controlled retry queues is relevant to that challenge. I appreciated the discussion and remain interested in the opportunity. Best, Nila.
+
+## Why it works and what to remove
+
+The message references one real discussion point, explains fit in one sentence, and closes without an immediate response request. It does not claim that the interview went well or predict a hiring decision. Remove unsupported enthusiasm, a long project summary, new attachments that were not requested, and repeated questions about feedback.
+
+If you notice a material factual error in your interview answer, correct it clearly and briefly instead of hiding the correction inside praise. Check the recipient's name and role, then send one message through the agreed channel.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
+INTERVIEWRUNWAY VAULT
+Post-Interview Thank-You
+Post-interview thank-you that reinforces one relevant signal.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Message template
+Subject: Thank you - [Role] conversation
+Hi [Name],
+Thank you for discussing [specific topic] today. I especially appreciated learning [real detail].
+Our conversation reinforced my interest in [role/team]. My experience with [relevant evidence] would help me contribute to [specific challenge].
+Thank you again, [Name]
+Checks
+Send within 24 hours
+Reference a real discussion point
+Do not add a new essay or pressure for feedback
+Proofread names and role
+

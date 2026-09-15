@@ -1,0 +1,47 @@
+{
+  "asset_id": "pdf.company.walmart-global-tech",
+  "company": "Walmart Global Tech",
+  "research_status": "requires_named_human_verification_before_publish",
+  "method": "Original practice prompts derived from public company product, engineering, careers, and role context. No verbatim proprietary question set was copied.",
+  "profile": {
+    "domain": "global retail technology",
+    "emphases": [
+      "commerce scale",
+      "supply chain",
+      "operational reliability"
+    ]
+  },
+  "source_requirements": {
+    "minimum_independent_sources": 3,
+    "recent_source_required": true,
+    "verbatim_copy_prohibited": true
+  },
+  "sources": [
+    {
+      "url": "https://walmart.com/",
+      "publisher": "Walmart Global Tech",
+      "source_type": "official_company",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    },
+    {
+      "url": "https://www.glassdoor.com/Interview/Walmart-Global-Tech-Interview-Questions-E3293060.htm",
+      "publisher": "glassdoor",
+      "source_type": "public_interview_discussion_or_guide",
+      "date": "accessed 2026-07-18",
+      "recent": false,
+      "use": "Company/role context and current preparation themes; paraphrase only.",
+      "verification": "candidate_source_requires_named_human_review"
+    }
+  ],
+  "frequency_claims": [],
+  "exclusion_if_gate_fails": true,
+  "automated_collection": {
+    "query": "\"Walmart Global Tech\" software engineer interview official careers engineering Glassdoor 2026",
+    "collected_at": "2026-07-18",
+    "candidate_count": 2,
+    "human_verification_complete": false
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.cache-invalidation.01",
+  "filename": "sysdesign_cache-invalidation_01.mp4",
+  "title": "Cache Invalidation Strategies",
+  "category": "sysdesign",
+  "topic": "cache-invalidation",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 801,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Define how cached representations become fresh enough after authoritative data changes.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "TTL",
+        "event invalidation",
+        "versioned keys",
+        "write-through",
+        "and stale tolerance."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Lost invalidations",
+        "broad purges",
+        "race conditions",
+        "and cascading misses."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

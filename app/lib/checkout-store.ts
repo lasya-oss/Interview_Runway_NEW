@@ -5,6 +5,11 @@ import {
   entitlements,
   paddleEvents,
 } from "@/db/schema";
+import {
+  isConfiguredTestFoundationEmail,
+  isConfiguredTestSecondSeatEmail,
+  isInternalFullAccessEmail,
+} from "@/app/lib/paid-access";
 import { VAULT_AMOUNT_MINOR, VAULT_CURRENCY } from "@/app/lib/paddle";
 
 export type CheckoutSessionRecord = typeof checkoutSessions.$inferSelect;
@@ -46,6 +51,14 @@ export async function countRecentCheckoutSessions(userEmail: string) {
 }
 
 export async function hasActiveVaultEntitlement(userEmail: string) {
+  if (
+    isInternalFullAccessEmail(userEmail) ||
+    isConfiguredTestFoundationEmail(userEmail) ||
+    isConfiguredTestSecondSeatEmail(userEmail)
+  ) {
+    return true;
+  }
+
   const [entitlement] = await (await getDb())
     .select({ id: entitlements.id })
     .from(entitlements)

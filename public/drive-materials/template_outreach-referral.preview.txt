@@ -1,0 +1,39 @@
+## Make a referral easy to assess
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Ask someone to evaluate fit before asking them to attach their name to an application.
+
+## Prepare before asking
+
+Read the exact opening and choose two requirements you genuinely meet. Provide the role link or identifier, a current resume, a short fit summary, and accurate location facts. A person should not need to reconstruct your background or search for the vacancy to decide whether they are comfortable helping.
+
+## Worked request - fictional
+
+Hi Dev, I hope you are well. I am considering the backend engineer opening on OrbitDesk's notification team. My work on idempotent delivery and service operations appears aligned with the role's reliability requirements. Would you be comfortable taking a quick look at my resume and telling me whether the fit seems credible? If so, and if you are comfortable referring me, I would appreciate it. No pressure either way. I have included the role identifier and my resume in this message.
+
+## What makes the request respectful
+
+It asks for judgment, gives useful evidence, and makes declining easy. If the contact does not know your work, do not imply a close relationship or ask them to endorse claims they cannot assess. If they agree, send one organized packet and follow their process. Thank them regardless of the hiring outcome.
+
+Practice: compress your fit summary into three sentences: target role, two relevant capabilities, and one evidence-rich result. Remove generic praise and explain any important constraint honestly.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
+INTERVIEWRUNWAY VAULT
+Referral Request Message
+Referral request that lets the other person assess fit before attaching their name.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Message template
+Hi [Name] - I hope you are well. I am considering [role + link] at [company]. My background in [two requirements] and [one result] appears aligned.
+Would you be comfortable taking a quick look at my resume and telling me whether the fit seems credible? If so, and if you are comfortable referring me, I would appreciate it. No pressure either way.
+Resume: [link] | Role: [link]
+Referral packet
+Role link and ID
+One-page resume
+Three-sentence fit summary
+Location/work-authorization facts
+Deadline, if real
+

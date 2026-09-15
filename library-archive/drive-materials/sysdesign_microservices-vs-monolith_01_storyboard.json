@@ -1,0 +1,83 @@
+{
+  "asset_id": "video.sysdesign.microservices-vs-monolith.01",
+  "filename": "sysdesign_microservices-vs-monolith_01.mp4",
+  "title": "Microservices vs Monolith: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "microservices-vs-monolith",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 810,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Choose service boundaries only when organizational and scaling benefits exceed distributed-system costs.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Ownership",
+        "deployment cadence",
+        "data boundaries",
+        "failure isolation",
+        "and observability."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Chatty calls",
+        "shared databases",
+        "operational sprawl",
+        "and premature decomposition."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

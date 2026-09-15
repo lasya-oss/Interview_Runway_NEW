@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "timing_policy": "natural-conversation-v2",
+  "samples": [
+    {
+      "interview_id": "mock_recruiter_remote-saas-backend_01",
+      "integrated_lufs": -16.4,
+      "true_peak_dbfs": -1.4
+    },
+    {
+      "interview_id": "mock_coding_sliding-window_01",
+      "integrated_lufs": -17.2,
+      "true_peak_dbfs": -1.3
+    },
+    {
+      "interview_id": "mock_sysdesign_url-shortener_01",
+      "integrated_lufs": -17.5,
+      "true_peak_dbfs": -1.4
+    },
+    {
+      "interview_id": "mock_behavioral_ownership-failure_01",
+      "integrated_lufs": -18.0,
+      "true_peak_dbfs": -1.2
+    },
+    {
+      "interview_id": "mock_manager_backend-project_01",
+      "integrated_lufs": -17.5,
+      "true_peak_dbfs": -1.4
+    }
+  ],
+  "accepted_integrated_lufs_range": [
+    -18.0,
+    -15.0
+  ],
+  "accepted_true_peak_max_dbfs": -1.0
+}

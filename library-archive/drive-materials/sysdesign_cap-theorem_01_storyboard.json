@@ -1,0 +1,79 @@
+{
+  "asset_id": "video.sysdesign.cap-theorem.01",
+  "filename": "sysdesign_cap-theorem_01.mp4",
+  "title": "CAP Theorem: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "cap-theorem",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 818,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "During a network partition, a distributed operation must choose between a consistent response and an available response.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Define the operation",
+        "consistency guarantee",
+        "failure model",
+        "and user-visible fallback."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Treating CAP as a permanent two-of-three menu or ignoring latency and normal-operation tradeoffs."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+1
+00:00:00,000 --> 00:00:09,950
+This lesson builds an interview-ready mental model for Two Pointers, with emphasis on recognition and reusable template. The
+
+2
+00:00:10,000 --> 00:00:19,950
+goal is not to memorize a code shape. The goal is to recognize when the pattern is justified,
+
+3
+00:00:20,000 --> 00:00:29,950
+name the invariant before implementation, and explain why every pointer, state update, or recursive step preserves correctness. The
+
+4
+00:00:30,000 --> 00:00:39,950
+core mental model is simple: Maintain two positions whose movement discards a provably irrelevant region after every comparison.
+
+5
+00:00:40,000 --> 00:00:49,950
+During an interview, say the model out loud before touching the editor. That gives the interviewer a testable
+
+6
+00:00:50,000 --> 00:00:59,950
+plan and gives you a reference point when edge cases appear. Strong
+
+7
+00:01:00,000 --> 00:01:09,950
+cues include sorted input, pair or triplet target, in-place compaction, and opposite-end comparison. These phrases are evidence, not
+
+8
+00:01:10,000 --> 00:01:19,950
+proof. Translate the prompt into three questions: what part of the input is active, what summary changes incrementally,
+
+9
+00:01:20,000 --> 00:01:29,950
+and what decision lets you discard work permanently? If those answers line up with this pattern, proceed. If
+
+10
+00:01:30,000 --> 00:01:39,950
+the prompt requires arbitrary reordering, nonlocal updates, or a guarantee the pattern cannot provide, choose another tool. A
+
+11
+00:01:40,000 --> 00:01:49,950
+disciplined candidate explains both why a pattern fits and what would make it fail. Write the invariant in
+
+12
+00:01:50,000 --> 00:01:59,950
+one sentence: Everything outside the active pointer range has already been classified
+
+13
+00:02:00,000 --> 00:02:09,950
+or cannot improve the answer. Treat that sentence as a contract. Before the loop or recursion begins, show
+
+14
+00:02:10,000 --> 00:02:19,950
+why it is true. For every update, explain why it remains true. At termination, connect it directly to
+
+15
+00:02:20,000 --> 00:02:29,950
+the returned answer. This structure turns code narration into a short correctness proof. It also exposes common bugs
+
+16
+00:02:30,000 --> 00:02:39,950
+early: if a variable cannot be connected to the invariant, it may be unnecessary or updated at the
+
+17
+00:02:40,000 --> 00:02:49,950
+wrong time. Use this sequence: name what each pointer represents, prove which pointer can move, handle equality explicitly,
+
+18
+00:02:50,000 --> 00:02:59,950
+and decide whether order must be preserved. Start with the clearest correct
+
+19
+00:03:00,000 --> 00:03:09,950
+implementation, then discuss optimization. Name boundary conventions explicitly. If duplicates, empty inputs, or invalid parameters change behavior, decide
+
+20
+00:03:10,000 --> 00:03:19,950
+that behavior before coding. Keep the implementation vocabulary aligned with your explanation: names such as left, right, distance,
+
+21
+00:03:20,000 --> 00:03:29,950
+parent, count, or best should describe their role, not their type. This makes the dry run and test
+
+22
+00:03:30,000 --> 00:03:39,950
+discussion much faster. Use this representative example: In a sorted pair-sum search, a sum below target forces the
+
+23
+00:03:40,000 --> 00:03:49,950
+left pointer right; moving right cannot increase the sum. Before calculating, predict what the state should mean after
+
+24
+00:03:50,000 --> 00:03:59,950
+the first meaningful step. Then trace at least one normal transition, one
+
+25
+00:04:00,000 --> 00:04:09,950
+boundary transition, and one transition that changes the best answer. Do not narrate every assignment. Narrate the decisions
+
+26
+00:04:10,000 --> 00:04:19,950
+that rule out alternatives. In a live interview, a small table with input position, active state, and current
+
+27
+00:04:20,000 --> 00:04:29,950
+answer is usually enough to make the reasoning visible. The target analysis is: O(n) after sorting, or O(n
+
+28
+00:04:30,000 --> 00:04:39,950
+log n) including a required sort; often O(1) auxiliary space. Explain the bound by counting operations, not by
+
+29
+00:04:40,000 --> 00:04:49,950
+pointing at the visual nesting of loops. A nested loop can still be linear when a pointer moves
+
+30
+00:04:50,000 --> 00:04:59,950
+only forward across the entire execution. Conversely, a short implementation can hide
+
+31
+00:05:00,000 --> 00:05:09,950
+expensive copies, slicing, sorting, or repeated hashing. State time, auxiliary space, output space when relevant, and the assumptions
+
+32
+00:05:10,000 --> 00:05:19,950
+behind the bound. The most common mistakes are moving both pointers without proof, ignoring duplicate handling, sorting when
+
+33
+00:05:20,000 --> 00:05:29,950
+original indices matter, and off-by-one loop bounds. Test each one deliberately. Use an empty input, a single item,
+
+34
+00:05:30,000 --> 00:05:39,950
+all-equal values, no valid answer, an answer at the first or last position, and the smallest input that
+
+35
+00:05:40,000 --> 00:05:49,950
+forces the main state transition. For numeric problems, add zero, negative values, and overflow-sized totals when the prompt
+
+36
+00:05:50,000 --> 00:05:59,950
+permits them. A good final check is to restate the invariant and
+
+37
+00:06:00,000 --> 00:06:09,950
+verify every mutation preserves it. A concise talk track is: I see Two Pointers because the prompt contains
+
+38
+00:06:10,000 --> 00:06:19,950
+the relevant structural cues. My state will represent the active portion of the input, and my invariant is
+
+39
+00:06:20,000 --> 00:06:29,950
+the contract I just stated. I will update one boundary or decision at a time, restore validity when
+
+40
+00:06:30,000 --> 00:06:39,950
+necessary, and record the answer only when the invariant guarantees it is meaningful. The resulting complexity follows from
+
+41
+00:06:40,000 --> 00:06:49,950
+the bounded number of state transitions. I will dry-run a boundary case before I call the solution complete.
+
+42
+00:06:50,000 --> 00:06:59,950
+Practice in three passes. First, classify six prompts without coding and write
+
+43
+00:07:00,000 --> 00:07:09,950
+only the state and invariant. Second, implement two canonical problems from a blank editor while speaking the proof.
+
+44
+00:07:10,000 --> 00:07:19,950
+Third, take one near-miss problem where this pattern looks tempting but is wrong, and explain the disqualifying condition.
+
+45
+00:07:20,000 --> 00:07:29,950
+Revisit the set after forty-eight hours. A pattern counts as learned only when you can identify it, reject
+
+46
+00:07:30,000 --> 00:07:39,950
+it when inappropriate, implement it, test it, and explain its complexity without notes. Finish by writing one new
+
+47
+00:07:40,000 --> 00:07:49,950
+edge case and predicting the result before running code; that prediction is evidence that the mental model, not
+
+48
+00:07:50,000 --> 00:07:59,950
+the syntax, is doing the work.

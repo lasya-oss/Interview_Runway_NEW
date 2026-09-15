@@ -1,0 +1,82 @@
+{
+  "asset_id": "video.sysdesign.database-replication.01",
+  "filename": "sysdesign_database-replication_01.mp4",
+  "title": "Database Replication: Core model and tradeoffs",
+  "category": "sysdesign",
+  "topic": "database-replication",
+  "target_duration_minutes": 10,
+  "transcript_word_count": 813,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Copy data across nodes to improve read scale and resilience while managing lag and failover.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Leader/follower vs multi-leader",
+        "sync level",
+        "read routing",
+        "and recovery point."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Replication lag",
+        "split brain",
+        "lost writes",
+        "and failover storms."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

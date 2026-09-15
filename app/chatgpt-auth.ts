@@ -9,6 +9,7 @@ export type ChatGPTUser = {
   displayName: string;
   email: string;
   fullName: string | null;
+  subject: string;
 };
 
 const SIGN_IN_PATH = "/sign-in";
@@ -24,6 +25,7 @@ export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
     displayName: session.name ?? session.email,
     email: session.email,
     fullName: session.name,
+    subject: session.subject,
   };
 }
 

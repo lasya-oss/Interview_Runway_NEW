@@ -1,0 +1,55 @@
+{
+  "preflight": {
+    "mode": "execute",
+    "interviews": 1,
+    "turns": 66,
+    "requests_planned_before_resume": 8,
+    "characters": 11719,
+    "target_hours": 0.3,
+    "candidate_voice_usage": {
+      "9a4e0509-6a22-4a95-b202-3321aebb4d3f": 3,
+      "75f05e9b-c84a-4eab-9f0d-c5c88fe88799": 3,
+      "e7cc4201-8ebc-4376-a4cf-78ca85142110": 3,
+      "e5b9d67b-885e-4306-b7be-3366c6e26d41": 3,
+      "8b55b7c5-4c05-4968-a80e-c91e152d58b9": 3,
+      "19e0687c-bbd8-4398-9844-512ba01981ee": 3,
+      "efb6d51d-ce64-4ec3-bacc-5f8e3a2594db": 3,
+      "b6f9907b-69fb-4bdb-a4f8-1b39c916602f": 3,
+      "2965944c-5668-4039-983e-02245229e5e5": 3,
+      "32ab6304-5b90-45d3-a523-15fdd53e70c8": 3
+    },
+    "interviewer_voice_usage": {
+      "2e4f5fed-e691-4d6a-bdbe-82880007ad4b": 8,
+      "3b8223cb-30e4-4472-9952-21f89f20548d": 8,
+      "8b9ed861-3382-455d-9c03-a40671943d6b": 7,
+      "cb1a4fae-dad5-4729-bd73-a43f570b9117": 7
+    }
+  },
+  "results": [
+    {
+      "id": "mock_recruiter_remote-saas-backend_01",
+      "state": "built",
+      "characters": 11719
+    }
+  ],
+  "spend_ledger": {
+    "schema_version": "interviewrunway.hume-spend-ledger.v1",
+    "reserved_characters": 651966,
+    "request_attempts": 286,
+    "created_at": "2026-07-19T21:39:55Z",
+    "last_reservation": {
+      "interview_id": "mock_recruiter_remote-saas-backend_01",
+      "turn_indexes": [
+        54,
+        56,
+        58,
+        60,
+        62,
+        64,
+        66
+      ],
+      "characters": 754,
+      "at": "2026-07-20T04:31:32Z"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+ALTER TABLE `learner_progress` ADD `completion_activity` text DEFAULT '{}' NOT NULL;

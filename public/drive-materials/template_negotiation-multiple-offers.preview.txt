@@ -1,0 +1,43 @@
+## Use real alternatives without turning them into threats
+
+Worked example - fictional. Names, organizations, dates, amounts, metrics, and outcomes below are invented to demonstrate the method. Do not copy them as your own experience. Use only facts you can explain and support.
+
+Learning objective: Communicate a genuine competing deadline and one comparable package fact while protecting confidentiality and maintaining a credible decision process.
+
+## Compare before mentioning
+
+Verify that the alternative is real and understand its currency, fixed versus variable components, engagement model, operating expectations, and deadline. A larger headline is not automatically a better package. Only disclose information you are permitted and comfortable to share. The template is a communication aid, not a market-price or legal determination.
+
+## Worked message - fictional
+
+Subject: Offer timing and package discussion
+
+Hi Riya, I want to be transparent that I have another written offer with a decision date of 18 September. Your role remains compelling because of the end-to-end service ownership and the team's reliability priorities. After comparing the same annual fixed-cash component under the stated engagement models, the other package is stronger on fixed compensation. Is there flexibility to improve that component? I would appreciate knowing what is possible by 16 September so I can make a considered decision. Best, Nila.
+
+## Boundaries that preserve credibility
+
+The message gives a real deadline, identifies the component, and asks a question without demanding a match or promising acceptance. If you choose to name an amount, state the currency and time unit and distinguish guaranteed from conditional value. Never forward a confidential offer letter simply because someone asks; consider what can be summarized instead.
+
+Decide in advance what you will do if the package cannot change. Thank the team for a clear answer, compare the full operating reality, and communicate your final decision promptly. Never fabricate an offer, deadline, or willingness to accept.
+
+# Reusable template
+
+The personal-entry fields below are intentional. Use your own truthful information; the completed example above teaches the method and is not your record. The original editable Word template is unchanged.
+
+INTERVIEWRUNWAY VAULT
+Multiple-Offer Leverage Email
+Multiple-offer leverage email that is factual, respectful, and deadline-aware.
+How to use: Replace bracketed fields, delete instructions that do not apply, and keep every claim truthful and interview-defensible.
+Email template
+Subject: Offer timing and package discussion
+Hi [Name],
+I want to be transparent that I have another written offer with a decision date of [date]. InterviewRunway note: disclose only real, documentable facts.
+Your role remains compelling because [specific reason]. The other package is [high-level comparable fact, if useful]. If there is flexibility to improve [specific component] to [target], I would be ready to prioritize this opportunity.
+Could you let me know what is possible by [reasonable date]?
+Best, [Name]
+Guardrails
+Do not fabricate an offer or deadline
+Compare equivalent annual cash and risk
+Avoid forwarding confidential offer letters unless comfortable and permitted
+Leave the relationship intact if the answer is no
+

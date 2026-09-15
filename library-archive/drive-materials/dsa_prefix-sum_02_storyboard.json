@@ -1,0 +1,81 @@
+{
+  "asset_id": "video.dsa.prefix-sum.02",
+  "filename": "dsa_prefix-sum_02.mp4",
+  "title": "Prefix Sum: Worked interview problem",
+  "category": "dsa",
+  "topic": "prefix-sum",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 839,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Mental model",
+      "bullets": [
+        "Precompute cumulative totals so any range aggregate becomes a difference of two prefix states.",
+        "Recognition before memorization",
+        "Name the invariant first"
+      ]
+    },
+    {
+      "title": "Recognition cues",
+      "bullets": [
+        "many range-sum queries",
+        "subarray sum target",
+        "balance of categories",
+        "immutable array aggregation"
+      ]
+    },
+    {
+      "title": "State contract",
+      "bullets": [
+        "prefix[i] represents exactly the first i elements, making range [l, r) equal prefix[r] - prefix[l].",
+        "Prove initialization",
+        "Preserve on every update"
+      ]
+    },
+    {
+      "title": "Implementation sequence",
+      "bullets": [
+        "choose a zero-length prefix",
+        "define interval convention",
+        "combine with a frequency map for target subarrays",
+        "promote numeric type when sums grow"
+      ]
+    },
+    {
+      "title": "Worked reasoning",
+      "bullets": [
+        "A subarray ending at current prefix P sums to k for every earlier prefix P-k.",
+        "Trace one boundary transition",
+        "Narrate decisions, not assignments"
+      ]
+    },
+    {
+      "title": "Complexity proof",
+      "bullets": [
+        "O(n) preprocessing and O(1) range queries, or O(n) for target-subarray counting with a map.",
+        "Count total transitions",
+        "Call out hidden copies or sorts"
+      ]
+    },
+    {
+      "title": "Failure modes",
+      "bullets": [
+        "off-by-one ranges",
+        "forgetting the initial zero prefix",
+        "integer overflow",
+        "using it for frequently updated arrays without a Fenwick tree"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Recognize",
+        "State the invariant",
+        "Implement",
+        "Dry-run",
+        "Prove complexity"
+      ]
+    }
+  ]
+}

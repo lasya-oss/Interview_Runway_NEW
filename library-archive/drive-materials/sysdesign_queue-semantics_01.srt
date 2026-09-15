@@ -1,0 +1,191 @@
+1
+00:00:00,000 --> 00:00:13,700
+This lesson develops an interview-ready approach to Queue Delivery Semantics. The central model is: Choose delivery and ordering
+
+2
+00:00:13,750 --> 00:00:27,450
+guarantees together with consumer idempotency and recovery behavior. Begin by clarifying the product behavior rather than naming technologies.
+
+3
+00:00:27,500 --> 00:00:41,200
+Ask who uses the system, what the critical write and read paths are, which operations must be correct,
+
+4
+00:00:41,250 --> 00:00:54,950
+and which outcomes may be delayed. State two or three non-goals. This prevents a familiar architecture from being
+
+5
+00:00:55,000 --> 00:01:08,700
+forced onto the wrong product. Separate functional requirements from quality attributes. Functional requirements describe user-visible actions and state
+
+6
+00:01:08,750 --> 00:01:22,450
+changes. Quality attributes describe scale, latency, availability,
+
+7
+00:01:22,500 --> 00:01:36,200
+durability, consistency, privacy, and cost. Pick the two attributes that drive architecture and say why. Avoid promising maximum
+
+8
+00:01:36,250 --> 00:01:49,950
+consistency, maximum availability, minimum latency, and minimum cost simultaneously. A strong interview answer makes the tradeoff visible and
+
+9
+00:01:50,000 --> 00:02:03,700
+ties it to a user consequence. Use rounded assumptions for daily active users, peak requests per second, read-to-write
+
+10
+00:02:03,750 --> 00:02:17,450
+ratio, payload size, retention, and replication. Calculate only values that influence a decision. Label every assumption and keep
+
+11
+00:02:17,500 --> 00:02:31,200
+units on the page. An estimate is useful when it changes partition count, storage tier, cache capacity, or
+
+12
+00:02:31,250 --> 00:02:44,950
+network design. It is not useful when
+
+13
+00:02:45,000 --> 00:02:58,700
+it creates false precision. Add headroom and distinguish average from peak load. Build the design around these decisions:
+
+14
+00:02:58,750 --> 00:03:12,450
+At-most/at-least/exactly-once claims, partitions, acknowledgements, visibility timeout, and replay. Draw clients, edge controls, stateless services, authoritative stores, asynchronous paths,
+
+15
+00:03:12,500 --> 00:03:26,200
+and observability. Put arrows in the direction of data flow and label synchronous versus asynchronous work. For each
+
+16
+00:03:26,250 --> 00:03:39,950
+durable write, identify the source of truth. For each cache or index, identify how it becomes fresh enough.
+
+17
+00:03:40,000 --> 00:03:53,700
+For each queue, identify the consumer's idempotency strategy. Define the smallest useful API and the core data entities.
+
+18
+00:03:53,750 --> 00:04:07,450
+Include identifiers, ownership, timestamps or versions, and
+
+19
+00:04:07,500 --> 00:04:21,200
+uniqueness constraints. Explain the dominant query patterns before selecting storage. If data is partitioned, name the partition key
+
+20
+00:04:21,250 --> 00:04:34,950
+and show why it spreads load without breaking essential queries. If an operation crosses partitions or services, describe
+
+21
+00:04:35,000 --> 00:04:48,700
+the consistency boundary and how partial completion is reconciled. Pressure-test the design against Duplicate effects, poison loops, reordering,
+
+22
+00:04:48,750 --> 00:05:02,450
+and unbounded retention. Walk through timeout, retry, dependency outage, overload, and recovery. Bound every retry with deadlines, backoff,
+
+23
+00:05:02,500 --> 00:05:16,200
+and jitter. Use idempotency where a repeated request can create a duplicate effect. Define whether the system fails
+
+24
+00:05:16,250 --> 00:05:29,950
+closed, fails open, serves stale data, queues
+
+25
+00:05:30,000 --> 00:05:43,700
+work, or rejects it. Then explain how operators detect the condition and how the system returns to normal.
+
+26
+00:05:43,750 --> 00:05:57,450
+For every major component, connect the choice to a requirement and name the cost it introduces. A cache
+
+27
+00:05:57,500 --> 00:06:11,200
+reduces latency but creates freshness and invalidation work. Replication improves resilience and read capacity but introduces lag, conflict,
+
+28
+00:06:11,250 --> 00:06:24,950
+and failover decisions. Partitioning increases scale but complicates queries, transactions, and rebalancing. Asynchronous work absorbs bursts but changes
+
+29
+00:06:25,000 --> 00:06:38,700
+completion semantics and requires retries, deduplication, and backlog operations. This requirement-choice-cost pattern keeps the answer grounded and prevents
+
+30
+00:06:38,750 --> 00:06:52,450
+architecture by buzzword. Start with the simplest
+
+31
+00:06:52,500 --> 00:07:06,200
+architecture that satisfies the stated scale. Then identify the first bottleneck and evolve one dimension at a time:
+
+32
+00:07:06,250 --> 00:07:19,950
+add caching for read pressure, partition state for size or write throughput, queue noncritical work for burst absorption,
+
+33
+00:07:20,000 --> 00:07:33,700
+and add regional redundancy only when the availability objective justifies the cost. This evolution story demonstrates judgment better
+
+34
+00:07:33,750 --> 00:07:47,450
+than drawing every distributed component from the beginning. Define service-level indicators for latency, availability, correctness, freshness, and backlog.
+
+35
+00:07:47,500 --> 00:08:01,200
+Alert on user impact and exhaustion trends, not every internal fluctuation. Carry request identifiers through logs and traces.
+
+36
+00:08:01,250 --> 00:08:14,950
+For security, authenticate the caller, authorize the
+
+37
+00:08:15,000 --> 00:08:28,700
+resource action, encrypt in transit and at rest, minimize sensitive data, rotate credentials, and audit privileged changes. Mention
+
+38
+00:08:28,750 --> 00:08:42,450
+abuse controls when the system exposes public APIs or user-generated content. Prepare to zoom into one write and
+
+39
+00:08:42,500 --> 00:08:56,200
+one read at message-level detail. Name the request, validation, authoritative mutation, secondary updates, response, and recovery behavior. Then
+
+40
+00:08:56,250 --> 00:09:09,950
+answer four predictable pivots: what changes at ten times scale, what happens when the main dependency is unavailable,
+
+41
+00:09:10,000 --> 00:09:23,700
+how duplicate requests are handled, and how a user observes a stale or partial result. If a decision
+
+42
+00:09:23,750 --> 00:09:37,450
+depends on an unknown requirement, offer two
+
+43
+00:09:37,500 --> 00:09:51,200
+branches and ask the interviewer which product behavior to optimize. Close by restating the requirements that drove the
+
+44
+00:09:51,250 --> 00:10:04,950
+design, the source of truth, the main data path, and the most important tradeoff. Offer one alternative and
+
+45
+00:10:05,000 --> 00:10:18,700
+say when it would be preferable. Then invite the interviewer to choose a deep dive: data model, consistency,
+
+46
+00:10:18,750 --> 00:10:32,450
+capacity, failure recovery, or a product-specific edge case. The design is complete when its behavior under pressure is
+
+47
+00:10:32,500 --> 00:10:46,200
+as clear as its happy path. Keep the final summary short enough that the interviewer can challenge one
+
+48
+00:10:46,250 --> 00:10:59,950
+decision while time remains.

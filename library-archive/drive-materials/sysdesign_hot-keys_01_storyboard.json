@@ -1,0 +1,82 @@
+{
+  "asset_id": "video.sysdesign.hot-keys.01",
+  "filename": "sysdesign_hot-keys_01.mp4",
+  "title": "Hot Keys and Uneven Load",
+  "category": "sysdesign",
+  "topic": "hot-keys",
+  "target_duration_minutes": 11,
+  "transcript_word_count": 807,
+  "audio": "intentionally_omitted",
+  "scenes": [
+    {
+      "title": "Problem frame",
+      "bullets": [
+        "Detect and diffuse disproportionate load concentrated on a small set of keys or tenants.",
+        "Users and critical paths",
+        "Non-goals"
+      ]
+    },
+    {
+      "title": "Requirements",
+      "bullets": [
+        "Functional behavior",
+        "Scale and latency",
+        "Correctness and availability"
+      ]
+    },
+    {
+      "title": "Capacity",
+      "bullets": [
+        "Peak RPS",
+        "Payload and retention",
+        "Read/write ratio",
+        "Headroom"
+      ]
+    },
+    {
+      "title": "Reference architecture",
+      "bullets": [
+        "Replication",
+        "request coalescing",
+        "adaptive partitioning",
+        "caching",
+        "and quotas."
+      ]
+    },
+    {
+      "title": "Data and consistency",
+      "bullets": [
+        "Source of truth",
+        "Partition key",
+        "Versioning",
+        "Reconciliation"
+      ]
+    },
+    {
+      "title": "Failure-mode drill",
+      "bullets": [
+        "Single-shard saturation",
+        "synchronized misses",
+        "and moving the hotspot downstream."
+      ]
+    },
+    {
+      "title": "Scale and operate",
+      "bullets": [
+        "Find the first bottleneck",
+        "Evolve one dimension",
+        "Measure user impact"
+      ]
+    },
+    {
+      "title": "Interview-ready recap",
+      "bullets": [
+        "Requirements",
+        "Data path",
+        "Tradeoff",
+        "Failure behavior",
+        "Deep dive"
+      ]
+    }
+  ]
+}

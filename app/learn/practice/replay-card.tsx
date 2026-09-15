@@ -25,7 +25,7 @@ export function PracticeReplayCollection() {
             </div>
             <div className="practice-replay-card-action">
               <span>Access · {replay.accessTier}</span>
-              <Link href={`/learn/practice/replays/${replay.slug}`}>Open replay <span aria-hidden="true">↗</span></Link>
+              <Link className="member-action-button" href={`/learn/practice/replays/${replay.slug}`}>Open replay <span aria-hidden="true">↗</span></Link>
             </div>
           </article>
         ))}

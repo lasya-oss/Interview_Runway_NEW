@@ -4,6 +4,7 @@ import {
   jwtVerify,
   type JWTPayload,
 } from "jose";
+import { isConfiguredTestFullAccessEmail } from "@/app/lib/paid-access";
 
 export const AUTH_COOKIE_NAME = "interviewrunway_session";
 export const AUTH_SESSION_SECONDS = 60 * 60 * 12;
@@ -72,7 +73,13 @@ export function isAllowedGoogleIdentity({
   emailVerified: boolean;
   hostedDomain: string | null;
 }): boolean {
-  if (!email || !emailVerified || !hostedDomain) return false;
+  if (!email || !emailVerified) return false;
+
+  // Temporary pre-launch QA: the named external test account signs in with a
+  // verified consumer Gmail address, so it carries no hosted-domain claim. A
+  // verified email address remains mandatory.
+  if (isConfiguredTestFullAccessEmail(email)) return true;
+  if (!hostedDomain) return false;
 
   const domain = allowedDomain();
   const normalizedEmail = email.toLowerCase();
