@@ -50,7 +50,7 @@ const PROVIDERS = [
 
 type ProviderName = (typeof PROVIDERS)[number]["name"];
 type ProviderEnvironment = Partial<Record<
-  "CEREBRAS_API_KEY" | "CEREBRAS_MODEL" | "GROQ_API_KEY" | "GROQ_BRAIN_MODEL",
+  "AI_EVALUATION_DEBUG_HTTP" | "CEREBRAS_API_KEY" | "CEREBRAS_MODEL" | "GROQ_API_KEY" | "GROQ_BRAIN_MODEL",
   string | undefined
 >>;
 
@@ -175,7 +175,15 @@ export async function evaluateSecondSeatAssessment(
     configuredProviderCount += 1;
     const model = env[provider.model]?.trim() || provider.defaultModel;
     try {
-      const raw = await requestEvaluation(provider, apiKey, model, mock, answers, fetchImpl);
+      const raw = await requestEvaluation(
+        provider,
+        apiKey,
+        model,
+        mock,
+        answers,
+        fetchImpl,
+        env.AI_EVALUATION_DEBUG_HTTP === "1",
+      );
       return buildEvaluation(mock, answers, raw, provider.name, model, now().toISOString(), fallback);
     } catch (error) {
       const reason = safeProviderFailure(error);
@@ -234,6 +242,7 @@ async function requestEvaluation(
   mock: SecondSeatMock,
   answers: readonly string[],
   fetchImpl: typeof fetch,
+  debugHttp: boolean,
 ): Promise<RawEvaluation> {
   const response = await fetchImpl(provider.url, {
     method: "POST",
@@ -257,6 +266,9 @@ async function requestEvaluation(
   });
 
   if (!response.ok) {
+    if (debugHttp) {
+      console.warn("Second Seat provider HTTP failure", await safeProviderHttpFailure(provider.name, response));
+    }
     throw new ProviderEvaluationError(`http_${response.status}`);
   }
   const payload = await response.json() as unknown;
@@ -274,6 +286,22 @@ async function requestEvaluation(
     throw new ProviderEvaluationError("invalid_json");
   }
   return normalizeProviderEvaluation(content, mock, answers);
+}
+
+async function safeProviderHttpFailure(provider: ProviderName, response: Response) {
+  const detail = await response.clone().json().catch(() => null) as unknown;
+  const error = isRecord(detail) && isRecord(detail.error) ? detail.error : null;
+  return {
+    provider,
+    status: response.status,
+    type: safeDiagnosticField(error?.type),
+    code: safeDiagnosticField(error?.code),
+    message: safeDiagnosticField(error?.message),
+  };
+}
+
+function safeDiagnosticField(value: unknown) {
+  return typeof value === "string" ? value.slice(0, 600) : null;
 }
 
 function assessmentSystemPrompt() {
