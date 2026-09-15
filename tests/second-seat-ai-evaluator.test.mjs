@@ -109,7 +109,8 @@ test("falls through from malformed Cerebras output to validated Groq JSON", asyn
   assert.equal(calls.length, 2);
   assert.match(calls[0].url, /cerebras\.ai/);
   assert.match(calls[1].url, /groq\.com/);
-  assert.equal(calls[1].body.response_format.type, "json_object");
+  assert.equal(calls[1].body.response_format.type, "json_schema");
+  assert.equal(calls[1].body.response_format.json_schema.strict, true);
   assert.deepEqual(failures, [{ provider: "cerebras", reason: "invalid_json" }]);
   assert.equal(evaluation.evaluationSource, "ai");
   assert.equal(evaluation.provider?.name, "groq");
@@ -168,9 +169,8 @@ test("keeps the saved assessment usable when both providers fail", async () => {
   const failures = [];
   const evaluation = await evaluateSecondSeatAssessment(mock, answers, {
     env: { CEREBRAS_API_KEY: "test-cerebras", GROQ_API_KEY: "test-groq" },
-    fetchImpl: async (_url, init) => {
-      const body = JSON.parse(init.body);
-      return body.response_format.type === "json_schema"
+    fetchImpl: async (url) => {
+      return String(url).includes("cerebras.ai")
         ? new Response("temporarily unavailable", { status: 503 })
         : okResponse({ choices: [{ message: { content: "{}" } }] });
     },

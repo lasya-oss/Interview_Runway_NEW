@@ -251,16 +251,7 @@ async function requestEvaluation(
       seed: 7,
       max_tokens: 5_000,
       ...reasoningConfiguration(model),
-      response_format: provider.name === "cerebras"
-        ? {
-            type: "json_schema",
-            json_schema: {
-              name: "second_seat_assessment",
-              strict: true,
-              schema: RESPONSE_SCHEMA,
-            },
-          }
-        : { type: "json_object" },
+      response_format: responseFormat(provider.name, model),
     }),
     signal: AbortSignal.timeout(provider.timeoutMs),
   });
@@ -282,21 +273,7 @@ async function requestEvaluation(
   } catch {
     throw new ProviderEvaluationError("invalid_json");
   }
-  try {
-    return normalizeProviderEvaluation(content, mock, answers);
-  } catch (error) {
-    if (
-      process.env.AI_EVALUATION_DEBUG_SHAPE === "1"
-      && error instanceof ProviderEvaluationError
-      && error.reason === "schema_mismatch"
-    ) {
-      console.warn("Second Seat provider response shape", {
-        provider: provider.name,
-        shape: jsonValueShape(content),
-      });
-    }
-    throw error;
-  }
+  return normalizeProviderEvaluation(content, mock, answers);
 }
 
 function assessmentSystemPrompt() {
@@ -418,6 +395,23 @@ function reasoningConfiguration(model: string) {
   if (model.includes("gpt-oss")) return { reasoning_effort: "low" as const };
   if (model.includes("zai-glm")) return { reasoning_effort: "none" as const };
   return {};
+}
+
+function responseFormat(provider: ProviderName, model: string) {
+  const groqStrictModel = provider === "groq" && (
+    model === "openai/gpt-oss-20b" || model === "openai/gpt-oss-120b"
+  );
+  if (provider === "cerebras" || groqStrictModel) {
+    return {
+      type: "json_schema" as const,
+      json_schema: {
+        name: "second_seat_assessment",
+        strict: true,
+        schema: RESPONSE_SCHEMA,
+      },
+    };
+  }
+  return { type: "json_object" as const };
 }
 
 function consistentVerdict(
@@ -760,23 +754,6 @@ function isNonEmptyString(value: unknown): value is string {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function jsonValueShape(value: unknown, depth = 0): unknown {
-  if (value === null) return "null";
-  if (typeof value === "string") return `string(${value.length})`;
-  if (typeof value !== "object") return typeof value;
-  if (depth >= 4) return Array.isArray(value) ? `array(${value.length})` : "object";
-  if (Array.isArray(value)) {
-    return {
-      type: "array",
-      length: value.length,
-      first: value.length ? jsonValueShape(value[0], depth + 1) : undefined,
-    };
-  }
-  return Object.fromEntries(
-    Object.entries(value).map(([key, child]) => [key, jsonValueShape(child, depth + 1)]),
-  );
 }
 
 class ProviderEvaluationError extends Error {
