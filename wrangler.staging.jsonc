@@ -29,9 +29,8 @@
     }
   ],
   "vars": {
-    "AI_EVALUATION_DEBUG_HTTP": "1",
     "AUTH_ALLOWED_DOMAIN": "vividlabsai.com",
-    "CEREBRAS_MODEL": "__staging-force-groq-fallback__",
+    "CEREBRAS_MODEL": "gpt-oss-120b",
     "GOOGLE_CLIENT_ID": "773066800394-e7t7o8l73nbja6srkrqil4ktj449dc7o.apps.googleusercontent.com",
     "GROQ_BRAIN_MODEL": "openai/gpt-oss-120b",
     "INTERNAL_FULL_ACCESS_DOMAIN": "vividlabsai.com",

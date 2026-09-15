@@ -134,8 +134,8 @@ jobs:
         if: contains(github.event.head_commit.message, '[verify staging AI]')
         env:
           AUTH_SESSION_SECRET: ${{ secrets.STAGING_AUTH_SESSION_SECRET }}
-          EXPECTED_AI_MODEL: openai/gpt-oss-120b
-          EXPECTED_AI_PROVIDER: groq
+          EXPECTED_AI_MODEL: gpt-oss-120b
+          EXPECTED_AI_PROVIDER: cerebras
           SECOND_SEAT_E2E_BASE_URL: https://interview-runway-staging.ir-staging-pratheep211088.workers.dev
         run: node scripts/verify-staging-ai.mjs
 
