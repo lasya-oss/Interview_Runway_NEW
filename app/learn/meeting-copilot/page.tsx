@@ -28,7 +28,7 @@ export default async function MeetingCopilotPage() {
 
   // Create the private bridge credential only when the learner clicks. This
   // keeps it out of the rendered page, RSC payload, DOM, and source-tab history.
-  const launchUrl = profile.isLive === true && profile.id === "practice"
+  const launchUrl = profile.isLive === true && profile.access.practice
     ? "/api/meeting-copilot/launch"
     : MEETING_COPILOT_RELEASE.launchUrl;
 

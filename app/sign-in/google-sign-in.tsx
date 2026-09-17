@@ -61,7 +61,7 @@ export function GoogleSignIn({
       }
 
       setSubmitting(true);
-      setMessage("Verifying your Vivid Labs account…");
+      setMessage("Verifying your Google account…");
 
       try {
         const response = await fetch("/api/auth/google", {
@@ -77,7 +77,7 @@ export function GoogleSignIn({
           setSubmitting(false);
           setMessage(
             result.message ??
-              "This Google account is not approved for InterviewRunway.",
+              "This Google account could not be verified.",
           );
           return;
         }
@@ -93,10 +93,9 @@ export function GoogleSignIn({
       if (!active || !window.google?.accounts.id || !buttonRef.current) return;
 
       buttonRef.current.replaceChildren();
-      // No hosted-domain restriction here: the account chooser must also offer
-      // the temporary pre-launch QA account. The server remains the enforcer
-      // and still admits only Workspace accounts plus that one allowlisted
-      // address.
+      // The account chooser stays open to verified Google identities. Product
+      // entitlements and Vivid Labs-only administration are enforced
+      // independently on the server after authentication.
       window.google.accounts.id.initialize({
         auto_select: false,
         callback: handleCredential,
@@ -113,7 +112,7 @@ export function GoogleSignIn({
         type: "standard",
         width: 320,
       });
-      setMessage("Only approved Google accounts can sign in.");
+      setMessage("Use the Google account you want connected to InterviewRunway.");
     };
 
     const existing = document.querySelector<HTMLScriptElement>(

@@ -5,7 +5,11 @@ export function ChunkedReplayPlayer({
   parts: readonly string[];
   title: string;
 }) {
-  const source = parts[0]?.replace(/\.part-\d{2}$/, "") ?? null;
+  const relativeSource = parts[0]?.replace(/\.part-\d{2}$/, "") ?? null;
+  const configuredAssetOrigin = readReplayAssetOrigin();
+  const source = relativeSource && configuredAssetOrigin
+    ? new URL(relativeSource, configuredAssetOrigin).toString()
+    : relativeSource;
 
   if (!source) {
     return (
@@ -26,4 +30,15 @@ export function ChunkedReplayPlayer({
       src={source}
     />
   );
+}
+
+function readReplayAssetOrigin() {
+  const value = process.env.REPLAY_ASSET_ORIGIN?.trim();
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? `${url.origin}/` : null;
+  } catch {
+    return null;
+  }
 }

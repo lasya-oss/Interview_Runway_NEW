@@ -9,6 +9,7 @@ import { isAuthorizedUserHistoryOperator } from "../app/lib/user-history-access.
 import { createUserHistoryPdf } from "../app/lib/user-history-pdf.ts";
 import {
   createGmailReportMessage,
+  describeGmailDeliveryFailure,
   deliverUserHistoryReportWithGmail,
   GmailAttachmentTooLargeError,
   GmailAuthorizationError,
@@ -460,6 +461,48 @@ test("Gmail failures distinguish authorization, policy, quota, rejection, and in
     GmailDeliveryIndeterminateError,
   );
   assert.equal(callCount, 2);
+});
+
+test("Gmail failures retain the exact safe provider stage, status, reason, and message for Worker logs", async () => {
+  let captured;
+  try {
+    await deliverUserHistoryReportWithGmail({
+      accessToken: "test-google-access-token-1234567890",
+      learnerEmail: "learner@example.com",
+      pdf: new TextEncoder().encode("%PDF-1.4\nreport"),
+      recipientEmail: "reviewer@vividlabsai.com",
+      recipientSubject: "google-subject-reviewer",
+    }, {
+      configuredDomain: "vividlabsai.com",
+      fetch: async (input) => String(input).includes("userinfo")
+        ? Response.json({
+          email: "reviewer@vividlabsai.com",
+          email_verified: true,
+          hd: "vividlabsai.com",
+          sub: "google-subject-reviewer",
+        })
+        : Response.json({
+          error: {
+            errors: [{ reason: "domainPolicy" }],
+            message: "Gmail API access is blocked by the Workspace policy.",
+          },
+        }, { status: 403 }),
+    });
+  } catch (error) {
+    captured = error;
+  }
+
+  assert.ok(captured instanceof GmailWorkspacePolicyError);
+  assert.deepEqual(describeGmailDeliveryFailure(captured), {
+    errorName: "GmailWorkspacePolicyError",
+    message: "Google Workspace policy does not allow this Gmail delivery",
+    stage: "gmail-send-response",
+    providerStatus: 403,
+    providerReason: "domainpolicy",
+    providerMessage: "Gmail API access is blocked by the Workspace policy.",
+    cause: null,
+  });
+  assert.doesNotMatch(JSON.stringify(describeGmailDeliveryFailure(captured)), /test-google-access-token/i);
 });
 
 test("Gmail treats a malformed 2xx send response as indeterminate", async () => {

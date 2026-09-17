@@ -116,11 +116,12 @@ export function UserHistoryReportPanel({
         return;
       }
       if (!response.ok) {
-        const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
+        const body = (await response.json().catch(() => null)) as { error?: string; message?: string; reference?: string } | null;
+        const reference = body?.reference ? ` Reference: ${body.reference}.` : "";
         throw new Error(
           response.status === 401
             ? "Gmail reauthorization was not accepted. Choose the same signed-in Vivid Labs account and allow email sending."
-            : body?.error || body?.message || "The report could not be sent",
+            : `${body?.error || body?.message || "The report could not be sent"}${reference}`,
         );
       }
       if (response.headers.get("x-interviewrunway-report-delivered") !== "gmail") {
@@ -184,11 +185,10 @@ export function UserHistoryReportPanel({
             if (!active) return;
             pendingLearnerRef.current = null;
             setGenerationStage("idle");
-            setError(
-              googleError.type === "popup_closed"
-                ? "Gmail authorization was cancelled. No report was sent."
-                : "Gmail authorization could not be completed. No report was sent.",
-            );
+            const detail = [googleError.type, googleError.message].filter(Boolean).join(": ");
+            setError(googleError.type === "popup_closed"
+              ? "Gmail authorization was cancelled. No report was sent."
+              : `Gmail authorization could not be completed${detail ? ` (${detail})` : ""}. No report was sent.`);
           },
         });
         setGmailState("ready");

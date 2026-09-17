@@ -39,7 +39,7 @@ test("only the exact allowlisted address matches, on any domain", async () => {
   });
 });
 
-test("verified test address signs in without a hosted-domain claim", async () => {
+test("verified Google identities can sign in while unverified or malformed identities cannot", async () => {
   await withAllowlist(TEST_EMAIL, async () => {
     assert.equal(
       isAllowedGoogleIdentity({ email: TEST_EMAIL, emailVerified: true, hostedDomain: null }),
@@ -51,7 +51,7 @@ test("verified test address signs in without a hosted-domain claim", async () =>
     );
     assert.equal(
       isAllowedGoogleIdentity({ email: "other@gmail.com", emailVerified: true, hostedDomain: null }),
-      false,
+      true,
     );
     assert.equal(
       isAllowedGoogleIdentity({
@@ -60,6 +60,10 @@ test("verified test address signs in without a hosted-domain claim", async () =>
         hostedDomain: "vividlabsai.com",
       }),
       true,
+    );
+    assert.equal(
+      isAllowedGoogleIdentity({ email: "not-an-email", emailVerified: true, hostedDomain: null }),
+      false,
     );
   });
 });

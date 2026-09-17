@@ -233,7 +233,7 @@ test("server-renders the finished InterviewRunway homepage", async () => {
   assert.match(text, /WhatsApp guidance from engineers with FAANG and leading-tech experience/i);
   assert.match(text, /Why capable candidates still get overlooked/i);
   assert.match(text, /How InterviewRunway closes the gap/i);
-  assert.match(text, /Check your interview signal/i);
+  assert.equal((text.match(/Run the free signal check/gi) ?? []).length, 3);
   assert.match(html, /href=["'][^"']*\/diagnostic["'][^>]*data-analytics-event=["']hero_signal_cta_clicked["']/i);
   assert.match(text, /Baseline → intervention → signal change → outcome/i);
   assert.match(html, /data-testid=["']previous-evidence-record["']/i);
@@ -258,19 +258,16 @@ test("server-renders the finished InterviewRunway homepage", async () => {
   );
 });
 
-test("anonymous visitors are sent to the Vivid Labs Google sign-in", async () => {
+test("anonymous visitors can reach the public launch site and customer Google sign-in", async () => {
   const response = await request("/", {}, false);
-  assert.equal(response.status, 307);
-  assert.match(
-    response.headers.get("location") ?? "",
-    /\/sign-in\?return_to=%2F$/,
-  );
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("location"), null);
 
   const signIn = await request("/sign-in", {}, false);
   assert.equal(signIn.status, 200);
   const signInText = visibleText(await signIn.text());
-  assert.match(signInText, /Authorized crew only/i);
-  assert.match(signInText, /@vividlabsai\.com/i);
+  assert.match(signInText, /Continue with Google/i);
+  assert.match(signInText, /verified Google account/i);
 });
 
 test("www traffic uses the Google-enabled apex domain", async () => {
@@ -958,6 +955,32 @@ const productRoutes = [
   ["/proof", [/Flight recorder format/i, /Baseline/i, /Intervention/i, /Signal change/i, /No learner claims are live yet/i]],
 ];
 
+test("public acquisition and demo routes stay outside the learner authentication wall", async () => {
+  for (const pathname of [
+    "/",
+    "/diagnostic",
+    "/pricing",
+    "/vault",
+    "/second-seat",
+    "/premium",
+    "/qualify",
+    "/demo-login",
+    "/legal/privacy",
+  ]) {
+    const response = await request(pathname, { headers: { accept: "text/html" }, redirect: "manual" }, false);
+    assert.equal(response.status, 200, `${pathname} must be public`);
+    assert.doesNotMatch(response.headers.get("location") ?? "", /\/sign-in/i, pathname);
+  }
+
+  const protectedWorkspace = await request(
+    "/learn",
+    { headers: { accept: "text/html" }, redirect: "manual" },
+    false,
+  );
+  assert.equal(protectedWorkspace.status, 307);
+  assert.match(protectedWorkspace.headers.get("location") ?? "", /\/sign-in\?return_to=/i);
+});
+
 for (const [pathname, expected] of productRoutes) {
   test(`server-renders product route ${pathname}`, async () => {
     const response = await render(pathname);
@@ -1009,7 +1032,7 @@ test("all three one-click demos issue protected tier sessions", async () => {
   }
 });
 
-test("Human Calibration keeps Current access in the status drawer and omits Second Seat-only navigation", async () => {
+test("Human Calibration keeps Current access in the status drawer and exposes entitled Meeting Copilot", async () => {
   const login = await request("/api/demo-session", {
     method: "POST",
     headers: {
@@ -1032,8 +1055,10 @@ test("Human Calibration keeps Current access in the status drawer and omits Seco
   const sidebar = html.match(/<aside\b[^>]*member-sidebar[^>]*>[\s\S]*?<\/aside>/i)?.[0] ?? "";
   assert.ok(sidebar, "Human Calibration sidebar should render");
   assert.doesNotMatch(sidebar, /member-plan-card|Current access/i);
-  assert.doesNotMatch(visibleText(sidebar), /Meeting Copilot|WhatsApp Support/i);
-  assert.doesNotMatch(sidebar, /href=["']\/learn\/(?:meeting-copilot|whatsapp-support)["']/i);
+  assert.match(visibleText(sidebar), /Meeting Copilot/i);
+  assert.match(sidebar, /href=["']\/learn\/meeting-copilot["']/i);
+  assert.doesNotMatch(visibleText(sidebar), /WhatsApp Support/i);
+  assert.doesNotMatch(sidebar, /href=["']\/learn\/whatsapp-support["']/i);
 
   const statusAccess = html.match(/<section\b[^>]*ops-current-access[^>]*>[\s\S]*?<\/section>/i)?.[0] ?? "";
   assert.ok(statusAccess, "status drawer Current access section should render");
@@ -1042,7 +1067,7 @@ test("Human Calibration keeps Current access in the status drawer and omits Seco
   assert.equal((html.match(/member-plan-card member-plan-card-status/gi) ?? []).length, 1);
 });
 
-test("Meeting Copilot and WhatsApp Support remain Second Seat navigation sections", async () => {
+test("Meeting Copilot remains an entitlement-gated Second Seat navigation section", async () => {
   const login = await request("/api/demo-session", {
     method: "POST",
     headers: {
@@ -1066,16 +1091,12 @@ test("Meeting Copilot and WhatsApp Support remain Second Seat navigation section
   assert.ok(sidebar, "Second Seat sidebar should render");
   const sidebarText = visibleText(sidebar);
   assert.match(sidebarText, /Meeting Copilot/i);
-  assert.match(sidebarText, /WhatsApp Support/i);
   assert.match(sidebar, /href=["']\/learn\/meeting-copilot["']/i);
-  assert.match(sidebar, /href=["']\/learn\/whatsapp-support["']/i);
+  assert.doesNotMatch(sidebarText, /WhatsApp Support/i);
+  assert.doesNotMatch(sidebar, /href=["']\/learn\/whatsapp-support["']/i);
   assert.ok(
-    sidebarText.indexOf("Meeting Copilot") < sidebarText.indexOf("WhatsApp Support"),
-    "WhatsApp Support should remain directly below Meeting Copilot",
-  );
-  assert.ok(
-    sidebarText.indexOf("WhatsApp Support") < sidebarText.indexOf("Coach room"),
-    "Coach room should remain after the Second Seat support sections",
+    sidebarText.indexOf("Meeting Copilot") < sidebarText.indexOf("Coach room"),
+    "Coach room should remain after Meeting Copilot",
   );
 });
 
@@ -1096,7 +1117,8 @@ test("Second Seat Meeting Copilot page alone launches the pinned validated relea
   assert.doesNotMatch(shell, /127\.0\.0\.1:8123/);
   assert.doesNotMatch(shell, /onClick=\{item\.key === "meeting-copilot"/);
   assert.match(pageSource, /MEETING_COPILOT_RELEASE\.launchUrl/);
-  assert.match(pageSource, /profile\.isLive === true && profile\.id === "practice"/);
+  assert.match(pageSource, /profile\.isLive === true && profile\.access\.practice/);
+  assert.doesNotMatch(pageSource, /profile\.id === "practice"/);
   assert.match(pageSource, /"\/api\/meeting-copilot\/launch"/);
   assert.doesNotMatch(pageSource, /issueMeetingCopilotBridgeSession|ir_profile_copy/);
   assert.match(launchRoute, /await issueMeetingCopilotBridgeSession\(\)/);
@@ -1189,7 +1211,7 @@ test("live Second Seat creates its short-lived profile token only on the protect
   assert.doesNotMatch(unauthorized.headers.get("location") ?? "", /ir_profile_copy=/i);
 });
 
-test("live Meeting Copilot launch fails closed without bridge configuration and never bridges Human Calibration", async () => {
+test("live Meeting Copilot launch fails closed without bridge configuration and honors Human Calibration Second Seat entitlement", async () => {
   const unconfiguredSecondSeat = await withEnvironment(
     {
       MEETING_COPILOT_BRIDGE_SECRET: undefined,
@@ -1241,7 +1263,7 @@ test("live Meeting Copilot launch fails closed without bridge configuration and 
   );
   assert.equal(humanCalibration.status, 200);
   const humanCalibrationHtml = await humanCalibration.text();
-  assert.match(humanCalibrationHtml, /href=["']http:\/\/127\.0\.0\.1:8123\/["']/i);
+  assert.match(humanCalibrationHtml, /href=["']\/api\/meeting-copilot\/launch["']/i);
   assert.doesNotMatch(humanCalibrationHtml, /ir_profile_copy=/i);
 
   const humanCalibrationLaunch = await withEnvironment(
@@ -1256,8 +1278,8 @@ test("live Meeting Copilot launch fails closed without bridge configuration and 
       { DB: emptyD1Database() },
     ),
   );
-  assert.equal(humanCalibrationLaunch.status, 403);
-  assert.doesNotMatch(humanCalibrationLaunch.headers.get("location") ?? "", /ir_profile_copy=/i);
+  assert.equal(humanCalibrationLaunch.status, 302);
+  assert.match(humanCalibrationLaunch.headers.get("location") ?? "", /#ir_profile_copy=/i);
 });
 
 test("Meeting Copilot profile-copy configuration stays server-only and environment-driven", async () => {

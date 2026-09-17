@@ -13,15 +13,15 @@ export const metadata: Metadata = {
 };
 
 const SESSION_PATH = [
-  { number: "01", state: "Complete", title: "Diagnostic review", detail: "Repeated evidence isolated staff-level narrative calibration as the primary gap.", date: "15 Jul" },
-  { number: "02", state: "Next", title: "Scope and influence calibration", detail: "Rebuild one project narrative around decision cost, cross-team influence, and durable outcome.", date: "23 Jul" },
-  { number: "03", state: "Planned", title: "Full-loop rehearsal", detail: "Apply the corrected narrative under behavioural and architecture follow-ups.", date: "28 Jul" },
+  { number: "01", state: "Complete", title: "Diagnostic review", detail: "Repeated evidence isolated staff-level narrative calibration as the primary gap.", date: "Evidence reviewed" },
+  { number: "02", state: "Next", title: "Scope and influence calibration", detail: "Rebuild one project narrative around decision cost, cross-team influence, and durable outcome.", date: "Scheduled after admission" },
+  { number: "03", state: "Planned", title: "Full-loop rehearsal", detail: "Apply the corrected narrative under behavioural and architecture follow-ups.", date: "After session 02" },
 ] as const;
 
 const PRIVATE_FILES = [
-  ["01", "Diagnostic evidence brief", "PDF · sample record", "Reviewed 15 Jul"],
-  ["02", "Staff-level narrative spine", "Working document · sample", "Updated 17 Jul"],
-  ["03", "Architecture assumption sheet", "Worksheet · sample", "Due 22 Jul"],
+  ["01", "Diagnostic evidence brief", "PDF · sample record", "Reviewed"],
+  ["02", "Staff-level narrative spine", "Working document · sample", "Current"],
+  ["03", "Architecture assumption sheet", "Worksheet · sample", "Before session 02"],
   ["04", "Session 01 private notes", "Coach note · sample", "Private"],
 ] as const;
 
@@ -50,7 +50,7 @@ export default async function CoachingPage() {
           <div>
             <p className="member-kicker">Sample Human Calibration engagement</p>
             <h1>One gap. <em>Full attention.</em></h1>
-            <p>This private room demonstrates the expected qualification-based experience. Coach identity, live availability, package scope, and meeting actions are placeholders until verified and commercially final.</p>
+            <p>This private room demonstrates the qualification-based experience. Coach identity, live availability, package scope, and meeting actions remain unavailable until they are verified and commercially final.</p>
           </div>
           <div className="coaching-status"><i /><span>Example engagement</span><strong>02 / 03</strong><small>sample session path</small></div>
         </section>
@@ -64,14 +64,14 @@ export default async function CoachingPage() {
 
         <section className="coaching-command-grid">
           <article className="coaching-next-session">
-            <div className="member-panel-label"><span>Next calibration</span><b>Sample calendar event</b></div>
-            <time dateTime="2026-07-23T18:30:00+05:30"><span>THU</span><strong>23</strong><small>JUL · 18:30 IST</small></time>
+            <div className="member-panel-label"><span>Next calibration</span><b>Admission-controlled scheduling</b></div>
+            <div className="coaching-session-timing"><span>BOOKING</span><strong>—</strong><small>DATE SET AFTER QUALIFICATION</small></div>
             <div>
               <p>Session 02 · 55 min example</p>
               <h2>Make staff-level scope unmistakable.</h2>
               <ul><li>Open with the irreversible decision</li><li>Show influence beyond direct authority</li><li>Quantify the operating consequence</li></ul>
             </div>
-            <button type="button" disabled>Meeting link appears after real booking</button>
+            <p className="coaching-session-state">Meeting access is created only after admission and booking are confirmed.</p>
           </article>
 
           <aside className="coaching-identity">
@@ -84,7 +84,7 @@ export default async function CoachingPage() {
         </section>
 
         <section className="coaching-note" aria-labelledby="coach-note-title">
-          <div><span>Private sample note</span><b>17 JUL · 09:10 IST</b></div>
+          <div><span>Private sample note</span><b>ILLUSTRATIVE FORMAT</b></div>
           <blockquote id="coach-note-title">“Your architecture is already credible. The level signal weakens when every decision receives equal narration. Lead with the decisions that were expensive to reverse, then show how other teams changed course because of them.”</blockquote>
           <p>Sample note written to demonstrate format; not authored by a real coach.</p>
         </section>
@@ -104,7 +104,7 @@ export default async function CoachingPage() {
           <div className="coaching-files">
             <div className="member-section-heading"><div><p className="member-kicker">Private workspace</p><h2>Working files with provenance.</h2></div></div>
             {PRIVATE_FILES.map(([number, title, format, state]) => (
-              <article key={number}><span>{number}</span><div><h3>{title}</h3><small>{format}</small></div><b>{state}</b><button type="button" disabled>Preview</button></article>
+              <article key={number}><span>{number}</span><div><h3>{title}</h3><small>{format}</small></div><b>{state}</b><span className="coaching-file-state">Sample only</span></article>
             ))}
           </div>
           <aside className="coaching-prework">
@@ -123,8 +123,8 @@ export default async function CoachingPage() {
                 <p className="member-kicker">Due before session 02</p>
                 <h2>Bring two influence stories.</h2>
                 <p>Each should identify the competing constraint, the decision you changed, who needed alignment, and the measurable result six weeks later.</p>
-                <dl><div><dt>Preparation</dt><dd>25 min</dd></div><div><dt>Sample due</dt><dd>22 Jul · 18:30</dd></div></dl>
-                <button type="button" disabled>Submission disabled in demo</button>
+                <dl><div><dt>Preparation</dt><dd>25 min</dd></div><div><dt>Timing</dt><dd>Before the first session</dd></div></dl>
+                <p className="coaching-submission-state">Submission opens only for an accepted engagement.</p>
               </>
             )}
           </aside>

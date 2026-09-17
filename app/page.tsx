@@ -71,7 +71,7 @@ export default function Home() {
               <h1 id="hero-title">Turn your experience into <em>interview signal.</em></h1>
               <p className="hero-v2-body">A structured system for engineers who need to recognise patterns, explain trade-offs, and make their experience legible to remote and AI-adjacent teams.</p>
               <div className="hero-v2-actions">
-                <CtaLink href="/diagnostic" event="hero_signal_cta_clicked">Check your interview signal <span aria-hidden="true">↗</span></CtaLink>
+                <CtaLink href="/diagnostic" event="hero_signal_cta_clicked">Run the free signal check <span aria-hidden="true">↗</span></CtaLink>
                 <Link className="text-link" href="/demo-login">Enter the demo cockpit <span aria-hidden="true">→</span></Link>
               </div>
               <p className="microcopy">Free · 7–10 minutes · No payment or account</p>
@@ -177,7 +177,7 @@ export default function Home() {
 
         <section className="final-cta-v2" aria-labelledby="final-title" data-aero-phase="start">
           <div className="convergence-field" aria-hidden="true"><i /><i /><i /><span /></div>
-          <div className="container final-cta-v2-inner"><Reveal><p className="eyebrow">Begin with evidence</p><h2 id="final-title">Find the gap before you buy the fix.</h2><p>The free Interview Signal Check gives you one risk, one exercise, and the smallest useful next layer.</p><div className="hero-v2-actions"><CtaLink href="/diagnostic" event="hero_signal_cta_clicked">Check your interview signal <span aria-hidden="true">↗</span></CtaLink><Link className="text-link" href="/demo-login">Enter the demo cockpit <span aria-hidden="true">→</span></Link></div></Reveal></div>
+          <div className="container final-cta-v2-inner"><Reveal><p className="eyebrow">Begin with evidence</p><h2 id="final-title">Find the gap before you buy the fix.</h2><p>The free Interview Signal Check gives you one risk, one exercise, and the smallest useful next layer.</p><div className="hero-v2-actions"><CtaLink href="/diagnostic" event="hero_signal_cta_clicked">Run the free signal check <span aria-hidden="true">↗</span></CtaLink><Link className="text-link" href="/demo-login">Enter the demo cockpit <span aria-hidden="true">→</span></Link></div></Reveal></div>
         </section>
       </main>
 

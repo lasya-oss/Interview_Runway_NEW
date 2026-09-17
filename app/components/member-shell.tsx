@@ -84,10 +84,11 @@ export function MemberShell({
     : isSecondSeatWorkspace
       ? (isLive ? "Second Seat Plan Active" : "Demo workspace")
       : (isLive ? "Human Calibration Plan Active" : "Demo workspace");
-  const memberNav = MEMBER_NAV.filter((item) => (
-    (item.key !== "meeting-copilot" && item.key !== "whatsapp-support")
-      || (isSecondSeatWorkspace && profile.access.practice)
-  ));
+  const memberNav = MEMBER_NAV.filter((item) => {
+    if (item.key === "whatsapp-support") return false;
+    if (item.key === "meeting-copilot") return profile.access.practice;
+    return true;
+  });
 
   return (
     <div className="member-shell" data-member-tier={profile.id} data-member-layout={isVaultWorkspace ? "vault" : isSecondSeatWorkspace ? "second-seat" : "calibration"}>

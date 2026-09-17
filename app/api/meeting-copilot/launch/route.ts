@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const profile = await requireDemoProfile("/learn/meeting-copilot");
-  if (!profile.isLive || profile.id !== "practice" || !profile.access.practice) {
+  if (!profile.isLive || !profile.access.practice) {
     return json({ ok: false, error: "Second Seat access required" }, 403);
   }
 

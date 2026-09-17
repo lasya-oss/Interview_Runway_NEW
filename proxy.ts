@@ -5,12 +5,30 @@ import {
 } from "@/app/lib/google-auth";
 
 const PUBLIC_ROUTES = new Set([
+  "/",
+  "/about",
+  "/ai-prep",
   "/api/auth/google",
   "/api/auth/sign-out",
+  "/api/demo-session",
   "/api/meeting-copilot/profile-copy",
   "/api/meeting-copilot/session",
+  "/api/qualification",
   "/api/webhooks/paddle",
+  "/compare/interview-kickstart-alternative-india",
+  "/curriculum",
+  "/demo-login",
+  "/diagnostic",
+  "/legal/privacy",
+  "/legal/refund",
+  "/legal/terms",
+  "/premium",
+  "/pricing",
+  "/proof",
+  "/qualify",
+  "/second-seat",
   "/sign-in",
+  "/vault",
 ]);
 
 function isPublicPath(pathname: string): boolean {
@@ -20,6 +38,25 @@ function isPublicPath(pathname: string): boolean {
     pathname.startsWith("/_vinext/") ||
     /\.[a-z0-9]+$/i.test(pathname)
   );
+}
+
+function isDemoCompatiblePath(pathname: string): boolean {
+  return pathname === "/learn"
+    || pathname.startsWith("/learn/")
+    || pathname.startsWith("/api/learn/library/material-preview/");
+}
+
+function authenticatedResponse(request: NextRequest, session: Awaited<ReturnType<typeof verifySessionToken>>) {
+  if (!session) return null;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-interviewrunway-user-email", session.email);
+  requestHeaders.set("x-interviewrunway-user-domain", session.hostedDomain);
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  // Learner pages vary by the authenticated account and active-plan cookie.
+  // Keep an edge cache from replaying one account's workspace to another.
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
 }
 
 function unauthorized(request: NextRequest) {
@@ -60,23 +97,17 @@ export async function proxy(request: NextRequest) {
   }
 
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
+  if (isDemoCompatiblePath(request.nextUrl.pathname)) {
+    if (!token) return NextResponse.next();
+    const session = await verifySessionToken(token);
+    return authenticatedResponse(request, session) ?? NextResponse.next();
+  }
+
   if (!token) return unauthorized(request);
 
   const session = await verifySessionToken(token);
   if (!session) return unauthorized(request);
-
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-interviewrunway-user-email", session.email);
-  requestHeaders.set("x-interviewrunway-user-domain", session.hostedDomain);
-
-  const response = NextResponse.next({
-    request: { headers: requestHeaders },
-  });
-  // Learner pages vary by the authenticated account and active-plan cookie.
-  // Keep an edge cache from replaying the default Human Calibration render
-  // after a QA plan switch.
-  response.headers.set("Cache-Control", "private, no-store");
-  return response;
+  return authenticatedResponse(request, session) ?? unauthorized(request);
 }
 
 export const config = {

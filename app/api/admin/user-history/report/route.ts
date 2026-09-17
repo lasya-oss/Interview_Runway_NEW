@@ -13,6 +13,7 @@ import {
 } from "@/app/lib/user-history";
 import { createUserHistoryPdf } from "@/app/lib/user-history-pdf";
 import {
+  describeGmailDeliveryFailure,
   deliverUserHistoryReportWithGmail,
   GmailAttachmentTooLargeError,
   GmailAuthorizationError,
@@ -63,6 +64,8 @@ export function createUserHistoryReportHandler(dependencies: UserHistoryReportDe
       return json({ error: "Authorize Gmail with your signed-in Vivid Labs account" }, 400);
     }
 
+    const requestId = crypto.randomUUID();
+    let stage: "load-sources" | "pdf-generation" | "gmail-delivery" = "load-sources";
     try {
       const sources = await dependencies.loadSources({
         learnerEmail,
@@ -71,7 +74,9 @@ export function createUserHistoryReportHandler(dependencies: UserHistoryReportDe
           : null,
         generatedByEmail: authorization.user.email,
       });
+      stage = "pdf-generation";
       const pdf = createUserHistoryPdf(buildUserHistoryReport(sources));
+      stage = "gmail-delivery";
       await dependencies.deliver({
         accessToken: googleAccessToken,
         learnerEmail,
@@ -90,56 +95,62 @@ export function createUserHistoryReportHandler(dependencies: UserHistoryReportDe
           "Content-Type": "application/pdf",
           "Pragma": "no-cache",
           "X-InterviewRunway-Report-Delivered": "gmail",
+          "X-InterviewRunway-Report-Request-Id": requestId,
           "X-Content-Type-Options": "nosniff",
         },
       });
     } catch (error) {
+      logReportFailure(requestId, stage, error);
+      const failureHeaders = { "X-InterviewRunway-Report-Request-Id": requestId };
       if (error instanceof UserHistoryNotFoundError) {
-        return json({ error: "The selected learner has no stored Interview Runway history" }, 404);
+        return json({ error: "The selected learner has no stored Interview Runway history", reference: requestId }, 404, failureHeaders);
       }
       if (error instanceof GmailAttachmentTooLargeError) {
-        return json({ error: "This report is too large to attach to a Gmail message" }, 413);
+        return json({ error: "This report is too large to attach to a Gmail message", reference: requestId }, 413, failureHeaders);
       }
       if (error instanceof GmailAuthorizationError) {
         return json(
-          { error: "Gmail authorization expired or is no longer granted. Reconnect Gmail and try again" },
+          { error: "Gmail authorization expired or is no longer granted. Reconnect Gmail and try again", reference: requestId },
           401,
           {
+            ...failureHeaders,
             "WWW-Authenticate": 'Bearer realm="user-history-report", error="invalid_token"',
             "X-InterviewRunway-Gmail-Authorization": "required",
           },
         );
       }
       if (error instanceof GmailDeliveryIndeterminateError) {
-        console.error("Internal user history report Gmail delivery was indeterminate");
-        return json({ error: "Gmail did not confirm delivery. Check your Inbox or Sent folder before trying again" }, 502);
+        return json({ error: "Gmail did not confirm delivery. Check your Inbox or Sent folder before trying again", reference: requestId }, 502, failureHeaders);
       }
       if (error instanceof GmailProviderUnavailableError) {
-        console.error("Internal user history report Google identity verification was unavailable");
-        return json({ error: "Google authorization is temporarily unavailable. Wait a moment, then try again" }, 503);
+        return json({ error: "Google authorization is temporarily unavailable. Wait a moment, then try again", reference: requestId }, 503, failureHeaders);
       }
       if (error instanceof GmailWorkspacePolicyError) {
-        console.error("Internal user history report Gmail delivery was blocked by Workspace policy");
-        return json({ error: "Google Workspace has not enabled this report delivery. Ask a Workspace administrator to allow Interview Runway Gmail sending" }, 503);
+        return json({ error: "Google Workspace has not enabled this report delivery. Ask a Workspace administrator to allow Interview Runway Gmail sending", reference: requestId }, 503, failureHeaders);
       }
       if (error instanceof GmailQuotaError) {
-        console.error("Internal user history report Gmail delivery was rate limited");
-        return json({ error: "Gmail is temporarily limiting report delivery. Wait a moment, then try again" }, 429);
+        return json({ error: "Gmail is temporarily limiting report delivery. Wait a moment, then try again", reference: requestId }, 429, failureHeaders);
       }
       if (error instanceof GmailDeliveryError) {
-        console.error("Internal user history report Gmail delivery failed", safeErrorMessage(error));
-        return json({ error: "Gmail could not send the report. Check your Gmail permission and try again" }, 502);
+        return json({ error: "Gmail could not send the report. Check your Gmail permission and try again", reference: requestId }, 502, failureHeaders);
       }
-      console.error("Internal user history report generation failed", safeErrorMessage(error));
-      return json({ error: "The user history report could not be generated" }, 503);
+      return json({ error: "The user history report could not be generated", reference: requestId }, 503, failureHeaders);
     }
   };
 }
 
 export const POST = createUserHistoryReportHandler();
 
-function safeErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
+function logReportFailure(
+  requestId: string,
+  routeStage: "load-sources" | "pdf-generation" | "gmail-delivery",
+  error: unknown,
+) {
+  console.error("Internal user history report failed", {
+    requestId,
+    routeStage,
+    ...describeGmailDeliveryFailure(error),
+  });
 }
 
 function json(body: object, status: number, headers: Record<string, string> = {}) {

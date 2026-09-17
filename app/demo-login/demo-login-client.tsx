@@ -123,7 +123,7 @@ export function DemoLoginClient({ returnTo }: { returnTo: string }) {
       })}
 
       {message ? <p className="demo-login-error" role="alert">{message}</p> : null}
-      <p className="demo-login-note">Sample workspace data · Foundation cards use QA references; higher-tier demo materials remain marked pending final human editorial review.</p>
+      <p className="demo-login-note">Sample workspace data · Demo activity is isolated from learner accounts and creates no purchase record.</p>
     </div>
   );
 }

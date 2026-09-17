@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        message: "Use an approved @vividlabsai.com Google Workspace account.",
+        message: "Use a verified Google account.",
       },
       { status: 403 },
     );

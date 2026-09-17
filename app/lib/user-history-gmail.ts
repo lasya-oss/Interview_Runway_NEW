@@ -12,53 +12,112 @@ const MAX_PDF_ATTACHMENT_BYTES = 3_000_000;
 const GOOGLE_IDENTITY_ATTEMPTS = 2;
 const GOOGLE_IDENTITY_RETRY_DELAY_MS = 100;
 
-export class GmailAuthorizationError extends Error {
-  constructor() {
-    super("Gmail authorization does not match the signed-in Vivid Labs account");
+export type GmailFailureStage =
+  | "input-validation"
+  | "identity-request"
+  | "identity-response"
+  | "identity-match"
+  | "gmail-send-request"
+  | "gmail-send-response"
+  | "gmail-confirmation";
+
+type GmailFailureContext = {
+  stage?: GmailFailureStage;
+  providerStatus?: number;
+  providerReason?: string;
+  providerMessage?: string;
+  cause?: unknown;
+};
+
+class GmailDiagnosticError extends Error {
+  readonly stage: GmailFailureStage;
+  readonly providerStatus: number | null;
+  readonly providerReason: string | null;
+  readonly providerMessage: string | null;
+  readonly causeMessage: string | null;
+
+  constructor(message: string, defaultStage: GmailFailureStage, context: GmailFailureContext = {}) {
+    super(message);
+    this.stage = context.stage ?? defaultStage;
+    this.providerStatus = context.providerStatus ?? null;
+    this.providerReason = sanitizeDiagnostic(context.providerReason);
+    this.providerMessage = sanitizeDiagnostic(context.providerMessage);
+    this.causeMessage = sanitizeDiagnostic(
+      context.cause instanceof Error ? `${context.cause.name}: ${context.cause.message}` : context.cause,
+    );
+  }
+}
+
+export class GmailAuthorizationError extends GmailDiagnosticError {
+  constructor(context: GmailFailureContext = {}) {
+    super("Gmail authorization does not match the signed-in Vivid Labs account", "identity-match", context);
     this.name = "GmailAuthorizationError";
   }
 }
 
-export class GmailDeliveryError extends Error {
-  constructor(message = "Gmail could not deliver the user history report") {
-    super(message);
+export class GmailDeliveryError extends GmailDiagnosticError {
+  constructor(message = "Gmail could not deliver the user history report", context: GmailFailureContext = {}) {
+    super(message, "gmail-send-response", context);
     this.name = "GmailDeliveryError";
   }
 }
 
 export class GmailProviderUnavailableError extends GmailDeliveryError {
-  constructor() {
-    super("Google identity verification is temporarily unavailable");
+  constructor(context: GmailFailureContext = {}) {
+    super("Google identity verification is temporarily unavailable", { stage: "identity-request", ...context });
     this.name = "GmailProviderUnavailableError";
   }
 }
 
 export class GmailWorkspacePolicyError extends GmailDeliveryError {
-  constructor() {
-    super("Google Workspace policy does not allow this Gmail delivery");
+  constructor(context: GmailFailureContext = {}) {
+    super("Google Workspace policy does not allow this Gmail delivery", context);
     this.name = "GmailWorkspacePolicyError";
   }
 }
 
 export class GmailQuotaError extends GmailDeliveryError {
-  constructor() {
-    super("Gmail has temporarily limited report delivery");
+  constructor(context: GmailFailureContext = {}) {
+    super("Gmail has temporarily limited report delivery", context);
     this.name = "GmailQuotaError";
   }
 }
 
-export class GmailDeliveryIndeterminateError extends Error {
-  constructor() {
-    super("Gmail did not return a final delivery response");
+export class GmailDeliveryIndeterminateError extends GmailDiagnosticError {
+  constructor(context: GmailFailureContext = {}) {
+    super("Gmail did not return a final delivery response", "gmail-confirmation", context);
     this.name = "GmailDeliveryIndeterminateError";
   }
 }
 
-export class GmailAttachmentTooLargeError extends Error {
+export class GmailAttachmentTooLargeError extends GmailDiagnosticError {
   constructor() {
-    super("The generated report is too large for this Gmail delivery flow");
+    super("The generated report is too large for this Gmail delivery flow", "input-validation");
     this.name = "GmailAttachmentTooLargeError";
   }
+}
+
+export function describeGmailDeliveryFailure(error: unknown) {
+  if (error instanceof GmailDiagnosticError) {
+    return {
+      errorName: error.name,
+      message: error.message,
+      stage: error.stage,
+      providerStatus: error.providerStatus,
+      providerReason: error.providerReason,
+      providerMessage: error.providerMessage,
+      cause: error.causeMessage,
+    };
+  }
+  return {
+    errorName: error instanceof Error ? error.name : "UnknownError",
+    message: sanitizeDiagnostic(error instanceof Error ? error.message : error) ?? "Unknown error",
+    stage: null,
+    providerStatus: null,
+    providerReason: null,
+    providerMessage: null,
+    cause: null,
+  };
 }
 
 type GmailDeliveryDependencies = {
@@ -92,7 +151,9 @@ export async function deliverUserHistoryReportWithGmail(
   input: GmailDeliveryInput,
   overrides: Partial<GmailDeliveryDependencies> = {},
 ) {
-  if (!isGoogleAccessToken(input.accessToken)) throw new GmailAuthorizationError();
+  if (!isGoogleAccessToken(input.accessToken)) {
+    throw new GmailAuthorizationError({ stage: "input-validation", providerReason: "invalid_access_token_shape" });
+  }
   if (input.pdf.byteLength > MAX_PDF_ATTACHMENT_BYTES) throw new GmailAttachmentTooLargeError();
 
   const dependencies: GmailDeliveryDependencies = {
@@ -117,7 +178,7 @@ export async function deliverUserHistoryReportWithGmail(
     || normalizeEmail(identity.hostedDomain) !== configuredDomain
     || !isInternalFullAccessEmail(identity.email, configuredDomain)
   ) {
-    throw new GmailAuthorizationError();
+    throw new GmailAuthorizationError({ stage: "identity-match", providerReason: "signed_in_identity_mismatch" });
   }
 
   const message = createGmailReportMessage({
@@ -140,33 +201,47 @@ export async function deliverUserHistoryReportWithGmail(
       body: message,
       redirect: "error",
     }, 15_000);
-  } catch {
-    throw new GmailDeliveryIndeterminateError();
+  } catch (error) {
+    throw new GmailDeliveryIndeterminateError({ stage: "gmail-send-request", cause: error });
   }
 
   if (response.status === 401) {
-    throw new GmailAuthorizationError();
+    const provider = await readGoogleError(response);
+    throw new GmailAuthorizationError(gmailResponseContext(response, provider));
   }
   if (response.status === 403) {
-    const reason = await readGmailErrorReason(response);
-    if (GMAIL_AUTHORIZATION_REASONS.has(reason)) throw new GmailAuthorizationError();
-    if (GMAIL_POLICY_REASONS.has(reason)) throw new GmailWorkspacePolicyError();
-    if (GMAIL_QUOTA_REASONS.has(reason)) throw new GmailQuotaError();
-    throw new GmailDeliveryError("Gmail rejected report delivery");
+    const provider = await readGoogleError(response);
+    const context = gmailResponseContext(response, provider);
+    if (GMAIL_AUTHORIZATION_REASONS.has(provider.reason)) throw new GmailAuthorizationError(context);
+    if (GMAIL_POLICY_REASONS.has(provider.reason)) throw new GmailWorkspacePolicyError(context);
+    if (GMAIL_QUOTA_REASONS.has(provider.reason)) throw new GmailQuotaError(context);
+    throw new GmailDeliveryError("Gmail rejected report delivery", context);
   }
-  if (response.status === 429) throw new GmailQuotaError();
+  if (response.status === 429) {
+    const provider = await readGoogleError(response);
+    throw new GmailQuotaError(gmailResponseContext(response, provider));
+  }
   if (response.status >= 500) {
-    throw new GmailDeliveryIndeterminateError();
+    const provider = await readGoogleError(response);
+    throw new GmailDeliveryIndeterminateError(gmailResponseContext(response, provider));
   }
   if (!response.ok) {
-    throw new GmailDeliveryError(`Gmail delivery returned status ${response.status}`);
+    const provider = await readGoogleError(response);
+    throw new GmailDeliveryError(
+      `Gmail delivery returned status ${response.status}`,
+      gmailResponseContext(response, provider),
+    );
   }
 
   const result = response.headers.get("content-type")?.toLowerCase().includes("application/json")
     ? await response.json().catch(() => null) as { id?: unknown } | null
     : null;
   if (typeof result?.id !== "string" || !result.id.trim()) {
-    throw new GmailDeliveryIndeterminateError();
+    throw new GmailDeliveryIndeterminateError({
+      stage: "gmail-confirmation",
+      providerStatus: response.status,
+      providerReason: "missing_message_id",
+    });
   }
 
   return {
@@ -194,15 +269,32 @@ const GMAIL_QUOTA_REASONS = new Set([
   "userratelimitexceeded",
 ]);
 
-async function readGmailErrorReason(response: Response) {
-  if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) return "";
+type GoogleProviderError = { reason: string; message: string };
+
+async function readGoogleError(response: Response): Promise<GoogleProviderError> {
+  if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
+    return { reason: "", message: "" };
+  }
   const body = await response.json().catch(() => null) as {
     error?: {
       errors?: Array<{ reason?: unknown }>;
+      message?: unknown;
     };
   } | null;
   const reason = body?.error?.errors?.find((item) => typeof item.reason === "string")?.reason;
-  return typeof reason === "string" ? reason.replace(/[^a-z]/gi, "").toLowerCase() : "";
+  return {
+    reason: typeof reason === "string" ? reason.replace(/[^a-z]/gi, "").toLowerCase() : "",
+    message: typeof body?.error?.message === "string" ? body.error.message : "",
+  };
+}
+
+function gmailResponseContext(response: Response, provider: GoogleProviderError): GmailFailureContext {
+  return {
+    stage: "gmail-send-response",
+    providerStatus: response.status,
+    providerReason: provider.reason,
+    providerMessage: provider.message,
+  };
 }
 
 export function createGmailReportMessage({
@@ -258,6 +350,7 @@ export function createGmailReportMessage({
 }
 
 async function readGoogleIdentity(fetchImpl: typeof fetch, accessToken: string) {
+  let lastFailure: GmailFailureContext = { stage: "identity-request" };
   for (const userInfoUrl of GOOGLE_USERINFO_URLS) {
     for (let attempt = 1; attempt <= GOOGLE_IDENTITY_ATTEMPTS; attempt += 1) {
       let response: Response;
@@ -270,7 +363,8 @@ async function readGoogleIdentity(fetchImpl: typeof fetch, accessToken: string) 
           },
           redirect: "error",
         }, 8_000);
-      } catch {
+      } catch (error) {
+        lastFailure = { stage: "identity-request", cause: error };
         if (attempt < GOOGLE_IDENTITY_ATTEMPTS) {
           await waitForGoogleIdentityRetry();
           continue;
@@ -278,16 +372,47 @@ async function readGoogleIdentity(fetchImpl: typeof fetch, accessToken: string) 
         break;
       }
 
-      if (response.status === 401 || response.status === 403) throw new GmailAuthorizationError();
+      if (response.status === 401 || response.status === 403) {
+        const provider = await readGoogleError(response);
+        throw new GmailAuthorizationError({
+          stage: "identity-response",
+          providerStatus: response.status,
+          providerReason: provider.reason,
+          providerMessage: provider.message,
+        });
+      }
       if (response.status === 408 || response.status === 429 || response.status >= 500) {
+        const provider = await readGoogleError(response);
+        lastFailure = {
+          stage: "identity-response",
+          providerStatus: response.status,
+          providerReason: provider.reason,
+          providerMessage: provider.message,
+        };
         if (attempt < GOOGLE_IDENTITY_ATTEMPTS) {
           await waitForGoogleIdentityRetry();
           continue;
         }
         break;
       }
-      if (!response.ok) throw new GmailDeliveryError(`Google identity verification returned status ${response.status}`);
-      if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) break;
+      if (!response.ok) {
+        const provider = await readGoogleError(response);
+        throw new GmailDeliveryError(`Google identity verification returned status ${response.status}`, {
+          stage: "identity-response",
+          providerStatus: response.status,
+          providerReason: provider.reason,
+          providerMessage: provider.message,
+        });
+      }
+      if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
+        lastFailure = {
+          stage: "identity-response",
+          providerStatus: response.status,
+          providerReason: "unexpected_content_type",
+          providerMessage: response.headers.get("content-type") ?? "missing content-type",
+        };
+        break;
+      }
 
       const body = await response.json().catch(() => null) as {
         email?: unknown;
@@ -296,7 +421,11 @@ async function readGoogleIdentity(fetchImpl: typeof fetch, accessToken: string) 
         sub?: unknown;
       } | null;
       if (!body || typeof body.email !== "string" || typeof body.hd !== "string") {
-        throw new GmailAuthorizationError();
+        throw new GmailAuthorizationError({
+          stage: "identity-response",
+          providerStatus: response.status,
+          providerReason: "incomplete_workspace_identity",
+        });
       }
       return {
         email: body.email,
@@ -307,7 +436,7 @@ async function readGoogleIdentity(fetchImpl: typeof fetch, accessToken: string) 
     }
   }
 
-  throw new GmailProviderUnavailableError();
+  throw new GmailProviderUnavailableError(lastFailure);
 }
 
 async function fetchWithTimeout(
@@ -348,4 +477,10 @@ function assertSafeHeaderValue(value: string) {
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
+}
+
+function sanitizeDiagnostic(value: unknown) {
+  if (typeof value !== "string") return null;
+  const normalized = value.replace(/[\u0000-\u001f\u007f]+/g, " ").trim();
+  return normalized ? normalized.slice(0, 500) : null;
 }

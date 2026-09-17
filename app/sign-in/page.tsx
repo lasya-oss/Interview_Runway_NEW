@@ -10,7 +10,7 @@ import { GoogleSignIn } from "./google-sign-in";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Vivid Labs sign-in",
+  title: "Sign in",
   description: "Secure access to the InterviewRunway workspace.",
   robots: { follow: false, index: false },
 };
@@ -56,27 +56,27 @@ export default async function SignInPage({
           <span>IR</span>
           <p>InterviewRunway</p>
         </div>
-        <p className="vivid-sign-in__eyebrow">Vivid Labs · Secure workspace</p>
+        <p className="vivid-sign-in__eyebrow">Secure learner workspace</p>
         <h1 id="vivid-sign-in-title">
-          Authorized crew
-          <em> only.</em>
+          Continue with
+          <em> Google.</em>
         </h1>
         <p className="vivid-sign-in__lede">
-          Sign in with your Vivid Labs Google Workspace account to enter the
-          InterviewRunway operating environment.
+          Sign in with a verified Google account to purchase access or enter
+          your private InterviewRunway workspace.
         </p>
 
         <div className="vivid-sign-in__card">
           <div>
-            <span>ACCESS POLICY</span>
-            <strong>@vividlabsai.com</strong>
+            <span>ACCOUNT SECURITY</span>
+            <strong>VERIFIED GOOGLE ACCOUNT</strong>
           </div>
           {clientId ? (
             <GoogleSignIn clientId={clientId} returnTo={returnTo} />
           ) : (
             <p role="alert">
-              Google sign-in is not configured. Contact the Vivid Labs
-              administrator.
+              Google sign-in is temporarily unavailable. Contact
+              InterviewRunway support.
             </p>
           )}
         </div>

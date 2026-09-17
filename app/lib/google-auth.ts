@@ -4,7 +4,6 @@ import {
   jwtVerify,
   type JWTPayload,
 } from "jose";
-import { isConfiguredTestFullAccessEmail } from "@/app/lib/paid-access";
 
 export const AUTH_COOKIE_NAME = "interviewrunway_session";
 export const AUTH_SESSION_SECONDS = 60 * 60 * 12;
@@ -42,12 +41,6 @@ function requiredEnvironmentValue(name: string): string {
   return value;
 }
 
-function allowedDomain(): string {
-  return (
-    process.env.AUTH_ALLOWED_DOMAIN?.trim().toLowerCase() || "vividlabsai.com"
-  );
-}
-
 function sessionSecret(): Uint8Array {
   const value = requiredEnvironmentValue("AUTH_SESSION_SECRET");
   if (value.length < 32) {
@@ -67,26 +60,15 @@ function stringClaim(
 export function isAllowedGoogleIdentity({
   email,
   emailVerified,
-  hostedDomain,
 }: {
   email: string | null;
   emailVerified: boolean;
   hostedDomain: string | null;
 }): boolean {
-  if (!email || !emailVerified) return false;
-
-  // Temporary pre-launch QA: the named external test account signs in with a
-  // verified consumer Gmail address, so it carries no hosted-domain claim. A
-  // verified email address remains mandatory.
-  if (isConfiguredTestFullAccessEmail(email)) return true;
-  if (!hostedDomain) return false;
-
-  const domain = allowedDomain();
-  const normalizedEmail = email.toLowerCase();
-  return (
-    hostedDomain.toLowerCase() === domain &&
-    normalizedEmail.endsWith(`@${domain}`)
-  );
+  if (!emailVerified || !email) return false;
+  const normalizedEmail = email.trim().toLowerCase();
+  return normalizedEmail.length <= 254
+    && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normalizedEmail);
 }
 
 export async function verifyGoogleCredential(
@@ -115,7 +97,7 @@ export async function verifyGoogleCredential(
 
     return {
       email: email!,
-      hostedDomain: hostedDomain!,
+      hostedDomain: hostedDomain ?? "",
       name: stringClaim(payload, "name"),
       picture: stringClaim(payload, "picture"),
       subject: payload.sub,
@@ -165,7 +147,7 @@ export async function verifySessionToken(
 
     return {
       email: email!,
-      hostedDomain: hostedDomain!,
+      hostedDomain: hostedDomain ?? "",
       name: stringClaim(payload, "name"),
       subject: payload.sub,
     };
