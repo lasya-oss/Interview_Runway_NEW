@@ -27,19 +27,23 @@ This starter does not use `wrangler.jsonc`.
 - `examples/d1/` contains an optional D1 example surface
 - `drizzle.config.ts` supports local migration generation when needed
 
-## Google Workspace Sign-In
+## Google Sign-In
 
-The deployed site is publicly reachable at the hosting layer and protected by
-app-owned Google Workspace authentication.
+The marketing site and demo are public. Purchases and account-backed learner
+workspaces use app-owned Google authentication.
 
-- Google Auth Platform is configured with an Internal audience for the
-  `vividlabsai.com` organization.
-- The server independently verifies the Google ID token audience, issuer,
-  verified email, hosted-domain claim, and `@vividlabsai.com` email suffix.
+- Google Auth Platform must use an External audience so customers can sign in;
+  both production and staging origins must be authorized in the OAuth client.
+- The server independently verifies the Google ID token audience, issuer, and
+  verified email before issuing a signed session.
+- Paid entitlements are resolved server-side. Vivid Labs administration and
+  internal full access remain separately restricted to `vividlabsai.com`.
 - A signed, HTTP-only, same-site session cookie protects browser pages and API
-  routes. Paddle's signed webhook route remains public.
-- `proxy.ts` redirects anonymous page requests to `/sign-in` and rejects
-  anonymous API requests.
+  routes. Public acquisition routes, the isolated demo-session route, and
+  Paddle's signed webhook remain public.
+- `proxy.ts` redirects anonymous protected-page requests to `/sign-in` and
+  rejects anonymous protected API requests. Demo-compatible learner pages
+  validate the signed demo cookie in their route logic.
 
 Required runtime values are documented in `.env.example`. Store the production
 session secret in Sites as a secret rather than committing it.
