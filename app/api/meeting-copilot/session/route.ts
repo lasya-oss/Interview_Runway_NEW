@@ -87,6 +87,7 @@ export function createMeetingCopilotSessionHandler(
     return json({
       ok: true,
       ownerKey: session.ownerKey,
+      userEmail: session.userEmail,
       expiresAt: profileCopySession.expiresAt,
       profileCopyToken: profileCopySession.token,
     }, 200);
