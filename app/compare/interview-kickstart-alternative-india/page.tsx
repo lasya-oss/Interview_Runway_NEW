@@ -40,7 +40,7 @@ const CRITERIA = [
   {
     title: "India payment experience",
     interviewRunway:
-      "The planned checkout is INR-first and UPI-first, with the exact price and applicable taxes shown before payment. Payments are not active yet.",
+      "Checkout is priced in INR. Paddle, the merchant of record, shows the exact total including applicable taxes before payment.",
     verify:
       "Check the final currency, taxes, payment methods, financing cost, and foreign-transaction implications for your location.",
   },
@@ -54,7 +54,7 @@ const CRITERIA = [
   {
     title: "Refund and exit terms",
     interviewRunway:
-      "The final refund window is still pending and must be shown at checkout before payments are enabled.",
+      "Digital-product sales are final once access is granted. Duplicate charges and payments that fail to activate access are reversed through Paddle.",
     verify:
       "Read the provider's current written refund, deferral, attendance, financing, and cancellation conditions before signing or paying.",
   },

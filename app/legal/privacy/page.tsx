@@ -47,12 +47,17 @@ export default function PrivacyPolicyPage() {
 
           <h2>Information created when you use the service</h2>
           <p>
-            The service records basic device, browser, page, referral, and
-            feature-usage data for security, reliability, and funnel
-            measurement. Paddle returns transaction status, amount, method type,
-            and identifiers for payments. InterviewRunway never asks you to
-            enter card or UPI credentials into its own fields — payment details
-            go directly to Paddle.
+            Essential server logs may record connection, device, and browser
+            details for security and reliability. Optional page, referral, and
+            feature-usage analytics are disabled until you choose to allow
+            analytics. Your choice is stored in your browser and can be changed
+            at any time using the Analytics choices link in the footer.
+          </p>
+          <p>
+            Paddle returns transaction status, amount, method type, and
+            identifiers for payments. InterviewRunway never asks you to enter
+            card or UPI credentials into its own fields — payment details go
+            directly to Paddle.
           </p>
 
           <h2>How the information is used</h2>
@@ -113,9 +118,10 @@ export default function PrivacyPolicyPage() {
 
           <h2>Your choices</h2>
           <p>
-            You can update account information in the product, opt out of
-            marketing email at any time, and request access, correction, or
-            deletion of your personal data at the address above.
+            You can reject optional analytics without losing access to the site,
+            change that choice later, update account information in the product,
+            opt out of marketing email at any time, and request access,
+            correction, or deletion of your personal data at the address above.
           </p>
 
           <h2>Grievances</h2>

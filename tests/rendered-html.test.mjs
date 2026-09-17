@@ -1869,6 +1869,43 @@ test("analytics contract is present on acquisition and payment surfaces", async 
   assert.match(await checkout.text(), /Continue to secure checkout|Checkout configuration unavailable/i);
 });
 
+test("checkout requires affirmative final-sale and terms acceptance", async () => {
+  const checkout = await render("/checkout/vault", {
+    headers: {
+      accept: "text/html",
+      "oai-authenticated-user-email": "buyer@example.com",
+    },
+  });
+  const html = await checkout.text();
+
+  assert.equal(checkout.status, 200);
+  assert.match(html, /ALL SALES ARE FINAL/i);
+  assert.match(html, /duplicate[\s-]+charge/i);
+  assert.match(html, /fails to activate/i);
+  assert.match(html, /type=["']checkbox["']/i);
+  assert.match(html, /href=["']\/legal\/terms["']/i);
+  assert.match(html, /href=["']\/legal\/refund["']/i);
+  assert.match(html, /Optional add-ons<\/span><span>None/i);
+  assert.match(html, /Paddle[^<]*merchant of record/i);
+  assert.doesNotMatch(html, /defaultChecked|checked=["'](?:checked|true)["']/i);
+});
+
+test("analytics events are gated behind the visitor consent choice", async () => {
+  const analytics = await readFile(
+    new URL("../app/lib/analytics.ts", import.meta.url),
+    "utf8",
+  );
+  const consent = await readFile(
+    new URL("../app/components/analytics-consent.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(analytics, /if \(!hasAnalyticsConsent\(\)\) return/);
+  assert.match(consent, /Essential only/);
+  assert.match(consent, /Allow analytics/);
+  assert.match(consent, /localStorage\.setItem\(ANALYTICS_CONSENT_KEY, choice\)/);
+});
+
 test("Paddle checkout requires an authenticated account", async () => {
   const checkout = await request("/api/checkout", {
     method: "POST",
@@ -1884,6 +1921,21 @@ test("Paddle checkout requires an authenticated account", async () => {
     ok: false,
     message: "Google sign-in is required.",
   });
+});
+
+test("Paddle checkout rejects requests without explicit policy acceptance", async () => {
+  const checkout = await request("/api/checkout", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ offer: "vault", termsAccepted: false }),
+  });
+
+  assert.equal(checkout.status, 400);
+  assert.match((await checkout.json()).error, /Accept the Terms and Refund Policy/i);
 });
 
 test("Phase 3 qualification rejects incomplete submissions before persistence", async () => {
@@ -1924,7 +1976,7 @@ test("buyer-facing checkout contains no prototype or no-charge simulation", asyn
   const text = visibleText(await response.text());
   assert.match(text, /Continue to secure checkout|Checkout configuration unavailable/i);
   assert.doesNotMatch(text, /prototype|simulation|₹0|no-charge/i);
-  assert.doesNotMatch(text, /Paddle|buyer@example\.com|purchasing account/i);
+  assert.doesNotMatch(text, /buyer@example\.com|purchasing account/i);
 });
 
 test("checkout collects the receipt email instead of prefilling the signed-in account", async () => {

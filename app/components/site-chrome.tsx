@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AnalyticsSettingsButton } from "@/app/components/analytics-consent";
 
 const NAV_ITEMS = [
   { href: "/curriculum", label: "Curriculum" },
@@ -57,7 +58,8 @@ export function Footer() {
       </div>
       <div className="container footer-bottom">
         <span>© {new Date().getFullYear()} InterviewRunway</span>
-        <span>All prices shown in INR · Seller details added before payments go live</span>
+        <span>Seller: VividLabs AI · Paddle is merchant of record</span>
+        <AnalyticsSettingsButton />
       </div>
     </footer>
   );

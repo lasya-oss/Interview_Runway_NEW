@@ -44,9 +44,9 @@ export default async function CheckoutPage({
             <p className="module-kicker">VAULT ACCESS · ONE TIME</p>
             <h1 id="payment-title">Clearance for your next interview.</h1>
             <p className="checkout-intro">
-              Review your order, then continue to the encrypted payment screen.
-              Your payment details are handled securely and are never stored by
-              InterviewRunway.
+              Review the product, final-sale policy, and terms below. Paddle is
+              the merchant of record and securely handles the payment; VividLabs
+              AI never stores your payment details.
             </p>
 
             <CheckoutClient
@@ -70,10 +70,8 @@ export default async function CheckoutPage({
             </div>
 
             <p className="checkout-policy-line">
-              By continuing, you can review the final tax-adjusted total before
-              paying. Read the <Link href="/legal/terms">terms</Link>,{" "}
-              <Link href="/legal/privacy">privacy notice</Link>, and{" "}
-              <Link href="/legal/refund">refund policy</Link>.
+              Sold by VividLabs AI · Payment processed by Paddle as merchant of
+              record · <Link href="/legal/privacy">Privacy notice</Link>
             </p>
           </section>
 
@@ -82,20 +80,23 @@ export default async function CheckoutPage({
             <h2 id="order-title">{vault.name}</h2>
             <p>{vault.description}</p>
 
-            <div className="price-line"><span>Vault access</span><span>{vault.priceLabel}</span></div>
+            <div className="price-line"><span>Subtotal</span><span>{vault.priceLabel}</span></div>
             <div className="price-line"><span>Billing</span><span>One time</span></div>
-            <div className="price-line"><span>Tax</span><span>Calculated at checkout</span></div>
-            <div className="price-line price-total"><span>Base price</span><span>{vault.priceLabel}</span></div>
+            <div className="price-line"><span>Optional add-ons</span><span>None</span></div>
+            <div className="price-line"><span>Tax</span><span>Based on billing location</span></div>
+            <div className="price-line price-total"><span>Exact total</span><span>Shown before payment</span></div>
 
             <div className="refund-inline">
-              Any applicable tax and the final amount are shown before payment.
-              You will not be charged until you confirm the order.
+              Paddle calculates any applicable tax from your billing details and
+              displays the complete tax-adjusted total before its final payment
+              button. You will not be charged until you confirm that amount.
             </div>
 
             <div className="trust-note">
               <span>✓ SECURE PAYMENT ENTRY</span>
               <span>✓ ONE-TIME ₹799 PURCHASE</span>
               <span>✓ NO SUBSCRIPTION</span>
+              <span>✓ NO UPSELL OR ADD-ON</span>
               <span>✓ ACCESS ACTIVATED AFTER PAYMENT CONFIRMATION</span>
             </div>
           </aside>

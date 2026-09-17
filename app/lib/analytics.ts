@@ -23,8 +23,20 @@ type AnalyticsWindow = Window & {
   dataLayer?: Array<Record<string, unknown>>;
 };
 
+export const ANALYTICS_CONSENT_KEY = "interviewrunway.analytics-consent";
+
+export function hasAnalyticsConsent() {
+  if (typeof window === "undefined") return false;
+
+  try {
+    return window.localStorage.getItem(ANALYTICS_CONSENT_KEY) === "granted";
+  } catch {
+    return false;
+  }
+}
+
 export function trackEvent(event: AnalyticsEvent, payload: AnalyticsPayload = {}) {
-  if (typeof window === "undefined") return;
+  if (!hasAnalyticsConsent()) return;
 
   const detail = { event, ...payload };
   const analyticsWindow = window as AnalyticsWindow;

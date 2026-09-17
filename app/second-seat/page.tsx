@@ -28,7 +28,7 @@ export default function SecondSeatPage() {
       >
           <div className="lock-panel">
           <span>PRIVATE UPGRADE · VAULT CLEARANCE REQUIRED</span>
-          <p>The Second Seat is a separate entitlement for verified Vault owners. Access is activated after the purchase is confirmed; the launch price is ₹2,499 and the included practice allowance is shown before any unlock.</p>
+          <p>The Second Seat is a separate entitlement for verified Vault owners. Access is activated after the purchase is confirmed; the price is ₹2,499 and the included practice allowance is shown before any unlock.</p>
         </div>
         <div className="hero-actions">
           <CtaLink href="/vault">Start with the ₹799 Vault</CtaLink>

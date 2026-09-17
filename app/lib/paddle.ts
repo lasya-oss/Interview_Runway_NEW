@@ -31,14 +31,20 @@ export function getPaddleWebhookSecret(): string {
   return requiredEnvironmentVariable("PADDLE_WEBHOOK_SECRET");
 }
 
-export async function createVaultTransaction(checkoutSessionId: string) {
+export async function createVaultTransaction(
+  checkoutSessionId: string,
+  termsAcceptedAt: string,
+) {
   return getPaddleClient().transactions.create({
     collectionMode: "automatic",
     currencyCode: VAULT_CURRENCY,
     customData: {
       checkoutSessionId,
       offer: "vault",
+      refundPolicy: "final-sale-2026-09-17",
       site: "interviewrunway",
+      termsAcceptedAt,
+      termsVersion: "2026-09-17",
     },
     items: [
       {

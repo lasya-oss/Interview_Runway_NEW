@@ -19,10 +19,18 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => null)) as {
     offer?: unknown;
+    termsAccepted?: unknown;
   } | null;
 
   if (body?.offer !== "vault") {
     return json({ error: "This offer is not available for checkout" }, 400);
+  }
+
+  if (body.termsAccepted !== true) {
+    return json(
+      { error: "Accept the Terms and Refund Policy before checkout" },
+      400,
+    );
   }
 
   try {
@@ -46,7 +54,10 @@ export async function POST(request: Request) {
     const session = await createVaultCheckoutSession(user.email);
 
     try {
-      const transaction = await createVaultTransaction(session.id);
+      const transaction = await createVaultTransaction(
+        session.id,
+        new Date().toISOString(),
+      );
       await attachPaddleTransaction(session.id, transaction.id);
 
       return json(
