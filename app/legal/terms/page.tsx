@@ -7,9 +7,9 @@ import {
 } from "@/app/components/site-chrome";
 
 export const metadata: Metadata = {
-  title: "Terms of use — draft before launch",
+  title: "Terms of use | InterviewRunway",
   description:
-    "Plain-language draft terms for InterviewRunway. Seller details, grievance contact, and final refund terms remain pending before payment activation.",
+    "The terms governing your use of InterviewRunway, in plain language. Operated by VividLabs AI. Effective 17 September 2026.",
   alternates: { canonical: "/legal/terms" },
 };
 
@@ -18,40 +18,36 @@ export default function TermsPage() {
     <PageShell>
       <PageHero
         quiet
-        eyebrow="LEGAL · LAUNCH DRAFT"
+        eyebrow="LEGAL"
         title="Terms you should be able to read once."
-        body="These draft terms explain the intended ground rules. They are not ready to govern a paid purchase until the seller details, grievance contact, and final refund window are completed and published."
+        body="The ground rules for using InterviewRunway, in plain language. Effective 17 September 2026."
       />
-
-      <section className="content-section" aria-labelledby="terms-status-title">
-        <div className="container">
-          <article className="content-card glass-card">
-            <p className="module-kicker">NOT YET ACTIVE FOR PURCHASES</p>
-            <h2 id="terms-status-title">Required launch details are pending</h2>
-            <p>
-              The legal seller name and address, grievance officer and contact
-              method, governing-law details, and final refund window have not
-              been supplied. Payments must remain disabled until they are
-              completed.
-            </p>
-          </article>
-        </div>
-      </section>
 
       <section className="content-section" aria-labelledby="terms-title">
         <div className="container content-narrow">
           <SectionHeading
             eyebrow="PLAIN-LANGUAGE TERMS"
-            title="The intended agreement."
+            title="The agreement."
             id="terms-title"
           />
 
+          <h2>Who we are</h2>
+          <p>
+            InterviewRunway is operated by VividLabs AI (&ldquo;we&rdquo;,
+            &ldquo;us&rdquo;). For anything about these terms, your account, or
+            a purchase, contact{" "}
+            <a href="mailto:support@vividlabsai.com">
+              support@vividlabsai.com
+            </a>
+            .
+          </p>
+
           <h2>What InterviewRunway provides</h2>
           <p>
-            InterviewRunway offers interview-preparation content, optional AI
-            practice tools, and optional coaching. The product page and checkout
-            will state what is included, how long access lasts, any usage limits,
-            and the full price before you pay.
+            InterviewRunway offers interview-preparation content, AI practice
+            tools, and optional coaching. The product page and checkout state
+            what is included, how long access lasts, any usage limits, and the
+            full price before you pay.
           </p>
 
           <h2>No outcome guarantee</h2>
@@ -81,32 +77,51 @@ export default function TermsPage() {
 
           <h2>Payments and access</h2>
           <p>
-            The checkout will show the exact INR amount, applicable taxes, the
-            payment processor, and the access being purchased. No optional
-            upgrade will be pre-selected. Paid access will begin only after a
-            successful payment confirmation.
+            Payments are processed by Paddle, which acts as the merchant of
+            record — the charge on your statement will appear from Paddle.
+            Checkout shows the exact amount, applicable taxes, and the access
+            terms before you pay. No optional upgrade is pre-selected. Paid
+            access begins only after a successful payment confirmation.
           </p>
 
-          <h2>Refunds and cancellations</h2>
+          <h2>Refunds</h2>
           <p>
-            The final refund window and product-specific eligibility rules are
-            still pending. They will appear in the{" "}
-            <Link href="/legal/refund">Refund Policy</Link> and at checkout
-            before payments are activated.
+            InterviewRunway products are digital goods delivered instantly, and
+            all sales are final once access is granted. The exceptions —
+            duplicate charges and payments that never created access — are
+            described in the <Link href="/legal/refund">Refund Policy</Link>.
           </p>
 
           <h2>Content and service changes</h2>
           <p>
             InterviewRunway may improve, replace, or retire material. Any change
             that materially affects a paid entitlement will be handled under
-            the live terms presented at purchase, not hidden in a later update.
+            the terms presented at purchase, not hidden in a later update.
           </p>
 
-          <h2>Contact and complaints</h2>
+          <h2>Contact and grievances</h2>
           <p>
-            The seller contact and grievance escalation route are pending and
-            will be listed here before launch. The live terms will also include
-            an effective date and explain how material updates are communicated.
+            For support, billing questions, or complaints, write to{" "}
+            <a href="mailto:support@vividlabsai.com">
+              support@vividlabsai.com
+            </a>
+            . Our Grievance Officer is Lasya Priya, reachable at the same
+            address. We acknowledge grievances within 48 hours and resolve
+            them within 30 days.
+          </p>
+
+          <h2>Governing law</h2>
+          <p>
+            These terms are governed by the laws of India. Disputes are subject
+            to the exclusive jurisdiction of the courts at the seller&apos;s
+            principal place of business.
+          </p>
+
+          <h2>Changes to these terms</h2>
+          <p>
+            If these terms change materially, the updated version will carry a
+            new effective date and paying customers will be notified by email
+            or site notice before the change affects their entitlements.
           </p>
 
           <p>

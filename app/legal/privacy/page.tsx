@@ -7,9 +7,9 @@ import {
 } from "@/app/components/site-chrome";
 
 export const metadata: Metadata = {
-  title: "Privacy policy — draft before launch",
+  title: "Privacy policy | InterviewRunway",
   description:
-    "InterviewRunway's plain-language draft privacy policy covering account, learning, payment, support, and analytics data.",
+    "How InterviewRunway collects, uses, and protects your data, in plain language. Data controller: VividLabs AI, support@vividlabsai.com. Effective 17 September 2026.",
   alternates: { canonical: "/legal/privacy" },
 };
 
@@ -18,31 +18,16 @@ export default function PrivacyPolicyPage() {
     <PageShell>
       <PageHero
         quiet
-        eyebrow="LEGAL · LAUNCH DRAFT"
+        eyebrow="LEGAL"
         title="Your data should have a clear job."
-        body="This draft describes the data the service is expected to use. The final policy will name the enabled providers, retention periods, seller, and privacy contact before accounts or payments go live."
+        body="What we collect, why, who processes it, and your rights. Data controller: VividLabs AI — support@vividlabsai.com. Effective 17 September 2026."
       />
-
-      <section className="content-section" aria-labelledby="privacy-status-title">
-        <div className="container">
-          <article className="content-card glass-card">
-            <p className="module-kicker">PRE-LAUNCH DISCLOSURE</p>
-            <h2 id="privacy-status-title">Required details are still pending</h2>
-            <p>
-              The legal seller or data-controller identity, grievance and privacy
-              contact, enabled service-provider list, retention schedule, and
-              final refund window have not been supplied. They must be published
-              before payment activation.
-            </p>
-          </article>
-        </div>
-      </section>
 
       <section className="content-section" aria-labelledby="privacy-title">
         <div className="container content-narrow">
           <SectionHeading
             eyebrow="PRIVACY IN PLAIN LANGUAGE"
-            title="What may be collected, and why."
+            title="What is collected, and why."
             id="privacy-title"
           />
 
@@ -62,14 +47,15 @@ export default function PrivacyPolicyPage() {
 
           <h2>Information created when you use the service</h2>
           <p>
-            The service may record basic device, browser, page, referral, and
-            feature-usage data for security, reliability, and funnel measurement.
-            Payment providers may return transaction status, amount, method type,
-            and identifiers. InterviewRunway will not ask you to enter full card
-            or UPI credentials into its own fields.
+            The service records basic device, browser, page, referral, and
+            feature-usage data for security, reliability, and funnel
+            measurement. Paddle returns transaction status, amount, method type,
+            and identifiers for payments. InterviewRunway never asks you to
+            enter card or UPI credentials into its own fields — payment details
+            go directly to Paddle.
           </p>
 
-          <h2>How the information may be used</h2>
+          <h2>How the information is used</h2>
           <ul>
             <li>Provide access, learning features, scores, and support.</li>
             <li>Process and reconcile payments and issue purchase records.</li>
@@ -80,41 +66,86 @@ export default function PrivacyPolicyPage() {
 
           <h2>Service providers</h2>
           <p>
-            The live service may rely on providers for hosting, authentication,
-            storage, payments, email, analytics, advertising measurement, and AI
-            processing. The final policy will name the providers actually enabled
-            and explain relevant data transfers before launch.
+            Your data is processed by the providers that run the service, each
+            for its own job:
           </p>
+          <ul>
+            <li>
+              <strong>Cloudflare</strong> — hosting, edge delivery, and the D1
+              database that stores accounts, progress, and sessions.
+            </li>
+            <li>
+              <strong>Google</strong> — sign-in (Google OAuth) and report
+              delivery (Gmail).
+            </li>
+            <li>
+              <strong>Paddle</strong> — payment processing as merchant of
+              record. Card and bank details go to Paddle, never to us.
+            </li>
+            <li>
+              <strong>Groq and Cerebras</strong> — AI processing for practice,
+              evaluation, and feedback features.
+            </li>
+          </ul>
 
           <h2>AI processing and sensitive material</h2>
           <p>
-            Text or files used by an AI feature may be sent to the configured AI
+            Text or files used by an AI feature are sent to the configured AI
             provider to produce that feature&apos;s result. Do not submit secrets,
             employer-confidential material, leaked interview content, government
-            identifiers, financial credentials, or another person&apos;s data without
-            permission.
+            identifiers, financial credentials, or another person&apos;s data
+            without permission.
           </p>
 
           <h2>Retention and deletion</h2>
           <p>
-            A final retention schedule has not yet been set. The live policy will
-            explain how long account, learning, payment, support, and analytics
-            records are kept, along with the deletion or access request process.
+            Account and learning data are kept while your account is active and
+            deleted on request. Support messages are kept for 24 months.
+            Payment and transaction records are kept as long as tax and
+            accounting law requires (up to 7 years). Anonymized analytics may
+            be kept longer. To request access, correction, or deletion of your
+            data, write to{" "}
+            <a href="mailto:support@vividlabsai.com">
+              support@vividlabsai.com
+            </a>
+            .
           </p>
 
           <h2>Your choices</h2>
           <p>
-            Available controls will cover account information, optional marketing,
-            relevant analytics consent, and requests to access, correct, or delete
-            data where applicable. The privacy and grievance contact for those
-            requests is pending before launch.
+            You can update account information in the product, opt out of
+            marketing email at any time, and request access, correction, or
+            deletion of your personal data at the address above.
+          </p>
+
+          <h2>Grievances</h2>
+          <p>
+            For privacy complaints or grievance redressal, contact our
+            Grievance Officer, Lasya Priya, at{" "}
+            <a href="mailto:support@vividlabsai.com">
+              support@vividlabsai.com
+            </a>
+            . We acknowledge grievances within 48 hours and resolve them within
+            30 days.
           </p>
 
           <h2>Security</h2>
           <p>
-            Reasonable safeguards will be used, but no online service can promise
-            perfect security. Confirmed incidents will be handled under applicable
+            Reasonable safeguards are used, but no online service can promise
+            perfect security. Confirmed incidents are handled under applicable
             notification requirements.
+          </p>
+
+          <h2>Children</h2>
+          <p>
+            InterviewRunway is for job seekers aged 18 and above and is not
+            directed at children.
+          </p>
+
+          <h2>Changes to this policy</h2>
+          <p>
+            Material changes will be announced by email or site notice with a
+            new effective date before they take effect.
           </p>
 
           <p>
