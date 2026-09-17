@@ -1782,6 +1782,25 @@ test("demo sign-in issues a protected session and opens the learner product", as
   assert.match(visibleText(await lockedReplay.text()), /This replay belongs to the practice layer/i);
 });
 
+test("unreleased WhatsApp support bookmarks return to the learner workspace", async () => {
+  const login = await request("/api/demo-session", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      origin: "http://localhost",
+    },
+    body: JSON.stringify({ preview: "practice" }),
+  });
+  const sessionCookie = (login.headers.get("set-cookie") ?? "").split(";")[0];
+  const response = await request("/learn/whatsapp-support", {
+    headers: { accept: "text/html", cookie: sessionCookie },
+    redirect: "manual",
+  });
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/learn");
+});
+
 test("Foundation demo Today renders the clean starting values", async () => {
   const login = await request("/api/demo-session", {
     method: "POST",
