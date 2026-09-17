@@ -522,6 +522,7 @@ test("session and profile-copy handlers recheck active Second Seat access", asyn
   assert.deepEqual(await allowedResponse.json(), {
     ok: true,
     ownerKey: session.ownerKey,
+    userEmail: session.userEmail,
     expiresAt: session.expiresAt,
     profileCopyToken: "profile-copy-token",
   });
