@@ -1,8 +1,11 @@
 import type { VoiceSession } from "@/app/lib/voice-session-store";
 
 export const GEMINI_LIVE_MODEL = "gemini-3.8-live";
-export const GEMINI_LIVE_WEBSOCKET_URL = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained";
-const GEMINI_AUTH_TOKEN_URL = "https://generativelanguage.googleapis.com/v1beta/auth_tokens";
+// Google's official Gen AI SDK currently routes ephemeral-token sessions over
+// the constrained v1alpha surface, even though the surrounding Live API docs
+// also describe v1beta examples.
+export const GEMINI_LIVE_WEBSOCKET_URL = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained";
+const GEMINI_AUTH_TOKEN_URL = "https://generativelanguage.googleapis.com/v1alpha/auth_tokens";
 
 export class VoiceTokenError extends Error {
   constructor(public readonly code: "configuration" | "authorization" | "quota" | "provider") {
@@ -13,14 +16,16 @@ export class VoiceTokenError extends Error {
 
 export function createVoiceLiveConfig(session: VoiceSession, resumeHandle?: string | null) {
   return {
-    responseModalities: ["AUDIO"],
+    generationConfig: {
+      responseModalities: ["AUDIO"],
+      speechConfig: {
+        voiceConfig: { prebuiltVoiceConfig: { voiceName: session.persona === "hiring_manager" ? "Kore" : "Puck" } },
+      },
+    },
     inputAudioTranscription: {},
     outputAudioTranscription: {},
     sessionResumption: resumeHandle ? { handle: resumeHandle } : {},
     contextWindowCompression: { slidingWindow: {} },
-    speechConfig: {
-      voiceConfig: { prebuiltVoiceConfig: { voiceName: session.persona === "hiring_manager" ? "Kore" : "Puck" } },
-    },
     systemInstruction: { parts: [{ text: interviewerPrompt(session) }] },
     tools: [{ functionDeclarations: interviewerTools() }],
   };
@@ -47,9 +52,9 @@ export async function createGeminiVoiceToken(
         uses: 1,
         expireTime,
         newSessionExpireTime,
-        liveConnectConstraints: {
+        bidiGenerateContentSetup: {
           model: `models/${GEMINI_LIVE_MODEL}`,
-          config,
+          ...config,
         },
       }),
       redirect: "error",
