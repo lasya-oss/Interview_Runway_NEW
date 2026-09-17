@@ -41,6 +41,8 @@ function isPublicPath(pathname: string): boolean {
 }
 
 function isDemoCompatiblePath(pathname: string): boolean {
+  // /learn/voice remains inside the same signed-in learner boundary as every
+  // other learner section. /api/voice is intentionally not demo-compatible.
   return pathname === "/learn"
     || pathname.startsWith("/learn/")
     || pathname.startsWith("/api/learn/library/material-preview/");

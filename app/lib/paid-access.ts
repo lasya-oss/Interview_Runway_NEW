@@ -27,6 +27,14 @@ export type LearnerAccess = {
   vault: boolean;
   secondSeat: boolean;
   humanCalibration: boolean;
+  voice: boolean;
+};
+
+export type VoiceEntitlement = {
+  enabled: boolean;
+  plan: "vault" | "second_seat" | null;
+  monthlySessionLimit: 0 | 2 | 10;
+  sessionMinutes: 30;
 };
 
 export function isLearnerPlan(value: unknown): value is DemoTier {
@@ -132,6 +140,22 @@ export async function hasSecondSeatAccess(email: string): Promise<boolean> {
   return Boolean(entitlement);
 }
 
+/** Voice practice is its own product capability. It is included with Vault
+ * and receives a larger quota when the account also owns Second Seat. */
+export async function getVoiceEntitlement(email: string): Promise<VoiceEntitlement> {
+  const access = await getLearnerAccess(email);
+  if (!access.voice) {
+    return { enabled: false, plan: null, monthlySessionLimit: 0, sessionMinutes: 30 };
+  }
+  return access.secondSeat
+    ? { enabled: true, plan: "second_seat", monthlySessionLimit: 10, sessionMinutes: 30 }
+    : { enabled: true, plan: "vault", monthlySessionLimit: 2, sessionMinutes: 30 };
+}
+
+export async function hasVoiceAccess(email: string): Promise<boolean> {
+  return (await getVoiceEntitlement(email)).enabled;
+}
+
 /**
  * Resolve the access stack for the learner shell with one entitlement lookup.
  * The shell is rendered for every learner section, so keeping these related
@@ -140,15 +164,15 @@ export async function hasSecondSeatAccess(email: string): Promise<boolean> {
 export async function getLearnerAccess(email: string): Promise<LearnerAccess> {
   const normalizedEmail = normalizeEmail(email);
   if (isInternalFullAccessEmail(normalizedEmail)) {
-    return { vault: true, secondSeat: true, humanCalibration: true };
+    return { vault: true, secondSeat: true, humanCalibration: true, voice: true };
   }
   if (isConfiguredTestFullAccessEmail(normalizedEmail)) {
-    return { vault: true, secondSeat: true, humanCalibration: true };
+    return { vault: true, secondSeat: true, humanCalibration: true, voice: true };
   }
   const foundationTestEmail = isConfiguredTestFoundationEmail(normalizedEmail);
   const secondSeatTestEmail = isConfiguredTestSecondSeatEmail(normalizedEmail);
   if (secondSeatTestEmail) {
-    return { vault: true, secondSeat: true, humanCalibration: false };
+    return { vault: true, secondSeat: true, humanCalibration: false, voice: true };
   }
   const offers = foundationTestEmail ? ["ai-prep"] : ["vault", "ai-prep"];
   const records = await (await getDb())
@@ -168,6 +192,7 @@ export async function getLearnerAccess(email: string): Promise<LearnerAccess> {
     vault,
     secondSeat: vault && secondSeat,
     humanCalibration: false,
+    voice: vault,
   };
 }
 
@@ -538,6 +563,7 @@ function createLiveLearnerProfile(
       practice: config.practiceAccess,
       feedback: config.practiceAccess,
       coaching: config.coachingAccess,
+      voice: true,
     },
   };
 }

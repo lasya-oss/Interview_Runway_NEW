@@ -6,6 +6,7 @@ import { isInternalFullAccessEmail } from "../app/lib/internal-access.ts";
 import {
   getLearnerAccess,
   hasSecondSeatAccess,
+  hasVoiceAccess,
   hasVaultAccess,
   isConfiguredTestFoundationEmail,
   isConfiguredTestFullAccessEmail,
@@ -74,9 +75,11 @@ test("test address receives the full user-level plan stack", async () => {
       vault: true,
       secondSeat: true,
       humanCalibration: true,
+      voice: true,
     });
     assert.equal(await hasVaultAccess(TEST_EMAIL), true);
     assert.equal(await hasSecondSeatAccess(TEST_EMAIL), true);
+    assert.equal(await hasVoiceAccess(TEST_EMAIL), true);
   });
 });
 

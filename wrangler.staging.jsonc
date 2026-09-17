@@ -28,6 +28,12 @@
       "migrations_dir": "drizzle"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "VOICE_AUDIO",
+      "bucket_name": "interview-runway-staging-voice-audio"
+    }
+  ],
   "vars": {
     "AUTH_ALLOWED_DOMAIN": "vividlabsai.com",
     "CEREBRAS_MODEL": "gpt-oss-120b",

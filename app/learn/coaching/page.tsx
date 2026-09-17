@@ -62,6 +62,13 @@ export default async function CoachingPage() {
           />
         ) : null}
 
+        {profile.access.voice ? (
+          <section className="voice-entry-card voice-entry-card--coach">
+            <div><p className="member-kicker">Voice rehearsal</p><h2>Rehearse before live calibration.</h2><p>Choose Behavioral / STAR or role-specific Q&amp;A, then bring the scored evidence back into the Coach Room.</p></div>
+            <Link className="member-primary-button" href="/learn/voice/new">Open voice mock ↗</Link>
+          </section>
+        ) : null}
+
         <section className="coaching-command-grid">
           <article className="coaching-next-session">
             <div className="member-panel-label"><span>Next calibration</span><b>Admission-controlled scheduling</b></div>

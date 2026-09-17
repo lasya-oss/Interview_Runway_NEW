@@ -56,6 +56,7 @@ jobs:
           CEREBRAS_API_KEY: ${{ secrets.STAGING_CEREBRAS_API_KEY }}
           DEMO_SESSION_SECRET: ${{ secrets.STAGING_DEMO_SESSION_SECRET }}
           GROQ_API_KEY: ${{ secrets.STAGING_GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.STAGING_GEMINI_API_KEY }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}
           GOOGLE_GMAIL_REFRESH_TOKEN: ${{ secrets.STAGING_GOOGLE_GMAIL_REFRESH_TOKEN }}
           GOOGLE_GMAIL_SENDER_EMAIL: ${{ secrets.STAGING_GOOGLE_GMAIL_SENDER_EMAIL }}
@@ -75,6 +76,7 @@ jobs:
             CEREBRAS_API_KEY
             DEMO_SESSION_SECRET
             GROQ_API_KEY
+            GEMINI_API_KEY
             GOOGLE_CLIENT_SECRET
             GOOGLE_GMAIL_REFRESH_TOKEN
             GOOGLE_GMAIL_SENDER_EMAIL
@@ -109,6 +111,7 @@ jobs:
           CEREBRAS_API_KEY: ${{ secrets.STAGING_CEREBRAS_API_KEY }}
           DEMO_SESSION_SECRET: ${{ secrets.STAGING_DEMO_SESSION_SECRET }}
           GROQ_API_KEY: ${{ secrets.STAGING_GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.STAGING_GEMINI_API_KEY }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}
           GOOGLE_GMAIL_REFRESH_TOKEN: ${{ secrets.STAGING_GOOGLE_GMAIL_REFRESH_TOKEN }}
           GOOGLE_GMAIL_SENDER_EMAIL: ${{ secrets.STAGING_GOOGLE_GMAIL_SENDER_EMAIL }}
@@ -130,6 +133,7 @@ jobs:
             "CEREBRAS_API_KEY",
             "DEMO_SESSION_SECRET",
             "GROQ_API_KEY",
+            "GEMINI_API_KEY",
             "GOOGLE_CLIENT_SECRET",
             "GOOGLE_GMAIL_REFRESH_TOKEN",
             "GOOGLE_GMAIL_SENDER_EMAIL",
@@ -154,6 +158,12 @@ jobs:
           EXPECTED_AI_PROVIDER: cerebras
           SECOND_SEAT_E2E_BASE_URL: https://interview-runway-staging.ir-staging-pratheep211088.workers.dev
         run: node scripts/verify-staging-ai.mjs
+
+      - name: Verify staging Voice Mock
+        env:
+          AUTH_SESSION_SECRET: ${{ secrets.STAGING_AUTH_SESSION_SECRET }}
+          VOICE_E2E_BASE_URL: https://interview-runway-staging.ir-staging-pratheep211088.workers.dev
+        run: node scripts/verify-staging-voice.mjs
 
   production:
     name: Deploy production (manual only)

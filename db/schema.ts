@@ -83,6 +83,106 @@ export const secondSeatSessions = sqliteTable(
   ],
 );
 
+export const voiceCandidateProfiles = sqliteTable("voice_candidate_profiles", {
+  userEmail: text("user_email").primaryKey(),
+  profileId: text("profile_id").notNull(),
+  profileRevision: integer("profile_revision").notNull(),
+  profileJson: text("profile_json").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const voiceSessions = sqliteTable(
+  "voice_sessions",
+  {
+    id: text("id").primaryKey(),
+    userEmail: text("user_email").notNull(),
+    interviewType: text("interview_type").notNull(),
+    persona: text("persona").notNull(),
+    language: text("language").notNull().default("en"),
+    jobDescription: text("job_description"),
+    candidateProfile: text("candidate_profile"),
+    status: text("status").notNull().default("ready"),
+    tokenId: text("token_id"),
+    consentAt: text("consent_at"),
+    audioRetentionApproved: integer("audio_retention_approved", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    audioObjectPrefix: text("audio_object_prefix"),
+    createdAt: text("created_at").notNull(),
+    startedAt: text("started_at"),
+    endedAt: text("ended_at"),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [
+    index("voice_sessions_user_created_idx").on(table.userEmail, table.createdAt),
+    index("voice_sessions_user_status_idx").on(table.userEmail, table.status),
+  ],
+);
+
+// Kept after a learner deletes session content so monthly quotas cannot be
+// reset by deleting transcripts. It contains no interview content.
+export const voiceSessionUsage = sqliteTable(
+  "voice_session_usage",
+  {
+    sessionId: text("session_id").primaryKey(),
+    userEmail: text("user_email").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("voice_session_usage_user_created_idx").on(table.userEmail, table.createdAt)],
+);
+
+export const voiceTurns = sqliteTable(
+  "voice_turns",
+  {
+    id: text("id").primaryKey(),
+    sessionId: text("session_id")
+      .notNull()
+      .references(() => voiceSessions.id, { onDelete: "cascade" }),
+    speaker: text("speaker").notNull(),
+    text: text("text").notNull(),
+    startedAt: text("started_at").notNull(),
+    endedAt: text("ended_at").notNull(),
+    toolCalls: text("tool_calls"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("voice_turns_session_started_idx").on(table.sessionId, table.startedAt)],
+);
+
+export const voiceScores = sqliteTable("voice_scores", {
+  sessionId: text("session_id")
+    .primaryKey()
+    .references(() => voiceSessions.id, { onDelete: "cascade" }),
+  rubricVersion: text("rubric_version").notNull(),
+  perAnswer: text("per_answer").notNull(),
+  sessionVerdict: text("session_verdict").notNull(),
+  strengths: text("strengths").notNull(),
+  gaps: text("gaps").notNull(),
+  recommendedDrills: text("recommended_drills").notNull(),
+  provider: text("provider").notNull(),
+  model: text("model").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const voiceReportDeliveries = sqliteTable(
+  "voice_report_deliveries",
+  {
+    deliveryKey: text("delivery_key").primaryKey(),
+    sessionId: text("session_id")
+      .notNull()
+      .references(() => voiceSessions.id, { onDelete: "cascade" }),
+    status: text("status").notNull().default("pending"),
+    messageId: text("message_id"),
+    failureCode: text("failure_code"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+    sentAt: text("sent_at"),
+  },
+  (table) => [
+    uniqueIndex("voice_report_deliveries_session_unique").on(table.sessionId),
+    index("voice_report_deliveries_status_created_idx").on(table.status, table.createdAt),
+  ],
+);
+
 export const meetingCopilotProfileDeliveries = sqliteTable(
   "meeting_copilot_profile_deliveries",
   {

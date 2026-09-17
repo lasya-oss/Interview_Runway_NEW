@@ -31,6 +31,7 @@ export type DemoProfile = {
     practice: boolean;
     feedback: boolean;
     coaching: boolean;
+    voice: boolean;
   };
 };
 
@@ -55,7 +56,7 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     nextActionMeta: "Plan · 20 min",
     nextActionHref: "/learn/roadmap/task/12w-1-map",
     focus: "Start by defining the role, level, timeline, and evidence bar.",
-    access: { library: true, practice: false, feedback: false, coaching: false },
+    access: { library: true, practice: false, feedback: false, coaching: false, voice: false },
   },
   {
     id: "practice",
@@ -77,7 +78,7 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     nextActionMeta: "Practice · 30 min",
     nextActionHref: "/learn/practice",
     focus: "Start with one interview-shaped round and use the transcript to choose the next correction.",
-    access: { library: true, practice: true, feedback: true, coaching: false },
+    access: { library: true, practice: true, feedback: true, coaching: false, voice: false },
   },
   {
     id: "premium",
@@ -97,7 +98,7 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     nextAction: "Prepare evidence for Thursday’s calibration",
     nextActionMeta: "Coach review · 25 min",
     focus: "Make staff-level scope explicit: decisions, influence, and measurable trade-offs.",
-    access: { library: true, practice: true, feedback: true, coaching: true },
+    access: { library: true, practice: true, feedback: true, coaching: true, voice: false },
   },
 ] as const;
 

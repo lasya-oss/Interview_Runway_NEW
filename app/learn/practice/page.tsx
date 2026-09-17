@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LockedMemberPanel } from "@/app/components/member-shell";
 import { requireDemoProfile } from "@/app/lib/demo-session";
 import { getSecondSeatSessions } from "@/app/lib/second-seat-store";
@@ -24,6 +25,12 @@ export default async function PracticePage() {
     <div className="member-page">
       {profile.access.practice ? (
         <>
+          {profile.access.voice ? (
+            <section className="voice-entry-card">
+              <div><p className="member-kicker">Speak the next round</p><h2>Run a full-duplex voice mock.</h2><p>Behavioral or role-specific, with interruptions, transcript checkpoints, and an answer-level report.</p></div>
+              <Link className="member-primary-button" href="/learn/voice/new">Start voice mock ↗</Link>
+            </section>
+          ) : null}
           <PracticeReplayCollection />
           <PracticeClient
             learnerName={profile.firstName}

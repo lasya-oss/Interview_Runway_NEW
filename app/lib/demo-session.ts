@@ -114,6 +114,7 @@ const resolveWorkspaceProfile = cacheForRequest(async (): Promise<WorkspaceProfi
     vault: false,
     secondSeat: false,
     humanCalibration: false,
+    voice: false,
   };
   try {
     access = await getLearnerAccess(user.email);

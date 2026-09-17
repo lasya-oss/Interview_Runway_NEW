@@ -19,6 +19,7 @@ import {
 } from "@/app/lib/meeting-copilot-profile-delivery-store";
 import { hasSecondSeatAccess } from "@/app/lib/paid-access";
 import { readLimitedJson } from "@/app/lib/user-history-access";
+import { saveVoiceCandidateProfile } from "@/app/lib/voice-candidate-profile-store";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ type ProfileCopyDependencies = {
   hasAccess: typeof hasSecondSeatAccess;
   deliver: typeof deliverMeetingCopilotProfileCopy;
   deliveryStore: MeetingCopilotProfileDeliveryStore;
+  persistVoiceProfile?: typeof saveVoiceCandidateProfile;
 };
 
 const defaultDependencies: ProfileCopyDependencies = {
@@ -34,6 +36,7 @@ const defaultDependencies: ProfileCopyDependencies = {
   hasAccess: hasSecondSeatAccess,
   deliver: deliverMeetingCopilotProfileCopy,
   deliveryStore: meetingCopilotProfileDeliveryStore,
+  persistVoiceProfile: saveVoiceCandidateProfile,
 };
 
 export function createMeetingCopilotProfileCopyHandler(
@@ -70,6 +73,17 @@ export function createMeetingCopilotProfileCopyHandler(
     }
     const saved = await parseMeetingCopilotSavedProfileCopy(parsed.value);
     if (!saved) return json({ ok: false, error: "Saved profile record is invalid" }, 400);
+
+    if (dependencies.persistVoiceProfile) {
+      try {
+        await dependencies.persistVoiceProfile(session.userEmail, saved);
+      } catch {
+        console.error("Meeting Copilot voice profile snapshot could not be stored", {
+          eventId: saved.eventId,
+        });
+        return json({ ok: false, error: "Profile saved, but the voice profile sync is unavailable" }, 503);
+      }
+    }
 
     let reservation: Awaited<ReturnType<MeetingCopilotProfileDeliveryStore["reserve"]>>;
     try {

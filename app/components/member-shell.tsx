@@ -14,10 +14,11 @@ const MEMBER_NAV = [
   { key: "roadmap", href: "/learn/roadmap", label: "Roadmap", mark: "02", access: "library" },
   { key: "library", href: "/learn/library", label: "Library", mark: "03", access: "library" },
   { key: "practice", href: "/learn/practice", label: "Practice", mark: "04", access: "practice" },
-  { key: "feedback", href: "/learn/feedback", label: "Feedback", mark: "05", access: "feedback" },
-  { key: "meeting-copilot", href: "/learn/meeting-copilot", label: "Meeting Copilot", mark: "06", access: "practice" },
-  { key: "whatsapp-support", href: "/learn/whatsapp-support", label: "WhatsApp Support", mark: "07", access: "practice" },
-  { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "08", access: "coaching" },
+  { key: "voice", href: "/learn/voice", label: "Voice mock", mark: "05", access: "voice" },
+  { key: "feedback", href: "/learn/feedback", label: "Feedback", mark: "06", access: "feedback" },
+  { key: "meeting-copilot", href: "/learn/meeting-copilot", label: "Meeting Copilot", mark: "07", access: "practice" },
+  { key: "whatsapp-support", href: "/learn/whatsapp-support", label: "WhatsApp Support", mark: "08", access: "practice" },
+  { key: "coaching", href: "/learn/coaching", label: "Coach room", mark: "09", access: "coaching" },
 ] as const;
 
 const VAULT_SECTION_LABELS: Record<(typeof MEMBER_NAV)[number]["key"], string> = {
@@ -25,6 +26,7 @@ const VAULT_SECTION_LABELS: Record<(typeof MEMBER_NAV)[number]["key"], string> =
   roadmap: "Roadmap",
   library: "Library",
   practice: "Practice",
+  voice: "Voice mock",
   feedback: "Feedback",
   coaching: "Coach room",
   "meeting-copilot": "Meeting Copilot",
@@ -189,6 +191,7 @@ function sectionForPathname(pathname: string | null): (typeof MEMBER_NAV)[number
   if (pathname.startsWith("/learn/roadmap")) return "roadmap";
   if (pathname.startsWith("/learn/library") || pathname.startsWith("/learn/material")) return "library";
   if (pathname.startsWith("/learn/practice")) return "practice";
+  if (pathname.startsWith("/learn/voice")) return "voice";
   if (pathname.startsWith("/learn/feedback")) return "feedback";
   if (pathname.startsWith("/learn/coaching")) return "coaching";
   if (pathname.startsWith("/learn/meeting-copilot")) return "meeting-copilot";

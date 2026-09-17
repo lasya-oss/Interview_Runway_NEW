@@ -2311,7 +2311,7 @@ test("the configured internal domain receives live Human Calibration full access
   const viteConfig = await readFile(new URL("../vite.config.ts", import.meta.url), "utf8");
 
   assert.match(internalAccess, /INTERNAL_FULL_ACCESS_DOMAIN/);
-  assert.match(paidAccess, /return \{ vault: true, secondSeat: true, humanCalibration: true \}/);
+  assert.match(paidAccess, /return \{ vault: true, secondSeat: true, humanCalibration: true, voice: true \}/);
   assert.match(session, /if \(plan === "premium"\)[\s\S]*createHumanCalibrationProfile\([\s\S]*getLearnerProgress\(user\.email, 4\)/);
   assert.match(paidAccess, /export function createHumanCalibrationProfile\([\s\S]*id: "premium"[\s\S]*practiceAccess: true[\s\S]*isSecondSeatLive: true[\s\S]*coachingAccess: true/);
   assert.match(shell, /HUMAN CALIBRATION<br \/>FULL ACCESS ACTIVE/);
@@ -2555,7 +2555,7 @@ test("Second Seat practice is durable, entitlement-gated, and transcript-backed"
   assert.match(engine, /problemFraming|technicalDepth|tradeoffClarity|communication/);
   assert.match(paidAccess, /isConfiguredTestSecondSeatEmail/);
   assert.match(paidAccess, /TEST_SECOND_SEAT_EMAILS/);
-  assert.match(paidAccess, /return \{ vault: true, secondSeat: true, humanCalibration: false \}/);
+  assert.match(paidAccess, /return \{ vault: true, secondSeat: true, humanCalibration: false, voice: true \}/);
   assert.match(viteConfig, /TEST_SECOND_SEAT_EMAILS: process\.env\.TEST_SECOND_SEAT_EMAILS \?\? ""/);
   assert.match(store, /secondSeatSessions/);
   assert.match(store, /evaluateSecondSeatSession\(mock, answers\)/);
