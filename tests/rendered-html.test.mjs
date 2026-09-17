@@ -270,6 +270,14 @@ test("anonymous visitors can reach the public launch site and customer Google si
   assert.match(signInText, /verified Google account/i);
 });
 
+test("pricing has one primary page heading", async () => {
+  const response = await request("/pricing", {}, false);
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.equal((html.match(/<h1\b/gi) ?? []).length, 1);
+  assert.match(html, /<h1[^>]*>Foundation earns access\. The Second Seat brings it alive\.<\/h1>/i);
+});
+
 test("www traffic uses the Google-enabled apex domain", async () => {
   const response = await request(
     "/pricing?source=www",

@@ -67,11 +67,24 @@ export function CtaLink({ href, children, event }: { href: string; children: Rea
   return <Link className="primary-cta" href={href} data-analytics-event={event}>{children}</Link>;
 }
 
-export function SectionHeading({ eyebrow, title, body, id }: { eyebrow: string; title: string; body?: string; id?: string }) {
+export function SectionHeading({
+  eyebrow,
+  title,
+  body,
+  id,
+  level = "h2",
+}: {
+  eyebrow: string;
+  title: string;
+  body?: string;
+  id?: string;
+  level?: "h1" | "h2";
+}) {
+  const Heading = level;
   return (
     <div className="section-heading">
       <p className="eyebrow">{eyebrow}</p>
-      <h2 id={id}>{title}</h2>
+      <Heading id={id}>{title}</Heading>
       {body ? <p>{body}</p> : null}
     </div>
   );

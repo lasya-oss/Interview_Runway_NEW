@@ -98,6 +98,7 @@ export default async function PricingPage() {
             title="Foundation earns access. The Second Seat brings it alive."
             body="Human Calibration joins only when technology has made a remaining gap specific enough to deserve a person's time."
             id="pricing-layers-title"
+            level="h1"
           />
           <div className="pricing-layer-grid">
             {PRICING_LAYERS.map((layer, index) => (
