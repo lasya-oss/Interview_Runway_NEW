@@ -33,6 +33,7 @@ export async function POST(request: Request) {
       return voiceJson({
         error: error.code === "quota" ? "Voice provider is temporarily rate limited" : "Voice provider is unavailable",
         code: error.code,
+        providerStatus: error.providerStatus ?? null,
       }, status);
     }
     console.error("Voice token route failed", safeVoiceError(error));
