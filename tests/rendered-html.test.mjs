@@ -252,6 +252,11 @@ test("server-renders the finished InterviewRunway homepage", async () => {
   assert.match(visibleText(primaryNavigation), /Curriculum\s+Pricing\s+Try it/i);
   assert.doesNotMatch(visibleText(primaryNavigation), /Product|Coaching|About|Member demo/i);
 
+  const signedInHeader = html.match(/<header\b[\s\S]*?<\/header>/i)?.[0] ?? "";
+  assert.match(signedInHeader, /Pratheep Venkataiah/i);
+  assert.equal((signedInHeader.match(/href=["']\/learn["']/gi) ?? []).length, 2);
+  assert.doesNotMatch(signedInHeader, /href=["']\/sign-in["']/i);
+
   assert.doesNotMatch(
     html,
     /codex-preview|react-loading-skeleton|Codex is working|Your site is taking shape/i,
@@ -268,6 +273,11 @@ test("anonymous visitors can reach the public launch site and customer Google si
   const signInText = visibleText(await signIn.text());
   assert.match(signInText, /Continue with Google/i);
   assert.match(signInText, /verified Google account/i);
+
+  const anonHeader = (await response.text()).match(/<header\b[\s\S]*?<\/header>/i)?.[0] ?? "";
+  assert.match(visibleText(anonHeader), /Log in/i);
+  assert.equal((anonHeader.match(/href=["']\/sign-in["']/gi) ?? []).length, 2);
+  assert.doesNotMatch(anonHeader, /href=["']\/learn["']/i);
 });
 
 test("pricing has one primary page heading", async () => {

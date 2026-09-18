@@ -1,12 +1,26 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { AnalyticsSettingsButton } from "@/app/components/analytics-consent";
+import { AUTH_COOKIE_NAME, verifySessionToken } from "@/app/lib/google-auth";
 
 const NAV_ITEMS = [
   { href: "/curriculum", label: "Curriculum" },
   { href: "/pricing", label: "Pricing" },
   { href: "/demo-login", label: "Try it" },
 ] as const;
+
+async function readHeaderSessionLabel(): Promise<string | null> {
+  try {
+    const token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
+    if (!token) return null;
+    const session = await verifySessionToken(token);
+    if (!session) return null;
+    return session.name?.trim() || session.email.split("@")[0] || null;
+  } catch {
+    return null;
+  }
+}
 
 export function Brand() {
   return (
@@ -17,7 +31,14 @@ export function Brand() {
   );
 }
 
-export function Header() {
+export async function Header() {
+  const sessionLabel = await readHeaderSessionLabel();
+  const sessionAction = sessionLabel
+    ? <Link className="signin-link" href="/learn">{sessionLabel}</Link>
+    : <Link className="signin-link" href="/sign-in">Log in</Link>;
+  const mobileSessionAction = sessionLabel
+    ? <Link href="/learn">{sessionLabel}</Link>
+    : <Link href="/sign-in">Log in</Link>;
   return (
     <header className="site-header">
       <div className="container header-inner">
@@ -26,6 +47,7 @@ export function Header() {
           {NAV_ITEMS.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
         </nav>
         <div className="header-actions">
+          {sessionAction}
           <Link className="compact-cta" href="/checkout/vault" data-analytics-event="checkout_started">
             Start with the Vault <span>₹799</span>
           </Link>
@@ -34,6 +56,7 @@ export function Header() {
           <summary aria-label="Open navigation"><span /><span /></summary>
           <nav aria-label="Mobile navigation">
             {NAV_ITEMS.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
+            {mobileSessionAction}
             <Link href="/checkout/vault">Start with the Vault · ₹799</Link>
           </nav>
         </details>
