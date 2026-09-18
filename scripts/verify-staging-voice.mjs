@@ -126,17 +126,23 @@ async function verifyGeminiLiveConnection(credential) {
       }));
     });
     socket.addEventListener("message", (event) => {
-      try {
-        const message = JSON.parse(typeof event.data === "string" ? event.data : "");
+      void webSocketText(event.data).then((text) => {
+        const message = JSON.parse(text);
         if (message.setupComplete) finish();
         else if (message.goAway) finish(new Error("Gemini Live rejected the setup"));
-      } catch {
-        finish(new Error("Gemini Live returned an invalid setup response"));
-      }
+      }).catch(() => finish(new Error("Gemini Live returned an invalid setup response")));
     });
     socket.addEventListener("error", () => finish(new Error("Gemini Live connection failed")));
     socket.addEventListener("close", () => finish(new Error("Gemini Live closed before setup completed")));
   });
+}
+
+async function webSocketText(data) {
+  if (typeof data === "string") return data;
+  if (data instanceof Blob) return data.text();
+  if (data instanceof ArrayBuffer) return Buffer.from(data).toString("utf8");
+  if (ArrayBuffer.isView(data)) return Buffer.from(data.buffer, data.byteOffset, data.byteLength).toString("utf8");
+  throw new Error("Unsupported WebSocket message type");
 }
 
 async function api(pathname, init = {}) {
