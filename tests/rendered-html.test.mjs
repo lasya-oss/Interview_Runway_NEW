@@ -249,7 +249,7 @@ test("server-renders the finished InterviewRunway homepage", async () => {
   assert.match(html, /<footer\b/i);
 
   const primaryNavigation = html.match(/<nav[^>]*aria-label=["']Primary navigation["'][^>]*>([\s\S]*?)<\/nav>/i)?.[1] ?? "";
-  assert.match(visibleText(primaryNavigation), /Curriculum\s+Pricing\s+Demo/i);
+  assert.match(visibleText(primaryNavigation), /Curriculum\s+Pricing\s+Try it/i);
   assert.doesNotMatch(visibleText(primaryNavigation), /Product|Coaching|About|Member demo/i);
 
   assert.doesNotMatch(
