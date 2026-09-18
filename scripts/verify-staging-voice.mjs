@@ -59,7 +59,7 @@ try {
   assert.equal(credential?.model, "gemini-3.8-live");
   assert.equal(
     credential?.websocketUrl,
-    "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained",
+    "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained",
   );
   assert.ok(typeof credential?.token === "string" && credential.token.length >= 16, "ephemeral token is missing");
   assert.equal(JSON.stringify(credential).includes("GEMINI_API_KEY"), false);

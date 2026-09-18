@@ -73,7 +73,7 @@ test("Gemini credential is short-lived, constrained, and never returns the serve
     },
   });
 
-  assert.equal(request.url, "https://generativelanguage.googleapis.com/v1alpha/auth_tokens");
+  assert.equal(request.url, "https://generativelanguage.googleapis.com/v1beta/auth_tokens");
   assert.equal(request.init.headers["x-goog-api-key"], "server-only-gemini-key");
   assert.equal(request.body.uses, 1);
   assert.equal(request.body.bidiGenerateContentSetup.model, `models/${GEMINI_LIVE_MODEL}`);
