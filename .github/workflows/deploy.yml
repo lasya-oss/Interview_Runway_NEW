@@ -90,9 +90,12 @@ jobs:
             TEST_SECOND_SEAT_EMAILS
           )
           for name in "${required[@]}"; do
-            if [[ -z "${!name}" ]]; then
-              echo "::error::$name is not configured"
+            val="${!name}"
+            if [[ -z "$val" ]]; then
+              echo "::error::$name is not configured (empty)"
               exit 1
+            else
+              echo "$name is SET (length ${#val})"
             fi
           done
 
@@ -239,9 +242,12 @@ jobs:
             TEST_SECOND_SEAT_EMAILS
           )
           for name in "${required[@]}"; do
-            if [[ -z "${!name}" ]]; then
-              echo "::error::$name is not configured"
+            val="${!name}"
+            if [[ -z "$val" ]]; then
+              echo "::error::$name is not configured (empty)"
               exit 1
+            else
+              echo "$name is SET (length ${#val})"
             fi
           done
 
