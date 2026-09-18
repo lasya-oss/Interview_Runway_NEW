@@ -43,7 +43,6 @@ export async function createGeminiVoiceToken(
   const expireTime = new Date(now.getTime() + 31 * 60 * 1_000).toISOString();
   const newSessionExpireTime = new Date(now.getTime() + 60 * 1_000).toISOString();
   const config = createVoiceLiveConfig(session);
-  const { generationConfig, ...sessionConfig } = config;
   let headers: Headers;
   try {
     headers = new Headers({ "x-goog-api-key": apiKey, "Content-Type": "application/json", Accept: "application/json" });
@@ -59,16 +58,11 @@ export async function createGeminiVoiceToken(
         uses: 1,
         expireTime,
         newSessionExpireTime,
-        liveConnectConstraints: {
+        bidiGenerateContentSetup: {
           model: `models/${GEMINI_LIVE_MODEL}`,
-          config: {
-            ...sessionConfig,
-            ...generationConfig,
-          },
+          ...config,
         },
       }),
-      redirect: "error",
-      signal: AbortSignal.timeout(8_000),
     });
   } catch (error) {
     throw new VoiceTokenError(error instanceof DOMException && error.name === "TimeoutError" ? "timeout" : "transport");

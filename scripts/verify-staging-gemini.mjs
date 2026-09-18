@@ -18,15 +18,12 @@ const tokenResponse = await fetch("https://generativelanguage.googleapis.com/v1b
   headers: { ...headers, "content-type": "application/json" },
   body: JSON.stringify({
     uses: 1,
-    liveConnectConstraints: {
+    bidiGenerateContentSetup: {
       model: `models/${model}`,
-      config: {
-        responseModalities: ["AUDIO"],
-        sessionResumption: {},
-      },
+      generationConfig: { responseModalities: ["AUDIO"] },
+      sessionResumption: {},
     },
   }),
-  redirect: "error",
 });
 const tokenBody = await tokenResponse.json().catch(() => null);
 assert.equal(tokenResponse.ok, true, safeFailureFromBody("ephemeral token", tokenResponse, tokenBody));

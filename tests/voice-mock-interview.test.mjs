@@ -76,11 +76,10 @@ test("Gemini credential is short-lived, constrained, and never returns the serve
   assert.equal(request.url, "https://generativelanguage.googleapis.com/v1beta/auth_tokens");
   assert.equal(request.init.headers.get("x-goog-api-key"), "server-only-gemini-key");
   assert.equal(request.body.uses, 1);
-  assert.equal(request.body.liveConnectConstraints.model, `models/${GEMINI_LIVE_MODEL}`);
-  assert.deepEqual(request.body.liveConnectConstraints.config.sessionResumption, {});
-  assert.deepEqual(request.body.liveConnectConstraints.config.contextWindowCompression, { slidingWindow: {} });
-  assert.deepEqual(request.body.liveConnectConstraints.config.responseModalities, ["AUDIO"]);
-  assert.equal(request.body.liveConnectConstraints.config.generationConfig, undefined);
+  assert.equal(request.body.bidiGenerateContentSetup.model, `models/${GEMINI_LIVE_MODEL}`);
+  assert.deepEqual(request.body.bidiGenerateContentSetup.sessionResumption, {});
+  assert.deepEqual(request.body.bidiGenerateContentSetup.contextWindowCompression, { slidingWindow: {} });
+  assert.deepEqual(request.body.bidiGenerateContentSetup.generationConfig.responseModalities, ["AUDIO"]);
   assert.equal(Date.parse(credential.newSessionExpireTime) - NOW.getTime(), 60_000);
   assert.equal(Date.parse(credential.expireTime) - NOW.getTime(), 31 * 60_000);
   assert.equal(credential.websocketUrl, GEMINI_LIVE_WEBSOCKET_URL);
