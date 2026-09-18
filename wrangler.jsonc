@@ -5,7 +5,25 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "main": "./worker/index.ts",
+  "main": "./dist/server/index.js",
+  "no_bundle": true,
+  "rules": [
+    {
+      "type": "ESModule",
+      "globs": ["**/*.js", "**/*.mjs"]
+    }
+  ],
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "interviewrunway.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.interviewrunway.com",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "dist/client",
     "not_found_handling": "none",
@@ -13,5 +31,35 @@
   },
   "images": {
     "binding": "IMAGES"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "interview-runway",
+      "database_id": "e7b02cfc-4fb3-4cc5-bba4-536942db88e8",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "VOICE_AUDIO",
+      "bucket_name": "interview-runway-voice-audio"
+    }
+  ],
+  "vars": {
+    "AUTH_ALLOWED_DOMAIN": "vividlabsai.com",
+    "CEREBRAS_MODEL": "gpt-oss-120b",
+    "GOOGLE_CLIENT_ID": "773066800394-e7t7o8l73nbja6srkrqil4ktj449dc7o.apps.googleusercontent.com",
+    "GROQ_BRAIN_MODEL": "openai/gpt-oss-120b",
+    "INTERNAL_FULL_ACCESS_DOMAIN": "vividlabsai.com",
+    "PADDLE_ENV": "production",
+    "REPLAY_ASSET_ORIGIN": "https://interviewrunway.com"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
   }
 }
