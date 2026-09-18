@@ -74,7 +74,7 @@ test("Gemini credential is short-lived, constrained, and never returns the serve
   });
 
   assert.equal(request.url, "https://generativelanguage.googleapis.com/v1beta/auth_tokens");
-  assert.equal(request.init.headers["x-goog-api-key"], "server-only-gemini-key");
+  assert.equal(request.init.headers.get("x-goog-api-key"), "server-only-gemini-key");
   assert.equal(request.body.uses, 1);
   assert.equal(request.body.liveConnectConstraints.model, `models/${GEMINI_LIVE_MODEL}`);
   assert.deepEqual(request.body.liveConnectConstraints.config.sessionResumption, {});
@@ -104,6 +104,13 @@ test("Gemini credential failures distinguish invalid keys from request configura
       fetchImpl: async () => Response.json({ error: {} }, { status: 400 }),
     }),
     (error) => error?.code === "request" && error?.providerStatus === 400,
+  );
+  await assert.rejects(
+    createGeminiVoiceToken(session(), {
+      apiKey: "test-key",
+      fetchImpl: async () => { throw new TypeError("diagnostic transport failure"); },
+    }),
+    (error) => error?.code === "transport" && error?.providerStatus === undefined,
   );
 });
 

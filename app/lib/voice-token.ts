@@ -6,7 +6,7 @@ const GEMINI_AUTH_TOKEN_URL = "https://generativelanguage.googleapis.com/v1beta/
 
 export class VoiceTokenError extends Error {
   constructor(
-    public readonly code: "configuration" | "authorization" | "request" | "model" | "quota" | "provider",
+    public readonly code: "configuration" | "authorization" | "request" | "model" | "quota" | "timeout" | "transport" | "provider",
     public readonly providerStatus?: number,
   ) {
     super("Voice provider credential could not be created");
@@ -44,11 +44,17 @@ export async function createGeminiVoiceToken(
   const newSessionExpireTime = new Date(now.getTime() + 60 * 1_000).toISOString();
   const config = createVoiceLiveConfig(session);
   const { generationConfig, ...sessionConfig } = config;
+  let headers: Headers;
+  try {
+    headers = new Headers({ "x-goog-api-key": apiKey, "Content-Type": "application/json", Accept: "application/json" });
+  } catch {
+    throw new VoiceTokenError("configuration");
+  }
   let response: Response;
   try {
     response = await (dependencies.fetchImpl ?? fetch)(GEMINI_AUTH_TOKEN_URL, {
       method: "POST",
-      headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json", Accept: "application/json" },
+      headers,
       body: JSON.stringify({
         uses: 1,
         expireTime,
@@ -64,8 +70,8 @@ export async function createGeminiVoiceToken(
       redirect: "error",
       signal: AbortSignal.timeout(8_000),
     });
-  } catch {
-    throw new VoiceTokenError("provider");
+  } catch (error) {
+    throw new VoiceTokenError(error instanceof DOMException && error.name === "TimeoutError" ? "timeout" : "transport");
   }
   const body = await response.json().catch(() => null) as GeminiTokenResponse | null;
   if (!response.ok) {
