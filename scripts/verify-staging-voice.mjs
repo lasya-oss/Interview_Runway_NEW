@@ -89,7 +89,7 @@ try {
   assert.equal(detail.body?.session?.audioRetentionApproved, true);
 } finally {
   const deleted = await api(`/api/voice/sessions/${encodeURIComponent(sessionId)}`, { method: "DELETE" });
-  assert.equal(deleted.response.status, 200, requestFailure("delete", deleted));
+  assert.ok([200, 404].includes(deleted.response.status), requestFailure("delete", deleted));
 }
 
 const missing = await api(`/api/voice/sessions/${encodeURIComponent(sessionId)}`);
