@@ -1216,7 +1216,19 @@ test("live Second Seat creates its short-lived profile token only on the protect
     false,
   );
   assert.equal(unauthorized.status, 401);
+  assert.match(unauthorized.headers.get("cache-control") ?? "", /no-store/i);
   assert.doesNotMatch(unauthorized.headers.get("location") ?? "", /ir_profile_copy=/i);
+});
+
+test("unauthenticated voice API responses are never cacheable", async () => {
+  const response = await request(
+    "/api/voice/sessions",
+    { headers: { accept: "application/json" } },
+    false,
+  );
+
+  assert.equal(response.status, 401);
+  assert.match(response.headers.get("cache-control") ?? "", /no-store/i);
 });
 
 test("live Meeting Copilot launch fails closed without bridge configuration and honors Human Calibration Second Seat entitlement", async () => {

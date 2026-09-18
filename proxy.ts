@@ -65,7 +65,10 @@ function unauthorized(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/")) {
     return NextResponse.json(
       { ok: false, message: "Google sign-in is required." },
-      { status: 401 },
+      {
+        status: 401,
+        headers: { "Cache-Control": "private, no-store" },
+      },
     );
   }
 
