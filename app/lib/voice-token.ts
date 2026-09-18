@@ -5,7 +5,10 @@ export const GEMINI_LIVE_WEBSOCKET_URL = "wss://generativelanguage.googleapis.co
 const GEMINI_AUTH_TOKEN_URL = "https://generativelanguage.googleapis.com/v1beta/auth_tokens";
 
 export class VoiceTokenError extends Error {
-  constructor(public readonly code: "configuration" | "authorization" | "quota" | "provider") {
+  constructor(
+    public readonly code: "configuration" | "authorization" | "request" | "model" | "quota" | "provider",
+    public readonly providerStatus?: number,
+  ) {
     super("Voice provider credential could not be created");
     this.name = "VoiceTokenError";
   }
@@ -40,6 +43,7 @@ export async function createGeminiVoiceToken(
   const expireTime = new Date(now.getTime() + 31 * 60 * 1_000).toISOString();
   const newSessionExpireTime = new Date(now.getTime() + 60 * 1_000).toISOString();
   const config = createVoiceLiveConfig(session);
+  const { generationConfig, ...sessionConfig } = config;
   let response: Response;
   try {
     response = await (dependencies.fetchImpl ?? fetch)(GEMINI_AUTH_TOKEN_URL, {
@@ -49,9 +53,12 @@ export async function createGeminiVoiceToken(
         uses: 1,
         expireTime,
         newSessionExpireTime,
-        bidiGenerateContentSetup: {
+        liveConnectConstraints: {
           model: `models/${GEMINI_LIVE_MODEL}`,
-          ...config,
+          config: {
+            ...sessionConfig,
+            ...generationConfig,
+          },
         },
       }),
       redirect: "error",
@@ -60,12 +67,19 @@ export async function createGeminiVoiceToken(
   } catch {
     throw new VoiceTokenError("provider");
   }
-  if (response.status === 401 || response.status === 403) throw new VoiceTokenError("authorization");
-  if (response.status === 429) throw new VoiceTokenError("quota");
-  if (!response.ok) throw new VoiceTokenError("provider");
-  const body = await response.json().catch(() => null) as { name?: unknown } | null;
+  const body = await response.json().catch(() => null) as GeminiTokenResponse | null;
+  if (!response.ok) {
+    const reason = providerErrorReason(body);
+    if (response.status === 401 || response.status === 403 || reason?.includes("API_KEY")) {
+      throw new VoiceTokenError("authorization", response.status);
+    }
+    if (response.status === 400) throw new VoiceTokenError("request", response.status);
+    if (response.status === 404) throw new VoiceTokenError("model", response.status);
+    if (response.status === 429) throw new VoiceTokenError("quota", response.status);
+    throw new VoiceTokenError("provider", response.status);
+  }
   if (typeof body?.name !== "string" || body.name.length < 16 || body.name.length > 8_192 || /\s/.test(body.name)) {
-    throw new VoiceTokenError("provider");
+    throw new VoiceTokenError("provider", response.status);
   }
   return {
     token: body.name,
@@ -77,6 +91,18 @@ export async function createGeminiVoiceToken(
     newSessionExpireTime,
     resumeFromTranscript: Boolean(session.turns?.some((turn) => turn.text.trim())),
   };
+}
+
+type GeminiTokenResponse = {
+  name?: unknown;
+  error?: {
+    details?: Array<{ reason?: unknown }>;
+  };
+};
+
+function providerErrorReason(body: GeminiTokenResponse | null) {
+  const reason = body?.error?.details?.find((detail) => typeof detail?.reason === "string")?.reason;
+  return typeof reason === "string" ? reason.toUpperCase() : null;
 }
 
 function interviewerPrompt(session: VoiceSession) {

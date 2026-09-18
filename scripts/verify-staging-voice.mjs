@@ -63,6 +63,7 @@ try {
   );
   assert.ok(typeof credential?.token === "string" && credential.token.length >= 16, "ephemeral token is missing");
   assert.equal(JSON.stringify(credential).includes("GEMINI_API_KEY"), false);
+  await verifyGeminiLiveConnection(credential);
 
   const timestamp = new Date().toISOString();
   const savedTurns = await api(`/api/voice/sessions/${encodeURIComponent(sessionId)}/turns`, {
@@ -99,9 +100,44 @@ console.log("VOICE_VERIFY_RESULT=" + JSON.stringify({
   authentication: "ok",
   d1: "ok",
   geminiCredential: "ok",
+  geminiLiveConnection: "ok",
   r2ApprovedAudio: "put-and-delete-ok",
   transcriptDelete: "ok",
 }));
+
+async function verifyGeminiLiveConnection(credential) {
+  assert.equal(typeof WebSocket, "function", "Node.js WebSocket support is unavailable");
+  const url = `${credential.websocketUrl}?access_token=${encodeURIComponent(credential.token)}`;
+  await new Promise((resolve, reject) => {
+    const socket = new WebSocket(url);
+    let settled = false;
+    const finish = (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      if (socket.readyState === WebSocket.OPEN) socket.close(1000, "Staging verification complete");
+      if (error) reject(error);
+      else resolve();
+    };
+    const timeout = setTimeout(() => finish(new Error("Gemini Live setup timed out")), 15_000);
+    socket.addEventListener("open", () => {
+      socket.send(JSON.stringify({
+        setup: { model: `models/${credential.model}`, ...credential.config },
+      }));
+    });
+    socket.addEventListener("message", (event) => {
+      try {
+        const message = JSON.parse(typeof event.data === "string" ? event.data : "");
+        if (message.setupComplete) finish();
+        else if (message.goAway) finish(new Error("Gemini Live rejected the setup"));
+      } catch {
+        finish(new Error("Gemini Live returned an invalid setup response"));
+      }
+    });
+    socket.addEventListener("error", () => finish(new Error("Gemini Live connection failed")));
+    socket.addEventListener("close", () => finish(new Error("Gemini Live closed before setup completed")));
+  });
+}
 
 async function api(pathname, init = {}) {
   const response = await fetch(new URL(pathname, baseUrl), {

@@ -29,8 +29,11 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof VoiceTokenError) {
       const status = error.code === "quota" ? 429 : error.code === "configuration" ? 503 : 502;
-      console.error("Voice provider credential failed", { code: error.code });
-      return voiceJson({ error: error.code === "quota" ? "Voice provider is temporarily rate limited" : "Voice provider is unavailable" }, status);
+      console.error("Voice provider credential failed", { code: error.code, providerStatus: error.providerStatus });
+      return voiceJson({
+        error: error.code === "quota" ? "Voice provider is temporarily rate limited" : "Voice provider is unavailable",
+        code: error.code,
+      }, status);
     }
     console.error("Voice token route failed", safeVoiceError(error));
     return voiceJson({ error: "Voice session could not connect" }, 503);
