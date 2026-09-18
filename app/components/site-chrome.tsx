@@ -5,7 +5,7 @@ import { AnalyticsSettingsButton } from "@/app/components/analytics-consent";
 const NAV_ITEMS = [
   { href: "/curriculum", label: "Curriculum" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/demo-login", label: "Demo" },
+  { href: "/demo-login", label: "Try it" },
 ] as const;
 
 export function Brand() {
