@@ -36,6 +36,9 @@ const SIGN_IN_HREF = "/sign-in?return_to=/learn";
 
 export async function Header() {
   const sessionLabel = await readHeaderSessionLabel();
+  const visibleNavItems = sessionLabel
+    ? NAV_ITEMS.filter((item) => item.href !== "/demo-login")
+    : NAV_ITEMS;
   const sessionAction = sessionLabel
     ? <Link className="signin-link" href="/learn">{sessionLabel}</Link>
     : <Link className="signin-link" href={SIGN_IN_HREF}>Log in</Link>;
@@ -57,7 +60,7 @@ export async function Header() {
       <div className="container header-inner">
         <Brand />
         <nav className="desktop-nav" aria-label="Primary navigation">
-          {NAV_ITEMS.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
+          {visibleNavItems.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
         </nav>
         <div className="header-actions">
           {sessionAction}
@@ -67,7 +70,7 @@ export async function Header() {
         <details className="mobile-menu">
           <summary aria-label="Open navigation"><span /><span /></summary>
           <nav aria-label="Mobile navigation">
-            {NAV_ITEMS.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
+            {visibleNavItems.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
             {mobileSessionAction}
             {sessionLabel ? <HeaderSignOutButton mobile /> : null}
             {mobileVaultAction}
