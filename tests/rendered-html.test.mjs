@@ -250,18 +250,18 @@ test("server-renders the finished InterviewRunway homepage", async () => {
 
   const primaryNavigation = html.match(/<nav[^>]*aria-label=["']Primary navigation["'][^>]*>([\s\S]*?)<\/nav>/i)?.[1] ?? "";
   assert.match(visibleText(primaryNavigation), /Curriculum\s+Pricing/i);
-  assert.doesNotMatch(visibleText(primaryNavigation), /Try it/i);
+  assert.doesNotMatch(visibleText(primaryNavigation), /Demo/i);
   assert.doesNotMatch(primaryNavigation, /href=["']\/demo-login["']/i);
   assert.doesNotMatch(visibleText(primaryNavigation), /Product|Coaching|About|Member demo/i);
 
   const signedInMobileNavigation = html.match(/<nav[^>]*aria-label=["']Mobile navigation["'][^>]*>([\s\S]*?)<\/nav>/i)?.[1] ?? "";
   assert.match(visibleText(signedInMobileNavigation), /Curriculum\s+Pricing/i);
-  assert.doesNotMatch(visibleText(signedInMobileNavigation), /Try it/i);
+  assert.doesNotMatch(visibleText(signedInMobileNavigation), /Demo/i);
   assert.doesNotMatch(signedInMobileNavigation, /href=["']\/demo-login["']/i);
 
   const signedInHeader = html.match(/<header\b[\s\S]*?<\/header>/i)?.[0] ?? "";
   assert.equal((signedInHeader.match(/href=["']\/demo-login["']/gi) ?? []).length, 0);
-  assert.doesNotMatch(visibleText(signedInHeader), /Try it/i);
+  assert.doesNotMatch(visibleText(signedInHeader), /Demo/i);
   assert.match(signedInHeader, /Pratheep Venkataiah/i);
   assert.equal((signedInHeader.match(/href=["']\/learn["']/gi) ?? []).length, 4);
   assert.doesNotMatch(signedInHeader, /href=["']\/sign-in["']/i);
@@ -298,13 +298,13 @@ test("anonymous visitors can reach the public launch site and customer Google si
 
   const anonHeader = (await response.text()).match(/<header\b[\s\S]*?<\/header>/i)?.[0] ?? "";
   const anonPrimaryNavigation = anonHeader.match(/<nav[^>]*aria-label=["']Primary navigation["'][^>]*>([\s\S]*?)<\/nav>/i)?.[1] ?? "";
-  assert.match(visibleText(anonPrimaryNavigation), /Curriculum\s+Pricing\s+Try it/i);
+  assert.match(visibleText(anonPrimaryNavigation), /Curriculum\s+Pricing\s+Demo/i);
   assert.equal((anonPrimaryNavigation.match(/href=["']\/demo-login["']/gi) ?? []).length, 1);
   const anonMobileNavigation = anonHeader.match(/<nav[^>]*aria-label=["']Mobile navigation["'][^>]*>([\s\S]*?)<\/nav>/i)?.[1] ?? "";
-  assert.match(visibleText(anonMobileNavigation), /Curriculum\s+Pricing\s+Try it/i);
+  assert.match(visibleText(anonMobileNavigation), /Curriculum\s+Pricing\s+Demo/i);
   assert.equal((anonMobileNavigation.match(/href=["']\/demo-login["']/gi) ?? []).length, 1);
   assert.equal((anonHeader.match(/href=["']\/demo-login["']/gi) ?? []).length, 2);
-  assert.equal((visibleText(anonHeader).match(/Try it/g) ?? []).length, 2);
+  assert.equal((visibleText(anonHeader).match(/Demo/g) ?? []).length, 2);
   assert.match(visibleText(anonHeader), /Log in/i);
   assert.equal((anonHeader.match(/href=["']\/sign-in\?return_to=\/learn["']/gi) ?? []).length, 2);
   assert.doesNotMatch(anonHeader, /href=["']\/sign-in["']/i);

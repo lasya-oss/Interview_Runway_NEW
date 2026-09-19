@@ -8,7 +8,7 @@ import { AUTH_COOKIE_NAME, verifySessionToken } from "@/app/lib/google-auth";
 const NAV_ITEMS = [
   { href: "/curriculum", label: "Curriculum" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/demo-login", label: "Try it" },
+  { href: "/demo-login", label: "Demo" },
 ] as const;
 
 async function readHeaderSessionLabel(): Promise<string | null> {
