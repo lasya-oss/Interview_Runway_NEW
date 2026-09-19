@@ -91,7 +91,7 @@ export function Footer() {
         </div>
         <div className="footer-links">
           <div><p>PRODUCT</p><Link href="/vault">The Vault</Link><Link href="/second-seat">The Second Seat</Link><Link href="/premium">1:1 Coaching</Link><Link href="/demo-login">Demo</Link></div>
-          <div><p>EXPLORE</p><Link href="/pricing">Pricing</Link><Link href="/curriculum">Curriculum</Link><Link href="/about">About</Link><Link href="/proof">Evidence standard</Link></div>
+          <div><p>EXPLORE</p><Link href="/pricing">Pricing</Link><Link href="/curriculum">Curriculum</Link><Link href="/about">About</Link><Link href="/about-us">About Us</Link><Link href="/proof">Evidence standard</Link></div>
           <div><p>LEGAL</p><Link href="/legal/refund">Refunds</Link><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link></div>
         </div>
       </div>
