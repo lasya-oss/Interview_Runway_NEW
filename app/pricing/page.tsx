@@ -87,6 +87,7 @@ const PRICING_FAQS = [
 
 export default async function PricingPage() {
   const user = await getChatGPTUser();
+  const signedIn = user !== null;
   const learnerName = getLearnerName(user?.fullName, user?.email);
 
   return (
@@ -110,13 +111,19 @@ export default async function PricingPage() {
                 <p>{layer.body}</p>
                 <ul>{layer.includes.map((item) => <li key={item}>{item}</li>)}</ul>
                 <div className="pricing-layer-entitlement"><span>Access model</span><b>{layer.entitlement}</b></div>
-                <Link
-                  className={index === 0 ? "primary-cta" : "text-link"}
-                  data-analytics-event={index === 0 ? "foundation_checkout_started" : index === 1 ? "second_seat_preview_started" : undefined}
-                  href={layer.href}
-                >
-                  {layer.cta} <span aria-hidden="true">↗</span>
-                </Link>
+                {index === 0 && signedIn ? (
+                  <Link className="primary-cta" href="/learn">
+                    Open workspace <span aria-hidden="true">→</span>
+                  </Link>
+                ) : (
+                  <Link
+                    className={index === 0 ? "primary-cta" : "text-link"}
+                    data-analytics-event={index === 0 ? "foundation_checkout_started" : index === 1 ? "second_seat_preview_started" : undefined}
+                    href={layer.href}
+                  >
+                    {layer.cta} <span aria-hidden="true">↗</span>
+                  </Link>
+                )}
               </article>
             ))}
           </div>
@@ -195,7 +202,11 @@ export default async function PricingPage() {
           <h2 id="pricing-cta-title">Build the flight plan first.</h2>
           <p>Foundation is {OFFERS.vault.priceLabel} once. Complete its checkpoints, then unlock the Second Seat when you are ready to use it.</p>
           <div className="section-actions">
-            <CtaLink href="/checkout/vault" event="foundation_checkout_started">Start Foundation <span aria-hidden="true">↗</span></CtaLink>
+            {signedIn ? (
+              <CtaLink href="/learn">Open workspace <span aria-hidden="true">→</span></CtaLink>
+            ) : (
+              <CtaLink href="/checkout/vault" event="foundation_checkout_started">Start Foundation <span aria-hidden="true">↗</span></CtaLink>
+            )}
             <Link className="text-link" href="/curriculum">Explore the curriculum <span aria-hidden="true">→</span></Link>
           </div>
         </div>

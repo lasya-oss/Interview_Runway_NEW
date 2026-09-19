@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { AnalyticsSettingsButton } from "@/app/components/analytics-consent";
+import { HeaderSignOutButton } from "@/app/components/header-sign-out";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/app/lib/google-auth";
 
 const NAV_ITEMS = [
@@ -31,14 +32,26 @@ export function Brand() {
   );
 }
 
+const SIGN_IN_HREF = "/sign-in?return_to=/learn";
+
 export async function Header() {
   const sessionLabel = await readHeaderSessionLabel();
   const sessionAction = sessionLabel
     ? <Link className="signin-link" href="/learn">{sessionLabel}</Link>
-    : <Link className="signin-link" href="/sign-in">Log in</Link>;
+    : <Link className="signin-link" href={SIGN_IN_HREF}>Log in</Link>;
   const mobileSessionAction = sessionLabel
     ? <Link href="/learn">{sessionLabel}</Link>
-    : <Link href="/sign-in">Log in</Link>;
+    : <Link href={SIGN_IN_HREF}>Log in</Link>;
+  const vaultAction = sessionLabel
+    ? <Link className="compact-cta" href="/learn">Open workspace</Link>
+    : (
+      <Link className="compact-cta" href="/checkout/vault" data-analytics-event="checkout_started">
+        Start with the Vault <span>₹799</span>
+      </Link>
+    );
+  const mobileVaultAction = sessionLabel
+    ? <Link href="/learn">Open workspace</Link>
+    : <Link href="/checkout/vault">Start with the Vault · ₹799</Link>;
   return (
     <header className="site-header">
       <div className="container header-inner">
@@ -48,16 +61,16 @@ export async function Header() {
         </nav>
         <div className="header-actions">
           {sessionAction}
-          <Link className="compact-cta" href="/checkout/vault" data-analytics-event="checkout_started">
-            Start with the Vault <span>₹799</span>
-          </Link>
+          {sessionLabel ? <HeaderSignOutButton /> : null}
+          {vaultAction}
         </div>
         <details className="mobile-menu">
           <summary aria-label="Open navigation"><span /><span /></summary>
           <nav aria-label="Mobile navigation">
             {NAV_ITEMS.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
             {mobileSessionAction}
-            <Link href="/checkout/vault">Start with the Vault · ₹799</Link>
+            {sessionLabel ? <HeaderSignOutButton mobile /> : null}
+            {mobileVaultAction}
           </nav>
         </details>
       </div>

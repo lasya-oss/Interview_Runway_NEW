@@ -254,8 +254,21 @@ test("server-renders the finished InterviewRunway homepage", async () => {
 
   const signedInHeader = html.match(/<header\b[\s\S]*?<\/header>/i)?.[0] ?? "";
   assert.match(signedInHeader, /Pratheep Venkataiah/i);
-  assert.equal((signedInHeader.match(/href=["']\/learn["']/gi) ?? []).length, 2);
+  assert.equal((signedInHeader.match(/href=["']\/learn["']/gi) ?? []).length, 4);
   assert.doesNotMatch(signedInHeader, /href=["']\/sign-in["']/i);
+  assert.doesNotMatch(signedInHeader, /href=["']\/checkout\/vault["']/i);
+  assert.doesNotMatch(visibleText(signedInHeader), /Start with the Vault/i);
+  assert.equal((signedInHeader.match(/>Log out</gi) ?? []).length, 2);
+  assert.equal((signedInHeader.match(/<button[^>]*>Log out<\/button>/gi) ?? []).length, 2);
+  assert.equal((signedInHeader.match(/Open workspace/gi) ?? []).length, 2);
+
+  const headerSignOut = await readFile(
+    new URL("../app/components/header-sign-out.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(headerSignOut, /fetch\(["']\/api\/auth\/sign-out["']/i);
+  assert.match(headerSignOut, /method:\s*["']POST["']/i);
+  assert.match(headerSignOut, /window\.location\.assign\(["']\/["']\)/i);
 
   assert.doesNotMatch(
     html,
@@ -276,8 +289,13 @@ test("anonymous visitors can reach the public launch site and customer Google si
 
   const anonHeader = (await response.text()).match(/<header\b[\s\S]*?<\/header>/i)?.[0] ?? "";
   assert.match(visibleText(anonHeader), /Log in/i);
-  assert.equal((anonHeader.match(/href=["']\/sign-in["']/gi) ?? []).length, 2);
+  assert.equal((anonHeader.match(/href=["']\/sign-in\?return_to=\/learn["']/gi) ?? []).length, 2);
+  assert.doesNotMatch(anonHeader, /href=["']\/sign-in["']/i);
   assert.doesNotMatch(anonHeader, /href=["']\/learn["']/i);
+  assert.doesNotMatch(anonHeader, /Log out/i);
+  assert.doesNotMatch(anonHeader, /Open workspace/i);
+  assert.equal((anonHeader.match(/href=["']\/checkout\/vault["']/gi) ?? []).length, 2);
+  assert.match(visibleText(anonHeader), /Start with the Vault/i);
 });
 
 test("pricing has one primary page heading", async () => {
@@ -286,6 +304,43 @@ test("pricing has one primary page heading", async () => {
   const html = await response.text();
   assert.equal((html.match(/<h1\b/gi) ?? []).length, 1);
   assert.match(html, /<h1[^>]*>Foundation earns access\. The Second Seat brings it alive\.<\/h1>/i);
+});
+
+test("pricing purchase CTAs are member-aware", async () => {
+  const anonymous = await request("/pricing", {}, false);
+  assert.equal(anonymous.status, 200);
+  const anonymousHtml = await anonymous.text();
+  assert.equal((anonymousHtml.match(/href=["']\/checkout\/vault["']/gi) ?? []).length, 5);
+  assert.equal((anonymousHtml.match(/Start Foundation(?:<!-- -->)? <span/g) ?? []).length, 2);
+  assert.doesNotMatch(visibleText(anonymousHtml), /Open workspace/i);
+
+  const member = await request("/pricing");
+  assert.equal(member.status, 200);
+  const memberHtml = await member.text();
+  assert.equal((memberHtml.match(/<h1\b/gi) ?? []).length, 1);
+  assert.equal((memberHtml.match(/href=["']\/checkout\/vault["']/gi) ?? []).length, 1);
+  assert.equal((memberHtml.match(/Start Foundation(?:<!-- -->)? <span/g) ?? []).length, 0);
+  assert.equal((memberHtml.match(/href=["']\/learn["']/gi) ?? []).length, 6);
+  assert.equal((visibleText(memberHtml).match(/Open workspace/g) ?? []).length, 4);
+});
+
+test("unknown routes render the branded 404 page", async () => {
+  for (const [pathname, authenticated] of [["/no-such-runway-page-xyz", true], ["/no-such-runway-page-xyz.css", false]]) {
+    const response = await request(pathname, {}, authenticated);
+    assert.equal(response.status, 404, pathname);
+    const html = await response.text();
+    const text = visibleText(html);
+    assert.match(html, /<header\b/i, pathname);
+    assert.match(html, /<footer\b/i, pathname);
+    assert.match(html, /<h1\b/i, pathname);
+    assert.match(text, /This runway doesn't exist/i, pathname);
+    assert.match(html, /href=["']\/["']/i, pathname);
+    assert.match(html, /href=["']\/learn["']/i, pathname);
+  }
+
+  const anonymousMiss = await request("/no-such-runway-page-xyz", {}, false);
+  assert.equal(anonymousMiss.status, 307);
+  assert.match(anonymousMiss.headers.get("location") ?? "", /\/sign-in\?/i);
 });
 
 test("www traffic uses the Google-enabled apex domain", async () => {
