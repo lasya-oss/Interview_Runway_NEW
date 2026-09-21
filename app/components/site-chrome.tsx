@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { AnalyticsSettingsButton } from "@/app/components/analytics-consent";
 import { HeaderSignOutButton } from "@/app/components/header-sign-out";
+import { LiveLogoutButton } from "@/app/components/member-actions";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/app/lib/google-auth";
 
 const NAV_ITEMS = [
@@ -11,16 +12,59 @@ const NAV_ITEMS = [
   { href: "/demo-login", label: "Demo" },
 ] as const;
 
-async function readHeaderSessionLabel(): Promise<string | null> {
+type HeaderSession = { name: string; email: string };
+
+async function readHeaderSession(): Promise<HeaderSession | null> {
   try {
     const token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
     if (!token) return null;
     const session = await verifySessionToken(token);
-    if (!session) return null;
-    return session.name?.trim() || session.email.split("@")[0] || null;
+    if (!session || !session.email) return null;
+    return {
+      name: session.name?.trim() || session.email.split("@")[0] || "Learner",
+      email: session.email,
+    };
   } catch {
     return null;
   }
+}
+
+function ProfileIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 12.25a4.25 4.25 0 1 0 0-8.5 4.25 4.25 0 0 0 0 8.5Z" />
+      <path d="M4.75 20.25c.9-3.35 3.32-5 7.25-5s6.35 1.65 7.25 5" />
+    </svg>
+  );
+}
+
+function HeaderProfile({ name, email }: { name: string; email: string }) {
+  return (
+    <details className="header-profile">
+      <summary aria-label={`Open account menu for ${name}`}>
+        <span className="header-profile-icon"><ProfileIcon /></span>
+        <span className="header-profile-trigger-copy">
+          <small>Signed in</small>
+          <strong>{name}</strong>
+        </span>
+        <span className="header-profile-chevron" aria-hidden="true">⌄</span>
+      </summary>
+      <div className="header-profile-panel">
+        <p>YOUR PROFILE</p>
+        <div className="header-profile-person">
+          <span className="header-profile-icon"><ProfileIcon /></span>
+          <div>
+            <strong>{name}</strong>
+            <span>{email}</span>
+          </div>
+        </div>
+        <div className="header-profile-links">
+          <Link href="/learn">Open workspace <span aria-hidden="true">↗</span></Link>
+          <LiveLogoutButton />
+        </div>
+      </div>
+    </details>
+  );
 }
 
 export function Brand() {
@@ -35,7 +79,8 @@ export function Brand() {
 const SIGN_IN_HREF = "/sign-in?return_to=/learn";
 
 export async function Header() {
-  const sessionLabel = await readHeaderSessionLabel();
+  const session = await readHeaderSession();
+  const sessionLabel = session?.name ?? null;
   const visibleNavItems = sessionLabel
     ? NAV_ITEMS.filter((item) => item.href !== "/demo-login")
     : NAV_ITEMS;
@@ -63,8 +108,7 @@ export async function Header() {
           {visibleNavItems.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
         </nav>
         <div className="header-actions">
-          {sessionAction}
-          {sessionLabel ? <HeaderSignOutButton /> : null}
+          {session ? <HeaderProfile name={session.name} email={session.email} /> : sessionAction}
           {vaultAction}
         </div>
         <details className="mobile-menu">

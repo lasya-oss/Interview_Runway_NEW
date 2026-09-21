@@ -6,6 +6,7 @@ import "@fontsource/ibm-plex-mono/latin-500.css";
 import "@fontsource/ibm-plex-mono/latin-600.css";
 import { AeroRuntime } from "@/app/components/aero-runtime";
 import { AnalyticsConsent } from "@/app/components/analytics-consent";
+import { BackToTop } from "@/app/components/back-to-top";
 import "./globals.css";
 
 const siteUrl = "https://interviewrunway.com";
@@ -69,7 +70,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-IN">
-      <body><AeroRuntime />{children}<AnalyticsConsent /></body>
+      <body><AeroRuntime />{children}<BackToTop /><AnalyticsConsent /></body>
     </html>
   );
 }
