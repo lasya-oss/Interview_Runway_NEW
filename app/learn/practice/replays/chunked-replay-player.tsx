@@ -1,3 +1,5 @@
+import { ChunkedReplayVideo } from "./chunked-replay-video";
+
 export function ChunkedReplayPlayer({
   parts,
   title,
@@ -20,16 +22,7 @@ export function ChunkedReplayPlayer({
     );
   }
 
-  return (
-    <video
-      aria-label={`${title} video`}
-      controls
-      data-replay-part-count={parts.length}
-      playsInline
-      preload="metadata"
-      src={source}
-    />
-  );
+  return <ChunkedReplayVideo partCount={parts.length} source={source} title={title} />;
 }
 
 function readReplayAssetOrigin() {
