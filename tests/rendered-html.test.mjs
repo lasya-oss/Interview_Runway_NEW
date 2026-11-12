@@ -267,9 +267,9 @@ test("server-renders the finished InterviewRunway homepage", async () => {
   assert.doesNotMatch(signedInHeader, /href=["']\/sign-in["']/i);
   assert.doesNotMatch(signedInHeader, /href=["']\/checkout\/vault["']/i);
   assert.doesNotMatch(visibleText(signedInHeader), /Start with the Vault/i);
-  assert.equal((signedInHeader.match(/>Log out</gi) ?? []).length, 2);
-  assert.equal((signedInHeader.match(/<button[^>]*>Log out<\/button>/gi) ?? []).length, 2);
-  assert.equal((signedInHeader.match(/Open workspace/gi) ?? []).length, 2);
+  assert.equal((signedInHeader.match(/>Log out</gi) ?? []).length, 1);
+  assert.equal((signedInHeader.match(/<button[^>]*>Log out<\/button>/gi) ?? []).length, 1);
+  assert.equal((signedInHeader.match(/Open workspace/gi) ?? []).length, 3);
 
   const headerSignOut = await readFile(
     new URL("../app/components/header-sign-out.tsx", import.meta.url),
@@ -338,7 +338,7 @@ test("pricing purchase CTAs are member-aware", async () => {
   assert.equal((memberHtml.match(/href=["']\/checkout\/vault["']/gi) ?? []).length, 1);
   assert.equal((memberHtml.match(/Start Foundation(?:<!-- -->)? <span/g) ?? []).length, 0);
   assert.equal((memberHtml.match(/href=["']\/learn["']/gi) ?? []).length, 6);
-  assert.equal((visibleText(memberHtml).match(/Open workspace/g) ?? []).length, 4);
+  assert.equal((visibleText(memberHtml).match(/Open workspace/g) ?? []).length, 5);
 });
 
 test("unknown routes render the branded 404 page", async () => {
