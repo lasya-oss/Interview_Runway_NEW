@@ -6,6 +6,7 @@ import "@fontsource/ibm-plex-mono/latin-500.css";
 import "@fontsource/ibm-plex-mono/latin-600.css";
 import { AeroRuntime } from "@/app/components/aero-runtime";
 import { AnalyticsConsent } from "@/app/components/analytics-consent";
+import { MetaPixel } from "@/app/components/meta-pixel";
 import { BackToTop } from "@/app/components/back-to-top";
 import "./globals.css";
 
@@ -70,7 +71,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-IN">
-      <body><AeroRuntime />{children}<BackToTop /><AnalyticsConsent /></body>
+      <body><AeroRuntime />{children}<BackToTop /><AnalyticsConsent /><MetaPixel /></body>
     </html>
   );
 }
