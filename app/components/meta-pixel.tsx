@@ -4,7 +4,7 @@ import Script from "next/script";
 import { useEffect, useState } from "react";
 import { hasAnalyticsConsent } from "@/app/lib/analytics";
 
-const META_PIXEL_ID = "1156279163760484";
+const META_PIXEL_ID = "2049815335681613";
 
 const CONSENT_CHANGED_EVENT = "interviewrunway:analytics-consent-changed";
 
